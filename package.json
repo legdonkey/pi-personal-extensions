@@ -1,0 +1,35 @@
+{
+  "name": "pi-personal-extensions",
+  "version": "0.1.0",
+  "description": "个人维护的 Pi 扩展合集",
+  "type": "module",
+  "private": true,
+  "keywords": [
+    "pi-package"
+  ],
+  "files": [
+    "extensions",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck"
+  },
+  "pi": {
+    "extensions": [
+      "./extensions/*.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.84.3",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

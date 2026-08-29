@@ -35,6 +35,28 @@
 ~/.pi/agent/clickable-paths.json
 ```
 
+### thinking-zh
+
+将实时可见的 assistant `thinking` 内容在后台忠实中文化，并显示在编辑器上方的独立 Widget 中。译文不会修改原始消息、思考签名、会话记录或后续模型上下文；非 TUI 模式不会发起翻译请求。
+
+首次使用时显式选择翻译模型并开启：
+
+```text
+/thinking-zh model <provider/id>
+/thinking-zh on
+```
+
+其他命令：
+
+```text
+/thinking-zh status
+/thinking-zh show
+/thinking-zh clear
+/thinking-zh off
+```
+
+全局配置保存在 `~/.pi/agent/thinking-zh.json`。插件不会读取旧的 `thinking-translator.json`，也不会在未配置时回退到当前主 Agent 模型。
+
 ## 本地开发
 
 安装依赖并检查类型：

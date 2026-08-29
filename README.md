@@ -4,9 +4,9 @@
 
 ## 包含的扩展
 
-### provider-usage
+### substatusline
 
-在 Pi 状态栏显示当前模型服务商的剩余额度。
+在 Pi 状态栏显示当前模型服务商的剩余额度和当前会话 ID。
 
 目前支持：
 
@@ -103,7 +103,7 @@ pi install npm:pi-personal-extensions
 .
 ├── extensions/
 │   ├── clickable-paths.ts
-│   └── provider-usage.ts
+│   └── substatusline.ts
 ├── CHANGELOG.md
 ├── README.md
 ├── package.json

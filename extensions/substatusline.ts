@@ -1,6 +1,10 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+} from "@earendil-works/pi-coding-agent";
 
 const STATUS_KEY = "usage";
+const SESSION_STATUS_KEY = "session-id";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const SETTLED_REFRESH_COOLDOWN_MS = 30 * 1000;
 const REQUEST_TIMEOUT_MS = 15 * 1000;
@@ -20,7 +24,14 @@ interface ZaiLimit {
 	percentage?: unknown;
 }
 
-export default function providerUsage(pi: ExtensionAPI) {
+const showSessionId = (ctx: ExtensionContext) => {
+	ctx.ui.setStatus(
+		SESSION_STATUS_KEY,
+		ctx.sessionManager.getSessionId().slice(0, 7),
+	);
+};
+
+export default function subStatusline(pi: ExtensionAPI) {
 	let activeSessionManager: ExtensionContext["sessionManager"] | undefined;
 	let activeProvider: string | undefined;
 	let refreshGeneration = 0;
@@ -29,7 +40,8 @@ export default function providerUsage(pi: ExtensionAPI) {
 	let lastRefreshStartedAt = 0;
 	const cache = new Map<string, string>();
 
-	const ownsSession = (ctx: ExtensionContext) => ctx.sessionManager === activeSessionManager;
+	const ownsSession = (ctx: ExtensionContext) =>
+		ctx.sessionManager === activeSessionManager;
 
 	const clearTimer = () => {
 		if (!refreshTimer) return;
@@ -57,8 +69,13 @@ export default function providerUsage(pi: ExtensionAPI) {
 		ctx: ExtensionContext,
 		options: { force?: boolean } = {},
 	) => {
-		if (!ownsSession(ctx) || !provider || !SUPPORTED_PROVIDERS.has(provider)) return;
-		if (!options.force && Date.now() - lastRefreshStartedAt < SETTLED_REFRESH_COOLDOWN_MS) return;
+		if (!ownsSession(ctx) || !provider || !SUPPORTED_PROVIDERS.has(provider))
+			return;
+		if (
+			!options.force &&
+			Date.now() - lastRefreshStartedAt < SETTLED_REFRESH_COOLDOWN_MS
+		)
+			return;
 
 		lastRefreshStartedAt = Date.now();
 		const generation = ++refreshGeneration;
@@ -105,6 +122,7 @@ export default function providerUsage(pi: ExtensionAPI) {
 	pi.on("session_start", (_event, ctx) => {
 		activeSessionManager = ctx.sessionManager;
 		showProvider(ctx.model?.provider, ctx);
+		showSessionId(ctx);
 		startTimer(ctx);
 		void refresh(ctx.model?.provider, ctx, { force: true });
 	});
@@ -112,6 +130,7 @@ export default function providerUsage(pi: ExtensionAPI) {
 	pi.on("session_tree", (_event, ctx) => {
 		activeSessionManager = ctx.sessionManager;
 		showProvider(ctx.model?.provider, ctx);
+		showSessionId(ctx);
 		startTimer(ctx);
 		void refresh(ctx.model?.provider, ctx, { force: true });
 	});
@@ -135,12 +154,16 @@ export default function providerUsage(pi: ExtensionAPI) {
 		clearTimer();
 		cancelRequest("Provider usage session shut down");
 		ctx.ui.setStatus(STATUS_KEY, undefined);
+		ctx.ui.setStatus(SESSION_STATUS_KEY, undefined);
 		activeSessionManager = undefined;
 		activeProvider = undefined;
 	});
 }
 
-async function fetchCodexUsage(pi: ExtensionAPI, signal: AbortSignal): Promise<string> {
+async function fetchCodexUsage(
+	pi: ExtensionAPI,
+	signal: AbortSignal,
+): Promise<string> {
 	const token = await readCredential(pi, [
 		"auth",
 		"print-bearer-token",
@@ -168,7 +191,10 @@ async function fetchCodexUsage(pi: ExtensionAPI, signal: AbortSignal): Promise<s
 	return `weekly ${formatRemaining(weekly.used_percent)}`;
 }
 
-async function fetchZaiUsage(pi: ExtensionAPI, signal: AbortSignal): Promise<string> {
+async function fetchZaiUsage(
+	pi: ExtensionAPI,
+	signal: AbortSignal,
+): Promise<string> {
 	const apiKey = await readCredential(pi, [
 		"auth",
 		"print-api-key",
@@ -193,10 +219,14 @@ async function fetchZaiUsage(pi: ExtensionAPI, signal: AbortSignal): Promise<str
 	return `5h ${formatRemaining(fiveHour.percentage)} · weekly ${formatRemaining(weekly.percentage)}`;
 }
 
-async function readCredential(pi: ExtensionAPI, args: string[]): Promise<string> {
+async function readCredential(
+	pi: ExtensionAPI,
+	args: string[],
+): Promise<string> {
 	const result = await pi.exec("pi", args, { timeout: REQUEST_TIMEOUT_MS });
 	const credential = result.stdout.trim();
-	if (result.code !== 0 || !credential) throw new Error("Provider credential is unavailable");
+	if (result.code !== 0 || !credential)
+		throw new Error("Provider credential is unavailable");
 	return credential;
 }
 
@@ -210,7 +240,8 @@ async function fetchJson(
 		headers,
 		signal: AbortSignal.any([signal, timeoutSignal]),
 	});
-	if (!response.ok) throw new Error(`Usage endpoint returned HTTP ${response.status}`);
+	if (!response.ok)
+		throw new Error(`Usage endpoint returned HTTP ${response.status}`);
 	return response.json();
 }
 
@@ -218,7 +249,9 @@ function readChatGptAccountId(token: string): string | undefined {
 	try {
 		const payload = token.split(".")[1];
 		if (!payload) return undefined;
-		const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+		const claims = JSON.parse(
+			Buffer.from(payload, "base64url").toString("utf8"),
+		) as {
 			"https://api.openai.com/auth"?: { chatgpt_account_id?: unknown };
 		};
 		const value = claims["https://api.openai.com/auth"]?.chatgpt_account_id;
@@ -239,7 +272,9 @@ function findCodexWeeklyWindow(body: unknown): CodexWindow | undefined {
 	}
 	return candidates.find((window) => {
 		const seconds = asFiniteNumber(window.limit_window_seconds);
-		return seconds !== undefined && seconds >= 6 * 86_400 && seconds <= 8 * 86_400;
+		return (
+			seconds !== undefined && seconds >= 6 * 86_400 && seconds <= 8 * 86_400
+		);
 	});
 }
 
@@ -256,7 +291,12 @@ function readZaiLimits(body: unknown): Array<{
 	number: number;
 	percentage: number;
 }> {
-	if (!isRecord(body) || !isRecord(body.data) || !Array.isArray(body.data.limits)) return [];
+	if (
+		!isRecord(body) ||
+		!isRecord(body.data) ||
+		!Array.isArray(body.data.limits)
+	)
+		return [];
 	const result: Array<{ unit: number; number: number; percentage: number }> = [];
 	for (const raw of body.data.limits) {
 		if (!isRecord(raw)) continue;
@@ -265,7 +305,8 @@ function readZaiLimits(body: unknown): Array<{
 		const unit = asFiniteNumber(item.unit);
 		const number = asFiniteNumber(item.number);
 		const percentage = asFiniteNumber(item.percentage);
-		if (unit === undefined || number === undefined || percentage === undefined) continue;
+		if (unit === undefined || number === undefined || percentage === undefined)
+			continue;
 		result.push({ unit, number, percentage });
 	}
 	return result;

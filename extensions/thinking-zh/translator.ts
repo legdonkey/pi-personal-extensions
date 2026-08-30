@@ -1,9 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import {
-  type ProtectedSource,
-  restoreProtectedSource,
-} from "./protect.ts";
+import { type ProtectedSource, restoreProtectedSource } from "./protect.ts";
 
 type TranslationModel = NonNullable<
   ReturnType<ExtensionContext["modelRegistry"]["find"]>
@@ -65,11 +62,9 @@ async function translateOnce(
           content: [
             {
               type: "text",
-              text: [
-                "<SOURCE_DATA>",
-                input.source.text,
-                "</SOURCE_DATA>",
-              ].join("\n"),
+              text: ["<SOURCE_DATA>", input.source.text, "</SOURCE_DATA>"].join(
+                "\n",
+              ),
             },
           ],
           timestamp: Date.now(),
@@ -124,7 +119,10 @@ type ModelRequestError = Error & {
 
 function isTransientError(error: ModelRequestError): boolean {
   const status = readStatus(error);
-  if (status === 429 || (status !== undefined && status >= 500 && status <= 599)) {
+  if (
+    status === 429 ||
+    (status !== undefined && status >= 500 && status <= 599)
+  ) {
     return true;
   }
   return /\b(?:429|5\d\d)\b|network|fetch failed|ECONN|ETIMEDOUT|socket|temporar/i.test(

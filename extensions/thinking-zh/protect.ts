@@ -5,11 +5,16 @@ export interface ProtectedSource {
 
 const INLINE_CODE_RE = /(`+)([^`\n]+?)\1/g;
 const URL_RE = /https?:\/\/[^\s<>]+/g;
-const WINDOWS_PATH_RE = /\b[A-Za-z]:\\(?:[^\\\s:*?"<>|\r\n]+\\)*[^\\\s:*?"<>|\r\n]+(?::\d+(?::\d+)?)?/g;
-const POSIX_PATH_RE = /(?<![\w.@%+,-])(?:~\/|\/)(?:[\w.@%+,-]+\/)*[\w.@%+,-]+(?::\d+(?::\d+)?)?/g;
-const RELATIVE_PATH_RE = /(?<![\w@/.-])(?:\.{1,2}\/)?(?:[\w.@%+,-]+\/)+[\w.@%+,-]+(?::\d+(?::\d+)?)?/g;
-const BARE_FILE_RE = /(?<![\w@/.-])[\w@%+,-]+(?:\.[A-Za-z][\w-]*)+(?::\d+(?::\d+)?)?/g;
-const FILE_REFERENCE_RE = /(?<![\w@])@(?:[\w.-]+\/)*[\w.-]+\.[A-Za-z][\w-]*(?::\d+(?::\d+)?)?/g;
+const WINDOWS_PATH_RE =
+  /\b[A-Za-z]:\\(?:[^\\\s:*?"<>|\r\n]+\\)*[^\\\s:*?"<>|\r\n]+(?::\d+(?::\d+)?)?/g;
+const POSIX_PATH_RE =
+  /(?<![\w.@%+,-])(?:~\/|\/)(?:[\w.@%+,-]+\/)*[\w.@%+,-]+(?::\d+(?::\d+)?)?/g;
+const RELATIVE_PATH_RE =
+  /(?<![\w@/.-])(?:\.{1,2}\/)?(?:[\w.@%+,-]+\/)+[\w.@%+,-]+(?::\d+(?::\d+)?)?/g;
+const BARE_FILE_RE =
+  /(?<![\w@/.-])[\w@%+,-]+(?:\.[A-Za-z][\w-]*)+(?::\d+(?::\d+)?)?/g;
+const FILE_REFERENCE_RE =
+  /(?<![\w@])@(?:[\w.-]+\/)*[\w.-]+\.[A-Za-z][\w-]*(?::\d+(?::\d+)?)?/g;
 const PLACEHOLDER_RE = /__PI_THINKING_ZH_\d+__/g;
 
 const placeholderFor = (index: number): string =>

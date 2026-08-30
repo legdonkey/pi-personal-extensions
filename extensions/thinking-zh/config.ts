@@ -78,7 +78,11 @@ export function loadThinkingZhConfig(
 }
 
 function parseConfig(value: unknown): ThinkingZhConfig | undefined {
-  if (!isRecord(value) || value.version !== 1 || typeof value.enabled !== "boolean") {
+  if (
+    !isRecord(value) ||
+    value.version !== 1 ||
+    typeof value.enabled !== "boolean"
+  ) {
     return undefined;
   }
 

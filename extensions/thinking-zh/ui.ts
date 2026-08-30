@@ -70,7 +70,12 @@ export class ThinkingZhUi {
 
     await ctx.ui.custom<void>(
       (tui, theme, _keybindings, done) =>
-        new TimelineOverlay(() => this.timeline, tui, theme, () => done()),
+        new TimelineOverlay(
+          () => this.timeline,
+          tui,
+          theme,
+          () => done(),
+        ),
       {
         overlay: true,
         overlayOptions: {
@@ -138,7 +143,9 @@ class TimelineOverlay implements Component {
     const content: string[] = [];
     for (const [index, entry] of this.getTimeline().entries()) {
       if (index > 0) content.push("");
-      content.push(this.theme.fg("accent", this.theme.bold(`原文 ${index + 1}`)));
+      content.push(
+        this.theme.fg("accent", this.theme.bold(`原文 ${index + 1}`)),
+      );
       content.push(
         ...new Markdown(entry.original, 0, 0, getMarkdownTheme()).render(
           contentWidth,

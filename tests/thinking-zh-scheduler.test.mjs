@@ -91,7 +91,8 @@ test("相同思考内容会合并 in-flight 请求并复用会话缓存", async 
 
   translation.resolve("相同思考");
   await waitFor(
-    () => scheduler.getTimeline().every((entry) => entry.status === "translated"),
+    () =>
+      scheduler.getTimeline().every((entry) => entry.status === "translated"),
     "shared translation",
   );
   assert.equal(requestCount, 1);
@@ -279,7 +280,9 @@ test("思考译文按原始顺序单并发生成", async () => {
   assert.equal(secondAccepted, true);
   assert.deepEqual(started, ["first"]);
   assert.deepEqual(
-    scheduler.getTimeline().map(({ original, status }) => ({ original, status })),
+    scheduler
+      .getTimeline()
+      .map(({ original, status }) => ({ original, status })),
     [
       { original: "First thought", status: "pending" },
       { original: "Second thought", status: "pending" },
@@ -292,7 +295,8 @@ test("思考译文按原始顺序单并发生成", async () => {
 
   second.resolve("第二条思考");
   await waitFor(
-    () => scheduler.getTimeline().every((entry) => entry.status === "translated"),
+    () =>
+      scheduler.getTimeline().every((entry) => entry.status === "translated"),
     "timeline translations",
   );
   assert.deepEqual(

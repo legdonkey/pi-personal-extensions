@@ -15,10 +15,7 @@ import {
   protectSource,
   shouldTranslateSource,
 } from "./protect.ts";
-import {
-  type SchedulerWarning,
-  TranslationScheduler,
-} from "./scheduler.ts";
+import { type SchedulerWarning, TranslationScheduler } from "./scheduler.ts";
 import { translateThinking } from "./translator.ts";
 import { ThinkingZhUi } from "./ui.ts";
 
@@ -146,9 +143,7 @@ export class ThinkingZhRuntime {
 
     this.scheduler.reset("Translation model changed", { clearCache: true });
     this.resolveConfiguredModel(ctx);
-    const enableHint = this.config.enabled
-      ? ""
-      : "；仍需执行 /thinking-zh on";
+    const enableHint = this.config.enabled ? "" : "；仍需执行 /thinking-zh on";
     ctx.ui.notify(
       `翻译模型已设为 ${requested.provider}/${requested.id}${enableHint}`,
       "info",

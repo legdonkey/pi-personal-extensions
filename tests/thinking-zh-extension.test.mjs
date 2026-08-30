@@ -103,9 +103,7 @@ const createFakeContext = (completion) => {
     overlayOptions: () => overlayOptions,
     renderOverlay: () => overlayComponent?.render(80) ?? [],
     renderWidget: (width = 80) =>
-      Array.isArray(widget)
-        ? widget
-        : (widgetComponent?.render(width) ?? []),
+      Array.isArray(widget) ? widget : (widgetComponent?.render(width) ?? []),
   };
 };
 
@@ -225,10 +223,7 @@ test("message_end 不会重新入队已收到 thinking_end 的块", async () => 
       role: "assistant",
       content: [{ type: "thinking", thinking: "Reviewing clear behavior" }],
     };
-    pi.handlers.get("message_start")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    pi.handlers.get("message_start")({ message: assistantMessage }, fake.ctx);
     pi.handlers.get("message_update")(
       {
         message: assistantMessage,
@@ -244,10 +239,7 @@ test("message_end 不会重新入队已收到 thinking_end 的块", async () => 
     assert.equal(fake.completeCalls(), 1);
 
     await pi.commands.get("thinking-zh").handler("clear", fake.ctx);
-    pi.handlers.get("message_end")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    pi.handlers.get("message_end")({ message: assistantMessage }, fake.ctx);
     assert.equal(fake.completeCalls(), 1);
 
     completion.resolve({
@@ -281,9 +273,7 @@ test("关闭、清理、切换模型和 shutdown 都会取消旁路请求", asyn
         pi.handlers.get("session_start")({}, fake.ctx);
         const assistantMessage = {
           role: "assistant",
-          content: [
-            { type: "thinking", thinking: "Translating pending work" },
-          ],
+          content: [{ type: "thinking", thinking: "Translating pending work" }],
         };
         pi.handlers.get("message_start")(
           { message: assistantMessage },
@@ -363,10 +353,7 @@ test("队列溢出的 thinking_end 不会被 message_end 重新入队", async ()
       thinking: `Reviewing unique item ${index}`,
     }));
     const assistantMessage = { role: "assistant", content: blocks };
-    pi.handlers.get("message_start")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    pi.handlers.get("message_start")({ message: assistantMessage }, fake.ctx);
     blocks.forEach((block, contentIndex) => {
       pi.handlers.get("message_update")(
         {
@@ -387,14 +374,8 @@ test("队列溢出的 thinking_end 不会被 message_end 重新入队", async ()
       stopReason: "stop",
       content: [{ type: "text", text: "已翻译" }],
     });
-    await waitFor(
-      () => fake.completeCalls() === 32,
-      "accepted queue to drain",
-    );
-    pi.handlers.get("message_end")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    await waitFor(() => fake.completeCalls() === 32, "accepted queue to drain");
+    pi.handlers.get("message_end")({ message: assistantMessage }, fake.ctx);
     await new Promise((resolve) => setImmediate(resolve));
     assert.equal(fake.completeCalls(), 32);
   } finally {
@@ -474,9 +455,7 @@ test("缓存键包含受保护值，避免不同代码片段串译", async () =>
     const pi = createFakePi();
     const fake = createFakeContext(async () => ({
       stopReason: "stop",
-      content: [
-        { type: "text", text: "正在检查 __PI_THINKING_ZH_0000__" },
-      ],
+      content: [{ type: "text", text: "正在检查 __PI_THINKING_ZH_0000__" }],
     }));
     registerThinkingZh(pi, { agentDir });
     pi.handlers.get("session_start")({}, fake.ctx);
@@ -533,14 +512,8 @@ test("message_end 能补译缺失 thinking_end 的最终思考块", async () => 
       role: "assistant",
       content: [{ type: "thinking", thinking: "Reviewing fallback behavior" }],
     };
-    pi.handlers.get("message_start")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
-    pi.handlers.get("message_end")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    pi.handlers.get("message_start")({ message: assistantMessage }, fake.ctx);
+    pi.handlers.get("message_end")({ message: assistantMessage }, fake.ctx);
 
     assert.equal(fake.completeCalls(), 1);
     completion.resolve({
@@ -611,10 +584,7 @@ test("thinking_end 在后台翻译且 message_end 兜底不会重复请求", asy
       role: "assistant",
       content: [{ type: "thinking", thinking: "Summarizing Pi extensions" }],
     };
-    pi.handlers.get("message_start")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    pi.handlers.get("message_start")({ message: assistantMessage }, fake.ctx);
 
     const updateResult = pi.handlers.get("message_update")(
       {
@@ -650,10 +620,7 @@ test("thinking_end 在后台翻译且 message_end 兜底不会重复请求", asy
     assert.ok(fake.renderRequests() > 0);
     assert.equal(fake.renderWidget().join("\n").includes("**"), false);
 
-    pi.handlers.get("message_end")(
-      { message: assistantMessage },
-      fake.ctx,
-    );
+    pi.handlers.get("message_end")({ message: assistantMessage }, fake.ctx);
     await new Promise((resolve) => setImmediate(resolve));
     assert.equal(fake.completeCalls(), 1);
 

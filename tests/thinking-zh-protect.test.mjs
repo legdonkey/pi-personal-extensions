@@ -10,15 +10,9 @@ import {
 test("忠实中文化会隐藏并无损恢复行内代码", () => {
   const protectedSource = protectSource("Checking `npm run check` now");
 
+  assert.equal(protectedSource.text, "Checking __PI_THINKING_ZH_0000__ now");
   assert.equal(
-    protectedSource.text,
-    "Checking __PI_THINKING_ZH_0000__ now",
-  );
-  assert.equal(
-    restoreProtectedSource(
-      protectedSource,
-      "正在检查 __PI_THINKING_ZH_0000__",
-    ),
+    restoreProtectedSource(protectedSource, "正在检查 __PI_THINKING_ZH_0000__"),
     "正在检查 `npm run check`",
   );
 });
@@ -27,7 +21,7 @@ test("忠实中文化不会把代码、路径和 URL 发给翻译模型", () => 
   const source = [
     "Review these references:",
     "```ts",
-    "const token = \"secret\";",
+    'const token = "secret";',
     "```",
     "[documentation](https://example.com/private?q=1)",
     "https://api.example.com/v1/items",
@@ -63,8 +57,7 @@ test("忠实中文化不会把代码、路径和 URL 发给翻译模型", () => 
 });
 
 test("Markdown 链接中带括号的 URL 会完整保护", () => {
-  const source =
-    "[documentation](https://example.com/a_(secret)?q=(value))";
+  const source = "[documentation](https://example.com/a_(secret)?q=(value))";
   const protectedSource = protectSource(source);
 
   assert.deepEqual(protectedSource.values, [

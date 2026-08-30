@@ -1,10 +1,5 @@
 import assert from "node:assert/strict";
-import {
-  mkdtempSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -89,10 +84,7 @@ test("只有通过运行时校验的 v1 配置才会启用", () => {
     assert.equal(missingModel.config.enabled, false);
     assert.match(missingModel.issue ?? "", /模型/);
 
-    writeFileSync(
-      configPath,
-      JSON.stringify({ version: 1, enabled: "yes" }),
-    );
+    writeFileSync(configPath, JSON.stringify({ version: 1, enabled: "yes" }));
     const wrongSchema = loadThinkingZhConfig(configPath);
     assert.equal(wrongSchema.config.enabled, false);
     assert.match(wrongSchema.issue ?? "", /无效/);

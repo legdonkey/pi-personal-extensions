@@ -169,9 +169,7 @@ export class TranslationScheduler {
           }
           this.emitChange();
         } finally {
-          if (
-            this.pendingByCacheKey.get(pending.input.cacheKey) === pending
-          ) {
+          if (this.pendingByCacheKey.get(pending.input.cacheKey) === pending) {
             this.pendingByCacheKey.delete(pending.input.cacheKey);
           }
         }

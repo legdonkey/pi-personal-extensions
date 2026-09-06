@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { initTheme } from "@earendil-works/pi-coding-agent";
 import { visibleWidth } from "@earendil-works/pi-tui";
-import personal from "../extensions/index.ts";
+import personal from "../extensions/pi-personal-extensions.ts";
 
 const ids = [
   "terminal-title",
@@ -36,7 +36,9 @@ test("统一入口按开关注册五项功能，菜单保存后重载，取消�
     const manifest = JSON.parse(
       readFileSync(new URL("../package.json", import.meta.url), "utf8"),
     );
-    assert.deepEqual(manifest.pi.extensions, ["./extensions/index.ts"]);
+    assert.deepEqual(manifest.pi.extensions, [
+      "./extensions/pi-personal-extensions.ts",
+    ]);
     assert.deepEqual(
       [...load().commands.keys()],
       ["clickable-paths", "statusline-style", "personal"],

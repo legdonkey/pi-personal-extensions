@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/index.ts` 一个入口，通过 `/personal` 选择其中的五项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的五项功能。
 
 ## 功能开关
 
@@ -59,10 +59,10 @@
 
 ### user-message-border
 
-给对话区的普通用户消息加一圈细橙色线框（`#D99A52`），保留原有底色、文字颜色、Markdown 高亮和可点击链接。不修改会话记录或模型上下文，也不改变 AI 回答、工具输出和输入框。
+给对话区的普通用户消息加一圈细橙色线框（`#D99A52`），保留正文原有底色、文字颜色、Markdown 高亮和可点击链接。不修改会话记录或模型上下文，也不改变 AI 回答、工具输出和输入框。
 
 - 加载后自动生效，历史消息重新渲染时同样带框。
-- 终端边框由 `┌─┐│└┘` 字符组成，直接画在消息背景最外沿的原有空白上，不额外增加宽度或高度，正文位置和换行保持不变。边缘没有留白（如零 padding）或窗口太窄时回退原生显示，避免覆盖正文。
+- 使用带 `user` 标题的圆角细线框 `╭─╮│╰─╯`；边框和正文统一使用主题的 `userMessageBg` 背景。正文按可用宽度减两列重新排版，保留原生左右内边距、Markdown 和链接转换，上下边框替换原有空白行，不额外增加高度。宽度不足 8 列时回退原生显示。字符线条仍有字形留隙，不保证像素级贴边。
 - 仅在 TUI 模式启用；技能调用的折叠说明块等其他组件不加框。
 - pi 暂无普通用户消息的边框接口，因此扩展临时包装 `UserMessageComponent` 的渲染方法，重载或退出时清理。升级 pi 后建议运行测试验证兼容性。
 
@@ -151,7 +151,7 @@ pi install npm:pi-personal-extensions
 ```text
 .
 ├── extensions/
-│   ├── index.ts
+│   ├── pi-personal-extensions.ts
 │   ├── clickable-paths.ts
 │   ├── statusline-style-picker.ts
 │   ├── substatusline.ts

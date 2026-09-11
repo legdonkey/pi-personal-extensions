@@ -9,6 +9,7 @@ import personal from "../extensions/pi-personal-extensions.ts";
 
 const ids = [
   "terminal-title",
+  "session-title",
   "substatusline",
   "clickable-paths",
   "user-message-border",
@@ -27,7 +28,7 @@ function load() {
   return { commands, events, transformers };
 }
 
-test("统一入口按开关注册五项功能，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册六项功能，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -60,7 +61,7 @@ test("统一入口按开关注册五项功能，菜单保存后重载，取消�
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
-        id === "terminal-title",
+        ["terminal-title", "session-title"].includes(id),
       );
       assert.equal(
         loaded.transformers.length,
@@ -68,7 +69,12 @@ test("统一入口按开关注册五项功能，菜单保存后重载，取消�
       );
       assert.equal(
         loaded.events.includes("session_shutdown"),
-        ["terminal-title", "substatusline", "user-message-border"].includes(id),
+        [
+          "terminal-title",
+          "session-title",
+          "substatusline",
+          "user-message-border",
+        ].includes(id),
       );
     }
     writeFileSync(path, JSON.stringify(off));

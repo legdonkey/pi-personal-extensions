@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的五项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的六项功能。
 
 ## 功能开关
 
@@ -11,6 +11,7 @@
 ```json
 {
   "terminal-title": true,
+  "session-title": true,
   "substatusline": true,
   "clickable-paths": true,
   "user-message-border": true,
@@ -25,6 +26,14 @@
 ### terminal-title
 
 将 Pi 的终端标题设置为 `π · <会话名>`；未命名会话只显示 `π`。标题会在会话启动、切换和 `/name` 后更新。
+
+### session-title
+
+在 TUI 输入框下方、状态栏上方单独显示一行右对齐的会话标题，不覆盖原生页脚或 `pi-statusline`。默认开启，可通过 `/personal` 中的「右下角会话标题」关闭。
+
+- 读取 Pi 已有会话名，使用 `/name 标题` 修改后立即更新；启动、恢复、切换和重载时同步。
+- 未命名时显示「未命名会话」，不额外调用模型生成标题。
+- 长标题自动省略，支持中文和 emoji；不影响输入和其他状态栏信息。
 
 ### substatusline
 
@@ -153,12 +162,14 @@ pi install npm:pi-personal-extensions
 ├── extensions/
 │   ├── pi-personal-extensions.ts
 │   ├── clickable-paths.ts
+│   ├── session-title.ts
 │   ├── statusline-style-picker.ts
 │   ├── substatusline.ts
 │   ├── terminal-title.ts
 │   └── user-message-border.ts
 ├── tests/
 │   ├── personal.test.mjs
+│   ├── session-title.test.mjs
 │   ├── statusline-style-picker.test.mjs
 │   └── user-message-border.test.mjs
 ├── CHANGELOG.md

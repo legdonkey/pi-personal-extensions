@@ -7,6 +7,7 @@ import {
   type ExtensionAPI,
 } from "@earendil-works/pi-coding-agent";
 import { Container, SettingsList, Text } from "@earendil-works/pi-tui";
+import autoSessionName from "./auto-session-name.ts";
 import clickablePaths from "./clickable-paths.ts";
 import statuslineStylePicker from "./statusline-style-picker.ts";
 import sessionTitle from "./session-title.ts";
@@ -26,6 +27,12 @@ const features = [
     label: "右下角会话标题",
     description: "在输入框下方右对齐显示会话名，保留原有状态栏",
     register: sessionTitle,
+  },
+  {
+    id: "auto-session-name",
+    label: "自动会话命名",
+    description: "独立模型后台命名；/auto-name model 选择模型，保护手动标题",
+    register: autoSessionName,
   },
   {
     id: "substatusline",

@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的六项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的七项功能。
 
 ## 功能开关
 
@@ -12,6 +12,7 @@
 {
   "terminal-title": true,
   "session-title": true,
+  "auto-session-name": true,
   "substatusline": true,
   "clickable-paths": true,
   "user-message-border": true,
@@ -32,8 +33,46 @@
 在 TUI 输入框下方、状态栏上方单独显示一行右对齐的会话标题，不覆盖原生页脚或 `pi-statusline`。默认开启，可通过 `/personal` 中的「右下角会话标题」关闭。
 
 - 读取 Pi 已有会话名，使用 `/name 标题` 修改后立即更新；启动、恢复、切换和重载时同步。
-- 未命名时显示「未命名会话」，不额外调用模型生成标题。
+- 未命名时显示「未命名会话」。本显示组件不调用模型；自动生成由下面的独立功能负责。
 - 长标题自动省略，支持中文和 emoji；不影响输入和其他状态栏信息。
+
+### auto-session-name
+
+参考 [oil-oil/oil-codex-title](https://github.com/oil-oil/oil-codex-title) 的后台命名方式和稳定命名规则，通过 Pi 官方 `setSessionName()` 接口实现，不修改数据库、不启动子 Agent。
+
+- 默认开启。TUI / RPC 中每轮工作成功结束后，参考当前分支最近最多 5 轮对话，后台评估是否需要更新标题，例如 `🧩 邮箱验证码｜过期排查`；失败、中断或截断的轮次跳过。
+- 使用「类别 emoji + 对象｜目标」，跟随最近用户消息的主要语言。通过提示词要求稳定对象名称和类别，只有任务实质变化才更新；“继续”“推送”等收尾动作不取代主线。
+- 默认使用 **`gpt-5.6-luna`**，候选只来自 Pi 当前会话的 `/scoped-models`，并过滤未配置认证的模型。默认 ID 在多个服务商中匹配时，按 scoped 列表顺序选择；通过选择器保存后使用完整 `provider/modelId`。列表为空、模型被移出列表或未登录时会提示，保留原标题，不回退主模型或其他模型。
+- 思考强度默认**继承 `/settings` → Default thinking level per model**（`modelThinkingLevels["provider/modelId"]`），未配置时使用 `low`；不是主会话临时思考强度、scoped pattern 的思考后缀或全局 `defaultThinkingLevel`。已信任项目中的对应设置优先于全局设置，继承值按 Pi 的模型能力规则调整。
+- 可单独选择命名思考强度，选择器只展示该模型支持的等级；非推理模型实际使用 `off`。更换命名模型时恢复为继承，避免把旧模型的等级套到新模型。
+- 复用 Pi 已配置的认证、服务商和代理端点，通过 Pi 的统一思考参数适配各模型。独立调用一次辅助请求，不向原对话插入消息，也不会改动主模型或主会话思考等级。自动命名及预览都会额外消耗**命名模型**额度；这部分消耗不计入 Pi 原生会话用量统计。
+- 仅发送当前标题和对话文本片段：每轮用户文本最多 2,000 字符，助手文本最多 1,500 字符；不发送工具结果、思考内容或图片。片段中仍可能含有业务信息，会发送给选定的命名模型服务商。
+- 保护已有手动标题。`/name 自定义标题` 后自动暂停当前会话命名；重新开启需要显式执行 `/auto-name on`。恢复和重载会保留暂停状态及自动标题归属。
+- 新任务开始、切换会话、树导航、重载或退出时取消未完成请求，丢弃迟到结果；30 秒超时或异常时保留原名，并提示失败。Print / JSON 模式不自动调用，避免给批处理及常见子 Agent 额外命名。
+- 会话选择器、终端标题和右下角标题通过现有改名事件同步更新。
+
+```text
+/auto-name          # 查看状态、命名模型和实际思考强度
+/auto-name model    # 从 scoped-models 中选择全局命名模型
+/auto-name thinking # 选择独立思考强度，或恢复继承 Pi 逐模型默认值
+/auto-name preview  # 仅预览建议标题，不改名；工作结束后使用
+/auto-name off      # 暂停当前会话的自动命名，固定现有标题
+/auto-name on       # 恢复当前会话自动命名，下轮结束后生效
+/name 自定义标题    # Pi 原生命令；改名并保护该名称
+```
+
+模型和思考选择保存在 `~/.pi/agent/auto-session-name.json`（跟随 `PI_CODING_AGENT_DIR`），后续命名请求读取最新配置；选择框中取消不保存，更改配置会取消当前未完成的命名请求。不会修改 Pi 的 `settings.json`。
+
+```json
+{
+  "model": "openai-codex/gpt-5.6-luna",
+  "thinking": "inherit"
+}
+```
+
+`thinking` 可设为 `inherit` 或所选模型支持的 `off`、`minimal`、`low`、`medium`、`high`、`xhigh`、`max`。使用选择器可避免配置不支持的等级。
+
+全局关闭用 `/personal` 中的「自动会话命名」。关闭不会撤销已有标题。此功能只负责命名，未移植参考插件的闲置归档功能，也不绑定 Codex 专有模型。
 
 ### substatusline
 
@@ -161,6 +200,8 @@ pi install npm:pi-personal-extensions
 .
 ├── extensions/
 │   ├── pi-personal-extensions.ts
+│   ├── auto-session-name.ts
+│   ├── auto-session-name-settings.ts
 │   ├── clickable-paths.ts
 │   ├── session-title.ts
 │   ├── statusline-style-picker.ts
@@ -168,6 +209,7 @@ pi install npm:pi-personal-extensions
 │   ├── terminal-title.ts
 │   └── user-message-border.ts
 ├── tests/
+│   ├── auto-session-name.test.mjs
 │   ├── personal.test.mjs
 │   ├── session-title.test.mjs
 │   ├── statusline-style-picker.test.mjs

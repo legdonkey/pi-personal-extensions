@@ -10,6 +10,7 @@ import personal from "../extensions/pi-personal-extensions.ts";
 const ids = [
   "terminal-title",
   "session-title",
+  "auto-session-name",
   "substatusline",
   "clickable-paths",
   "user-message-border",
@@ -28,7 +29,7 @@ function load() {
   return { commands, events, transformers };
 }
 
-test("统一入口按开关注册六项功能，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册七项功能，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -42,11 +43,15 @@ test("统一入口按开关注册六项功能，菜单保存后重载，取消�
     ]);
     assert.deepEqual(
       [...load().commands.keys()],
-      ["clickable-paths", "statusline-style", "personal"],
+      ["auto-name", "clickable-paths", "statusline-style", "personal"],
     );
     for (const id of ids) {
       writeFileSync(path, JSON.stringify({ ...off, [id]: true }));
       const loaded = load();
+      assert.equal(
+        loaded.commands.has("auto-name"),
+        id === "auto-session-name",
+      );
       assert.equal(
         loaded.commands.has("clickable-paths"),
         id === "clickable-paths",
@@ -61,7 +66,7 @@ test("统一入口按开关注册六项功能，菜单保存后重载，取消�
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
-        ["terminal-title", "session-title"].includes(id),
+        ["terminal-title", "session-title", "auto-session-name"].includes(id),
       );
       assert.equal(
         loaded.transformers.length,
@@ -72,6 +77,7 @@ test("统一入口按开关注册六项功能，菜单保存后重载，取消�
         [
           "terminal-title",
           "session-title",
+          "auto-session-name",
           "substatusline",
           "user-message-border",
         ].includes(id),

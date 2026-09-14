@@ -8,7 +8,6 @@ import { visibleWidth } from "@earendil-works/pi-tui";
 import personal from "../extensions/pi-personal-extensions.ts";
 
 const ids = [
-  "terminal-title",
   "session-title",
   "auto-session-name",
   "substatusline",
@@ -29,7 +28,7 @@ function load() {
   return { commands, events, transformers };
 }
 
-test("统一入口按开关注册七项功能，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册六项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -44,6 +43,14 @@ test("统一入口按开关注册七项功能，菜单保存后重载，取消�
     assert.deepEqual(
       [...load().commands.keys()],
       ["auto-name", "clickable-paths", "statusline-style", "personal"],
+    );
+    const legacy = { ...off, "terminal-title": true };
+    writeFileSync(path, JSON.stringify(legacy));
+    assert.equal(load().events.length, 0, "旧终端标题开关不再注册事件");
+    assert.deepEqual(
+      JSON.parse(readFileSync(path, "utf8")),
+      legacy,
+      "加载时不改写用户旧配置",
     );
     for (const id of ids) {
       writeFileSync(path, JSON.stringify({ ...off, [id]: true }));
@@ -66,7 +73,7 @@ test("统一入口按开关注册七项功能，菜单保存后重载，取消�
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
-        ["terminal-title", "session-title", "auto-session-name"].includes(id),
+        ["session-title", "auto-session-name"].includes(id),
       );
       assert.equal(
         loaded.transformers.length,
@@ -75,7 +82,6 @@ test("统一入口按开关注册七项功能，菜单保存后重载，取消�
       assert.equal(
         loaded.events.includes("session_shutdown"),
         [
-          "terminal-title",
           "session-title",
           "auto-session-name",
           "substatusline",
@@ -137,7 +143,7 @@ test("统一入口按开关注册七项功能，菜单保存后重载，取消�
     await command.handler("", ctx);
     assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), {
       ...off,
-      "terminal-title": true,
+      "session-title": true,
     });
     assert.equal(reloads, 1);
     assert.ok(load().events.includes("session_info_changed"));
@@ -145,7 +151,7 @@ test("统一入口按开关注册七项功能，菜单保存后重载，取消�
     assert.equal(reloads, 1);
     assert.equal(notices.at(-1)[1], "warning");
 
-    for (const invalid of ["{", "null", "[]", '{"terminal-title":"false"}']) {
+    for (const invalid of ["{", "null", "[]", '{"session-title":"false"}']) {
       writeFileSync(path, invalid);
       assert.throws(load, /配置/);
       assert.equal(readFileSync(path, "utf8"), invalid);

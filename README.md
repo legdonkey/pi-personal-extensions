@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的七项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的六项功能。
 
 ## 功能开关
 
@@ -10,7 +10,6 @@
 
 ```json
 {
-  "terminal-title": true,
   "session-title": true,
   "auto-session-name": true,
   "substatusline": true,
@@ -23,10 +22,6 @@
 各功能自己的配置继续保留。例如 `/personal` 中启用路径链接，只表示加载该功能，仍遵循 `/clickable-paths` 保存的设置。关闭风格选择器只移除命令，不恢复之前已应用的状态栏配色。
 
 ## 包含的功能
-
-### terminal-title
-
-将 Pi 的终端标题设置为 `π · <会话名>`；未命名会话只显示 `π`。标题会在会话启动、切换和 `/name` 后更新。
 
 ### session-title
 
@@ -49,7 +44,7 @@
 - 仅发送当前标题和对话文本片段：每轮用户文本最多 2,000 字符，助手文本最多 1,500 字符；不发送工具结果、思考内容或图片。片段中仍可能含有业务信息，会发送给选定的命名模型服务商。
 - 保护已有手动标题。`/name 自定义标题` 后自动暂停当前会话命名；重新开启需要显式执行 `/auto-name on`。恢复和重载会保留暂停状态及自动标题归属。
 - 新任务开始、切换会话、树导航、重载或退出时取消未完成请求，丢弃迟到结果；30 秒超时或异常时保留原名，并提示失败。Print / JSON 模式不自动调用，避免给批处理及常见子 Agent 额外命名。
-- 会话选择器、终端标题和右下角标题通过现有改名事件同步更新。
+- 会话选择器和右下角标题通过现有改名事件同步更新；终端标题由 Pi 或 Orca 管理，本包不再额外写入。
 
 ```text
 /auto-name          # 查看状态、命名模型和实际思考强度
@@ -130,7 +125,9 @@
 
 安装本包后，移除以前单独安装的功能路径，避免重复注册。曾直接放在 `~/.pi/agent/extensions/` 下的同名扩展也需移出自动发现目录；需要删除时请放入废纸篓。
 
-旧版包过滤器（如 `-extensions/terminal-title.ts`）不再控制内部功能，请将选择迁移到 `/personal`。更换本地包路径时，先移除旧路径再安装新路径，保留原有功能配置文件。
+旧版包过滤器（如 `-extensions/clickable-paths.ts`）不再控制内部功能，请将选择迁移到 `/personal`。更换本地包路径时，先移除旧路径再安装新路径，保留原有功能配置文件。
+
+`terminal-title` 功能已移除。旧配置中的同名开关会被忽略，无需手动清理；下次通过 `/personal` 修改并保存配置时会移除该键。自动会话命名和右下角标题显示不受影响。
 
 ## 本地开发
 
@@ -206,7 +203,6 @@ pi install npm:pi-personal-extensions
 │   ├── session-title.ts
 │   ├── statusline-style-picker.ts
 │   ├── substatusline.ts
-│   ├── terminal-title.ts
 │   └── user-message-border.ts
 ├── tests/
 │   ├── auto-session-name.test.mjs

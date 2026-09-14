@@ -12,16 +12,9 @@ import clickablePaths from "./clickable-paths.ts";
 import statuslineStylePicker from "./statusline-style-picker.ts";
 import sessionTitle from "./session-title.ts";
 import subStatusline from "./substatusline.ts";
-import terminalTitle from "./terminal-title.ts";
 import userMessageBorder from "./user-message-border.ts";
 
 const features = [
-  {
-    id: "terminal-title",
-    label: "终端标题",
-    description: "用会话名设置终端标题",
-    register: terminalTitle,
-  },
   {
     id: "session-title",
     label: "右下角会话标题",

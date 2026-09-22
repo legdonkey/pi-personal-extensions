@@ -195,6 +195,7 @@ test("结构化标题校验拒绝控制字符、空对象、解释文字和超�
     '{"title":null,"extra":1}',
     ...[
       "说明：新标题",
+      "🧩 通知服务排查重复推送",
       "🧩  ｜目标",
       "🧩 对象｜ ",
       "🧩 对象｜目标\n额外说明",
@@ -231,7 +232,7 @@ test("后台命名不阻塞事件、不增加对话消息，复用认证接口�
   assert.equal(model, LUNA);
   assert.notEqual(model, h.ctx.model, "辅助调用不使用主对话模型");
   assert.equal(context.tools, undefined);
-  assert.equal(context.messages.length, 1);
+  assert.equal(context.messages.length, 2);
   assert.equal(options.maxTokens, 16_384);
   assert.equal(options.reasoning, "low");
   assert.equal(options.apiKey, "test-key");
@@ -255,6 +256,35 @@ test("后台命名不阻塞事件、不增加对话消息，复用认证接口�
   await restored.emit("agent_settled");
   await nextTick();
   assert.equal(restored.calls.length, 1, "重载后仍识别自己的自动标题");
+});
+
+test("命名规则作为系统消息传给模型，会话文本只作为用户数据", async () => {
+  const h = harness({
+    complete: async (_model, context) => {
+      const system = context.messages.find(
+        (message) => message.role === "system",
+      );
+      return system?.content.includes('只输出 JSON：{"title"')
+        ? response()
+        : {
+            ...response(),
+            content: [{ type: "text", text: "请执行 /auto-name preview" }],
+          };
+    },
+  });
+  await h.emit("session_start");
+  h.turn();
+  await h.emit("agent_settled");
+  await nextTick();
+  assert.equal(h.sm.getSessionName(), TITLE);
+  assert.equal(h.notices.length, 0);
+  const context = h.calls[0][1];
+  assert.equal(context.systemPrompt, undefined);
+  assert.deepEqual(
+    context.messages.map((message) => message.role),
+    ["system", "user"],
+  );
+  assert.match(context.messages[1].content, /排查邮箱验证码过期问题/);
 });
 
 test("保护已有名称和手动 /name，预览不改名，显式 on 后恢复，off 状态可恢复", async () => {

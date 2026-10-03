@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的六项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的七项功能。
 
 ## 功能开关
 
@@ -15,7 +15,8 @@
   "substatusline": true,
   "clickable-paths": true,
   "user-message-border": true,
-  "statusline-style-picker": true
+  "statusline-style-picker": true,
+  "jev-auto": true
 }
 ```
 
@@ -105,9 +106,36 @@
 给对话区的普通用户消息加一圈细橙色线框（`#D99A52`），保留正文原有底色、文字颜色、Markdown 高亮和可点击链接。不修改会话记录或模型上下文，也不改变 AI 回答、工具输出和输入框。
 
 - 加载后自动生效，历史消息重新渲染时同样带框。
-- 使用带 `user` 标题的圆角细线框 `╭─╮│╰─╯`；边框和正文统一使用主题的 `userMessageBg` 背景。正文按可用宽度减两列重新排版，保留原生左右内边距、Markdown 和链接转换，上下边框替换原有空白行，不额外增加高度。宽度不足 8 列时回退原生显示。字符线条仍有字形留隙，不保证像素级贴边。
+- 使用带 `user` 标题的圆角细线框 `╭─╮│╰─╯`；边框和正文统一使用主题的 `userMessageBg` 背景。正文按可用宽度减两列重新排版，保留原生左右内边距、Markdown 和链接转换，上下边框替换原有空白行，不额外增加高度。宽度不足 8 列时回退原生显示。字符线条仍有字形留隙，显示效果受终端字体影响。
 - 仅在 TUI 模式启用；技能调用的折叠说明块等其他组件不加框。
 - pi 暂无普通用户消息的边框接口，因此扩展临时包装 `UserMessageComponent` 的渲染方法，重载或退出时清理。升级 pi 后建议运行测试验证兼容性。
+
+### Jev 自动思考强度
+
+在会话开始时手动选择一个 Auto 模型。分类器只调整思考强度，基础模型始终使用所选入口对应的 Codex 模型。
+
+| Auto 模型 | 固定基础模型 |
+|---|---|
+| `jev/sol-auto` | `openai-codex/gpt-6.1-sol` |
+| `jev/astra-auto` | `openai-codex/gpt-6-astra` |
+
+启动新会话时选择模型：
+
+```bash
+pi --model jev/sol-auto
+pi --model jev/astra-auto
+```
+
+也可以在首次发送消息前使用 `/model jev/sol-auto` 或 `/model jev/astra-auto`。会话中手动更换入口会切换基础模型，影响缓存复用。
+
+- 每条新用户消息调用一次 OpenRouter 的 `~typesafe/jev-latest` 分类器。可选思考强度为 `low`、`medium`、`high`、`xhigh`、`max`。
+- 分类器接收当前请求和近期对话文本，文本片段合计最多 16,000 字符。它不接收工具结果、思考内容或图片数据；图片只用文字标记。
+- 分类调用会增加首个响应前的等待时间，并消耗分类服务额度。
+- 分类失败、结果无效或置信度不足时，沿用已有思考强度。没有已有强度时使用 `high`，基础模型保持不变。
+- 工具续调和重试沿用本轮思考强度，不重复分类。压缩摘要等独立请求也使用固定基础模型。
+- 需要配置 OpenRouter Jev 分类器，并登录 `openai-codex`。通过 `/personal` 中的「Jev 自动思考强度」统一启用或关闭两个入口。
+
+使用过 `jev/auto` 的会话需要手动选择上述入口之一。
 
 ### statusline-style-picker
 
@@ -131,7 +159,7 @@
 
 ## 本地开发
 
-需要 Pi 0.87.0 或更新版本。命名请求通过 `normalizeContext()` 将系统规则转换为服务商接口需要的消息格式。
+需要 Pi 1.0.1 或更新版本。命名请求通过 `normalizeContext()` 将系统规则转换为服务商接口需要的消息格式。
 
 安装依赖并检查类型：
 
@@ -205,13 +233,15 @@ pi install npm:pi-personal-extensions
 │   ├── session-title.ts
 │   ├── statusline-style-picker.ts
 │   ├── substatusline.ts
-│   └── user-message-border.ts
+│   ├── user-message-border.ts
+│   └── jev-router.ts
 ├── tests/
 │   ├── auto-session-name.test.mjs
 │   ├── personal.test.mjs
 │   ├── session-title.test.mjs
 │   ├── statusline-style-picker.test.mjs
-│   └── user-message-border.test.mjs
+│   ├── user-message-border.test.mjs
+│   └── jev-router.test.mjs
 ├── CHANGELOG.md
 ├── README.md
 ├── package.json

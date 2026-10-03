@@ -13,6 +13,7 @@ import statuslineStylePicker from "./statusline-style-picker.ts";
 import sessionTitle from "./session-title.ts";
 import subStatusline from "./substatusline.ts";
 import userMessageBorder from "./user-message-border.ts";
+import jevRouter from "./jev-router.ts";
 
 const features = [
   {
@@ -50,6 +51,12 @@ const features = [
     label: "状态栏风格选择",
     description: "提供 /statusline-style；需要另外启用 pi-statusline",
     register: statuslineStylePicker,
+  },
+  {
+    id: "jev-auto",
+    label: "Jev 自动思考强度",
+    description: "提供 Sol Auto 与 Astra Auto，基础模型由用户选择，Jev 只调整思考强度",
+    register: jevRouter,
   },
 ] as const;
 

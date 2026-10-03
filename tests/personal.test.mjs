@@ -14,21 +14,24 @@ const ids = [
   "clickable-paths",
   "user-message-border",
   "statusline-style-picker",
+  "jev-auto",
 ];
 const off = Object.fromEntries(ids.map((id) => [id, false]));
 function load() {
   const commands = new Map();
   const events = [];
   const transformers = [];
+  const virtualModels = [];
   personal({
     registerCommand: (name, command) => commands.set(name, command),
     on: (name) => events.push(name),
     registerMarkdownTransformer: (fn) => transformers.push(fn),
+    registerVirtualModel: (model) => virtualModels.push(model),
   });
-  return { commands, events, transformers };
+  return { commands, events, transformers, virtualModels };
 }
 
-test("统一入口按开关注册六项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册七项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -69,7 +72,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
       );
       assert.equal(
         loaded.events.includes("model_select"),
-        id === "substatusline",
+        ["substatusline", "jev-auto"].includes(id),
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
@@ -79,6 +82,10 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
         loaded.transformers.length,
         id === "clickable-paths" ? 1 : 0,
       );
+      assert.deepEqual(
+        loaded.virtualModels.map((model) => `${model.provider}/${model.id}`),
+        id === "jev-auto" ? ["jev/sol-auto", "jev/astra-auto"] : [],
+      );
       assert.equal(
         loaded.events.includes("session_shutdown"),
         [
@@ -86,6 +93,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
           "auto-session-name",
           "substatusline",
           "user-message-border",
+          "jev-auto",
         ].includes(id),
       );
     }

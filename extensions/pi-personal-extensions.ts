@@ -55,7 +55,7 @@ const features = [
   {
     id: "jev-auto",
     label: "Jev 自动思考强度",
-    description: "提供 Sol Auto 与 Astra Auto，基础模型由用户选择，Jev 只调整思考强度",
+    description: "提供 Luna、Sol、Astra Auto；子代理首次自动选模，会话内只调整思考强度",
     register: jevRouter,
   },
 ] as const;

@@ -84,7 +84,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
       );
       assert.deepEqual(
         loaded.virtualModels.map((model) => `${model.provider}/${model.id}`),
-        id === "jev-auto" ? ["jev/sol-auto", "jev/astra-auto"] : [],
+        id === "jev-auto" ? ["jev/luna-auto", "jev/sol-auto", "jev/astra-auto", "jev/subagent-auto"] : [],
       );
       assert.equal(
         loaded.events.includes("session_shutdown"),

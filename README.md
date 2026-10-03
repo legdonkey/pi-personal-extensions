@@ -112,30 +112,62 @@
 
 ### Jev 自动思考强度
 
-在会话开始时手动选择一个 Auto 模型。分类器只调整思考强度，基础模型始终使用所选入口对应的 Codex 模型。
+主会话可以手动选择一个 Auto 模型。Jev 分类器只调整思考强度，基础模型固定为所选入口对应的 Codex 模型。
+
+原生 Pi 子代理可以使用 `jev/subagent-auto`。Jev 根据首次子任务，从下面三个 Auto 模型中选择一个。每个子代理独立选模，会话内只调整思考强度。
 
 | Auto 模型 | 固定基础模型 |
 |---|---|
+| `jev/luna-auto` | `openai-codex/gpt-6-luna` |
 | `jev/sol-auto` | `openai-codex/gpt-6.1-sol` |
 | `jev/astra-auto` | `openai-codex/gpt-6-astra` |
 
 启动新会话时选择模型：
 
 ```bash
+pi --model jev/luna-auto
 pi --model jev/sol-auto
 pi --model jev/astra-auto
 ```
 
-也可以在首次发送消息前使用 `/model jev/sol-auto` 或 `/model jev/astra-auto`。会话中手动更换入口会切换基础模型，影响缓存复用。
+也可以在首次发送消息前，通过 `/model` 选择上述入口。会话中手动更换入口会切换基础模型，影响缓存复用。
+
+#### 子代理自动选模
+
+在 `~/.pi/agent/settings.json` 或项目 `.pi/settings.json` 中合并以下配置：
+
+```json
+{
+  "subagents": {
+    "defaultModel": "jev/subagent-auto"
+  }
+}
+```
+
+执行 `/reload` 后，用 `/subagents-models` 查看子代理默认入口。这项配置不改变父会话模型。角色定义、角色覆盖和本次调用显式指定的模型，优先于该默认值。
+
+- 首次子任务用一次分类调用，同时选择模型和思考强度。
+- 选模规则：Luna 用于范围明确的轻量任务；Sol 用于常规分析与开发；Astra 用于高难度攻坚。边界不清楚时使用 Sol。
+- 模型选择保存为会话记录。重载、恢复、树导航、工具续调、重试和压缩均保持该模型。fork 出的新子代理会话重新选模。
+- 后续用户消息、steer 和 follow-up 只分类思考强度，不再选模。
+- 首次选模失败、结果无效或置信度低于 `0.5` 时，固定使用 Sol。思考强度单独校验。
+- 选定模型缺失或调用失败时报告错误，保留模型选择，不自动切换。
+- 首次子任务前的压缩等独立请求使用 Sol，不锁定后续子任务模型。
+- 子代理必须加载本扩展。默认扩展发现机制可以加载它；受限扩展列表必须包含 `extensions/jev-router.ts` 或本包入口。
+- `claude-code`、`codex-exec` 等外部 CLI 代理使用各自适配器，无法使用此虚拟模型入口。
+
+Pi 虚拟模型必须直接返回物理模型。因此，`subagent-auto` 与三个固定入口复用同一组基础模型和思考分类规则，不嵌套调用虚拟模型。
+
+#### 思考强度与分类数据
 
 - 每条新用户消息调用一次 OpenRouter 的 `~typesafe/jev-latest` 分类器。可选思考强度为 `low`、`medium`、`high`、`xhigh`、`max`。
 - 分类器接收当前请求和近期对话文本，文本片段合计最多 16,000 字符。它不接收工具结果、思考内容或图片数据；图片只用文字标记。
 - 分类调用会增加首个响应前的等待时间，并消耗分类服务额度。
 - 分类失败、结果无效或置信度不足时，沿用已有思考强度。没有已有强度时使用 `high`，基础模型保持不变。
 - 工具续调和重试沿用本轮思考强度，不重复分类。压缩摘要等独立请求也使用固定基础模型。
-- 需要配置 OpenRouter Jev 分类器，并登录 `openai-codex`。通过 `/personal` 中的「Jev 自动思考强度」统一启用或关闭两个入口。
+- 需要配置 OpenRouter Jev 分类器，并登录 `openai-codex`。通过 `/personal` 中的「Jev 自动思考强度」统一启用或关闭四个入口。关闭前必须将子代理默认模型改为其他可用模型。
 
-使用过 `jev/auto` 的会话需要手动选择上述入口之一。
+使用过 `jev/auto` 的会话需要手动选择上述固定入口之一。
 
 ### statusline-style-picker
 

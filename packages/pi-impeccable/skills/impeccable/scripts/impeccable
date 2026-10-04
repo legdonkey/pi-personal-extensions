@@ -1,0 +1,3 @@
+#!/bin/sh
+# Pi 适配：运行固定版本且经过校验的官方引擎。
+exec node "$(dirname "$0")/run.mjs" "$@"

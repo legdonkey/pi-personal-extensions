@@ -1,0 +1,32 @@
+{
+  "name": "pi-impeccable",
+  "version": "0.1.0",
+  "description": "Impeccable 的 Pi 原生集成：设计技能、命令、检测钩子与 Live 工作流",
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "keywords": ["pi-package", "design", "impeccable"],
+  "files": ["extensions", "lib", "skills", "README.md", "LICENSE", "NOTICE.md", "upstream.json", "engine.json"],
+  "pi": {
+    "extensions": ["./extensions/impeccable.ts"],
+    "skills": ["./skills/impeccable"]
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types tests/*.test.mjs",
+    "check": "npm run typecheck && npm test",
+    "test:engine": "node --test tests/engine.test.mjs",
+    "impeccable": "node skills/impeccable/scripts/run.mjs"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": ">=1.0.2"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.0.2",
+    "@earendil-works/pi-coding-agent": "1.0.2",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {"node": ">=22.19.0"}
+}

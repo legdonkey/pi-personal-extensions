@@ -189,6 +189,10 @@ Pi 虚拟模型必须直接返回物理模型。因此，`subagent-auto` 与三�
 
 `terminal-title` 功能已移除。旧配置中的同名开关会被忽略，无需手动清理；下次通过 `/personal` 修改并保存配置时会移除该键。自动会话命名和右下角标题显示不受影响。
 
+## 独立 Pi 包
+
+[`packages/pi-impeccable`](packages/pi-impeccable/README.md) 提供 Impeccable 的 Pi 原生集成，包含完整设计技能、24 个命令、检测钩子和 Live 工作流。该包单独安装，不加入 `/personal` 开关。
+
 ## 本地开发
 
 需要 Pi 1.0.1 或更新版本。命名请求通过 `normalizeContext()` 将系统规则转换为服务商接口需要的消息格式。

@@ -1,0 +1,11 @@
+{
+  "version": "0.1.11",
+  "baseUrl": "https://github.com/pbakaus/impeccable/releases/download/engine-v0.1.11",
+  "sha256": {
+    "darwin-arm64": "7427918d6e75507401a1b7b691eefe58a7c01a2fc63b712016ffc5a0ac1c05e6",
+    "darwin-x64": "dfd1b6a5b719273bf703642e8ce60152a696cd1a76870ddab3cefa57bcce86d0",
+    "linux-x64": "0221607e1f535af937ea267c347b1f90233b85dc2563cbd2eeefdf42e0e5c594",
+    "linux-arm64": "a3036c5c2da08ac6a14fa4886e96a8b1651beab332af75cbe328092528d6e40a",
+    "windows-x64": "605b5b442d2a65d270ef989de13371444849526249f511d397ca7424c184db49"
+  }
+}

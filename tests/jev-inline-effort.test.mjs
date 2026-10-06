@@ -13,6 +13,7 @@ function setup({ thinking = "medium", model = codexModel() } = {}) {
   const h = {
     events, branch, thinking, model, choices: [], calls: 0, warnings: [], status: undefined,
     error: undefined, abortDuringClassification: undefined, inputs: [],
+    classifierAvailable: true, stopReason: "stop", confidence: 1,
   };
   register({
     on(name, handler) { events.set(name, handler); },
@@ -28,15 +29,22 @@ function setup({ thinking = "medium", model = codexModel() } = {}) {
       notify(message, type) { h.warnings.push({ message, type }); },
     },
     modelRegistry: {
-      findOfType: () => ({}),
+      findOfType(type, provider, id) {
+        assert.deepEqual([type, provider, id], ["classifier", "openrouter", "~typesafe/jev-latest"]);
+        return h.classifierAvailable ? {} : undefined;
+      },
       async classify(_model, input) {
         h.calls++;
         h.inputs.push(input);
         h.abortDuringClassification?.abort();
         if (h.error) throw h.error;
         assert.deepEqual(Object.keys(input.questions), ["thinking"]);
+        assert.deepEqual(Object.keys(input.questions.thinking.criteria), ["low", "medium", "high", "xhigh", "max"]);
         const choice = h.choices.shift() ?? "high";
-        return { stopReason: "stop", answers: { thinking: { type: "choice", choice, probabilities: { [choice]: 1 } } } };
+        return {
+          stopReason: h.stopReason,
+          answers: { thinking: { type: "choice", choice, probabilities: { [choice]: h.confidence } } },
+        };
       },
     },
   };
@@ -223,4 +231,57 @@ test("会话切换、模型选择和退出时清除状态栏", () => {
     h.events.get(event)({}, h.ctx);
     assert.equal(h.status, undefined);
   }
+});
+
+test("分类不可用、出错、截断、低置信度或结果无效时沿用当前生效强度", async () => {
+  const failures = {
+    missing: (h) => { h.classifierAvailable = false; },
+    exception: (h) => { h.error = new Error("网络连接失败"); },
+    error: (h) => { h.stopReason = "error"; },
+    length: (h) => { h.stopReason = "length"; },
+    confidence: (h) => { h.confidence = 0.49; },
+    unknown: (h) => { h.choices = ["invalid"]; },
+  };
+  for (const [failure, apply] of Object.entries(failures)) {
+    const h = setup({ thinking: "high" });
+    apply(h);
+    const payload = await h.request([system, user(1)], { base: "high" });
+    assert.deepEqual(updates(payload), [], failure);
+    assert.deepEqual(h.branch.map(({ data }) => data), [{ timestamp: 1, thinkingLevel: "high" }], failure);
+    const warned = ["missing", "exception", "error"].includes(failure);
+    assert.equal(h.warnings.length, warned ? 1 : 0, failure);
+    if (warned) assert.match(h.warnings[0].message, /思考强度沿用 high/);
+  }
+});
+
+test("取消分类时不记录决策、不提示失败", async () => {
+  const cancellations = {
+    before: (h) => { const c = new AbortController(); c.abort(); h.ctx.signal = c.signal; },
+    during: (h) => { h.abortDuringClassification = new AbortController(); h.ctx.signal = h.abortDuringClassification.signal; },
+    thrown: (h) => { h.error = new DOMException("已取消", "AbortError"); },
+    stopReason: (h) => { h.stopReason = "aborted"; },
+  };
+  for (const [name, apply] of Object.entries(cancellations)) {
+    const h = setup();
+    apply(h);
+    const payload = await h.request([system, user(1)]);
+    assert.deepEqual(updates(payload), [], name);
+    assert.equal(h.branch.length, 0, name);
+    assert.equal(h.warnings.length, 0, name);
+    if (name === "before") assert.equal(h.calls, 0);
+  }
+});
+
+test("分类输入限制文本长度，并排除系统规则、工具结果、思考内容和图片数据", async () => {
+  const h = setup();
+  await h.request([
+    { role: "system", content: "系统秘密", timestamp: 0 },
+    user(1, "历史内容".repeat(4000)),
+    { role: "assistant", content: [{ type: "thinking", thinking: "思考秘密" }], timestamp: 2 },
+    { role: "toolResult", toolCallId: "c3", content: [{ type: "text", text: "工具秘密" }], timestamp: 3 },
+    user(4, [{ type: "text", text: "当前任务".repeat(4000) }, { type: "image", data: "图片秘密", mimeType: "image/png" }]),
+  ]);
+  const prompt = h.inputs[0].state.prompt;
+  assert.ok(prompt.length < 16_200);
+  for (const secret of ["系统秘密", "思考秘密", "工具秘密", "图片秘密"]) assert.ok(!prompt.includes(secret), secret);
 });

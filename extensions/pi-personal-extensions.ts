@@ -14,7 +14,6 @@ import sessionTitle from "./session-title.ts";
 import subStatusline from "./substatusline.ts";
 import userMessageBorder from "./user-message-border.ts";
 import jevInlineEffort from "./jev-inline-effort.ts";
-import jevRouter from "./jev-router.ts";
 
 const features = [
   {
@@ -52,12 +51,6 @@ const features = [
     label: "状态栏风格选择",
     description: "提供 /statusline-style；需要另外启用 pi-statusline",
     register: statuslineStylePicker,
-  },
-  {
-    id: "jev-auto",
-    label: "Jev 自动思考强度",
-    description: "提供 Luna、Sol、Astra Auto；子代理首次自动选模，会话内只调整思考强度",
-    register: jevRouter,
   },
   {
     id: "jev-inline-effort",

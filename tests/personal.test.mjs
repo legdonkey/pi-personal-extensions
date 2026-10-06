@@ -14,7 +14,6 @@ const ids = [
   "clickable-paths",
   "user-message-border",
   "statusline-style-picker",
-  "jev-auto",
   "jev-inline-effort",
 ];
 const off = Object.fromEntries(ids.map((id) => [id, false]));
@@ -32,7 +31,7 @@ function load() {
   return { commands, events, transformers, virtualModels };
 }
 
-test("统一入口按开关注册八项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册七项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -48,9 +47,9 @@ test("统一入口按开关注册八项功能，忽略已移除开关，菜单�
       [...load().commands.keys()],
       ["auto-name", "clickable-paths", "statusline-style", "personal"],
     );
-    const legacy = { ...off, "terminal-title": true };
+    const legacy = { ...off, "terminal-title": true, "jev-auto": true };
     writeFileSync(path, JSON.stringify(legacy));
-    assert.equal(load().events.length, 0, "旧终端标题开关不再注册事件");
+    assert.equal(load().events.length, 0, "已移除的终端标题与 Jev 虚拟模型开关不再注册事件");
     assert.deepEqual(
       JSON.parse(readFileSync(path, "utf8")),
       legacy,
@@ -73,7 +72,7 @@ test("统一入口按开关注册八项功能，忽略已移除开关，菜单�
       );
       assert.equal(
         loaded.events.includes("model_select"),
-        ["substatusline", "jev-auto", "jev-inline-effort"].includes(id),
+        ["substatusline", "jev-inline-effort"].includes(id),
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
@@ -83,10 +82,7 @@ test("统一入口按开关注册八项功能，忽略已移除开关，菜单�
         loaded.transformers.length,
         id === "clickable-paths" ? 1 : 0,
       );
-      assert.deepEqual(
-        loaded.virtualModels.map((model) => `${model.provider}/${model.id}`),
-        id === "jev-auto" ? ["jev/luna-auto", "jev/sol-auto", "jev/astra-auto", "jev/subagent-auto"] : [],
-      );
+      assert.deepEqual(loaded.virtualModels, [], "不注册任何虚拟模型");
       assert.equal(
         loaded.events.includes("session_shutdown"),
         [
@@ -94,7 +90,6 @@ test("统一入口按开关注册八项功能，忽略已移除开关，菜单�
           "auto-session-name",
           "substatusline",
           "user-message-border",
-          "jev-auto",
           "jev-inline-effort",
         ].includes(id),
       );

@@ -15,8 +15,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test --experimental-strip-types tests/*.test.mjs",
-    "check": "npm run typecheck && npm test",
-    "audit": "node scripts/pi-audit-scan.mjs"
+    "check": "npm run typecheck && npm test"
   },
   "pi": {
     "extensions": [

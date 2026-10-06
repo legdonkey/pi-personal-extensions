@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { analyzeSession, buildReport, diffJson, LIMITS } from "../scripts/pi-audit-scan.mjs";
+import { analyzeSession, buildReport, classifyToolError, diffJson, LIMITS } from "../scripts/pi-audit-scan.mjs";
 
 const system = (tools = []) => ({ type: "message", message: { role: "system", sections: { rules: "规则" }, toolsAdded: tools } });
 const user = () => ({ type: "message", message: { role: "user", content: "问题" } });
@@ -22,7 +22,7 @@ test("识别上下文膨胀、超大工具定义与结果，以及扩展工具�
     { type: "message", message: { role: "toolResult", toolName: "codemode", content: "x".repeat(LIMITS.toolResultChars + 1) } },
     { type: "custom", customType: "jev-inline-effort", data: {} },
   ], "a.jsonl");
-  assert.deepEqual(signatures(analysis).sort(), ["base-input", "large-tool-result:codemode", "large-tool-result:read", "tool-error:fetch_content", "tool-size:subagent"]);
+  assert.deepEqual(signatures(analysis).sort(), ["base-input", "large-tool-result:read", "tool-error:fetch_content:config", "tool-size:subagent"]);
 });
 
 test("短间隔缓存失效按前置变化归因；超过间隔阈值的视为自然过期", () => {
@@ -72,35 +72,65 @@ test("物理 GPT-6 会话缺少 Jev 决策时提示；虚拟模型会话只报�
   assert.deepEqual(signatures(virtual), ["virtual-model"]);
 });
 
-test("报告按台账区分新旧问题，支持前缀匹配；配置差异列出增删改路径", () => {
+test("报告按出现次数列出全部候选异常，附示例会话；配置差异列出增删改路径", () => {
   const analyses = [
     { metrics: { baseInput: 9000, input: 100, cacheRead: 900 }, problems: [
       { signature: "tool-size:subagent", detail: "大", file: "/s/a.jsonl" },
       { signature: "cache-miss:model", detail: "失效", file: "/s/a.jsonl" },
-      { signature: "jev-missing", detail: "缺失", file: "/s/b.jsonl" },
+      { signature: "cache-miss:model", detail: "失效", file: "/s/b.jsonl" },
     ] },
   ];
-  const { markdown, freshCount } = buildReport({
-    since: "2026-10-01", now: "2026-10-06T00:00:00Z", analyses, ledger: ["tool-size:*", "jev-missing"], configChanges: [], versionChanges: [],
+  const { markdown, candidateCount } = buildReport({
+    since: "2026-10-01", now: "2026-10-06T00:00:00Z", analyses, configChanges: ["settings.json：- a"], versionChanges: [],
   });
-  assert.equal(freshCount, 1);
-  assert.match(markdown, /### `cache-miss:model` · 1 次 · 1 个会话/);
+  assert.equal(candidateCount, 2);
+  assert.ok(markdown.indexOf("`cache-miss:model` · 2 次 · 2 个会话") < markdown.indexOf("`tool-size:subagent` · 1 次"));
+  assert.match(markdown, /- 会话：`\/s\/b\.jsonl`/);
   assert.match(markdown, /整体缓存命中率：90%/);
-  assert.match(markdown, /- `tool-size:subagent` · 1 次/);
+  assert.match(markdown, /- settings\.json：- a/);
   assert.deepEqual(diffJson({ a: 1, b: { c: 2 } }, { a: 2, b: {}, d: true }), ["~ a: 1 → 2", "- b.c", "+ d: true"]);
 });
 
-test("服务端缓存未命中只在全期占比超过阈值时作为新问题报告", () => {
+test("服务端缓存未命中只在全期占比超过阈值时列为候选异常", () => {
   const report = (cacheChecks) => buildReport({
-    since: "2026-10-01", now: "2026-10-06T00:00:00Z", ledger: [], configChanges: [], versionChanges: [],
+    since: "2026-10-01", now: "2026-10-06T00:00:00Z", configChanges: [], versionChanges: [],
     analyses: [{ metrics: { baseInput: 9000, input: 100, cacheRead: 900, cacheChecks }, problems: [
       { signature: "cache-miss:provider", detail: "未命中", file: "/s/a.jsonl" },
     ] }],
   });
   const quiet = report(Math.ceil(1 / LIMITS.providerCacheMissRate));
-  assert.equal(quiet.freshCount, 0);
+  assert.equal(quiet.candidateCount, 0);
   assert.match(quiet.markdown, /服务端缓存未命中：1\/20 次短间隔请求（5\.0%/);
   const loud = report(10);
-  assert.equal(loud.freshCount, 1);
+  assert.equal(loud.candidateCount, 1);
   assert.match(loud.markdown, /### `cache-miss:provider` · 1 次/);
+});
+
+test("扩展工具报错按来源分类：配置故障出现即报告，外部原因、取消和参数错误同一会话达到 3 次才报告", () => {
+  assert.equal(classifyToolError("Error: Failed to resolve pi-audit-case.invalid: getaddrinfo ENOTFOUND pi-audit-case.invalid"), "external");
+  assert.equal(classifyToolError("Failed to resolve example.com; set ssrf.trustEnvProxy when only the proxy can resolve hostnames"), "config");
+  assert.equal(classifyToolError("Error: Page answer failed: No API key available for answer model jev/sol-auto"), "config");
+  assert.equal(classifyToolError("HTTP 404 Not Found"), "external");
+  assert.equal(classifyToolError("Operation aborted"), "abort");
+  assert.equal(classifyToolError("Validation failed for tool \"fetch_content\""), "args");
+  assert.equal(classifyToolError("完全没见过的报错"), "config");
+
+  const error = (text) => ({ type: "message", message: { role: "toolResult", toolName: "fetch_content", isError: true, content: text } });
+  const jev = { type: "custom", customType: "jev-inline-effort", data: {} };
+  const once = analyzeSession([system(), user(), error("getaddrinfo ENOTFOUND a.invalid"), error("No API key available"), jev], "e.jsonl");
+  assert.deepEqual(signatures(once), ["tool-error:fetch_content:config"]);
+  const thrice = analyzeSession([system(), user(), ...Array.from({ length: 3 }, () => error("getaddrinfo ENOTFOUND a.invalid")), jev], "f.jsonl");
+  assert.deepEqual(signatures(thrice), Array(3).fill("tool-error:fetch_content:external"));
+});
+
+test("codemode 只在输出被截断时报告，未截断的大结果不报告", () => {
+  const codemode = (content) => ({ type: "message", message: { role: "toolResult", toolName: "codemode", content } });
+  const analysis = analyzeSession([
+    system(), user(),
+    codemode("x".repeat(LIMITS.toolResultChars * 2)),
+    codemode(`${"x".repeat(100)}\nWarning: truncated output (original token count: 19915)\n${"y".repeat(100)}`),
+    { type: "custom", customType: "jev-inline-effort", data: {} },
+  ], "g.jsonl");
+  assert.deepEqual(signatures(analysis), ["codemode-truncated"]);
+  assert.match(analysis.problems[0].detail, /original token count: 19915/);
 });

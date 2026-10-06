@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-// pi 会话周检：扫描上次运行后新增或更新的 pi 会话，统计上下文体量、缓存、错误和配置变化，生成 Markdown 报告。
-// 只读取会话与配置，不调用模型。用法：node scripts/pi-audit-scan.mjs [--since <ISO 时间>] [--no-notify] [--dry-run]
+// pi 会话周检的数据采集：扫描上次运行后新增或更新的 pi 会话，统计上下文体量、缓存、错误和配置、版本变化，生成 Markdown 数据报告。
+// 只采集和初筛，不下结论：是否是问题、是否复发由诊断 agent 结合台账判断。不调用模型。
+// 用法：node scripts/pi-audit-scan.mjs [--since <ISO 时间>] [--dry-run] [--check]
+//   --check：只判断上次运行后是否有新会话或配置、版本变化，有则退出码 0，否则 1；不写文件，供 Orca 自动化的 precheck 使用。
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HOME = homedir();
@@ -19,7 +21,17 @@ export const LIMITS = {
   // 前置无客户端变化的缓存失效来自服务端（同一 WebSocket 连接上的 previous_response_id 增量请求也会出现），
   // 近几周基线约 2%；只在全期占比超过该值时报告。
   providerCacheMissRate: 0.05,
+  // 外部原因、取消和参数错误多为偶发，同一会话出现达到该次数才报告；配置类错误出现即报告。
+  benignToolErrorsPerSession: 3,
 };
+// 按顺序匹配，先认配置故障；认不出的报错一律视为 config，宁可误报不漏报。
+const TOOL_ERROR_KINDS = [
+  ["config", /API key|not configured|Failed to parse|must be|trustEnvProxy|jev\//i],
+  ["external", /Failed to resolve|ENOTFOUND|HTTP [45]\d\d|Too many redirects|timed out|ETIMEDOUT|ECONNREFUSED|ECONNRESET/i],
+  ["abort", /aborted/i],
+  ["args", /Validation failed for tool/],
+];
+export const classifyToolError = (output) => TOOL_ERROR_KINDS.find(([, pattern]) => pattern.test(output))?.[0] ?? "config";
 const SECRET_KEY = /key|token|secret|password|auth/i;
 // 内置工具的报错多是模型正常试探（命令失败、路径不存在），只报告扩展工具的错误。
 const BUILTIN_TOOLS = new Set(["bash", "read", "edit", "write", "grep", "find", "ls", "codemode", "tool_search"]);
@@ -66,6 +78,7 @@ export function analyzeSession(entries, file, { jevEnabled = true } = {}) {
   let jevDecisions = 0;
   let codexGpt6 = false;
   let virtual = false;
+  const toolErrors = new Map();
 
   for (const entry of entries) {
     if (entry.type === "model_change") {
@@ -85,7 +98,16 @@ export function analyzeSession(entries, file, { jevEnabled = true } = {}) {
       userMessages++;
     } else if (message.role === "toolResult") {
       const output = text(message.content);
-      if (message.isError && !BUILTIN_TOOLS.has(message.toolName)) add(`tool-error:${message.toolName}`, `${message.toolName} 报错：${output.slice(0, 160)}`);
+      if (message.isError && !BUILTIN_TOOLS.has(message.toolName)) {
+        const signature = `tool-error:${message.toolName}:${classifyToolError(output)}`;
+        const group = toolErrors.get(signature) ?? [];
+        toolErrors.set(signature, [...group, `${message.toolName} 报错：${output.slice(0, 160)}`]);
+      }
+      if (message.toolName === "codemode") {
+        // codemode 超过输出上限时从中间截断；未截断的大结果由脚本自行过滤，不报告。
+        if (output.includes("truncated output")) add("codemode-truncated", `codemode 输出被截断：${output.match(/truncated output[^)\n]*\)?/)?.[0]}`);
+        continue;
+      }
       const limit = TRUNCATED_TOOLS.has(message.toolName) ? LIMITS.truncatedToolResultChars : LIMITS.toolResultChars;
       if (output.length > limit) {
         add(`large-tool-result:${message.toolName}`, `${message.toolName} 返回 ${output.length} 字符`);
@@ -116,6 +138,11 @@ export function analyzeSession(entries, file, { jevEnabled = true } = {}) {
     }
   }
 
+  for (const [signature, details] of toolErrors) {
+    if (signature.endsWith(":config") || details.length >= LIMITS.benignToolErrorsPerSession) {
+      for (const detail of details) add(signature, detail);
+    }
+  }
   if (metrics.baseInput > LIMITS.baseInputTokens) add("base-input", `首轮输入 ${metrics.baseInput} tokens，超过 ${LIMITS.baseInputTokens}`);
   const toolSizes = (system?.toolsAdded ?? []).map((tool) => ({ name: tool.name, chars: JSON.stringify(tool).length }));
   for (const tool of toolSizes) {
@@ -145,15 +172,6 @@ export function listSessions(sessionsDir, since) {
   if (existsSync(sessionsDir)) walk(sessionsDir);
   return files.sort();
 }
-
-/** 读取台账中已处理问题的 signature；末尾为 * 时按前缀匹配。 */
-export function readLedger(file) {
-  if (!existsSync(file)) return [];
-  return [...readFileSync(file, "utf8").matchAll(/^- .*?`([^`]+)`/gm)].map((match) => match[1]);
-}
-
-const inLedger = (signature, ledger) =>
-  ledger.some((entry) => entry.endsWith("*") ? signature.startsWith(entry.slice(0, -1)) : entry === signature);
 
 function redact(value) {
   if (Array.isArray(value)) return value.map(redact);
@@ -203,7 +221,7 @@ const median = (values) => {
   return sorted.length ? sorted[Math.floor(sorted.length / 2)] : undefined;
 };
 
-export function buildReport({ since, now, analyses, ledger, configChanges, versionChanges }) {
+export function buildReport({ since, now, analyses, configChanges, versionChanges }) {
   const cacheChecks = analyses.reduce((sum, { metrics }) => sum + (metrics.cacheChecks ?? 0), 0);
   const providerMisses = analyses.flatMap(({ problems }) => problems).filter(({ signature }) => signature === "cache-miss:provider").length;
   const providerRate = cacheChecks ? providerMisses / cacheChecks : 0;
@@ -216,9 +234,7 @@ export function buildReport({ since, now, analyses, ledger, configChanges, versi
     group.files.add(problem.file);
     groups.set(problem.signature, group);
   }
-  const all = [...groups.values()].sort((a, b) => b.count - a.count);
-  const fresh = all.filter((group) => !inLedger(group.signature, ledger));
-  const known = all.filter((group) => inLedger(group.signature, ledger));
+  const candidates = [...groups.values()].sort((a, b) => b.count - a.count);
   const totals = analyses.reduce((sum, { metrics }) => ({ input: sum.input + metrics.input, cacheRead: sum.cacheRead + metrics.cacheRead }), { input: 0, cacheRead: 0 });
   const hitRate = totals.input + totals.cacheRead ? Math.round((totals.cacheRead / (totals.input + totals.cacheRead)) * 100) : 0;
 
@@ -228,11 +244,11 @@ export function buildReport({ since, now, analyses, ledger, configChanges, versi
     `- 扫描范围：${since} 之后更新的 ${analyses.length} 个会话`,
     `- 首轮输入中位数：${median(analyses.map(({ metrics }) => metrics.baseInput)) ?? "无数据"} tokens；整体缓存命中率：${hitRate}%`,
     `- 服务端缓存未命中：${providerMisses}/${cacheChecks} 次短间隔请求（${(providerRate * 100).toFixed(1)}%，超过 ${LIMITS.providerCacheMissRate * 100}% 才报告）`,
-    `- 新问题：${fresh.length} 类；台账中已处理：${known.length} 类`,
+    `- 候选异常：${candidates.length} 类（初筛结果，需诊断确认）`,
     "",
-    "## 新问题",
+    "## 候选异常",
     "",
-    ...(fresh.length ? fresh.flatMap((group) => [
+    ...(candidates.length ? candidates.flatMap((group) => [
       `### \`${group.signature}\` · ${group.count} 次 · ${group.files.size} 个会话`,
       "",
       ...group.details.map((detail) => `- ${detail}`),
@@ -247,16 +263,12 @@ export function buildReport({ since, now, analyses, ledger, configChanges, versi
     "",
     ...(versionChanges.length ? versionChanges.map((change) => `- ${change}`) : ["无。"]),
     "",
-    "## 台账中已处理的问题",
-    "",
-    ...(known.length ? known.map((group) => `- \`${group.signature}\` · ${group.count} 次`) : ["无。"]),
-    "",
   ];
-  return { markdown: lines.join("\n"), freshCount: fresh.length };
+  return { markdown: lines.join("\n"), candidateCount: candidates.length };
 }
 
 function main(argv) {
-  const options = { notify: !argv.includes("--no-notify"), dryRun: argv.includes("--dry-run") };
+  const options = { dryRun: argv.includes("--dry-run") || argv.includes("--check"), check: argv.includes("--check") };
   const sinceIndex = argv.indexOf("--since");
   const p = paths();
   const statePath = join(p.auditDir, "state.json");
@@ -278,29 +290,20 @@ function main(argv) {
   const currentVersions = versions(p.agentDir);
   const versionChanges = state.versions ? diffJson(state.versions, currentVersions) : [];
 
-  const ledgerPath = join(p.auditDir, "ledger.md");
-  const { markdown, freshCount } = buildReport({ since, now, analyses, ledger: readLedger(ledgerPath), configChanges, versionChanges });
+  if (options.check) {
+    const pending = analyses.length + configChanges.length + versionChanges.length;
+    console.log(`新会话 ${analyses.length} 个，配置变化 ${configChanges.length} 项，版本变化 ${versionChanges.length} 项`);
+    process.exit(pending > 0 ? 0 : 1);
+  }
+  const { markdown, candidateCount } = buildReport({ since, now, analyses, configChanges, versionChanges });
   const reportPath = join(p.auditDir, "reports", `${now.slice(0, 10)}.md`);
   if (!options.dryRun) {
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, markdown);
     writeFileSync(join(p.auditDir, "latest.md"), markdown);
     writeFileSync(statePath, `${JSON.stringify({ lastRun: now, configs, versions: currentVersions }, null, 2)}\n`);
-    if (!existsSync(ledgerPath)) {
-      writeFileSync(ledgerPath, "# pi 周检台账\n\n每行一个已处理的问题，格式为 `` - 状态 | `signature` | 说明 ``。状态写已修复、已接受或误报；signature 末尾加 * 表示按前缀匹配。\n\n");
-    }
   }
-  const changed = freshCount + configChanges.length + versionChanges.length;
-  console.log(options.dryRun ? markdown : `报告：${reportPath}（新问题 ${freshCount} 类，配置变化 ${configChanges.length} 项，版本变化 ${versionChanges.length} 项）`);
-  if (options.notify && !options.dryRun && changed > 0 && process.platform === "darwin") {
-    const message = `新问题 ${freshCount} 类，配置变化 ${configChanges.length} 项，版本变化 ${versionChanges.length} 项`;
-    try {
-      execFileSync("osascript", ["-e", `display notification ${JSON.stringify(message)} with title "pi 会话周检" subtitle ${JSON.stringify(basename(reportPath))}`], { stdio: ["ignore", "ignore", "pipe"] });
-      console.log("已发送系统通知");
-    } catch (error) {
-      console.error(`系统通知发送失败：${error.stderr?.toString().trim() || error.message}`);
-    }
-  }
+  console.log(options.dryRun ? markdown : `报告：${reportPath}（会话 ${analyses.length} 个，候选异常 ${candidateCount} 类，配置变化 ${configChanges.length} 项，版本变化 ${versionChanges.length} 项）`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main(process.argv.slice(2));

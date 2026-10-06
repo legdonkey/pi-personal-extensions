@@ -163,42 +163,52 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 ## pi 会话周检
 
-`scripts/pi-audit-scan.mjs` 扫描上次运行后更新过的 pi 会话，生成 Markdown 报告，不调用模型。分析、讲解、修复和验收在 Claude Code 中通过 `/pi-audit` 技能进行。
+周检分三层：
+
+1. **数据采集**：`scripts/pi-audit-scan.mjs` 扫描上次运行后更新过的 pi 会话，统计并初筛候选异常，生成 Markdown 数据报告。不调用模型，也不判断是否是问题。
+2. **无人值守诊断**：Orca 自动化每周运行 Claude Code 的 `/pi-audit-diagnose` 技能。它先运行采集脚本，再用 agent 团队对照台账溯源、反驳式验证，只写诊断报告，不做任何修改，完成后发系统通知。
+3. **交互处理**：用户在场时运行 `/pi-audit`，从诊断报告出发讲解、确认后修复、真实验收并更新台账。
 
 ```bash
-npm run audit -- --dry-run          # 只打印报告，不写文件
+npm run audit -- --dry-run          # 只打印数据报告，不写文件
 npm run audit -- --since 2026-10-01 # 指定起始时间
+npm run audit -- --check            # 有新会话或配置、版本变化时退出码为 0，否则为 1，不写文件
 ```
 
-检查项：
+候选异常的初筛规则：
 
 | signature | 含义 |
 |---|---|
 | `base-input` | 首轮输入（含缓存命中）超过 12,000 tokens |
 | `tool-size:<工具>` | 单个工具定义超过 8,000 字符 |
-| `large-tool-result:<工具>` | 单次工具结果超过 20,000 字符。`read`、`bash`、`grep`、`find`、`ls` 由 pi 按 50KB 截断，超过 52,000 字符（截断上限加截断说明）才报告，即只在截断失效时提示 |
-| `tool-error:<工具>` | 扩展工具报错；内置工具的报错多为模型正常试探，不报告 |
+| `large-tool-result:<工具>` | 单次工具结果超过 20,000 字符。`read`、`bash`、`grep`、`find`、`ls` 由 pi 按 50KB 截断，超过 52,000 字符（截断上限加截断说明）才报告，即只在截断失效时提示。`codemode` 不按长度判断，见下一行 |
+| `codemode-truncated` | codemode 输出超过上限（约 10k tokens）被从中间截断，结果中出现 `truncated output`。未截断的大结果不报告 |
+| `tool-error:<工具>:<类别>` | 扩展工具报错，按报错文本分类：`config`（缺 key、未配置、配置解析失败、`trustEnvProxy` 提示等，以及无法识别的报错）出现即报告；`external`（DNS、HTTP 4xx/5xx、超时、连接被拒或重置）、`abort`（取消）、`args`（参数校验失败）同一会话达到 3 次才报告。内置工具的报错多为模型正常试探，不报告 |
 | `assistant-error:<摘要>` | 模型请求失败 |
 | `cache-miss:<原因>` | 与上一请求间隔不到 2 分钟仍未命中缓存；原因为前置的 `model`、`thinking`、`tools` 变化，只归因紧随变化的那次请求。服务端缓存与模型绑定，切换模型后首轮未命中是预期代价；`model_change` 条目不记录切换来源，无法区分用户 `/model` 与扩展或回退切换 |
-| `cache-miss:provider` | 同上，但前置没有客户端可见变化，请求体只是在上一请求后追加。这类未命中来自服务端：同一 WebSocket 连接上带 `previous_response_id` 的增量请求也会出现，近几周基线约 2%。报告摘要列出全期占比，超过 5% 才作为新问题 |
+| `cache-miss:provider` | 同上，但前置没有客户端可见变化，请求体只是在上一请求后追加。这类未命中来自服务端：同一 WebSocket 连接上带 `previous_response_id` 的增量请求也会出现，近几周基线约 2%。报告摘要列出全期占比，超过 5% 才列为候选异常 |
 | `jev-missing` | 物理 GPT-6 Codex 会话没有任何 Jev 原位强度决策 |
 | `virtual-model` | 会话选择了已移除的 `jev/*` 虚拟模型 |
 
-报告还会列出受监控配置的变化（`settings.json`、`personal-extensions.json`、`web-search.json`、`rpiv-ask-user-question` 和 `ponytail` 配置，密钥类字段脱敏）以及 pi 和各扩展包的版本变化。临时目录（`--private-*`）和子代理产物不在扫描范围内。
+数据报告还会列出受监控配置的变化（`settings.json`、`personal-extensions.json`、`web-search.json`、`rpiv-ask-user-question` 和 `ponytail` 配置，密钥类字段脱敏）以及 pi 和各扩展包的版本变化。临时目录（`--private-*`）和子代理产物不在扫描范围内。
 
 输出位于 `~/.pi/agent/audit/`（可用 `PI_AUDIT_HOME` 修改）：
 
-- `reports/<日期>.md` 和 `latest.md`：报告；
+- `reports/<日期>.md` 和 `latest.md`：采集脚本的数据报告；
 - `state.json`：上次运行时间、配置快照和版本；
-- `ledger.md`：台账。已处理的问题按 `` - 状态 | `signature` | 说明 `` 记录，状态写已修复、已接受或误报；signature 末尾加 `*` 表示按前缀匹配。台账中的问题不再计为新问题。
+- `diagnoses/<日期>.md` 和 `diagnoses/latest.md`：诊断报告；
+- `ledger.md`：台账，每行一条决策记录 `- <日期> | <状态> | <现象> | <结论与依据>`，状态取已修复、已接受、误报之一。台账由诊断 agent 阅读判断，脚本不读取：已修复的问题出现在修复日期之后开始的会话里时按复发处理，已接受的问题频率明显升高时按频率异常处理。
 
-定时运行使用 macOS launchd，每周二 23:30 执行；错过的时间点会在唤醒后补跑。有新问题、配置变化或版本变化时发送系统通知。plist 位于 `~/Library/LaunchAgents/com.yangguandao.pi-audit.plist`，`ProgramArguments` 使用 node 的绝对路径，升级或切换 node 版本后需要同步修改：
+定时运行使用 Orca 自动化“pi 会话周检”：每周二 23:30（Asia/Shanghai）在 `~/Projects/pi` 工作区以新会话启动 Claude Code，提示词为 `/pi-audit-diagnose`。运行前以 `pi-audit-scan.mjs --check` 作为 precheck，没有新会话或变化时跳过本次运行；错过的时间点在 12 小时内补跑。Orca 需要处于运行状态。precheck 命令使用 node 的绝对路径，升级或切换 node 版本后需要同步修改：
 
 ```bash
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.yangguandao.pi-audit.plist   # 启用
-launchctl kickstart gui/$(id -u)/com.yangguandao.pi-audit                                 # 立即运行一次
-launchctl bootout gui/$(id -u)/com.yangguandao.pi-audit                                   # 停用
+orca automations list --json                                   # 查看自动化
+orca automations run <automationId> --json                     # 立即运行一次
+orca automations edit <automationId> --enabled --json          # 启用（--disabled 停用）
+orca automations runs --id <automationId> --json               # 查看运行记录
 ```
+
+`/pi-audit-diagnose` 与 `/pi-audit` 两个技能位于 `~/.claude/skills/`，不在本仓库中。
 
 ## 从独立扩展迁移
 

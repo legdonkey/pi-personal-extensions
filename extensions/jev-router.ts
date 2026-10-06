@@ -1,12 +1,9 @@
 import type { Message, ModelThinkingLevel } from "@earendil-works/pi-ai";
-import type {
-  ExtensionAPI,
-  ExtensionContext,
-  ModelRouteRequest,
-} from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 type RouteState = { thinkingLevel: ModelThinkingLevel };
 type Classification = RouteState & { autoModelId?: string };
+export type ClassificationRequest = { messages: readonly Message[]; signal?: AbortSignal };
 
 const CODEX_PROVIDER = "openai-codex";
 const JEV_PROVIDER = "openrouter";
@@ -62,8 +59,8 @@ function sessionModel(ctx: ExtensionContext) {
   }
 }
 
-async function classifyTask(
-  request: ModelRouteRequest<RouteState>,
+export async function classifyTask(
+  request: ClassificationRequest,
   ctx: ExtensionContext,
   fallbackThinking: ModelThinkingLevel,
   chooseModel = false,

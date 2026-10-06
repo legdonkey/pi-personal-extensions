@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的七项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的八项功能。
 
 ## 功能开关
 
@@ -16,7 +16,8 @@
   "clickable-paths": true,
   "user-message-border": true,
   "statusline-style-picker": true,
-  "jev-auto": true
+  "jev-auto": true,
+  "jev-inline-effort": true
 }
 ```
 
@@ -169,6 +170,24 @@ Pi 虚拟模型必须直接返回物理模型。因此，`subagent-auto` 与三�
 
 使用过 `jev/auto` 的会话需要手动选择上述固定入口之一。
 
+### Jev 原位思考强度
+
+主会话直接使用物理模型（如 `openai-codex/gpt-6.1-sol`）时，Jev 分类器为每条新用户消息选择思考强度，并通过 OpenAI Responses 的 `configuration_update` 输入项生效。请求顶层的 `reasoning.effort` 始终保持 Pi 当前 thinking 设置，请求前缀不变，prompt cache 和 WebSocket 增量续接都不受影响。
+
+```bash
+pi --model openai-codex/gpt-6.1-sol --thinking medium
+```
+
+- 适用范围：`openai-codex-responses` 接口的 GPT-6 系列模型，且 thinking 不为 `off`。其他模型和 `jev/*` 虚拟模型不做任何改动。
+- 顶层 thinking 是基线。建议设为 `medium`，由 update 向两侧调整。实测中途切换只移动约 50%～66% 的推理量差距，首条消息前的 update 接近完整生效；本功能不会为了极限强度改动顶层档位。
+- 分类规则与「Jev 自动思考强度」共用：可选 `low`、`medium`、`high`、`xhigh`、`max`，输入限制和分类服务要求相同。steer 和 follow-up 追加的用户消息也会重新分类；扩展消息、`!` 命令输出和摘要不分类。工具续调和重试不重复分类。
+- 每次决策以会话记录保存，锚定到对应用户消息的时间戳，并跟随当前分支。重载、恢复、fork 和 `/tree` 后，每次请求都在相同位置重建 update，保证历史前缀一致。只在强度变化处插入，两条 update 不会相邻。
+- 压缩后，压缩摘要前会补一条 update，承接被压掉的最后一次决策；本轮中途压缩时，强度也不会回落到基线。
+- 分类失败、结果无效或置信度不足时，沿用当前生效强度；取消请求时不记录决策。
+- 状态栏显示实际生效的强度，例如 `🧠 xhigh · 基线 medium`。Pi 自带的思考显示和响应中报告的 `reasoning.effort` 都只反映顶层基线。请求与上下文无法对齐时，本次不注入，状态栏显示 `🧠 medium · 未调整`。
+- OpenAI 的约束：`configuration_update` 只改变 effort，不能与服务端自动压缩、自动截断或 `/responses/compact` 一起使用。Pi 的压缩在客户端完成，不受影响。
+- 通过 `/personal` 中的「Jev 原位思考强度」启用或关闭。
+
 ### statusline-style-picker
 
 预览并应用 11 套状态栏配色，保留原有 `/statusline-style` 命令：
@@ -270,14 +289,16 @@ pi install npm:pi-personal-extensions
 │   ├── statusline-style-picker.ts
 │   ├── substatusline.ts
 │   ├── user-message-border.ts
-│   └── jev-router.ts
+│   ├── jev-router.ts
+│   └── jev-inline-effort.ts
 ├── tests/
 │   ├── auto-session-name.test.mjs
 │   ├── personal.test.mjs
 │   ├── session-title.test.mjs
 │   ├── statusline-style-picker.test.mjs
 │   ├── user-message-border.test.mjs
-│   └── jev-router.test.mjs
+│   ├── jev-router.test.mjs
+│   └── jev-inline-effort.test.mjs
 ├── CHANGELOG.md
 ├── README.md
 ├── package.json

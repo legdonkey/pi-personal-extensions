@@ -13,6 +13,7 @@ import statuslineStylePicker from "./statusline-style-picker.ts";
 import sessionTitle from "./session-title.ts";
 import subStatusline from "./substatusline.ts";
 import userMessageBorder from "./user-message-border.ts";
+import jevInlineEffort from "./jev-inline-effort.ts";
 import jevRouter from "./jev-router.ts";
 
 const features = [
@@ -57,6 +58,12 @@ const features = [
     label: "Jev 自动思考强度",
     description: "提供 Luna、Sol、Astra Auto；子代理首次自动选模，会话内只调整思考强度",
     register: jevRouter,
+  },
+  {
+    id: "jev-inline-effort",
+    label: "Jev 原位思考强度",
+    description: "物理 GPT-6 Codex 模型按消息分类，用 configuration_update 调整强度并保留缓存",
+    register: jevInlineEffort,
   },
 ] as const;
 

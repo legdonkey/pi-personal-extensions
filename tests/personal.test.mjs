@@ -15,6 +15,7 @@ const ids = [
   "user-message-border",
   "statusline-style-picker",
   "jev-auto",
+  "jev-inline-effort",
 ];
 const off = Object.fromEntries(ids.map((id) => [id, false]));
 function load() {
@@ -31,7 +32,7 @@ function load() {
   return { commands, events, transformers, virtualModels };
 }
 
-test("统一入口按开关注册七项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册八项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -72,7 +73,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
       );
       assert.equal(
         loaded.events.includes("model_select"),
-        ["substatusline", "jev-auto"].includes(id),
+        ["substatusline", "jev-auto", "jev-inline-effort"].includes(id),
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
@@ -94,6 +95,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
           "substatusline",
           "user-message-border",
           "jev-auto",
+          "jev-inline-effort",
         ].includes(id),
       );
     }

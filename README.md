@@ -161,6 +161,45 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 该功能是配色选择器，**不包含状态栏本体**，需要另外启用 `npm:@narumitw/pi-statusline`。配置继续写入 `~/.pi/agent/pi-statusline.json`（支持 `PI_AGENT_DIR`），应用后自动重载。
 
+## pi 会话周检
+
+`scripts/pi-audit-scan.mjs` 扫描上次运行后更新过的 pi 会话，生成 Markdown 报告，不调用模型。分析、讲解、修复和验收在 Claude Code 中通过 `/pi-audit` 技能进行。
+
+```bash
+npm run audit -- --dry-run          # 只打印报告，不写文件
+npm run audit -- --since 2026-10-01 # 指定起始时间
+```
+
+检查项：
+
+| signature | 含义 |
+|---|---|
+| `base-input` | 首轮输入（含缓存命中）超过 12,000 tokens |
+| `tool-size:<工具>` | 单个工具定义超过 8,000 字符 |
+| `large-tool-result:<工具>` | 单次工具结果超过 20,000 字符。`read`、`bash`、`grep`、`find`、`ls` 由 pi 按 50KB 截断，超过 52,000 字符（截断上限加截断说明）才报告，即只在截断失效时提示 |
+| `tool-error:<工具>` | 扩展工具报错；内置工具的报错多为模型正常试探，不报告 |
+| `assistant-error:<摘要>` | 模型请求失败 |
+| `cache-miss:<原因>` | 与上一请求间隔不到 2 分钟仍未命中缓存；原因为前置的 `model`、`thinking`、`tools` 变化，只归因紧随变化的那次请求。服务端缓存与模型绑定，切换模型后首轮未命中是预期代价；`model_change` 条目不记录切换来源，无法区分用户 `/model` 与扩展或回退切换 |
+| `cache-miss:provider` | 同上，但前置没有客户端可见变化，请求体只是在上一请求后追加。这类未命中来自服务端：同一 WebSocket 连接上带 `previous_response_id` 的增量请求也会出现，近几周基线约 2%。报告摘要列出全期占比，超过 5% 才作为新问题 |
+| `jev-missing` | 物理 GPT-6 Codex 会话没有任何 Jev 原位强度决策 |
+| `virtual-model` | 会话选择了已移除的 `jev/*` 虚拟模型 |
+
+报告还会列出受监控配置的变化（`settings.json`、`personal-extensions.json`、`web-search.json`、`rpiv-ask-user-question` 和 `ponytail` 配置，密钥类字段脱敏）以及 pi 和各扩展包的版本变化。临时目录（`--private-*`）和子代理产物不在扫描范围内。
+
+输出位于 `~/.pi/agent/audit/`（可用 `PI_AUDIT_HOME` 修改）：
+
+- `reports/<日期>.md` 和 `latest.md`：报告；
+- `state.json`：上次运行时间、配置快照和版本；
+- `ledger.md`：台账。已处理的问题按 `` - 状态 | `signature` | 说明 `` 记录，状态写已修复、已接受或误报；signature 末尾加 `*` 表示按前缀匹配。台账中的问题不再计为新问题。
+
+定时运行使用 macOS launchd，每周二 23:30 执行；错过的时间点会在唤醒后补跑。有新问题、配置变化或版本变化时发送系统通知。plist 位于 `~/Library/LaunchAgents/com.yangguandao.pi-audit.plist`，`ProgramArguments` 使用 node 的绝对路径，升级或切换 node 版本后需要同步修改：
+
+```bash
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.yangguandao.pi-audit.plist   # 启用
+launchctl kickstart gui/$(id -u)/com.yangguandao.pi-audit                                 # 立即运行一次
+launchctl bootout gui/$(id -u)/com.yangguandao.pi-audit                                   # 停用
+```
+
 ## 从独立扩展迁移
 
 安装本包后，移除以前单独安装的功能路径，避免重复注册。曾直接放在 `~/.pi/agent/extensions/` 下的同名扩展也需移出自动发现目录；需要删除时请放入废纸篓。
@@ -251,13 +290,16 @@ pi install npm:pi-personal-extensions
 │   ├── substatusline.ts
 │   ├── user-message-border.ts
 │   └── jev-inline-effort.ts
+├── scripts/
+│   └── pi-audit-scan.mjs
 ├── tests/
 │   ├── auto-session-name.test.mjs
 │   ├── personal.test.mjs
 │   ├── session-title.test.mjs
 │   ├── statusline-style-picker.test.mjs
 │   ├── user-message-border.test.mjs
-│   └── jev-inline-effort.test.mjs
+│   ├── jev-inline-effort.test.mjs
+│   └── pi-audit-scan.test.mjs
 ├── CHANGELOG.md
 ├── README.md
 ├── package.json

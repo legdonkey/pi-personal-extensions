@@ -26,6 +26,15 @@ Pi 扩展提供命令入口、引擎工具和自动检测。
 POSIX 和 Windows 启动器也可用。本包需要 Node.js 22.19 或更新版本。
 下载或校验失败时，报告具体错误。不得临时执行未固定版本的 `npx impeccable`。
 
+## 参考文件加载
+
+用 `read` 逐个读取 `reference/` 下的参考文件和其他技能的 `SKILL.md`。
+不要在 `codemode` 中批量输出多份全文。
+其输出超过约 10k tokens 时从中间截断，且不标明丢失的文件。
+`reference/new-work.md` 较长。`read` 提示截断时，按提示的 `offset` 读完。
+`context` 单独调用，输出不与参考文件合并。
+按 `SKILL.md` 的时机加载：`craft-floor.md` 在 UI 编辑前读取，规划阶段不提前加载。
+
 ## 自动检测与项目配置
 
 Pi 在成功的 `edit`、`write` 和 `apply_patch` 后运行上游 `PostToolUse` 检查。

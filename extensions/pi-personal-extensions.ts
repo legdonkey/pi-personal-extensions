@@ -54,14 +54,45 @@ const features = [
   },
   {
     id: "jev-inline-effort",
-    label: "Jev 原位思考强度",
-    description: "物理 GPT-6 Codex 模型按消息分类，用 configuration_update 调整强度并保留缓存",
+    label: "原位思考强度（Jev / d1-ultra）",
+    description: "/effort 选择分类模型；物理 GPT-6 Codex 用 configuration_update 调整强度并保留缓存",
     register: jevInlineEffort,
   },
 ] as const;
 
 type FeatureId = (typeof features)[number]["id"];
 type FeatureSettings = Record<FeatureId, boolean>;
+type Command = Parameters<ExtensionAPI["registerCommand"]>[1];
+
+// 菜单只描述入口，设置和校验继续交给各功能已有的命令处理器。
+const actions: Partial<Record<FeatureId, { label: string; command: string; args: string }[]>> = {
+  "auto-session-name": [
+    { label: "查看状态", command: "auto-name", args: "status" },
+    { label: "选择命名模型", command: "auto-name", args: "model" },
+    { label: "选择命名思考强度", command: "auto-name", args: "thinking" },
+    { label: "预览建议标题", command: "auto-name", args: "preview" },
+    { label: "暂停当前会话命名", command: "auto-name", args: "off" },
+    { label: "恢复当前会话命名", command: "auto-name", args: "on" },
+  ],
+  "jev-inline-effort": [
+    { label: "查看分类模型与状态", command: "effort", args: "status" },
+    { label: "选择分类模型（Jev / d1-ultra）", command: "effort", args: "model" },
+    { label: "测试分类模型可用性", command: "effort", args: "test" },
+  ],
+  "clickable-paths": [
+    { label: "查看路径链接设置", command: "clickable-paths", args: "" },
+    { label: "开启路径链接", command: "clickable-paths", args: "on" },
+    { label: "暂停路径链接", command: "clickable-paths", args: "off" },
+    ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((editor) => ({
+      label: `打开方式：${editor}`, command: "clickable-paths", args: `editor ${editor}`,
+    })),
+    { label: "识别裸路径", command: "clickable-paths", args: "bare on" },
+    { label: "不识别裸路径", command: "clickable-paths", args: "bare off" },
+  ],
+  "statusline-style-picker": [
+    { label: "预览并选择配色", command: "statusline-style", args: "" },
+  ],
+};
 
 function readSettings(path: string): FeatureSettings {
   const settings = Object.fromEntries(
@@ -91,18 +122,57 @@ function readSettings(path: string): FeatureSettings {
 export default function personalExtensions(pi: ExtensionAPI) {
   const configPath = join(getAgentDir(), "personal-extensions.json");
   const enabled = readSettings(configPath);
+  const commands = new Map<string, Command>();
+  const featureApi: ExtensionAPI = Object.assign(Object.create(pi), {
+    registerCommand(name: string, command: Command) {
+      commands.set(name, command);
+      pi.registerCommand(name, command);
+    },
+  });
   for (const feature of features) {
-    if (enabled[feature.id]) feature.register(pi);
+    if (enabled[feature.id]) feature.register(featureApi);
   }
 
   pi.registerCommand("personal", {
-    description: "选择个人扩展功能，保存后自动重载",
-    async handler(_args, ctx) {
+    description: "个人扩展统一管理：启停、功能设置；switches 批量开关",
+    async handler(args, ctx) {
       if (ctx.mode !== "tui") {
         ctx.ui.notify("请在 pi 终端交互模式中使用 /personal", "warning");
         return;
       }
-      const selected = await ctx.ui.custom<FeatureSettings | undefined>(
+      if (args.trim() && args.trim() !== "switches") {
+        ctx.ui.notify("用法：/personal 或 /personal switches", "warning");
+        return;
+      }
+      let selected: FeatureSettings | undefined;
+      let batch = args.trim() === "switches";
+      if (!batch) {
+        const labels = features.map((feature) => `${feature.label} · ${enabled[feature.id] ? "已加载" : "未加载"}`);
+        const batchLabel = "批量功能开关";
+        const choice = await ctx.ui.select("个人扩展 · 统一管理", [...labels, batchLabel]);
+        if (choice === undefined) return;
+        batch = choice === batchLabel;
+        if (!batch) {
+          const feature = features[labels.indexOf(choice)];
+          if (!feature) return;
+          const loaded = enabled[feature.id];
+          const entries = loaded ? actions[feature.id] ?? [] : [];
+          const toggle = loaded ? "禁用此功能并重载" : "启用此功能并重载";
+          const action = await ctx.ui.select(
+            `${feature.label} · ${feature.description}${loaded ? "" : "；启用后可管理设置"}`,
+            [...entries.map(({ label }) => label), toggle],
+          );
+          if (action === undefined) return;
+          if (action !== toggle) {
+            const entry = entries.find(({ label }) => label === action);
+            const command = entry && commands.get(entry.command);
+            if (entry && command) await command.handler(entry.args, ctx);
+            return;
+          }
+          selected = { ...enabled, [feature.id]: !loaded };
+        }
+      }
+      if (batch) selected = await ctx.ui.custom<FeatureSettings | undefined>(
         (tui, theme, keybindings, done) => {
           const draft = { ...enabled };
           const container = new Container();

@@ -1,91 +1,100 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。Pi 只加载 `extensions/pi-personal-extensions.ts` 一个入口，通过 `/personal` 选择其中的七项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，用 `/personal` 管理七项功能。
 
-## 功能开关
+## 安装与开发
 
-输入 `/personal` 打开功能列表：上下选择、空格切换，Enter 保存并自动重载，Esc 放弃修改。`pi config` 只负责整个扩展的启用或禁用。
+需要 Pi ≥ 1.0.1、Node.js ≥ 22.19。在仓库根目录执行：
 
-开关保存在 `~/.pi/agent/personal-extensions.json`（设置 `PI_CODING_AGENT_DIR` 时跟随该目录），默认全部开启。关闭的功能不会注册命令、事件或定时器；保存后的重载会执行旧功能的正常清理。其他已打开的 pi 会话需要各自 `/reload`。
-
-```json
-{
-  "session-title": true,
-  "auto-session-name": true,
-  "substatusline": true,
-  "clickable-paths": true,
-  "user-message-border": true,
-  "statusline-style-picker": true,
-  "jev-inline-effort": true
-}
+```bash
+npm install --ignore-scripts --registry=https://registry.npmmirror.com
+npm run check
+pi install "$(pwd)"
 ```
 
-各功能自己的配置继续保留。例如 `/personal` 中启用路径链接，只表示加载该功能，仍遵循 `/clickable-paths` 保存的设置。关闭风格选择器只移除命令，不恢复之前已应用的状态栏配色。
+依赖镜像使用 npmmirror。修改代码后在 Pi 中执行 `/reload`；卸载使用 `pi remove "$(pwd)"`。
 
-## 包含的功能
+## 统一管理
 
-### session-title
-
-在 TUI 输入框下方、状态栏上方单独显示一行右对齐的会话标题，不覆盖原生页脚或 `pi-statusline`。默认开启，可通过 `/personal` 中的「右下角会话标题」关闭。
-
-- 读取 Pi 已有会话名，使用 `/name 标题` 修改后立即更新；启动、恢复、切换和重载时同步。
-- 未命名时显示「未命名会话」。本显示组件不调用模型；自动生成由下面的独立功能负责。
-- 长标题自动省略，支持中文和 emoji；不影响输入和其他状态栏信息。
-
-### auto-session-name
-
-参考 [oil-oil/oil-codex-title](https://github.com/oil-oil/oil-codex-title) 的后台命名方式和稳定命名规则，通过 Pi 官方 `setSessionName()` 接口实现，不修改数据库、不启动子 Agent。
-
-- 默认开启。TUI / RPC 中每轮工作成功结束后，参考当前分支最近最多 5 轮对话，后台评估是否需要更新标题，例如 `🧩 邮箱验证码｜过期排查`；失败、中断或截断的轮次跳过。
-- 使用「类别 emoji + 对象｜目标」，跟随最近用户消息的主要语言。通过提示词要求稳定对象名称和类别，只有任务实质变化才更新；“继续”“推送”等收尾动作不取代主线。
-- 默认使用 **`gpt-5.6-luna`**，候选只来自 Pi 当前会话的 `/scoped-models`，并过滤未配置认证的模型。默认 ID 在多个服务商中匹配时，按 scoped 列表顺序选择；通过选择器保存后使用完整 `provider/modelId`。列表为空、模型被移出列表或未登录时会提示，保留原标题，不回退主模型或其他模型。
-- 思考强度默认**继承 `/settings` → Default thinking level per model**（`modelThinkingLevels["provider/modelId"]`），未配置时使用 `low`；不是主会话临时思考强度、scoped pattern 的思考后缀或全局 `defaultThinkingLevel`。已信任项目中的对应设置优先于全局设置，继承值按 Pi 的模型能力规则调整。
-- 可单独选择命名思考强度，选择器只展示该模型支持的等级；非推理模型实际使用 `off`。更换命名模型时恢复为继承，避免把旧模型的等级套到新模型。
-- 复用 Pi 已配置的认证、服务商和代理端点，通过 Pi 的统一思考参数适配各模型。独立调用一次辅助请求，不向原对话插入消息，也不会改动主模型或主会话思考等级。自动命名及预览都会额外消耗**命名模型**额度；这部分消耗不计入 Pi 原生会话用量统计。
-- 仅发送当前标题和对话文本片段：每轮用户文本最多 2,000 字符，助手文本最多 1,500 字符；不发送工具结果、思考内容或图片。片段中仍可能含有业务信息，会发送给选定的命名模型服务商。
-- 保护已有手动标题。`/name 自定义标题` 后自动暂停当前会话命名；重新开启需要显式执行 `/auto-name on`。恢复和重载会保留暂停状态及自动标题归属。
-- 新任务开始、切换会话、树导航、重载或退出时取消未完成请求，丢弃迟到结果；30 秒超时或异常时保留原名，并提示失败。Print / JSON 模式不自动调用，避免给批处理及常见子 Agent 额外命名。
-- 会话选择器和右下角标题通过现有改名事件同步更新；终端标题由 Pi 或 Orca 管理，本包不再额外写入。
+`/personal` 是所有功能的管理入口：选择功能后，可启停或进入其设置。上下选择、Enter 确认、Esc 取消。例如：
 
 ```text
-/auto-name          # 查看状态、命名模型和实际思考强度
-/auto-name model    # 从 scoped-models 中选择全局命名模型
-/auto-name thinking # 选择独立思考强度，或恢复继承 Pi 逐模型默认值
-/auto-name preview  # 仅预览建议标题，不改名；工作结束后使用
-/auto-name off      # 暂停当前会话的自动命名，固定现有标题
-/auto-name on       # 恢复当前会话自动命名，下轮结束后生效
-/name 自定义标题    # Pi 原生命令；改名并保护该名称
+/personal → 原位思考强度 → 选择分类模型（Jev / d1-ultra）
+/personal → 自动会话命名 → 选择命名模型
+/personal → 文件路径可点击 → 打开方式
+/personal → 状态栏风格选择 → 预览并选择配色
 ```
 
-模型和思考选择保存在 `~/.pi/agent/auto-session-name.json`（跟随 `PI_CODING_AGENT_DIR`），后续命名请求读取最新配置；选择框中取消不保存，更改配置会取消当前未完成的命名请求。不会修改 Pi 的 `settings.json`。
+默认全部开启。禁用的功能只提供启用入口，不注册其快捷命令和事件。启停保存后自动重载；其他已打开的会话需各自 `/reload`。菜单显示的是功能是否已加载，各功能自身状态通过「查看状态」检查。
 
-```json
-{
-  "model": "openai-codex/gpt-5.6-luna",
-  "thinking": "inherit"
-}
+批量启停可选择「批量功能开关」，或执行 `/personal switches`：空格切换、Enter 保存、Esc 取消。
+
+| 功能 | 作用 |
+| --- | --- |
+| `session-title` | 输入框下方右对齐显示会话名，长标题自动省略，不调用模型 |
+| `auto-session-name` | 工作完成后后台命名，保护手动标题 |
+| `substatusline` | 显示服务商剩余额度和会话 ID |
+| `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
+| `user-message-border` | 为 TUI 普通用户消息添加橙色圆角边框，不修改上下文 |
+| `statusline-style-picker` | 预览并应用 11 套状态栏配色 |
+| `jev-inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex 思考强度 |
+
+`pi config` 管理整个扩展包。下列斜杠命令保留为快捷入口，与 `/personal` 子菜单共用处理逻辑和配置；启停功能不会清除其独立配置。
+
+## 自动会话命名
+
+TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话更新标题。Print / JSON 模式不自动调用。
+
+```text
+/auto-name          # 查看状态、模型和实际思考强度
+/auto-name model    # 从已认证的 scoped-models 中选择命名模型
+/auto-name thinking # 选择独立思考强度，或继承 Pi 逐模型默认值
+/auto-name preview  # 预览建议，不改名；工作结束后使用
+/auto-name off      # 暂停当前会话命名
+/auto-name on       # 恢复当前会话命名
+/name 自定义标题    # Pi 原生命令；手动命名后自动暂停
 ```
 
-`thinking` 可设为 `inherit` 或所选模型支持的 `off`、`minimal`、`low`、`medium`、`high`、`xhigh`、`max`。使用选择器可避免配置不支持的等级。
+- 默认模型为 `gpt-5.6-luna`。不可用时保留原标题，不改用主模型或其他模型。
+- 默认继承 `/settings` 中该模型的默认思考强度，未配置时用 `low`；不是主会话的临时思考等级。更换命名模型后恢复继承。
+- 复用 Pi 认证和代理，不改变主模型或主会话思考强度。配置保存后用于后续命名请求。
+- 仅发送标题和对话文本片段：每轮用户最多 2,000 字符、助手最多 1,500 字符，不发送工具结果、思考或图片。文本仍可能包含业务信息。
+- 命名及预览额外消耗所选模型额度，不计入 Pi 原生会话用量统计。
+- 30 秒超时或失败时保留原名；新任务、会话切换、树导航、重载和退出会取消未完成请求。
 
-全局关闭用 `/personal` 中的「自动会话命名」。关闭不会撤销已有标题。此功能只负责命名，未移植参考插件的闲置归档功能，也不绑定 Codex 专有模型。
+## 自动思考强度
 
-### substatusline
+适用于 `openai-codex-responses` 接口的 GPT-6 系列，且 thinking 不为 `off`。需要 OpenRouter 认证和 `openai-codex` 登录。
 
-在 Pi 状态栏显示当前模型服务商的剩余额度和当前会话 ID。
+```bash
+pi --model openai-codex/gpt-6.1-sol --thinking medium
+```
 
-目前支持：
+```text
+/effort                # 查看分类模型和当前分支的最近决策
+/effort model          # 选择并保存；Esc 取消
+/effort model jev      # 使用 Jev（默认）
+/effort model d1-ultra # 使用 d1-ultra
+/effort test           # 用固定公开样例测试，不改强度或会话决策
+```
 
-- `openai-codex`：显示周额度剩余比例。
-- `zai-coding-cn`：显示 5 小时和周额度剩余比例。
+| 选择 | OpenRouter 模型 ID |
+| --- | --- |
+| `jev` | `~typesafe/jev-latest` |
+| `d1-ultra` | `liquid/d1-ultra` |
 
-额度会在会话启动、切换模型、Agent 完成工作以及定时器触发时刷新。
+分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。通过 `configuration_update` 调整强度，顶层 thinking 保持基线，以保留缓存前缀。状态栏显示实际强度及最近尝试的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；Pi 自带的 thinking 显示仅反映基线。
 
-### clickable-paths
+- 切换从下一条尚未分类的用户消息生效，无需重载；其他会话和子代理的后续分类也读取全局选择。工作中不能切换或测试。
+- 每条新用户消息分类一次，包括 steer 和 follow-up；工具续调和重试不重复分类。决策跟随分支，恢复、fork、树导航和压缩后保持原结果。
+- 发送当前请求和近期对话文本，内容预算合计 16,000 字符；不发送系统规则、工具结果、思考或图片数据。文本可能包含业务信息，分类会增加等待时间并消耗服务额度。
+- 15 秒超时、服务不可用、结果无效或 `probabilities[choice] < 0.5` 时沿用当前强度，不切换分类模型。取消不记录决策，空白输入不调用。配置无效时提示，可用 `/effort model` 修复。
+- 复用 Pi 原生 classifier、OpenRouter 认证及代理。d1-ultra 是付费模型，价格以 [OpenRouter 端点信息](https://openrouter.ai/api/v1/models/liquid/d1-ultra/endpoints)为准。
+- OpenRouter 白名单需放行实际服务商及模型。`Latest` 别名还需放行解析后的固定版本，否则可能被 Guardrail 拦截。
+- 子代理需加载本扩展，角色 thinking 作为基线；外部 CLI 代理不经过本扩展。
+- `configuration_update` 不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响。请求无法与上下文对齐时不注入，并显示「未调整」。
 
-把 Pi 消息中的真实本地文件路径转换成终端可点击链接，支持定位到行号和列号。
-
-命令：
+## 路径链接与状态栏
 
 ```text
 /clickable-paths
@@ -93,173 +102,32 @@
 /clickable-paths off
 /clickable-paths editor <vscode|vscode-insiders|cursor|windsurf|file>
 /clickable-paths bare <on|off>
+
+/statusline-style     # 预览并选择配色，应用后自动重载
+/statusline-style 11  # 按编号选择
 ```
 
-配置保存在：
+配色选择器需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含状态栏本体。额度显示支持 `openai-codex` 周额度，以及 `zai-coding-cn` 的 5 小时和周额度。
 
-```text
-~/.pi/agent/clickable-paths.json
-```
+## 配置文件
 
-### user-message-border
+默认位于 `~/.pi/agent/`：
 
-给对话区的普通用户消息加一圈细橙色线框（`#D99A52`），保留正文原有底色、文字颜色、Markdown 高亮和可点击链接。不修改会话记录或模型上下文，也不改变 AI 回答、工具输出和输入框。
+| 文件 | 内容 |
+| --- | --- |
+| `personal-extensions.json` | 七项功能的布尔开关 |
+| `auto-session-name.json` | 命名模型 `model` 和思考设置 `thinking` |
+| `jev-inline-effort.json` | 分类模型：`{"model":"jev"}` 或 `{"model":"d1-ultra"}` |
+| `clickable-paths.json` | 路径链接设置 |
+| `pi-statusline.json` | 状态栏配色 |
 
-- 加载后自动生效，历史消息重新渲染时同样带框。
-- 使用带 `user` 标题的圆角细线框 `╭─╮│╰─╯`；边框和正文统一使用主题的 `userMessageBg` 背景。正文按可用宽度减两列重新排版，保留原生左右内边距、Markdown 和链接转换，上下边框替换原有空白行，不额外增加高度。宽度不足 8 列时回退原生显示。字符线条仍有字形留隙，显示效果受终端字体影响。
-- 仅在 TUI 模式启用；技能调用的折叠说明块等其他组件不加框。
-- pi 暂无普通用户消息的边框接口，因此扩展临时包装 `UserMessageComponent` 的渲染方法，重载或退出时清理。升级 pi 后建议运行测试验证兼容性。
-
-### Jev 原位思考强度
-
-主会话和子代理直接使用物理模型（如 `openai-codex/gpt-6.1-sol`）。Jev 分类器为每条新用户消息选择思考强度，并通过 OpenAI Responses 的 `configuration_update` 输入项生效。请求顶层的 `reasoning.effort` 始终保持 Pi 当前 thinking 设置，请求前缀不变，prompt cache 和 WebSocket 增量续接都不受影响。
-
-```bash
-pi --model openai-codex/gpt-6.1-sol --thinking medium
-```
-
-- 适用范围：`openai-codex-responses` 接口的 GPT-6 系列模型，且 thinking 不为 `off`。其他模型不做任何改动。
-- 顶层 thinking 是基线。建议设为 `medium`，由 update 向两侧调整。实测中途切换只移动约 50%～66% 的推理量差距，首条消息前的 update 接近完整生效；本功能不会为了极限强度改动顶层档位。
-- 每条新用户消息调用一次 OpenRouter 的 `~typesafe/jev-latest` 分类器，可选 `low`、`medium`、`high`、`xhigh`、`max`。steer 和 follow-up 追加的用户消息也会重新分类；扩展消息、`!` 命令输出和摘要不分类。工具续调和重试不重复分类。
-- 分类器接收当前请求和近期对话文本，合计最多 16,000 字符，不接收工具结果、思考内容或图片数据；图片只用文字标记。分类调用会增加首个响应前的等待时间，并消耗分类服务额度。
-- 每次决策以会话记录保存，锚定到对应用户消息的时间戳，并跟随当前分支。重载、恢复、fork 和 `/tree` 后，每次请求都在相同位置重建 update，保证历史前缀一致。只在强度变化处插入，两条 update 不会相邻。
-- 压缩后，压缩摘要前会补一条 update，承接被压掉的最后一次决策；本轮中途压缩时，强度也不会回落到基线。
-- 分类不可用、结果无效或置信度低于 `0.5` 时，沿用当前生效强度；取消请求时不记录决策。
-- 状态栏显示实际生效的强度，例如 `🧠 xhigh · 基线 medium`。Pi 自带的思考显示和响应中报告的 `reasoning.effort` 都只反映顶层基线。请求与上下文无法对齐时，本次不注入，状态栏显示 `🧠 medium · 未调整`。
-- OpenAI 的约束：`configuration_update` 只改变 effort，不能与服务端自动压缩、自动截断或 `/responses/compact` 一起使用。Pi 的压缩在客户端完成，不受影响。
-- 需要配置 OpenRouter Jev 分类器，并登录 `openai-codex`。通过 `/personal` 中的「Jev 原位思考强度」启用或关闭。
-
-#### 子代理
-
-子代理会话加载本扩展后，Jev 根据子任务在首条消息前插入强度，效果接近直接设置顶层强度。默认扩展发现机制可以加载它；受限扩展列表必须包含本包入口。基础模型按角色在 `settings.json` 中固定：
-
-```json
-{
-  "subagents": {
-    "defaultModel": "openai-codex/gpt-6.1-sol",
-    "defaultThinking": "medium",
-    "agentOverrides": {
-      "scout": { "model": "openai-codex/gpt-6-luna" }
-    }
-  }
-}
-```
-
-角色定义中的 `thinking` 作为该子会话的基线。`claude-code`、`codex-exec` 等外部 CLI 代理使用各自适配器，不经过本扩展。
-
-旧会话如果选择过已移除的 `jev/*` 虚拟模型，恢复时由 Pi 回退到最后应答的物理模型；`personal-extensions.json` 中的 `jev-auto` 开关会被忽略。
-
-### statusline-style-picker
-
-预览并应用 11 套状态栏配色，保留原有 `/statusline-style` 命令：
-
-```text
-/statusline-style
-/statusline-style 11
-/statusline-style Claude 暖纸
-```
-
-该功能是配色选择器，**不包含状态栏本体**，需要另外启用 `npm:@narumitw/pi-statusline`。配置继续写入 `~/.pi/agent/pi-statusline.json`（支持 `PI_AGENT_DIR`），应用后自动重载。
-
-## 从独立扩展迁移
-
-安装本包后，移除以前单独安装的功能路径，避免重复注册。曾直接放在 `~/.pi/agent/extensions/` 下的同名扩展也需移出自动发现目录；需要删除时请放入废纸篓。
-
-旧版包过滤器（如 `-extensions/clickable-paths.ts`）不再控制内部功能，请将选择迁移到 `/personal`。更换本地包路径时，先移除旧路径再安装新路径，保留原有功能配置文件。
-
-`terminal-title` 功能已移除。旧配置中的同名开关会被忽略，无需手动清理；下次通过 `/personal` 修改并保存配置时会移除该键。自动会话命名和右下角标题显示不受影响。
-
-## 独立 Pi 包
-
-[`packages/pi-impeccable`](packages/pi-impeccable/README.md) 提供 Impeccable 的 Pi 原生集成，包含完整设计技能、24 个命令、检测钩子和 Live 工作流。该包单独安装，不加入 `/personal` 开关。
-
-## 本地开发
-
-需要 Pi 1.0.1 或更新版本。命名请求通过 `normalizeContext()` 将系统规则转换为服务商接口需要的消息格式。
-
-安装依赖并检查类型：
-
-```bash
-npm install --ignore-scripts
-npm run check
-```
-
-将当前目录作为全局 Pi Package 安装：
-
-```bash
-pi install "$(pwd)"
-```
-
-修改扩展后，在正在运行的 Pi 中执行：
-
-```text
-/reload
-```
-
-查看或调整整个扩展的启用状态（内部功能用 `/personal`）：
-
-```bash
-pi list
-pi config
-```
-
-卸载本地包：
-
-```bash
-pi remove "$(pwd)"
-```
-
-## 通过 Git 安装
-
-推送到 GitHub 后可以直接安装：
-
-```bash
-pi install git:github.com/<用户名>/pi-personal-extensions
-```
-
-安装指定版本：
-
-```bash
-pi install git:github.com/<用户名>/pi-personal-extensions@v0.1.0
-```
-
-## 发布到 npm
-
-1. 删除 `package.json` 中的 `"private": true`。
-2. 确认包名可用，必要时改成 npm scope 包名。
-3. 更新 `version` 和 `CHANGELOG.md`。
-4. 执行 `npm run check`。
-5. 执行 `npm publish`。
-
-发布后安装：
-
-```bash
-pi install npm:pi-personal-extensions
-```
+前四项跟随 `PI_CODING_AGENT_DIR`，配色配置支持 `PI_AGENT_DIR`。配置选择器取消不保存；命名和分类设置不修改 Pi 的 `settings.json`。
 
 ## 项目结构
 
-```text
-.
-├── extensions/
-│   ├── pi-personal-extensions.ts
-│   ├── auto-session-name.ts
-│   ├── auto-session-name-settings.ts
-│   ├── clickable-paths.ts
-│   ├── session-title.ts
-│   ├── statusline-style-picker.ts
-│   ├── substatusline.ts
-│   ├── user-message-border.ts
-│   └── jev-inline-effort.ts
-├── tests/
-│   ├── auto-session-name.test.mjs
-│   ├── personal.test.mjs
-│   ├── session-title.test.mjs
-│   ├── statusline-style-picker.test.mjs
-│   ├── user-message-border.test.mjs
-│   └── jev-inline-effort.test.mjs
-├── CHANGELOG.md
-├── README.md
-├── package.json
-└── tsconfig.json
-```
+- `extensions/`：统一入口及功能实现。
+- `tests/`：功能与回归测试。
+- `package.json`：包声明和开发命令。
+- `CHANGELOG.md`：更新记录。
+
+运行 `npm run check` 检查类型并执行全部测试。用户消息边框依赖 Pi 组件渲染方法，升级 Pi 后应验证兼容性。

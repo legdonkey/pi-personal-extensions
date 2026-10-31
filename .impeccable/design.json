@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T00:00:00Z",
+  "title": "Design System: pi-personal-extensions 讲解页",
+  "extensions": {
+    "colorMeta": {
+      "accent": { "role": "primary", "displayName": "用户消息橙", "canonical": "#d99a52", "tonalRamp": ["#3a230b", "#5e3a13", "#9a5a14", "#c27a2c", "#d99a52", "#e6b67f", "#f1d3ae", "#fbf1e4"] },
+      "link": { "role": "secondary", "displayName": "靛蓝链接", "canonical": "#5b54f0", "tonalRamp": ["#17154a", "#262276", "#3a33b8", "#5b54f0", "#7c76f6", "#9a95ff", "#c9c6ff", "#efeefe"] },
+      "ink": { "role": "neutral", "displayName": "深海军蓝墨", "canonical": "#0a2540", "tonalRamp": ["#0a2540", "#273951", "#50617a", "#5f6e83", "#cfd8e3", "#e3e9f0", "#eef3f8", "#f6f9fc"] },
+      "paper": { "role": "neutral", "displayName": "纸白", "canonical": "#ffffff", "tonalRamp": ["#0b1526", "#101d33", "#16253f", "#1d2c46", "#cfd8e3", "#e3e9f0", "#f6f9fc", "#ffffff"] },
+      "code-bg": { "role": "neutral", "displayName": "代码夜色", "canonical": "#0d1b2e", "tonalRamp": ["#07101e", "#0d1b2e", "#16253f", "#2a3b59", "#50617a", "#8ea3bd", "#c9d4e3", "#dbe6f3"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "只用于封面标题。" },
+      "headline": { "displayName": "Headline", "purpose": "章节标题，手机上 26px。" },
+      "title": { "displayName": "Title", "purpose": "beat 内小节标题。" },
+      "lead": { "displayName": "Lead", "purpose": "章节导语；封面导语 18px。" },
+      "body": { "displayName": "Body", "purpose": "正文，次墨色，手机 15.5px。" },
+      "caption": { "displayName": "Caption", "purpose": "图注、表格、目录项。" },
+      "label": { "displayName": "Label", "purpose": "按钮、chip、播放器文字。" },
+      "code": { "displayName": "Code", "purpose": "代码块；等宽只用于代码与技术值。" }
+    },
+    "shadows": [
+      { "name": "popover", "value": "0 12px 32px -12px rgb(10 37 64 / .25)", "purpose": "窄屏章节下拉菜单，唯一的投影。" },
+      { "name": "seg-underline", "value": "inset 0 -2px 0 var(--accent)", "purpose": "正在朗读句子的橙色下划线。" },
+      { "name": "bar-glass", "value": "backdrop-filter: saturate(1.4) blur(10px)", "purpose": "顶栏与播放器的半透明毛玻璃（播放器 12px）。" }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "朗读高亮、图表 cue、播放键缩放。" },
+      { "name": "cue-fade", "value": "opacity .5s, filter .5s var(--ease-out)", "purpose": "图表元素变暗与点亮。" },
+      { "name": "seg-highlight", "value": "background-color .25s var(--ease-out)", "purpose": "朗读句子高亮切换。" },
+      { "name": "flow", "value": "stroke-dashoffset 0 → -22, 0.9s linear infinite", "purpose": "讲到时连线的流动虚线。" },
+      { "name": "ui-state", "value": ".15s", "purpose": "按钮 hover、复制按钮与「从这里朗读」显隐。" }
+    ],
+    "breakpoints": [
+      { "name": "side-narrow", "value": "1100px" },
+      { "name": "single-column", "value": "920px" },
+      { "name": "phone", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "墨色主按钮，例如「从头朗读全文」。",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"M4 2.5l9 5.5-9 5.5z\" fill=\"currentColor\"/></svg><span>从头朗读全文</span></button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border: 1px solid var(--rule-solid, #cfd8e3); border-radius: 8px; background: var(--paper, #fff); color: var(--ink, #0a2540); font: 600 14px/1 -apple-system, 'PingFang SC', sans-serif; cursor: pointer; transition: background .15s, border-color .15s; } .ds-btn-primary { background: var(--ink, #0a2540); color: var(--paper, #fff); border-color: var(--ink, #0a2540); } .ds-btn-primary:hover { background: var(--ink-2, #273951); } .ds-btn:focus-visible { outline: 2px solid var(--link, #5b54f0); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "描边次按钮，例如「直接阅读」。",
+      "html": "<button class=\"ds-btn2\">直接阅读</button>",
+      "css": ".ds-btn2 { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border: 1px solid var(--rule-solid, #cfd8e3); border-radius: 8px; background: var(--paper, #fff); color: var(--ink, #0a2540); font: 600 14px/1 -apple-system, 'PingFang SC', sans-serif; cursor: pointer; transition: background .15s, border-color .15s; } .ds-btn2:hover { background: var(--paper-2, #f6f9fc); border-color: var(--soft, #5f6e83); } .ds-btn2:focus-visible { outline: 2px solid var(--link, #5b54f0); outline-offset: 2px; }"
+    },
+    {
+      "name": "Dock Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "播放器里的倍速与「跟随滚动」切换。",
+      "html": "<button class=\"ds-chip\">1×</button> <button class=\"ds-chip\" aria-pressed=\"true\">跟随滚动</button>",
+      "css": ".ds-chip { height: 30px; padding: 0 10px; border: 1px solid var(--rule-solid, #cfd8e3); border-radius: 15px; background: var(--paper, #fff); color: var(--muted, #50617a); font: 600 12.5px -apple-system, 'PingFang SC', sans-serif; cursor: pointer; } .ds-chip[aria-pressed=\"true\"] { color: var(--ink, #0a2540); border-color: var(--ink, #0a2540); } .ds-chip:focus-visible { outline: 2px solid var(--link, #5b54f0); outline-offset: 2px; }"
+    },
+    {
+      "name": "TOC Link",
+      "kind": "nav",
+      "refersTo": "toc-link-current",
+      "description": "侧栏章节项：章节名、等宽时长、橙色朗读进度条。",
+      "html": "<ol class=\"ds-toc\"><li><a href=\"#\" aria-current=\"true\"><span>入口与 /personal</span><span class=\"ds-dur\">2:40</span><span class=\"ds-bar\"><i style=\"width:45%\"></i></span></a></li><li><a href=\"#\"><span>用户消息外观</span><span class=\"ds-dur\">3:05</span><span class=\"ds-bar\"><i></i></span></a></li></ol>",
+      "css": ".ds-toc { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; width: 220px; } .ds-toc a { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; padding: 7px 10px; border-radius: 6px; color: var(--muted, #50617a); text-decoration: none; font: 14.5px/1.4 -apple-system, 'PingFang SC', sans-serif; } .ds-toc a:hover { background: var(--paper-2, #f6f9fc); color: var(--ink, #0a2540); } .ds-toc a[aria-current=\"true\"] { background: var(--paper-2, #f6f9fc); color: var(--ink, #0a2540); font-weight: 600; } .ds-dur { font: 12px ui-monospace, monospace; color: var(--soft, #5f6e83); } .ds-bar { grid-column: 1 / -1; height: 2px; background: var(--rule, #e3e9f0); border-radius: 2px; overflow: hidden; } .ds-bar i { display: block; height: 100%; width: 0; background: var(--accent, #d99a52); }"
+    },
+    {
+      "name": "Narration Segment",
+      "kind": "custom",
+      "refersTo": "seg-active",
+      "description": "可点击朗读的句子；正在读时淡杏底加橙色下划线。",
+      "html": "<p class=\"ds-p\"><span class=\"ds-seg\">禁用的功能不注册命令和事件。</span><span class=\"ds-seg is-active\">各功能的快捷命令与 /personal 子菜单共用同一套处理逻辑。</span></p>",
+      "css": ".ds-p { font: 16px/1.75 -apple-system, 'PingFang SC', sans-serif; color: var(--ink-2, #273951); max-width: 32em; } .ds-seg { border-radius: 3px; cursor: pointer; transition: background-color .25s cubic-bezier(0.16,1,0.3,1); box-decoration-break: clone; -webkit-box-decoration-break: clone; } .ds-seg:hover { background: var(--paper-3, #eef3f8); } .ds-seg.is-active { background: var(--accent-tint, #fbf1e4); color: var(--ink, #0a2540); box-shadow: inset 0 -2px 0 var(--accent, #d99a52); }"
+    },
+    {
+      "name": "Figure Panel",
+      "kind": "card",
+      "refersTo": "figure-panel",
+      "description": "beat 右栏的 sticky 图表面板，SVG 使用共享类与 cue 状态。",
+      "html": "<figure class=\"ds-fig\"><svg viewBox=\"0 0 360 120\" width=\"100%\"><rect class=\"ds-n\" x=\"10\" y=\"40\" width=\"110\" height=\"40\" rx=\"6\"/><text class=\"ds-t\" x=\"65\" y=\"65\" text-anchor=\"middle\">/personal</text><path class=\"ds-w ds-flow\" d=\"M120 60H240\"/><rect class=\"ds-n ds-focal\" x=\"240\" y=\"40\" width=\"110\" height=\"40\" rx=\"6\"/><text class=\"ds-t\" x=\"295\" y=\"65\" text-anchor=\"middle\">处理逻辑</text></svg><figcaption>示例：子菜单和快捷命令进入同一处理函数。</figcaption></figure>",
+      "css": ".ds-fig { margin: 0; background: var(--paper-2, #f6f9fc); border: 1px solid var(--rule, #e3e9f0); border-radius: 10px; padding: 12px; } .ds-fig figcaption { margin: 10px 4px 0; padding-top: 10px; border-top: 1px solid var(--rule, #e3e9f0); font: 14.5px/1.7 -apple-system, 'PingFang SC', sans-serif; color: var(--muted, #50617a); } .ds-n { fill: var(--paper, #fff); stroke: var(--rule-solid, #cfd8e3); } .ds-focal { fill: var(--accent-tint, #fbf1e4); stroke: var(--accent, #d99a52); stroke-width: 1.5; } .ds-t { fill: var(--ink, #0a2540); font: 600 14px -apple-system, 'PingFang SC', sans-serif; } .ds-w { fill: none; stroke: var(--accent, #d99a52); stroke-width: 1.5; } .ds-flow { stroke-dasharray: 6 5; animation: ds-flow .9s linear infinite; } @keyframes ds-flow { to { stroke-dashoffset: -22; } } @media (prefers-reduced-motion: reduce) { .ds-flow { animation: none; } }"
+    },
+    {
+      "name": "Progress Rail",
+      "kind": "custom",
+      "refersTo": "play-button",
+      "description": "底部播放器：播放键、进度导轨、章节刻度、上次位置旗标。",
+      "html": "<div class=\"ds-dock\"><button class=\"ds-play\" aria-label=\"开始朗读\"><svg viewBox=\"0 0 16 16\" width=\"18\" height=\"18\"><path d=\"M4 2.5l9 5.5-9 5.5z\" fill=\"currentColor\"/></svg></button><div class=\"ds-rail\" role=\"slider\" tabindex=\"0\" aria-label=\"朗读进度\" aria-valuenow=\"38\"><span class=\"ds-fill\"></span><span class=\"ds-tick\" style=\"left:22%\"></span><span class=\"ds-tick\" style=\"left:55%\"></span><span class=\"ds-flag\" style=\"left:62%\"></span><span class=\"ds-knob\"></span></div><span class=\"ds-time\">4:12</span></div>",
+      "css": ".ds-dock { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; padding: 16px 24px; border-top: 1px solid var(--rule, #e3e9f0); background: var(--paper, #fff); } .ds-play { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--ink, #0a2540); color: var(--paper, #fff); display: grid; place-items: center; cursor: pointer; transition: transform .15s cubic-bezier(0.16,1,0.3,1); } .ds-play:hover { transform: scale(1.05); } .ds-play:active { transform: scale(.96); } .ds-play:focus-visible, .ds-rail:focus-visible { outline: 2px solid var(--link, #5b54f0); outline-offset: 4px; } .ds-rail { position: relative; height: 18px; cursor: pointer; } .ds-rail::before { content: ''; position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-radius: 3px; background: var(--rule, #e3e9f0); } .ds-fill { position: absolute; left: 0; top: 8px; height: 3px; width: 38%; border-radius: 3px; background: var(--accent, #d99a52); } .ds-tick { position: absolute; top: 4px; width: 1px; height: 11px; background: var(--rule-solid, #cfd8e3); } .ds-flag { position: absolute; top: -3px; width: 2px; height: 10px; margin-left: -1px; background: var(--link, #5b54f0); } .ds-knob { position: absolute; top: 3px; left: 38%; width: 13px; height: 13px; margin-left: -6.5px; border-radius: 50%; background: var(--paper, #fff); border: 2px solid var(--accent, #d99a52); } .ds-time { font: 12.5px ui-monospace, monospace; color: var(--muted, #50617a); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Code Block",
+      "kind": "custom",
+      "refersTo": "code-block",
+      "description": "深色代码块，hover 出现复制按钮。",
+      "html": "<pre class=\"ds-pre\"><button class=\"ds-copy\">复制</button><code>pi install npm:pi-personal-extensions</code></pre>",
+      "css": ".ds-pre { position: relative; margin: 0; padding: 14px 16px; background: var(--code-bg, #0d1b2e); color: var(--code-ink, #dbe6f3); border-radius: 8px; overflow-x: auto; font: 13.5px/1.65 ui-monospace, 'SF Mono', Menlo, monospace; } .ds-copy { position: absolute; top: 8px; right: 8px; height: 26px; padding: 0 9px; border: 1px solid rgba(219,230,243,.25); border-radius: 6px; background: var(--code-bg, #0d1b2e); color: var(--code-ink, #dbe6f3); font: 600 12px -apple-system, 'PingFang SC', sans-serif; cursor: pointer; opacity: 0; transition: opacity .15s; } .ds-pre:hover .ds-copy, .ds-copy:focus-visible { opacity: 1; }"
+    },
+    {
+      "name": "Demo Input",
+      "kind": "input",
+      "refersTo": "demo-input",
+      "description": "交互演示里的等宽文本输入。",
+      "html": "<label class=\"ds-label\">候选标题<input class=\"ds-input\" type=\"text\" value=\"实现会话标题\"></label>",
+      "css": ".ds-label { display: grid; gap: 6px; font: 13.5px -apple-system, 'PingFang SC', sans-serif; color: var(--muted, #50617a); max-width: 320px; } .ds-input { font: 14px ui-monospace, monospace; padding: 7px 10px; border: 1px solid var(--rule-solid, #cfd8e3); border-radius: 6px; background: var(--paper, #fff); color: var(--ink, #0a2540); } .ds-input:focus-visible { outline: 2px solid var(--link, #5b54f0); outline-offset: 1px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "朗读驱动的技术手册",
+    "overview": "这是一份照标准技术文档的路子做的讲解页，标杆是 Stripe Docs：白底、深海军蓝墨色、浅蓝灰面板、细线分隔。页面不靠装饰取胜，靠的是左文右图的双栏节拍：左栏是短段落，右栏是 sticky 的 SVG 图表或真实 Pi 录屏。朗读把两栏串起来，读到哪一句，那句文字就高亮，右侧图表对应的元素就点亮，其余元素变暗。\n\n整体密度偏「阅读型」：正文 16px、行高 1.75，段落短，标题字距收紧。版面全宽，不设版心，靠栏宽比例和流式内边距控制行长。唯一的暖色是项目自身用户消息边框的橙色，它只用来标示「正在讲的、焦点的、进度」，其余全部是冷灰蓝中性色。深色模式整体换成深海军蓝底，保持同一套角色映射。",
+    "keyCharacteristics": [
+      "左文右图的 beat 双栏（0.76fr / 1.24fr），图栏 sticky。",
+      "单一橙色强调，来自 `user-message-border` 扩展的终端前景色 rgb(217,154,82)。",
+      "系统中文无衬线做全部文字，等宽只用于代码和技术标签。",
+      "朗读状态驱动图表：未讲到变暗，讲到点亮或播放动画。",
+      "底部常驻播放器，顶栏与播放器都是半透明毛玻璃。",
+      "浅色、深色、跟随系统三态，`[data-theme]` 手动覆盖 `prefers-color-scheme`。"
+    ],
+    "rules": [
+      { "name": "The One Warm Voice Rule", "body": "页面里只有橙色一种暖色，它只表示「正在讲 / 焦点 / 进度」。不要把橙色用作装饰底色或第二个品牌色。", "section": "colors" },
+      { "name": "The Same Orange Rule", "body": "accent 必须与 `user-message-border` 扩展的终端色保持一致；扩展改色，讲解页随之改。", "section": "colors" },
+      { "name": "The Role Not Hex Rule", "body": "所有组件只引用 `var(--paper)`、`var(--ink)` 等角色变量；深色模式通过 `:root[data-theme=\"dark\"]` 和 `@media (prefers-color-scheme: dark) { :root:not([data-theme=\"light\"]) }` 两处同值重定义切换，两处必须同步修改。", "section": "colors" },
+      { "name": "The Mono Means Code Rule", "body": "等宽字体只出现在代码、命令、路径、配置键、时长和数值上。中文说明文字一律用无衬线。", "section": "typography" },
+      { "name": "The Keep-All Rule", "body": "标题和目录项使用 `word-break: keep-all; overflow-wrap: anywhere`，中文标题不在词中间断行。", "section": "typography" },
+      { "name": "The Text Left, Figure Right Rule", "body": "讲解单元一律是左文右图的 beat；不要改成卡片网格或纯文字长文。", "section": "layout" },
+      { "name": "The No Max-Width Rule", "body": "不给页面或主区设固定版心宽度；行长由栏比例控制。封面录屏是唯一的上限（980px）。", "section": "layout" },
+      { "name": "The Flat Paper Rule", "body": "面板靠底色和细线区分，不加投影。投影只给脱离文档流的临时浮层。", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** 每个讲解单元都用左文右图的 beat（0.76fr / 1.24fr），图栏 sticky 在顶栏下 20px。",
+      "**Do** 只通过角色变量取色，并在 `[data-theme=\"dark\"]` 和 `prefers-color-scheme` 两处同步定义深色值。",
+      "**Do** 给每个 SVG 元素绑定 `data-cue`，复用 `.n` `.t` `.w` 等共享类，不在图里另起配色（模拟终端画面的固定前景/背景色除外）。",
+      "**Do** 把橙色留给「正在讲 / 焦点 / 进度」；链接和焦点外框用靛蓝。",
+      "**Do** 代码、命令、路径和数值用等宽字体，说明文字用系统中文无衬线。",
+      "**Do** 在 `prefers-reduced-motion` 下取消动画，并让所有 cue 元素保持可见。"
+    ],
+    "donts": [
+      "**Don't** 给页面设固定版心宽度。",
+      "**Don't** 把讲解内容改成卡片网格或不配图的纯文字长文。",
+      "**Don't** 引入第二种暖色或强调色，也不要让 accent 偏离 `user-message-border` 的 rgb(217,154,82)。",
+      "**Don't** 给面板加常驻投影；层次靠 paper 色阶和 1px 细线。",
+      "**Don't** 用 soft 色排正文或必读说明；它在白底上的对比度不足 3:1，只适合辅助标注。"
+    ]
+  }
+}

@@ -1,0 +1,549 @@
+<section class="chapter" id="ch-effort" data-chapter="effort" aria-labelledby="ch-effort-h">
+  <header class="chapter-head">
+    <h2 id="ch-effort-h">原位思考强度：按消息选档位</h2>
+    <p class="chapter-sum">按每条新用户消息调整 GPT-6 系列的思考档位。顶层参数保持基线，档位写进 input 里这条消息的位置。</p>
+    <dl class="meta">
+      <dt>功能 ID</dt><dd><code>jev-inline-effort</code></dd>
+      <dt>命令</dt><dd><code>/effort</code></dd>
+      <dt>配置</dt><dd>默认 <code>~/.pi/agent/jev-inline-effort.json</code>，目录跟随 <code>PI_CODING_AGENT_DIR</code></dd>
+      <dt>分类器</dt><dd>Jev（默认）· d1-ultra</dd>
+    </dl>
+  </header>
+
+  <!-- 1. 什么时候分类 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>什么时候分类</h3>
+      <p>
+        <span class="seg" data-seg="effort-01" data-say="不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、x high、max 五档里选。">不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、xhigh、max 五档里选。</span>
+        <span class="seg" data-seg="effort-02" data-say="看图。接口是 openai codex responses，模型属于 GPT 六系列，thinking 不是 off，三个条件都满足叫适用。不适用就不分类。">接口是 <code>openai-codex-responses</code>，模型属于 GPT-6 系列，thinking 不是 <code>off</code>，三个条件都满足叫适用。不适用就不分类。</span>
+        <span class="seg" data-seg="effort-03">空白输入不调用分类器，沿用当前强度。当前强度是当前分支最近一次决策；没有决策就用基线，也就是 Pi 的 thinking 设置。</span>
+        <span class="seg" data-seg="effort-04">非空才调用分类器，最多等 15 秒。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 324" role="img" aria-labelledby="fig-effort-1-title fig-effort-1-desc">
+          <title id="fig-effort-1-title">分类前的两道检查</title>
+          <desc id="fig-effort-1-desc">新用户消息先检查接口、模型和 thinking 是否适用，不适用就不分类；适用时再检查文本，空白就沿用当前强度，非空才调用分类器。</desc>
+          <defs>
+            <marker id="fig-effort-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <g data-cue="effort-01">
+            <rect class="n" x="240" y="16" width="160" height="44" rx="6"/>
+            <text class="t" x="320" y="36" text-anchor="middle">新用户消息</text>
+            <text class="t-sub" x="320" y="52" text-anchor="middle">每条只分类一次</text>
+          </g>
+
+          <g data-cue="effort-02">
+            <line class="w" x1="320" y1="60" x2="320" y2="82" marker-end="url(#fig-effort-1-arrow)"/>
+            <line class="w" x1="240" y1="112" x2="206" y2="112" marker-end="url(#fig-effort-1-arrow)"/>
+            <rect class="mask" x="212" y="88" width="20" height="16" rx="2"/>
+            <text class="t-cap" x="222" y="100" text-anchor="middle">否</text>
+            <text class="t-cap" x="198" y="108" text-anchor="end">不分类</text>
+            <text class="t-cap" x="198" y="126" text-anchor="end">请求原样发出</text>
+            <polygon class="n" points="320,84 400,112 320,140 240,112"/>
+            <text class="t" x="320" y="117" text-anchor="middle">适用？</text>
+            <text class="t-sub" x="412" y="106">openai-codex-responses</text>
+            <text class="t-sub" x="412" y="124">GPT-6 系列 · thinking ≠ off</text>
+          </g>
+
+          <g data-cue="effort-03">
+            <line class="w" x1="320" y1="140" x2="320" y2="166" marker-end="url(#fig-effort-1-arrow)"/>
+            <rect class="mask" x="328" y="144" width="20" height="16" rx="2"/>
+            <text class="t-cap" x="338" y="156" text-anchor="middle">是</text>
+            <line class="w" x1="400" y1="196" x2="462" y2="196" marker-end="url(#fig-effort-1-arrow)"/>
+            <rect class="mask" x="414" y="172" width="32" height="16" rx="2"/>
+            <text class="t-cap" x="430" y="184" text-anchor="middle">空白</text>
+            <polygon class="n" points="320,168 400,196 320,224 240,196"/>
+            <text class="t" x="320" y="201" text-anchor="middle">文本空白？</text>
+            <rect class="n" x="464" y="168" width="160" height="56" rx="6"/>
+            <text class="t" x="544" y="192" text-anchor="middle">沿用当前强度</text>
+            <text class="t-cap" x="544" y="210" text-anchor="middle">最近决策，否则基线</text>
+          </g>
+
+          <g data-cue="effort-04">
+            <line class="w" x1="320" y1="224" x2="320" y2="254" marker-end="url(#fig-effort-1-arrow)"/>
+            <rect class="mask" x="328" y="230" width="32" height="16" rx="2"/>
+            <text class="t-cap" x="344" y="242" text-anchor="middle">非空</text>
+            <rect class="n is-ext" x="224" y="256" width="192" height="52" rx="6"/>
+            <text class="t" x="320" y="278" text-anchor="middle">分类器</text>
+            <text class="t-sub" x="320" y="296" text-anchor="middle">Jev 或 d1-ultra · 15 秒</text>
+          </g>
+        </svg>
+      </div>
+      <ul class="fig-notes">
+        <li>不再分类：工具续调、重试、自定义消息、bash 命令输出。steer 和 follow-up 追加的用户消息算新消息。</li>
+        <li>分类器：Jev（<code>~typesafe/jev-latest</code>，默认）或 d1-ultra（<code>liquid/d1-ultra</code>，付费），只回答 <code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。</li>
+        <li>只发对话文本，不发系统提示词、工具结果、思考块和图片数据（图片换成「[附有图片]」）。</li>
+        <li>对话内容预算按 UTF-16 单元计：当前请求最多 12000，近期最多 6 条用户或助手消息、最多 8000，合计不超过 16000；另加固定提示语和分类规则。</li>
+        <li>前提：OpenRouter 认证和 <code>openai-codex</code> 登录。功能不替换主模型。</li>
+      </ul>
+      <figcaption>虚线框是外部服务（OpenRouter）。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 2. 分类结果怎么用 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>分类结果怎么用</h3>
+      <p>
+        <span class="seg" data-seg="effort-05">分类正常完成、档位有效，且概率是 0.5 到 1 之间的有限数，这叫结果合格。结果合格，扩展就采用这个档位。</span>
+        <span class="seg" data-seg="effort-06">超时、出错或响应无法解析时，扩展沿用当前强度并警告。结果不合格时也沿用，但不警告。</span>
+        <span class="seg" data-seg="effort-07">两种情况都写入决策；用户取消时不写。</span>
+        <span class="seg" data-seg="effort-08">多条新消息只分类一次，结果写给每一条。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 320" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
+          <title id="fig-effort-2-title">分类结果的去向</title>
+          <desc id="fig-effort-2-desc">分类结果合格就采用该档位，不合格或出错就沿用当前强度；两条路都写入决策，用户取消时不写；多条新消息只分类一次、各写一条。</desc>
+          <defs>
+            <marker id="fig-effort-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+            <marker id="fig-effort-2-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--accent)"/></marker>
+          </defs>
+
+          <line class="w" x1="320" y1="60" x2="320" y2="78" marker-end="url(#fig-effort-2-arrow)"/>
+          <rect class="n is-ext" x="224" y="16" width="192" height="44" rx="6"/>
+          <text class="t" x="320" y="36" text-anchor="middle">分类器返回</text>
+          <text class="t-sub" x="320" y="52" text-anchor="middle">档位 + 概率</text>
+
+          <g data-cue="effort-05">
+            <line class="w is-accent" x1="320" y1="144" x2="320" y2="172" marker-end="url(#fig-effort-2-arrow-accent)"/>
+            <rect class="mask" x="328" y="150" width="20" height="16" rx="2"/>
+            <text class="t-cap" x="338" y="162" text-anchor="middle">是</text>
+            <polygon class="n" points="320,80 408,112 320,144 232,112"/>
+            <text class="t" x="320" y="111" text-anchor="middle">结果合格？</text>
+            <text class="t-sub" x="320" y="128" text-anchor="middle">0.5 ≤ p ≤ 1</text>
+            <rect class="n is-focal" x="240" y="176" width="160" height="48" rx="6"/>
+            <text class="t" x="320" y="198" text-anchor="middle">采用该档位</text>
+            <text class="t-sub" x="320" y="214" text-anchor="middle">low … max</text>
+          </g>
+
+          <g data-cue="effort-06">
+            <line class="w" x1="408" y1="112" x2="462" y2="112" marker-end="url(#fig-effort-2-arrow)"/>
+            <rect class="mask" x="424" y="88" width="20" height="16" rx="2"/>
+            <text class="t-cap" x="434" y="100" text-anchor="middle">否</text>
+            <rect class="n" x="464" y="84" width="160" height="56" rx="6"/>
+            <text class="t" x="544" y="108" text-anchor="middle">沿用当前强度</text>
+            <text class="t-cap" x="544" y="126" text-anchor="middle">超时 · 出错 · 不合格</text>
+            <text class="t-cap" x="556" y="172">出错时警告</text>
+          </g>
+
+          <g data-cue="effort-07">
+            <line class="w" x1="320" y1="224" x2="320" y2="254" marker-end="url(#fig-effort-2-arrow)"/>
+            <path class="w" d="M544 140 V272 Q544 280 536 280 H402" marker-end="url(#fig-effort-2-arrow)"/>
+            <rect class="n" x="240" y="256" width="160" height="48" rx="6"/>
+            <text class="t" x="320" y="278" text-anchor="middle">写入决策</text>
+            <text class="t-sub" x="320" y="294" text-anchor="middle">按消息时间戳</text>
+            <line class="w is-dash" x1="224" y1="38" x2="194" y2="38" marker-end="url(#fig-effort-2-arrow)"/>
+            <rect class="n is-ghost" x="24" y="14" width="168" height="48" rx="6"/>
+            <text class="t" x="108" y="34" text-anchor="middle">用户取消</text>
+            <text class="t-cap" x="108" y="52" text-anchor="middle">不写决策</text>
+          </g>
+
+          <g data-cue="effort-08">
+            <text class="t-cap" x="228" y="274" text-anchor="end">多条新消息：</text>
+            <text class="t-cap" x="228" y="292" text-anchor="end">分类一次，各写一条</text>
+          </g>
+        </svg>
+      </div>
+      <ul class="fig-notes">
+        <li>「合格」：分类正常完成，档位在五档之内，所选档位的概率是 0.5 到 1 之间的有限数。</li>
+        <li>多条新消息时，扩展按最后一条用户消息分类。</li>
+        <li>警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请用 /effort model 或 /effort test 检查。</code></li>
+        <li>分类进行中如果切换了会话或模型，迟到的结果不写入。</li>
+      </ul>
+    </figure>
+  </div>
+
+  <!-- 3. 为什么不改顶层参数 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>为什么不改顶层参数</h3>
+      <p>
+        <span class="seg" data-seg="effort-09" data-say="Pi 每次请求前，都按当前上下文构造完整的 input 列表。基线写在请求顶层的 reasoning 点 effort 字段。">Pi 每次请求前，都按当前上下文构造完整的 input 列表。基线写在请求顶层的 <code>reasoning.effort</code> 字段。</span>
+        <span class="seg" data-seg="effort-10">新请求开头里和上一次请求相同的部分，叫缓存前缀。服务端复用缓存前缀的机制叫 prompt cache。README 的设计目标是保留缓存前缀，让 prompt cache 生效。</span>
+        <span class="seg" data-seg="effort-11" data-say="看图。如果直接改顶层，请求 2 从顶层字段起就和请求 1 不同。Pi 的 WebSocket 增量续传也要求 input 和 previous response id 以外的字段不变，否则发送完整 input。">如果直接改顶层，请求 2 从顶层字段起就和请求 1 不同。Pi 的 WebSocket 增量续传也要求 <code>input</code> 和 <code>previous_response_id</code> 以外的字段不变，否则发送完整 input。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 560 268" role="img" aria-labelledby="fig-effort-3-title fig-effort-3-desc">
+          <title id="fig-effort-3-title">改不改顶层参数：请求 2 的开头对比</title>
+          <desc id="fig-effort-3-desc">示例：请求 1 顶层是 medium。请求 2 顶层不变时，开头 medium、U1 与请求 1 相同，是缓存前缀；请求 2 把顶层改成 xhigh 时，从顶层字段起就不同，整条色条是红色。</desc>
+
+          <text class="t-cap" x="134" y="18" text-anchor="middle">顶层 effort</text>
+          <text class="t-cap" x="200" y="18">input 列表（按顺序）</text>
+
+          <g data-cue="effort-09">
+            <text class="t-sub" x="16" y="53">请求 1</text>
+            <rect class="n" x="80" y="32" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="53" text-anchor="middle">medium</text>
+            <rect class="n" x="200" y="32" width="64" height="32" rx="4"/><text class="t-mono" x="232" y="53" text-anchor="middle">U1</text>
+          </g>
+          <rect data-cue="effort-09" data-cue-mode="active" x="76" y="28" width="116" height="40" rx="6" style="fill:none;stroke:var(--ink);stroke-width:1.5;stroke-dasharray:5 4"/>
+
+          <g data-cue="effort-10">
+            <text class="t-sub" x="16" y="101">请求 2</text>
+            <rect class="n" x="80" y="80" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="101" text-anchor="middle">medium</text>
+            <rect class="n" x="200" y="80" width="64" height="32" rx="4"/><text class="t-mono" x="232" y="101" text-anchor="middle">U1</text>
+            <rect class="n" x="272" y="80" width="64" height="32" rx="4"/><text class="t-mono" x="304" y="101" text-anchor="middle">A1</text>
+            <rect class="n" x="344" y="80" width="64" height="32" rx="4"/><text class="t-mono" x="376" y="101" text-anchor="middle">U2</text>
+            <text class="t-cap" x="420" y="101">顶层不变</text>
+            <rect x="80" y="120" width="184" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="184" dur="0.8s" begin="indefinite" fill="freeze"/>
+            </rect>
+            <rect x="272" y="120" width="136" height="6" rx="2" style="fill:var(--soft)"/>
+            <text class="t-cap" x="80" y="146">缓存前缀：与请求 1 相同</text>
+            <text class="t-cap" x="272" y="146">新增</text>
+          </g>
+
+          <g data-cue="effort-11">
+            <text class="t-sub" x="16" y="189">请求 2</text>
+            <rect x="80" y="168" width="108" height="32" rx="4" style="fill:var(--paper);stroke:var(--danger);stroke-width:1.5"/><text class="t-mono" x="134" y="189" text-anchor="middle">xhigh</text>
+            <rect class="n" x="200" y="168" width="64" height="32" rx="4"/><text class="t-mono" x="232" y="189" text-anchor="middle">U1</text>
+            <rect class="n" x="272" y="168" width="64" height="32" rx="4"/><text class="t-mono" x="304" y="189" text-anchor="middle">A1</text>
+            <rect class="n" x="344" y="168" width="64" height="32" rx="4"/><text class="t-mono" x="376" y="189" text-anchor="middle">U2</text>
+            <text class="t-cap" x="420" y="189">改顶层</text>
+            <rect x="80" y="208" width="328" height="6" rx="2" style="fill:var(--danger)">
+              <animate attributeName="width" from="0" to="328" dur="0.9s" begin="indefinite" fill="freeze"/>
+            </rect>
+            <text class="t-cap" x="80" y="234">从顶层字段起就和请求 1 不同</text>
+            <text class="t-cap" x="80" y="254">WebSocket 增量续传不成立：发送完整 input</text>
+          </g>
+        </svg>
+      </div>
+      <ul class="fig-notes">
+        <li>色条：绿色是与上一次请求相同的开头（缓存前缀），红色是从第一处不同开始的部分，灰色是新增部分。</li>
+        <li>仓库只验证请求怎样构造，没有验证服务端 prompt cache 的命中规则。</li>
+        <li>WebSocket 增量续传（传输方式 <code>auto</code> 或 <code>websocket-cached</code>）的前提：当前连接保留着上次的续传状态和响应 ID；除 <code>input</code>、<code>previous_response_id</code> 外其余字段一致；新 input 以「上次 input + 上次响应」开头。满足时只发新增部分。</li>
+      </ul>
+      <figcaption>示例。U 是用户消息，A 是助手回复（含工具调用）。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 4. 插入 configuration_update -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>插入 configuration_update</h3>
+      <p>
+        <span class="seg" data-seg="effort-12" data-say="扩展让顶层保持基线，在当前用户消息前插入一个 configuration update 项，只写新档位。档位写在 input 里这条消息的位置上，这就是原位。">扩展让顶层保持基线，在当前用户消息前插入一个 <code>configuration_update</code> 项，只写新档位。档位写在 input 里这条消息的位置上，这就是「原位」。</span>
+        <span class="seg" data-seg="effort-13">决策按消息时间戳存在会话里。模型、基线和已有上下文不变时，下一次请求在同样位置插入同样的项，开头逐项不变。</span>
+        <span class="seg" data-seg="effort-14">档位和当前强度相同时，扩展不插入。档位回到基线时，扩展也要插入一项，抵消之前那一项。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 656 236" role="img" aria-labelledby="fig-effort-4-title fig-effort-4-desc">
+          <title id="fig-effort-4-title">插入 configuration_update：请求开头的对比</title>
+          <desc id="fig-effort-4-desc">示例：顶层一直是 medium。请求 2 在 U2 前插入 xhigh 的 update，开头等于请求 1；请求 3 在 U3 前插入 medium 的 update，开头等于整个请求 2。</desc>
+
+          <text class="t-cap" x="134" y="18" text-anchor="middle">顶层 effort</text>
+          <text class="t-cap" x="200" y="18">input 列表（按顺序）</text>
+
+          <text class="t-sub" x="16" y="53">请求 1</text>
+          <rect class="n" x="80" y="32" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="53" text-anchor="middle">medium</text>
+          <rect class="n" x="200" y="32" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="53" text-anchor="middle">U1</text>
+
+          <g data-cue="effort-12">
+            <text class="t-sub" x="16" y="101">请求 2</text>
+            <rect class="n" x="80" y="80" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="101" text-anchor="middle">medium</text>
+            <rect class="n" x="200" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="101" text-anchor="middle">U1</text>
+            <rect class="n" x="264" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="292" y="101" text-anchor="middle">A1</text>
+            <rect class="n is-focal" x="328" y="80" width="56" height="32" rx="4"/>
+            <text class="t-sub" x="356" y="93" text-anchor="middle">update</text><text class="t-mono" x="356" y="107" text-anchor="middle">xhigh</text>
+            <rect class="n" x="392" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="420" y="101" text-anchor="middle">U2</text>
+            <rect x="80" y="120" width="176" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="176" dur="0.8s" begin="indefinite" fill="freeze"/>
+            </rect>
+            <rect x="264" y="120" width="184" height="6" rx="2" style="fill:var(--soft)"/>
+            <text class="t-cap" x="80" y="146">与请求 1 相同</text>
+            <text class="t-cap" x="264" y="146">新增</text>
+          </g>
+
+          <g data-cue="effort-13">
+            <text class="t-sub" x="16" y="181">请求 3</text>
+            <rect class="n" x="80" y="160" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="181" text-anchor="middle">medium</text>
+            <rect class="n" x="200" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="181" text-anchor="middle">U1</text>
+            <rect class="n" x="264" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="292" y="181" text-anchor="middle">A1</text>
+            <rect class="n" x="328" y="160" width="56" height="32" rx="4"/>
+            <text class="t-sub" x="356" y="173" text-anchor="middle">update</text><text class="t-mono" x="356" y="187" text-anchor="middle">xhigh</text>
+            <rect class="n" x="392" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="420" y="181" text-anchor="middle">U2</text>
+            <rect class="n" x="456" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="484" y="181" text-anchor="middle">A2</text>
+            <rect x="80" y="200" width="368" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="368" dur="1.2s" begin="indefinite" fill="freeze"/>
+            </rect>
+            <text class="t-cap" x="80" y="226">与整个请求 2 相同，含 xhigh 的 update</text>
+          </g>
+
+          <g data-cue="effort-14">
+            <rect class="n is-focal" x="520" y="160" width="56" height="32" rx="4"/>
+            <text class="t-sub" x="548" y="173" text-anchor="middle">update</text><text class="t-mono" x="548" y="187" text-anchor="middle">medium</text>
+            <rect class="n" x="584" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="612" y="181" text-anchor="middle">U3</text>
+            <rect x="456" y="200" width="184" height="6" rx="2" style="fill:var(--soft)"/>
+            <text class="t-cap" x="640" y="226" text-anchor="end">新增：回到基线</text>
+          </g>
+        </svg>
+      </div>
+<pre><code>{
+  "type": "configuration_update",
+  "reasoning": { "effort": "xhigh" }
+}</code></pre>
+      <ul class="fig-notes">
+        <li>插入发生在 <code>before_provider_request</code>，只改写 <code>input</code>。整轮没有任何 update 时，请求原样发出。</li>
+        <li>每条 update 后面紧跟一个用户项，不会相邻。档位先经过模型的 <code>thinkingLevelMap</code> 映射。</li>
+        <li>README 提醒：<code>configuration_update</code> 不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 混用。Pi 在客户端做的压缩不受影响。</li>
+      </ul>
+      <figcaption>示例：基线 medium，U2 分为 xhigh，U3 分为 medium。色条含义同上图。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 5. 决策跟随会话分支 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>决策跟随会话分支</h3>
+      <p>
+        <span class="seg" data-seg="effort-15">决策是会话里的自定义条目，不发给模型。扩展只读当前分支路径上的决策，所以恢复会话、fork 或树导航后，旧消息保持原档位，不重新分类。</span>
+        <span class="seg" data-seg="effort-16" data-say="看图。从 A1 另开分支 b 时，扩展仍继承共同祖先 U1 的决策，但读不到分叉后 U2 的决策。U3 是新消息，重新分类。">从 A1 另开分支 b 时，扩展仍继承共同祖先 U1 的决策，但读不到分叉后 U2 的决策。U3 是新消息，重新分类。</span>
+        <span class="seg" data-seg="effort-17">压缩后，压缩摘要承接被压缩部分的最后一次决策，强度不回落到基线。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-5">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 272" role="img" aria-labelledby="fig-effort-5-title fig-effort-5-desc">
+          <title id="fig-effort-5-title">决策跟随会话分支</title>
+          <desc id="fig-effort-5-desc">示例会话树：U1、A1 是共同祖先。分支 a 上 U1、U2 保持原决策，压缩后摘要承接 low；从 A1 分出的分支 b 继承 U1 的决策，新消息 U3 重新分类。</desc>
+          <defs>
+            <marker id="fig-effort-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <g data-cue="effort-15">
+            <line class="w" x1="136" y1="136" x2="166" y2="136" marker-end="url(#fig-effort-5-arrow)"/>
+            <path class="w" d="M264 124 H280 Q288 124 288 116 V72 Q288 64 296 64 H310" marker-end="url(#fig-effort-5-arrow)"/>
+            <text class="t-cap" x="312" y="28">分支 a（当前路径）</text>
+            <rect class="n" x="16" y="112" width="120" height="48" rx="6"/>
+            <text class="t" x="76" y="132" text-anchor="middle">U1</text>
+            <text class="t-sub" x="76" y="149" text-anchor="middle">决策 xhigh</text>
+            <rect class="n" x="168" y="112" width="96" height="48" rx="6"/>
+            <text class="t" x="216" y="132" text-anchor="middle">A1</text>
+            <text class="t-cap" x="216" y="149" text-anchor="middle">助手回复</text>
+            <rect class="n" x="312" y="40" width="136" height="48" rx="6"/>
+            <text class="t" x="380" y="60" text-anchor="middle">U2</text>
+            <text class="t-sub" x="380" y="77" text-anchor="middle">决策 low</text>
+          </g>
+
+          <g data-cue="effort-16">
+            <path class="w" d="M264 148 H280 Q288 148 288 156 V200 Q288 208 296 208 H310" marker-end="url(#fig-effort-5-arrow)"/>
+            <path d="M16 168 V174 H264 V168" style="fill:none;stroke:var(--muted);stroke-width:1.2"/>
+            <text class="t-cap" x="140" y="194" text-anchor="middle">共同祖先：分支 b 也读到</text>
+            <text class="t-cap" x="140" y="212" text-anchor="middle">U1 的决策</text>
+            <text class="t-cap" x="312" y="256">分支 b（fork 或树导航）</text>
+            <rect class="n is-focal" x="312" y="184" width="152" height="48" rx="6"/>
+            <text class="t" x="388" y="204" text-anchor="middle">U3</text>
+            <text class="t-cap" x="388" y="221" text-anchor="middle">新消息：重新分类</text>
+          </g>
+
+          <g data-cue="effort-17">
+            <line class="w is-dash" x1="448" y1="64" x2="494" y2="64" marker-end="url(#fig-effort-5-arrow)"/>
+            <rect class="mask" x="456" y="40" width="30" height="16" rx="2"/>
+            <text class="t-cap" x="471" y="52" text-anchor="middle">压缩</text>
+            <rect class="n" x="496" y="40" width="128" height="48" rx="6"/>
+            <text class="t" x="560" y="60" text-anchor="middle">压缩摘要</text>
+            <text class="t-sub" x="560" y="77" text-anchor="middle">承接 low</text>
+            <text class="t-cap" x="560" y="108" text-anchor="middle">U1、U2 被压缩掉</text>
+          </g>
+        </svg>
+      </div>
+      <ul class="fig-notes">
+        <li>决策条目类型是 <code>jev-inline-effort</code>，内容是 <code>{ timestamp, thinkingLevel, classifier }</code>。</li>
+        <li>会话开始、退出和切换模型时，扩展清掉状态栏里的 🧠 段，并取消进行中的分类。</li>
+      </ul>
+      <figcaption>示例。分支 b 读不到 U2 的决策。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 6. 状态栏 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>状态栏</h3>
+      <p>
+        <span class="seg" data-seg="effort-18" data-say="状态栏的思考强度段显示当前强度、基线和最近一次决策的分类器，例如：x high，基线 medium，Jev。当前强度等于基线时，只显示一个档位。">状态栏的 🧠 段显示当前强度、基线和最近一次决策的分类器，例如 <code>🧠 xhigh · 基线 medium · Jev</code>。当前强度等于基线时，只显示一个档位。</span>
+        <span class="seg" data-seg="effort-19">插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-6">
+      <div class="demo" id="effort-demo">
+        <p class="effort-demo-static">演示需要 JavaScript。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位，否则沿用当前强度。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
+        <form class="effort-demo-form" hidden>
+          <div class="effort-demo-grid">
+            <label>基线 thinking
+              <select name="base">
+                <option>low</option><option selected>medium</option><option>high</option><option>xhigh</option>
+              </select>
+            </label>
+            <label>分类器
+              <select name="model">
+                <option value="Jev" selected>Jev</option><option value="d1-ultra">d1-ultra</option>
+              </select>
+            </label>
+            <label>分类结果
+              <select name="result">
+                <option>low</option><option>medium</option><option>high</option><option selected>xhigh</option><option>max</option>
+                <option value="error">超时、出错或无法解析</option>
+                <option value="invalid">档位无效</option>
+                <option value="empty">空白输入（不调用）</option>
+              </select>
+            </label>
+            <label>所选档位的概率：<output name="pOut">0.80</output>
+              <input type="range" name="p" min="0" max="1" step="0.01" value="0.8">
+            </label>
+          </div>
+          <label class="effort-demo-check" data-cue="effort-19"><input type="checkbox" name="misaligned"> 用户项数和上下文不一致</label>
+          <div class="effort-demo-out" aria-live="polite">
+            <p><span>当前强度</span><span data-out="level"></span></p>
+            <p><span>请求里的 update</span><span data-out="update"></span></p>
+            <p data-cue="effort-18"><span>状态栏</span><code data-out="status"></code></p>
+            <p><span>警告</span><span data-out="warn"></span></p>
+          </div>
+        </form>
+      </div>
+      <ul class="fig-notes">
+        <li>Pi 自带的 thinking 显示只反映基线。</li>
+        <li>空白输入的决策不带分类器，标签显示「未分类」。</li>
+        <li>会话刚恢复时没有 🧠 段，下一次请求后才显示。</li>
+      </ul>
+      <figcaption>示例计算：假设这是当前分支的第一条消息，当前强度从基线开始。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 7. /effort 命令 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3><code>/effort</code> 命令</h3>
+      <p>
+        <span class="seg" data-seg="effort-20" data-say="不带参数时，斜杠 effort 等于斜杠 effort status。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">不带参数时，<code>/effort</code> 等于 <code>/effort status</code>。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
+        <span class="seg" data-seg="effort-21" data-say="斜杠 effort model 切换分类器。选择存进全局配置，从下一条未分类的消息生效。"><code>/effort model</code> 切换分类器。选择存进全局配置，从下一条未分类的消息生效。</span>
+        <span class="seg" data-seg="effort-22" data-say="斜杠 effort test 用固定样例测试分类器，不写决策。Pi 运行 agent 时，这两个子命令都不可用。"><code>/effort test</code> 用固定样例测试分类器，不写决策。Pi 运行 agent 时，这两个子命令都不可用。</span>
+      </p>
+    </div>
+    <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-7">
+      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /effort，输出适用状态、后续分类器 openrouter/liquid/d1-ultra 和最近决策 low · d1-ultra"></video></div>
+      <table>
+        <thead><tr><th>命令</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
+        <tbody>
+          <tr><td><code>/effort</code>、<code>/effort status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
+          <tr data-cue="effort-21"><td><code>/effort model</code></td><td>选择器，<kbd>Esc</kbd> 取消不保存；没有 UI 时（<code>ctx.hasUI</code> 为 false）必须带上模型名</td><td>不可用</td></tr>
+          <tr data-cue="effort-21"><td><code>/effort model jev</code><br><code>/effort model d1-ultra</code></td><td>直接保存所选分类器；其他会话和子代理的后续分类也读这份配置</td><td>不可用</td></tr>
+          <tr data-cue="effort-22"><td><code>/effort test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
+        </tbody>
+      </table>
+      <ul class="fig-notes">
+        <li>配置文件格式错误时，扩展报错，不退回 Jev；用 <code>/effort model</code> 重新保存即可修复。</li>
+        <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
+      </ul>
+      <figcaption>录屏：<code>/effort</code> 输出「适用」、后续分类器 <code>openrouter/liquid/d1-ultra</code> 和最近决策 <code>low · d1-ultra</code>。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 8. 子代理与代价 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>子代理与代价</h3>
+      <p>
+        <span class="seg" data-seg="effort-23">子代理要加载本扩展才会分类，基线取子代理自己的 thinking 设置。外部 CLI 代理不经过本扩展。</span>
+        <span class="seg" data-seg="effort-24" data-say="代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。D1 Ultra 是付费模型。">代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。d1-ultra 是付费模型。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-8">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 176" role="img" aria-labelledby="fig-effort-8-title fig-effort-8-desc">
+          <title id="fig-effort-8-title">一条新消息多出的分类步骤</title>
+          <desc id="fig-effort-8-desc">用户消息先经过分类器，最多 15 秒，再发主请求；分类带来等待、OpenRouter 额度消耗和对外发送文本三项代价。</desc>
+          <defs>
+            <marker id="fig-effort-8-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+          <line class="w" x1="144" y1="60" x2="198" y2="60" marker-end="url(#fig-effort-8-arrow)"/>
+          <line class="w" x1="400" y1="60" x2="462" y2="60" marker-end="url(#fig-effort-8-arrow)"/>
+          <rect class="n" x="16" y="36" width="128" height="48" rx="6"/>
+          <text class="t" x="80" y="65" text-anchor="middle">用户消息</text>
+          <rect class="n is-ext" x="200" y="36" width="200" height="48" rx="6"/>
+          <text class="t" x="300" y="56" text-anchor="middle">分类器</text>
+          <text class="t-sub" x="300" y="73" text-anchor="middle">最多 15 秒</text>
+          <rect class="n" x="464" y="36" width="160" height="48" rx="6"/>
+          <text class="t" x="544" y="56" text-anchor="middle">主请求</text>
+          <text class="t-sub" x="544" y="73" text-anchor="middle">GPT-6 系列</text>
+          <g data-cue="effort-24">
+            <path d="M200 96 V100 H400 V96" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
+            <text class="t-cap" x="300" y="122" text-anchor="middle">等待：用户要等分类，最多 15 秒</text>
+            <text class="t-cap" x="300" y="142" text-anchor="middle">额度：消耗 OpenRouter 额度，d1-ultra 付费</text>
+            <text class="t-cap" x="300" y="162" text-anchor="middle">外发：对话文本可能含业务信息</text>
+          </g>
+        </svg>
+      </div>
+      <ul class="fig-notes">
+        <li>d1-ultra 的价格以 OpenRouter 端点信息为准。</li>
+      </ul>
+      <figcaption>虚线框是外部服务（OpenRouter）。</figcaption>
+    </figure>
+  </div>
+
+  <style>
+    #ch-effort .fig-notes { margin: 12px 4px 0; padding-left: 1.2em; font-size: 14px; line-height: 1.65; color: var(--muted); }
+    #ch-effort .fig-notes li { margin: 3px 0; }
+    #ch-effort .fig-notes code { white-space: normal; }
+    #ch-effort .beat-fig > pre { margin: 12px 0 0; }
+    #ch-effort .effort-demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 16px; margin-bottom: 12px; }
+    #ch-effort .effort-demo-grid label { display: grid; gap: 6px; }
+    #ch-effort .effort-demo-grid output { display: inline; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: var(--ink); }
+    #ch-effort .effort-demo-check { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+    #ch-effort .effort-demo-static { margin: 0; font-size: 14.5px; color: var(--muted); }
+    #ch-effort .effort-demo-out { padding-top: 12px; border-top: 1px solid var(--rule); font-size: 14.5px; }
+    #ch-effort .effort-demo-out p { display: grid; grid-template-columns: 8.5em 1fr; gap: 12px; margin: 0 0 6px; }
+    #ch-effort .effort-demo-out p > span:first-child { color: var(--soft); }
+    #ch-effort .effort-demo-out p > :last-child { color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+    #ch-effort .capture table { margin: 12px 0 0; }
+  </style>
+  <script type="module">
+    {
+      const root = document.querySelector("#effort-demo");
+      const form = root?.querySelector(".effort-demo-form");
+      if (form) {
+        root.querySelector(".effort-demo-static").hidden = true;
+        form.hidden = false;
+        const out = (key) => form.querySelector(`[data-out="${key}"]`);
+        const LEVELS = ["low", "medium", "high", "xhigh", "max"];
+        const IDS = { "Jev": "~typesafe/jev-latest", "d1-ultra": "liquid/d1-ultra" };
+        // 与 extensions/jev-inline-effort.ts 一致：第一条消息时当前强度等于基线（:316），警告见 :330，状态栏见 :352、:378。
+        const render = () => {
+          const base = form.base.value;
+          const name = form.model.value;
+          const result = form.result.value;
+          const p = Number(form.p.value);
+          form.pOut.value = p.toFixed(2);
+          form.p.disabled = !LEVELS.includes(result);
+          let level = base;
+          let label = name;
+          let warn = "无";
+          if (result === "empty") label = "未分类";
+          else if (result === "error") warn = `openrouter/${IDS[name]} 不可用，思考强度沿用 ${base}。不会切换分类模型；请用 /effort model 或 /effort test 检查。`;
+          else if (LEVELS.includes(result) && p >= 0.5 && p <= 1) level = result;
+          if (form.misaligned.checked) {
+            out("level").textContent = `${level}（本次请求未生效）`;
+            out("update").textContent = "不插入";
+            out("status").textContent = `🧠 ${base} · 未调整 · ${label}`;
+          } else {
+            out("level").textContent = level === base ? `${level}（等于基线）` : level;
+            out("update").textContent = level === base ? "不插入" : `在本条用户消息前插入 effort = ${level}`;
+            out("status").textContent = level === base ? `🧠 ${base} · ${label}` : `🧠 ${level} · 基线 ${base} · ${label}`;
+          }
+          out("warn").textContent = warn;
+        };
+        form.addEventListener("input", render);
+        form.addEventListener("submit", (event) => event.preventDefault());
+        render();
+      }
+    }
+  </script>
+</section>

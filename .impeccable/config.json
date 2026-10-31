@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "docs/extensions-guide/src/_shell.html"
+        ],
+        "createdAt": "2026-10-31T10:33:17.114Z",
+        "reason": "model: _shell.html is a build template; its CSS is injected from guide.css (h1 34–52px vs 16px body), the built index.html is checked instead"
+      }
+    ]
+  }
+}

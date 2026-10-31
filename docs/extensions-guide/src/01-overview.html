@@ -1,0 +1,122 @@
+<section class="chapter" id="ch-overview" data-chapter="overview" aria-labelledby="ch-overview-h">
+  <header class="chapter-head">
+    <h2 id="ch-overview-h">总览：Pi&nbsp;屏幕上的七项功能</h2>
+    <p class="chapter-sum">七项功能各改 Pi 屏幕的哪一块，由哪一章讲。</p>
+    <dl class="meta">
+      <dt>入口文件</dt><dd><code>extensions/pi-personal-extensions.ts</code></dd>
+      <dt>管理命令</dt><dd><code>/personal</code></dd>
+      <dt>开关文件</dt><dd><code>personal-extensions.json</code>，默认在 <code>~/.pi/agent/</code>，可用 <code>PI_CODING_AGENT_DIR</code> 改目录</dd>
+    </dl>
+  </header>
+
+  <div class="beat">
+    <div class="beat-text">
+      <p>
+        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共七项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共七项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
+        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载七项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载七项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
+      </p>
+      <ul>
+        <li><span class="seg" data-seg="overview-03" data-say="看图。消息区有两项：用户消息橙色线框，和文件路径可点击。">消息区有两项：用户消息橙色线框，和文件路径可点击。</span></li>
+        <li><span class="seg" data-seg="overview-04" data-say="状态栏有两项：额度与会话 ID 写进扩展状态行，状态栏风格选择给 pi statusline 那一行换配色。">状态栏有两项：额度与会话 ID 写进扩展状态行，状态栏风格选择给 pi-statusline 那一行换配色。</span></li>
+        <li><span class="seg" data-seg="overview-05">输入框下方的会话名由右下角会话标题显示；自动会话命名在一轮正常结束后，用命名模型在后台起名。</span></li>
+        <li><span class="seg" data-seg="overview-06" data-say="状态栏里带大脑图标的那一段来自原位思考强度。它只在 GPT 六系列模型上，为新用户消息选择思考强度。">状态栏里的 🧠 段来自原位思考强度。它只在 GPT-6 系列模型上，为新用户消息选择思考强度。</span></li>
+      </ul>
+      <p>
+        <span class="seg" data-seg="overview-07">七项功能默认全部开启，每一项都能单独关闭。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-overview-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 488" width="100%" role="img" aria-labelledby="fig-overview-1-title fig-overview-1-desc">
+          <title id="fig-overview-1-title">Pi 屏幕地图：七项功能的位置</title>
+          <desc id="fig-overview-1-desc">Pi 终端界面从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击（第 3 章）；输入框下方有右下角会话标题和自动会话命名（第 5 章）；状态栏有额度与会话 ID 和状态栏风格选择（第 4 章）；状态栏的 🧠 段来自原位思考强度（第 6 章）；界面外的 /personal 命令统一启停（第 2 章）。</desc>
+          <defs>
+            <marker id="fig-overview-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+
+          <!-- 终端骨架 -->
+          <g data-cue="overview-01">
+            <rect class="n" x="16" y="96" width="440" height="336" rx="6"/>
+            <text class="t-sub" x="440" y="114" text-anchor="end">示例画面</text>
+            <line class="w" x1="24" y1="304" x2="448" y2="304" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <line class="w" x1="24" y1="336" x2="448" y2="336" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <rect x="32" y="312" width="8" height="16" style="fill:var(--muted)"/>
+            <text class="t-cap" x="48" y="325">输入框</text>
+            <rect class="n is-ghost" x="488" y="24" width="144" height="48" rx="6"/>
+            <text class="t" x="500" y="45">安装与配置</text>
+            <text class="t-sub" x="620" y="45" text-anchor="end">第 7 章</text>
+            <text class="t-cap" x="500" y="63">开发与配置文件</text>
+          </g>
+
+          <!-- /personal：界面外的入口 -->
+          <g data-cue="overview-02">
+            <path class="w is-flow" d="M236 72 V96" style="marker-end:url(#fig-overview-1-arrow)"/>
+            <rect class="n is-focal" x="16" y="24" width="440" height="48" rx="6"/>
+            <text class="t-mono" x="32" y="45">/personal</text>
+            <text class="t-sub" x="440" y="45" text-anchor="end">第 2 章</text>
+            <text class="t-cap" x="32" y="63">按开关加载七项功能，统一启停和设置</text>
+          </g>
+
+          <!-- 消息区 -->
+          <g data-cue="overview-03">
+            <rect x="32" y="128" width="408" height="56" rx="6" style="fill:none;stroke:var(--accent);stroke-width:1.5"/>
+            <rect class="mask" x="40" y="121" width="44" height="14" style="fill:var(--paper)"/>
+            <text class="t-sub" x="44" y="132" style="fill:var(--accent)">user</text>
+            <text class="t-cap" x="44" y="164" style="fill:var(--ink)">安装步骤写在哪里？</text>
+            <text class="t-cap" x="32" y="220" style="fill:var(--ink)">写在 <tspan class="t-mono" style="fill:var(--link);text-decoration:underline">README.md:9</tspan></text>
+            <path class="w" d="M440 156 H488"/>
+            <rect class="n" x="488" y="120" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="142">消息区</text>
+            <text class="t-sub" x="620" y="142" text-anchor="end">第 3 章</text>
+            <text class="t-cap" x="500" y="164">用户消息橙色线框</text>
+            <text class="t-cap" x="500" y="182">文件路径可点击</text>
+          </g>
+
+          <!-- 状态栏：第一行配色、第二行额度与会话 ID -->
+          <g data-cue="overview-04">
+            <rect x="32" y="372" width="168" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
+            <text class="t-sub" x="40" y="386" style="fill:var(--ink)">gpt-6.1-sol ❯ medium</text>
+            <rect x="204" y="372" width="88" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
+            <text class="t-sub" x="212" y="386" style="fill:var(--ink)">repo</text>
+            <rect x="296" y="372" width="56" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
+            <text class="t-sub" x="304" y="386" style="fill:var(--ink)">main</text>
+            <text class="t-sub" x="32" y="414">7c41e0a2 · weekly 88% left</text>
+            <circle cx="360" cy="382" r="3" style="fill:var(--muted)"/>
+            <path class="w" d="M360 382 H468 Q476 382 476 374 V356 Q476 348 484 348 H488"/>
+            <rect class="n" x="488" y="312" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="334">状态栏</text>
+            <text class="t-sub" x="620" y="334" text-anchor="end">第 4 章</text>
+            <text class="t-cap" x="500" y="356">额度与会话 ID</text>
+            <text class="t-cap" x="500" y="374">状态栏风格选择</text>
+          </g>
+
+          <!-- 输入框下方：会话名 -->
+          <g data-cue="overview-05">
+            <text class="t-cap" x="440" y="360" text-anchor="end">编写中文讲解文档</text>
+            <path class="w" d="M444 356 H456 Q464 356 464 348 V260 Q464 252 472 252 H488"/>
+            <rect class="n" x="488" y="216" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="238">输入框下方</text>
+            <text class="t-sub" x="620" y="238" text-anchor="end">第 5 章</text>
+            <text class="t-cap" x="500" y="260">右下角会话标题</text>
+            <text class="t-cap" x="500" y="278">自动会话命名</text>
+          </g>
+
+          <!-- 状态栏 🧠 段 -->
+          <g data-cue="overview-06">
+            <text class="t-sub" x="228" y="414" style="fill:var(--ink)">🧠 low · 基线 medium · d1-ultra</text>
+            <circle cx="462" cy="410" r="3" style="fill:var(--muted)"/>
+            <path class="w" d="M462 410 H488"/>
+            <rect class="n" x="488" y="392" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="414">🧠 段</text>
+            <text class="t-sub" x="620" y="414" text-anchor="end">第 6 章</text>
+            <text class="t-cap" x="500" y="436">原位思考强度</text>
+            <text class="t-cap" x="500" y="454">只对 GPT-6 系列生效</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>示例画面。右侧标出每块区域由哪项功能负责、在哪一章讲。</figcaption>
+    </figure>
+  </div>
+</section>

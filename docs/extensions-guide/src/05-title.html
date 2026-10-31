@@ -1,0 +1,818 @@
+<section class="chapter" id="ch-title" data-chapter="title" aria-labelledby="ch-title-h">
+  <header class="chapter-head">
+    <h2 id="ch-title-h">会话名：显示与自动起名</h2>
+    <p class="chapter-sum">会话名怎么显示在输入框下方；自动会话命名怎么在后台起名、校验结果，并保护手动起的名字。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>右下角会话标题 <code>session-title</code>（显示）；自动会话命名 <code>auto-session-name</code>（起名）</dd>
+      <dt>快捷命令</dt><dd><code>/auto-name</code>；右下角会话标题没有快捷命令</dd>
+      <dt>全局配置</dt><dd>agent 目录下的 <code>auto-session-name.json</code>（agent 目录默认 <code>~/.pi/agent</code>，可用 <code>PI_CODING_AGENT_DIR</code> 改）</dd>
+      <dt>会话里的状态</dt><dd>自定义条目 <code>personal-auto-session-name</code></dd>
+    </dl>
+  </header>
+
+  <!-- ===== 显示：右下角会话标题 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>显示：右下角会话标题</h3>
+      <p>
+        <span class="seg" data-seg="title-01">会话多了以后，要靠会话名找回会话。右下角会话标题负责显示会话名，自动会话命名负责起名。</span>
+        <span class="seg" data-seg="title-02">右下角会话标题只在 TUI 模式工作。它在输入框下方添加一个 widget。widget 是扩展自定义的一块界面。这个 widget 用一行暗色小字靠右显示会话名。</span>
+        <span class="seg" data-seg="title-03">会话开始或会话信息变化时，扩展重画这一行；会话关闭时，扩展移除这一行。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-title-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 344" width="100%" role="img" aria-labelledby="fig-title-1-title fig-title-1-desc">
+          <title id="fig-title-1-title">会话名显示在哪里、什么时候更新</title>
+          <desc id="fig-title-1-desc">会话名显示在输入框正下方、状态栏上方的一行，靠右对齐；session_start 和 session_info_changed 时重画这一行，session_shutdown 时移除。</desc>
+          <defs>
+            <marker id="fig-title-1-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <g data-cue="title-01">
+            <rect x="136" y="16" width="488" height="152" rx="6" class="n is-ghost"/>
+            <text x="16" y="48" class="t">消息区</text>
+            <rect x="152" y="32" width="300" height="6" rx="2" style="fill:var(--rule)"/>
+            <rect x="152" y="44" width="360" height="6" rx="2" style="fill:var(--rule)"/>
+            <rect x="152" y="56" width="240" height="6" rx="2" style="fill:var(--rule)"/>
+            <text x="16" y="93" class="t">输入框</text>
+            <rect x="152" y="72" width="456" height="32" rx="6" class="n"/>
+            <text x="164" y="93" class="t-mono">&gt;</text>
+            <text x="16" y="155" class="t">状态栏</text>
+            <rect x="152" y="140" width="456" height="20" rx="2" class="n"/>
+            <text x="164" y="154" class="t-cap">Pi 原有状态栏，不改动</text>
+          </g>
+          <g data-cue="title-02">
+            <text x="16" y="127" class="t">会话名</text>
+            <rect x="152" y="112" width="456" height="20" rx="2" style="fill:var(--accent-tint)"/>
+            <text x="160" y="126" class="t-cap">示例</text>
+            <text x="600" y="126" class="t-sub" text-anchor="end">实现会话标题 🐱</text>
+          </g>
+
+          <g data-cue="title-03">
+            <line x1="224" y1="208" x2="316" y2="208" class="w" marker-end="url(#fig-title-1-ah)"/>
+            <line x1="224" y1="248" x2="316" y2="248" class="w" marker-end="url(#fig-title-1-ah)"/>
+            <line x1="224" y1="288" x2="316" y2="288" class="w" marker-end="url(#fig-title-1-ah)"/>
+            <rect x="16" y="192" width="208" height="32" rx="6" class="n is-ghost"/>
+            <text x="120" y="212" class="t-sub" text-anchor="middle">session_start</text>
+            <rect x="16" y="232" width="208" height="32" rx="6" class="n is-ghost"/>
+            <text x="120" y="252" class="t-sub" text-anchor="middle">session_info_changed</text>
+            <rect x="16" y="272" width="208" height="32" rx="6" class="n is-ghost"/>
+            <text x="120" y="292" class="t-sub" text-anchor="middle">session_shutdown</text>
+            <rect x="320" y="192" width="288" height="72" rx="6" class="n"/>
+            <text x="464" y="222" class="t" text-anchor="middle">重画这一行</text>
+            <text x="464" y="244" class="t-sub" text-anchor="middle">personal-session-title</text>
+            <rect x="320" y="272" width="288" height="32" rx="6" class="n"/>
+            <text x="464" y="293" class="t" text-anchor="middle">移除这一行</text>
+          </g>
+          <text x="16" y="332" class="t-cap">在 RPC、Print、JSON 模式下，扩展不处理这三个事件</text>
+        </svg>
+      </div>
+      <figcaption>示例会话名来自测试用例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 清洗与排版 demo ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>清洗与排版</h3>
+      <p>
+        <span class="seg" data-seg="title-04">会话名可能带控制字符。扩展先删终端转义序列，再把换行、制表符等控制字符换成空格。</span>
+        <span class="seg" data-seg="title-05">如果清洗后的会话名为空，扩展显示「未命名会话」。这一步只读会话名，不调用模型。</span>
+      </p>
+      <ul>
+        <li>换成空格的范围：<code>\x00-\x1f</code>、<code>\x7f-\x9f</code>、U+2028、U+2029；最后去首尾空白。</li>
+        <li>颜色取主题的 <code>dim</code> 色，切换主题后跟着变。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-2">
+      <div class="demo" id="title-demo-width">
+        <p class="title-demo-fallback">示例：终端宽 40 列时，「实现会话标题 🐱」占 15 列，左侧补 25 个空格后靠右显示。终端宽 8 列时，会话名截断成「实现会…」，占 7 列，左侧补 1 个空格。</p>
+        <div class="title-demo-ui" hidden>
+          <div class="title-demo-controls">
+            <label>会话名
+              <select data-name>
+                <option value="0">实现会话标题 🐱</option>
+                <option value="1">较长的会话名</option>
+                <option value="2">带控制字符</option>
+                <option value="3">空名</option>
+              </select>
+            </label>
+            <label>终端宽度
+              <input type="range" min="4" max="40" value="28" data-width>
+              <span data-width-out>28 列</span>
+            </label>
+          </div>
+          <div class="title-demo-row" data-cue="title-04"><span>原始会话名</span><code data-raw></code></div>
+          <div class="title-demo-row" data-cue="title-05"><span>清洗后</span><code data-clean></code></div>
+          <div data-cue="title-06">
+            <div class="fig-scroll"><div class="title-demo-term" data-term aria-hidden="true"></div></div>
+            <div class="title-demo-row" aria-live="polite"><span>排版</span><span data-layout></span></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>
+        <span class="seg" data-seg="title-06" data-say="看演示。一个中文字符占两列。一行放不下时，扩展用 truncate to width 截断，末尾加省略号。">一个中文字符占两列。一行放不下时，扩展用 <code>truncateToWidth</code> 截断，末尾加省略号。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 起名：触发与时序 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>起名：什么时候触发</h3>
+      <p>
+        <span>自动会话命名在后台给会话起名，只在 TUI 和 RPC 模式下工作。</span>
+        <span class="seg" data-seg="title-07" data-say="Pi 发出 agent settled 事件后，扩展检查当前分支的最后一条消息。只有它是正常结束的助手消息，扩展才继续。">Pi 发出 <code>agent_settled</code> 事件后，扩展检查当前分支的最后一条消息。只有它是正常结束的助手消息，扩展才继续。</span>
+      </p>
+      <ul>
+        <li>「正常结束」指 <code>stopReason</code> 为 <code>stop</code>；还要求 Pi 空闲、on/off 状态为开启、会话名归本扩展。</li>
+        <li>Print / JSON 模式没有 UI，扩展直接返回，<code>/auto-name preview</code> 也不调用模型。</li>
+        <li>连续失败只提醒一次；配置、模型或档位出错时显示具体错误。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 472" width="100%" role="img" aria-labelledby="fig-title-3-title fig-title-3-desc">
+          <title id="fig-title-3-title">一轮自动命名的时序</title>
+          <desc id="fig-title-3-desc">Pi 主会话发出 agent_settled 后，扩展先启动 30 秒计时、读配置、解析模型和档位、开始认证，然后事件处理函数返回，用户继续输入；认证完成后扩展请求命名模型，计时内拿到合格标题就改会话名，超时或收到取消事件就中止请求并保留原名。</desc>
+          <defs>
+            <marker id="fig-title-3-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+            <marker id="fig-title-3-ah-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--accent)"/></marker>
+            <marker id="fig-title-3-ah-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--link)"/></marker>
+          </defs>
+
+          <rect x="24" y="248" width="632" height="204" rx="4" style="fill:var(--paper-2);stroke:var(--rule)"/>
+          <rect x="24" y="248" width="40" height="16" rx="2" style="fill:var(--paper);stroke:var(--rule)"/>
+          <text x="44" y="260" class="t-sub" text-anchor="middle">ALT</text>
+          <line x1="32" y1="340" x2="648" y2="340" style="stroke:var(--rule);stroke-dasharray:4 3"/>
+
+          <line x1="116" y1="68" x2="116" y2="460" style="stroke:var(--rule);stroke-dasharray:3 3"/>
+          <line x1="340" y1="68" x2="340" y2="460" style="stroke:var(--rule);stroke-dasharray:3 3"/>
+          <line x1="564" y1="68" x2="564" y2="460" style="stroke:var(--rule);stroke-dasharray:3 3"/>
+
+          <g data-cue="title-07">
+            <line x1="116" y1="104" x2="334" y2="104" class="w" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="173" y="84" width="104" height="14" class="mask"/>
+            <text x="225" y="95" class="t-sub" text-anchor="middle">agent_settled</text>
+          </g>
+          <g data-cue="title-08">
+            <text x="352" y="128" class="t-cap">启动 30 秒计时</text>
+            <text x="352" y="146" class="t-sub">读配置 · 解析模型和档位 · 开始认证</text>
+          </g>
+          <g data-cue="title-07">
+            <line x1="336" y1="172" x2="120" y2="172" class="w is-dash" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="185" y="152" width="80" height="14" class="mask"/>
+            <text x="225" y="163" class="t-cap" text-anchor="middle">处理函数返回</text>
+            <rect x="113" y="184" width="6" height="24" rx="2" style="fill:var(--muted)"/>
+            <text x="128" y="201" class="t-cap">用户继续输入</text>
+          </g>
+          <g data-cue="title-07" data-cue-mode="active">
+            <circle r="4" class="dot" cx="336" cy="172"><animateMotion dur="0.9s" begin="indefinite" fill="freeze" path="M0 0 H-214"/></circle>
+          </g>
+          <g data-cue="title-08">
+            <line x1="344" y1="228" x2="558" y2="228" class="w is-link is-flow" marker-end="url(#fig-title-3-ah-link)"/>
+            <rect x="383" y="208" width="140" height="14" class="mask"/>
+            <text x="453" y="219" class="t-sub" text-anchor="middle">streamSimple(JSON)</text>
+            <text x="72" y="268" class="t-cap">[30 秒内返回合格标题]</text>
+            <line x1="564" y1="288" x2="350" y2="288" class="w is-dash" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="405" y="268" width="96" height="14" class="mask"/>
+            <text x="453" y="279" class="t-sub" text-anchor="middle">{"title": …}</text>
+            <text x="352" y="316" class="t-cap">先确认会话没变</text>
+            <line x1="336" y1="320" x2="122" y2="320" class="w is-accent" marker-end="url(#fig-title-3-ah-accent)"/>
+            <rect x="169" y="300" width="112" height="14" class="mask"/>
+            <text x="225" y="311" class="t-sub" text-anchor="middle">setSessionName</text>
+          </g>
+          <g data-cue="title-08" data-cue-mode="active">
+            <circle r="4" class="dot" cx="344" cy="228"><animateMotion dur="1.2s" begin="indefinite" fill="freeze" path="M0 0 H214"/></circle>
+          </g>
+          <g data-cue="title-09">
+            <text x="32" y="362" class="t-cap">[超时，或收到取消事件]</text>
+            <line x1="116" y1="388" x2="334" y2="388" class="w" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="173" y="368" width="104" height="14" class="mask"/>
+            <text x="225" y="379" class="t-sub" text-anchor="middle">agent_start 等</text>
+            <line x1="344" y1="420" x2="558" y2="420" class="w is-dash" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="423" y="400" width="60" height="14" class="mask"/>
+            <text x="453" y="411" class="t-sub" text-anchor="middle">abort()</text>
+            <text x="128" y="440" class="t-cap">保留原名</text>
+          </g>
+
+          <rect x="336" y="96" width="8" height="348" style="fill:var(--paper-2);stroke:var(--muted);stroke-width:0.8"/>
+          <rect x="40" y="24" width="152" height="44" rx="6" class="n"/>
+          <text x="116" y="44" class="t" text-anchor="middle">Pi 主会话</text>
+          <text x="116" y="60" class="t-sub" text-anchor="middle">TUI / RPC</text>
+          <rect x="264" y="24" width="152" height="44" rx="6" class="n"/>
+          <text x="340" y="44" class="t" text-anchor="middle">自动会话命名</text>
+          <text x="340" y="60" class="t-sub" text-anchor="middle">auto-session-name</text>
+          <rect x="488" y="24" width="152" height="44" rx="6" class="n is-ext"/>
+          <text x="564" y="44" class="t" text-anchor="middle">命名模型</text>
+          <text x="564" y="60" class="t-sub" text-anchor="middle">默认 gpt-5.6-luna</text>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="seg" data-seg="title-08" data-say="看图。扩展先启动 30 秒计时、开始准备请求，然后才返回。计时内拿到合格标题，扩展先确认会话没变，再改会话名。">扩展先启动 30 秒计时、开始准备请求，然后才返回。计时内拿到合格标题，扩展先确认会话没变，再改会话名。</span>
+        <span class="seg" data-seg="title-09">超时或出错时，扩展保留原名。遇到新任务、切换会话、树导航、重载或退出时，扩展取消请求，不弹提醒。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 上下文 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>发给命名模型的上下文</h3>
+      <p>
+        <span class="seg" data-seg="title-10">扩展只读当前分支，从末尾往前数到第 5 条用户消息。</span>
+        <span class="seg" data-seg="title-11">每轮只取文本：用户消息保留前 2000 个字符，助手回复保留最后 1500 个字符。</span>
+        <span class="seg" data-seg="title-12">扩展不发送工具结果、思考块、工具调用和图片，也跳过出错或中断的回复。</span>
+      </p>
+      <ul>
+        <li>「字符」按 UTF-16 代码单元算。助手消息逐条拼接，每拼一条就去首尾空白、保留最后 1500 个字符。</li>
+        <li>自动命名遇到进行中的请求会跳过；<code>/auto-name preview</code> 会取消旧请求并重新请求。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 360" width="100%" role="img" aria-labelledby="fig-title-4-title fig-title-4-desc">
+          <title id="fig-title-4-title">命名上下文的裁剪（示例）</title>
+          <desc id="fig-title-4-desc">示例：当前分支有 7 轮对话、会话还没有名字。扩展只取最近 5 轮，丢掉工具结果、思考块、工具调用和图片，截断用户和助手文本，再和当前会话名一起组成 JSON；输入命中上次自动命名成功后记下的记录时不发请求。</desc>
+          <defs>
+            <marker id="fig-title-4-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <text x="16" y="32" class="t">当前分支（示例）</text>
+          <text x="248" y="32" class="t">过滤与截断</text>
+          <text x="464" y="32" class="t">发给模型的 JSON</text>
+
+          <g data-cue="title-10">
+            <line x1="212" y1="206" x2="242" y2="206" class="w" marker-end="url(#fig-title-4-ah)"/>
+          </g>
+          <g data-cue="title-13">
+            <line x1="424" y1="170" x2="458" y2="170" class="w is-flow" marker-end="url(#fig-title-4-ah)"/>
+          </g>
+
+          <rect x="16" y="48" width="192" height="28" rx="4" class="n is-ghost"/>
+          <text x="28" y="67" class="t-cap">第 1 轮</text>
+          <rect x="16" y="84" width="192" height="28" rx="4" class="n is-ghost"/>
+          <text x="28" y="103" class="t-cap">第 2 轮</text>
+          <rect x="16" y="120" width="192" height="28" rx="4" class="n"/>
+          <text x="28" y="139" class="t-cap">第 3 轮</text>
+          <text x="200" y="139" class="t-sub" text-anchor="end">user + assistant</text>
+          <rect x="16" y="156" width="192" height="28" rx="4" class="n"/>
+          <text x="28" y="175" class="t-cap">第 4 轮</text>
+          <text x="200" y="175" class="t-sub" text-anchor="end">user + assistant</text>
+          <rect x="16" y="192" width="192" height="28" rx="4" class="n"/>
+          <text x="28" y="211" class="t-cap">第 5 轮</text>
+          <text x="200" y="211" class="t-sub" text-anchor="end">user + assistant</text>
+          <rect x="16" y="228" width="192" height="28" rx="4" class="n"/>
+          <text x="28" y="247" class="t-cap">第 6 轮</text>
+          <text x="200" y="247" class="t-sub" text-anchor="end">user + assistant</text>
+          <rect x="16" y="264" width="192" height="28" rx="4" class="n"/>
+          <text x="28" y="283" class="t-cap">第 7 轮</text>
+          <text x="200" y="283" class="t-sub" text-anchor="end">user + assistant</text>
+
+          <g data-cue="title-10">
+            <rect x="12" y="116" width="200" height="180" rx="6" class="w is-accent is-dash"/>
+            <text x="16" y="320" class="t-cap">虚线框：最近 5 轮</text>
+            <text x="16" y="340" class="t-cap">其他分支：不读取</text>
+          </g>
+
+          <rect x="248" y="48" width="176" height="244" rx="6" class="n"/>
+          <g data-cue="title-11">
+            <text x="260" y="72" class="t-sub">保留 type = text</text>
+            <text x="260" y="96" class="t-mono">user 前 2000</text>
+            <text x="260" y="116" class="t-mono">assistant 后 1500</text>
+          </g>
+          <line x1="260" y1="132" x2="412" y2="132" style="stroke:var(--rule)"/>
+          <g data-cue="title-12">
+            <text x="260" y="156" class="t-sub">丢弃</text>
+            <text x="260" y="178" class="t-mono">toolResult</text>
+            <text x="260" y="198" class="t-mono">thinking</text>
+            <text x="260" y="218" class="t-mono">toolCall</text>
+            <text x="260" y="238" class="t-mono">image</text>
+            <text x="260" y="270" class="t-cap">error / aborted 回复</text>
+          </g>
+
+          <rect x="464" y="48" width="200" height="244" rx="6" class="n"/>
+          <g data-cue="title-13">
+            <text x="476" y="76" class="t-mono">{</text>
+            <text x="488" y="96" class="t-mono">"currentTitle": null,</text>
+            <text x="488" y="116" class="t-mono">"turns": [</text>
+            <text x="500" y="136" class="t-mono">{ "user": "…",</text>
+            <text x="508" y="156" class="t-mono">"assistant": "…" },</text>
+            <text x="500" y="176" class="t-mono">… 共 5 项</text>
+            <text x="488" y="196" class="t-mono">]</text>
+            <text x="476" y="216" class="t-mono">}</text>
+            <text x="464" y="316" class="t-cap">命中上次成功记下的输入：不发请求</text>
+            <text x="464" y="334" class="t-cap">记录 = 命名后的会话名 + turns</text>
+            <text x="464" y="352" class="t-cap">失败或预览不更新记录</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="seg" data-seg="title-13" data-say="看图，这是示例。如果这次的输入和上次自动命名成功后记下的输入相同，扩展不发请求。">这是示例。如果这次的输入和上次自动命名成功后记下的输入相同，扩展不发请求。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 标题格式 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>标题格式与校验</h3>
+      <p>命名规则写在系统提示词里。对话 JSON 作为用户消息发送，提示词要求模型只把它当数据。</p>
+      <p>
+        <span class="seg" data-seg="title-14">提示词要求模型只返回含 title 字段的 JSON。title 为 null 表示当前会话名已准确或信息不足，扩展不改名。</span>
+      </p>
+      <ul>
+        <li>返回不是 JSON、多出字段、<code>stopReason</code> 不是 <code>stop</code>，都按失败处理。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-5">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 300" width="100%" role="img" aria-labelledby="fig-title-5-title fig-title-5-desc">
+          <title id="fig-title-5-title">标题的格式（示例）</title>
+          <desc id="fig-title-5-desc">命名模型返回只含 title 的 JSON，title 为 null 时不改名；示例标题拆成类别 emoji、一个空格、对象、全角竖线和目标，下方列出八个可选类别。</desc>
+
+          <g data-cue="title-14">
+            <text x="40" y="24" class="t-cap">命名模型的返回（示例）</text>
+            <rect x="40" y="32" width="600" height="48" rx="6" class="n"/>
+            <text x="56" y="52" class="t-mono">{"title":"🧩 通知服务｜排查重复推送"}</text>
+            <text x="56" y="70" class="t-mono">{"title":null}</text>
+            <text x="624" y="70" class="t-cap" text-anchor="end">null：保持原会话名</text>
+          </g>
+
+          <g data-cue="title-15">
+            <rect x="40" y="104" width="64" height="56" rx="6" class="n"/>
+            <text x="72" y="142" text-anchor="middle" style="font-size:28px">🧩</text>
+            <rect x="108" y="104" width="16" height="56" rx="2" class="n is-ghost"/>
+            <text x="116" y="138" class="t-sub" text-anchor="middle">␣</text>
+            <rect x="128" y="104" width="196" height="56" rx="6" class="n"/>
+            <text x="226" y="140" class="t" text-anchor="middle" style="font-size:20px">通知服务</text>
+            <rect x="328" y="104" width="48" height="56" rx="6" class="n is-focal"/>
+            <text x="352" y="142" class="t" text-anchor="middle" style="font-size:24px">｜</text>
+            <rect x="380" y="104" width="260" height="56" rx="6" class="n"/>
+            <text x="510" y="140" class="t" text-anchor="middle" style="font-size:20px">排查重复推送</text>
+
+            <text x="72" y="184" class="t" text-anchor="middle">类别</text>
+            <text x="72" y="202" class="t-sub" text-anchor="middle">8 选 1 + 空格</text>
+            <text x="226" y="184" class="t" text-anchor="middle">对象</text>
+            <text x="226" y="202" class="t-sub" text-anchor="middle">首字符非空白</text>
+            <text x="352" y="184" class="t" text-anchor="middle">全角竖线</text>
+            <text x="352" y="202" class="t-sub" text-anchor="middle">U+FF5C ×1</text>
+            <text x="510" y="184" class="t" text-anchor="middle">目标</text>
+            <text x="510" y="202" class="t-sub" text-anchor="middle">首字符非空白</text>
+
+            <rect x="40" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="76" y="248" text-anchor="middle" style="font-size:18px">🎬</text>
+            <text x="76" y="270" class="t-cap" text-anchor="middle">内容制作</text>
+            <rect x="116" y="224" width="72" height="56" rx="6" class="n is-focal"/>
+            <text x="152" y="248" text-anchor="middle" style="font-size:18px">🧩</text>
+            <text x="152" y="270" class="t-cap" text-anchor="middle">工具开发</text>
+            <rect x="192" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="228" y="248" text-anchor="middle" style="font-size:18px">🔎</text>
+            <text x="228" y="270" class="t-cap" text-anchor="middle">对比调研</text>
+            <rect x="268" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="304" y="248" text-anchor="middle" style="font-size:18px">🎨</text>
+            <text x="304" y="270" class="t-cap" text-anchor="middle">页面设计</text>
+            <rect x="344" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="380" y="248" text-anchor="middle" style="font-size:18px">📝</text>
+            <text x="380" y="270" class="t-cap" text-anchor="middle">方法整理</text>
+            <rect x="420" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="456" y="248" text-anchor="middle" style="font-size:18px">📅</text>
+            <text x="456" y="270" class="t-cap" text-anchor="middle">日程安排</text>
+            <rect x="496" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="532" y="248" text-anchor="middle" style="font-size:18px">⚙️</text>
+            <text x="532" y="270" class="t-cap" text-anchor="middle">环境配置</text>
+            <rect x="572" y="224" width="72" height="56" rx="6" class="n"/>
+            <text x="608" y="248" text-anchor="middle" style="font-size:18px">💬</text>
+            <text x="608" y="270" class="t-cap" text-anchor="middle">一般讨论</text>
+          </g>
+        </svg>
+      </div>
+      <table data-cue="title-16">
+        <thead><tr><th>规则</th><th>谁来保证</th></tr></thead>
+        <tbody>
+          <tr><td>类别 emoji + 一个空格 + 对象 + <code>｜</code> + 目标</td><td>提示词 + 校验代码</td></tr>
+          <tr><td>通常 10～26 个中文字符</td><td>只有提示词</td></tr>
+          <tr><td>全长不超过 48 个码点</td><td>提示词 + 校验代码</td></tr>
+          <tr><td>不含控制字符、格式字符</td><td>校验代码</td></tr>
+          <tr><td>对象、目标两端没有空白</td><td>校验代码</td></tr>
+          <tr><td>对象、目标里没有 <code>|</code>、<code>`</code>、<code>@</code>、<code>Extended_Pictographic</code> 类字符（大部分 emoji）</td><td>校验代码</td></tr>
+          <tr><td>对象、目标里没有 <code>http://</code>、<code>https://</code>、<code>sk-</code></td><td>校验代码</td></tr>
+          <tr><td>对象开头，以及空白或 <code>｜</code> 之后，不出现路径开头：<code>/</code>、<code>~/</code>、<code>C:\</code> 这类盘符路径、<code>\\</code></td><td>校验代码</td></tr>
+          <tr><td>对象在前，目标在后；类别跟随工作对象；跟随用户的主要语言；对象和类别保持稳定；「继续」「提交」这类收尾动作不取代主线任务</td><td>只有提示词</td></tr>
+          <tr><td>不含密码、密钥、个人身份信息、完整本地路径</td><td>只有提示词（校验代码只拦上面几种模式，例如 <code>src/app.ts</code>、<code>example.com</code> 能通过）</td></tr>
+        </tbody>
+      </table>
+      <figcaption>
+        <span class="seg" data-seg="title-15" data-say="看图，这是示例标题：类别 emoji、空格、对象、全角竖线和目标。类别只有八个。">这是示例标题：类别 emoji、空格、对象、全角竖线和目标。类别只有八个。</span>
+        <span class="seg" data-seg="title-16">表里的规则分两类：提示词规则靠模型遵守，代码规则由校验函数检查。校验不通过，扩展保留原名。下面可以自己试。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 校验 demo ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>试一试：标题校验</h3>
+      <p>演示把输入的候选标题包成 <code>{"title": …}</code>，交给和源码相同的校验函数 <code>parseSessionTitle</code>。预设按钮覆盖常见的拒绝原因。</p>
+    </div>
+    <figure class="beat-fig" id="fig-title-6">
+      <div class="demo" id="title-demo-check">
+        <p class="demo-static">这里原本是一个交互演示：输入候选标题，页面用与 <code>parseSessionTitle</code> 相同的规则判断它能否通过。当前环境没有运行脚本。规则见上一节的表格。</p>
+        <div class="demo-live" hidden>
+          <label for="title-demo-input">候选标题</label>
+          <input id="title-demo-input" type="text" autocomplete="off" spellcheck="false" value="🧩 通知服务｜排查重复推送">
+          <div class="demo-presets" role="group" aria-label="示例输入">
+            <button type="button" data-title="🧩 通知服务｜排查重复推送">合格</button>
+            <button type="button" data-title="🧩 通知服务排查重复推送">缺少 ｜</button>
+            <button type="button" data-title="🧩 对象 ｜目标">竖线前有空格</button>
+            <button type="button" data-title="🧩 对象|细节｜目标">半角 |</button>
+            <button type="button" data-title="🧩 /home/name｜配置">绝对路径</button>
+            <button type="button" data-title="🚀 发布流程｜修复构建">未知类别</button>
+            <button type="button" data-title="🧩 对象｜字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字">超长</button>
+          </div>
+          <p><code id="title-demo-raw"></code></p>
+          <output id="title-demo-out" for="title-demo-input" aria-live="polite"></output>
+        </div>
+      </div>
+      <figcaption>通过只代表格式合格；自动命名还要满足请求未取消、会话没变、on/off 状态为开启、会话名归本扩展。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 保护 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>保护手动起的名字</h3>
+      <p>
+        <span class="seg" data-seg="title-17">扩展只改两种会话名：空的，或者等于它上次起的。</span>
+        <span class="seg" data-seg="title-18" data-say="用户用斜杠 name 改名后，扩展暂停这个会话的自动命名。">用户用 <code>/name</code> 改名后，扩展暂停这个会话的自动命名。</span>
+        <span class="seg" data-seg="title-19" data-say="会话开始时，扩展先恢复保存的 on off 状态；会话名不是它起的，也暂停。">会话开始时，扩展先恢复保存的 on/off 状态；会话名不是它起的，也暂停。</span>
+        <span class="seg" data-seg="title-20" data-say="斜杠 auto name on 让扩展接管当前会话名，下一轮结束后生效。"><code>/auto-name on</code> 让扩展接管当前会话名，下一轮结束后生效。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-title-7">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 340" width="100%" role="img" aria-labelledby="fig-title-7-title fig-title-7-desc">
+          <title id="fig-title-7-title">自动命名的开启与暂停</title>
+          <desc id="fig-title-7-desc">会话开始时先恢复保存的 on/off 状态，再检查会话名归属，归属检查只能把状态改成暂停；开启时遇到本扩展以外的改名或 off 进入暂停，执行 on 回到开启；状态写进会话的自定义条目。</desc>
+          <defs>
+            <marker id="fig-title-7-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <g data-cue="title-19">
+            <line x1="320" y1="44" x2="320" y2="58" class="w" marker-end="url(#fig-title-7-ah)"/>
+            <path d="M280 112 V132 Q280 140 272 140 H148 Q140 140 140 148 V164" class="w" marker-end="url(#fig-title-7-ah)"/>
+            <rect x="152" y="118" width="108" height="14" class="mask"/>
+            <text x="206" y="129" class="t-cap" text-anchor="middle">on 且归属本扩展</text>
+            <path d="M360 112 V132 Q360 140 368 140 H492 Q500 140 500 148 V164" class="w" marker-end="url(#fig-title-7-ah)"/>
+            <rect x="384" y="118" width="92" height="14" class="mask"/>
+            <text x="430" y="129" class="t-cap" text-anchor="middle">off 或不归属</text>
+          </g>
+          <g data-cue="title-18">
+            <line x1="240" y1="184" x2="394" y2="184" class="w" marker-end="url(#fig-title-7-ah)"/>
+            <rect x="252" y="164" width="136" height="14" class="mask"/>
+            <text x="320" y="175" class="t-cap" text-anchor="middle">本扩展以外改名 · off</text>
+          </g>
+          <g data-cue="title-20">
+            <line x1="400" y1="216" x2="246" y2="216" class="w" marker-end="url(#fig-title-7-ah)"/>
+            <rect x="268" y="222" width="104" height="14" class="mask"/>
+            <text x="320" y="233" class="t-sub" text-anchor="middle">/auto-name on</text>
+          </g>
+          <g data-cue="title-21">
+            <path d="M140 232 V282 Q140 290 148 290 H196" class="w is-dash" marker-end="url(#fig-title-7-ah)"/>
+            <path d="M500 232 V282 Q500 290 492 290 H444" class="w is-dash" marker-end="url(#fig-title-7-ah)"/>
+          </g>
+
+          <rect x="240" y="12" width="160" height="32" rx="6" class="n is-ghost"/>
+          <text x="320" y="32" class="t-sub" text-anchor="middle">session_start</text>
+          <g data-cue="title-19">
+            <rect x="168" y="64" width="304" height="48" rx="6" class="n"/>
+            <text x="320" y="84" class="t" text-anchor="middle">恢复保存的 on/off 状态</text>
+            <text x="320" y="102" class="t-cap" text-anchor="middle">没有条目时为开启</text>
+          </g>
+          <rect x="40" y="168" width="200" height="64" rx="6" class="n is-focal"/>
+          <text x="140" y="194" class="t" text-anchor="middle">自动命名中</text>
+          <g data-cue="title-17">
+            <text x="140" y="216" class="t-sub" text-anchor="middle">无会话名或 = lastAutoName</text>
+          </g>
+          <rect x="400" y="168" width="200" height="64" rx="6" class="n"/>
+          <text x="500" y="194" class="t" text-anchor="middle">暂停</text>
+          <text x="500" y="216" class="t-cap" text-anchor="middle">保护当前会话名</text>
+          <g data-cue="title-21">
+            <rect x="200" y="268" width="240" height="44" rx="6" class="n is-ghost"/>
+            <text x="320" y="286" class="t-sub" text-anchor="middle">personal-auto-session-name</text>
+            <text x="320" y="304" class="t-cap" text-anchor="middle">会话里的自定义条目</text>
+            <text x="320" y="332" class="t-cap" text-anchor="middle">改名暂停、on/off、自动改名成功时写入；开始时的暂停不写</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="seg" data-seg="title-21" data-say="看图。on off 状态写进会话的自定义条目，重载后仍然有效。">on/off 状态写进会话的自定义条目，重载后仍然有效。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 模型与档位 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>命名模型与思考强度</h3>
+      <p>
+        <span class="seg" data-seg="title-22" data-say="命名模型默认是 GPT 五点六 Luna，只从已认证的 scoped models 里找。找不到时，扩展报错并保留原名，不回退到其他模型。">命名模型默认是 <code>gpt-5.6-luna</code>，只从已认证的 scoped-models 里找。找不到时，扩展报错并保留原名，不回退到其他模型。</span>
+        <span class="seg" data-seg="title-23">命名请求的思考强度默认继承 Pi 的逐模型设置，未配置时用 low。主模型和主会话的思考强度不变。</span>
+      </p>
+      <ul>
+        <li>配置文件不存在时用默认值；文件损坏时报错，不调用模型，也不覆盖文件。保存时先写临时文件，再用 rename 替换，权限 <code>0600</code>。</li>
+        <li>继承时，项目级设置只在项目受信任时参与；显式档位必须是模型支持的档位。档位为 <code>off</code> 时 <code>maxTokens</code> 为 1024，否则取模型上限和 16384 中的较小值。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-8">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 256" width="100%" role="img" aria-labelledby="fig-title-8-title fig-title-8-desc">
+          <title id="fig-title-8-title">命名模型与思考强度怎么确定</title>
+          <desc id="fig-title-8-desc">命名模型从已认证的 scoped-models 中按名字查找，找不到时报错并保留原名；思考强度默认继承 Pi 的逐模型设置，未配置时为 low，再按模型能力收窄。</desc>
+          <defs>
+            <marker id="fig-title-8-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <text x="16" y="28" class="t-cap">模型</text>
+          <g data-cue="title-22">
+            <line x1="192" y1="64" x2="222" y2="64" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <line x1="412" y1="64" x2="442" y2="64" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <line x1="556" y1="88" x2="556" y2="106" class="w is-dash" marker-end="url(#fig-title-8-ah)"/>
+            <rect x="16" y="40" width="176" height="48" rx="6" class="n"/>
+            <text x="104" y="60" class="t" text-anchor="middle">命名配置 model</text>
+            <text x="104" y="78" class="t-sub" text-anchor="middle">默认 gpt-5.6-luna</text>
+            <rect x="228" y="40" width="184" height="48" rx="6" class="n"/>
+            <text x="320" y="60" class="t" text-anchor="middle">scoped-models</text>
+            <text x="320" y="78" class="t-cap" text-anchor="middle">只留已认证的模型</text>
+            <rect x="448" y="40" width="216" height="48" rx="6" class="n is-focal"/>
+            <text x="556" y="60" class="t" text-anchor="middle">命名模型</text>
+            <text x="556" y="78" class="t-sub" text-anchor="middle">匹配 provider/id 或 id</text>
+            <rect x="448" y="112" width="216" height="32" rx="6" class="n is-ghost"/>
+            <text x="556" y="132" class="t-cap" text-anchor="middle">找不到：报错，保留原名，不回退</text>
+          </g>
+
+          <text x="16" y="160" class="t-cap">思考强度</text>
+          <g data-cue="title-23">
+            <line x1="192" y1="196" x2="222" y2="196" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <line x1="412" y1="196" x2="442" y2="196" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <rect x="16" y="172" width="176" height="48" rx="6" class="n"/>
+            <text x="104" y="192" class="t" text-anchor="middle">thinking</text>
+            <text x="104" y="210" class="t-sub" text-anchor="middle">默认 inherit</text>
+            <rect x="228" y="172" width="184" height="48" rx="6" class="n"/>
+            <text x="320" y="192" class="t" text-anchor="middle">Pi 逐模型设置</text>
+            <text x="320" y="210" class="t-sub" text-anchor="middle">未配置 → low</text>
+            <rect x="448" y="172" width="216" height="48" rx="6" class="n"/>
+            <text x="556" y="192" class="t" text-anchor="middle">按模型能力收窄</text>
+            <text x="556" y="210" class="t-sub" text-anchor="middle">clampThinkingLevel</text>
+          </g>
+          <g data-cue="title-24">
+            <text x="16" y="244" class="t-cap">两项都存放在全局的 auto-session-name.json；on/off 状态按会话记录</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>
+        <span class="seg" data-seg="title-24" data-say="看图。命名模型和思考强度都是全局配置。on off 状态只作用于当前会话。">命名模型和思考强度都是全局配置。on/off 状态只作用于当前会话。</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 代价 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>代价：额度与外发文本</h3>
+      <p>
+        <span class="seg" data-seg="title-25">命名和预览都额外消耗命名模型的额度，这部分消耗不计入 Pi 自带的会话用量统计。发送的对话文本可能包含业务信息。</span>
+        <span class="seg" data-seg="title-26">和下一章对照：原位思考强度要先等分类器，最多 15 秒；自动命名在后台跑，用户不用等。</span>
+      </p>
+      <ul>
+        <li>命名请求使用新的随机 <code>sessionId</code>，<code>cacheRetention</code> 为 <code>none</code>，不带工具；认证、请求头、API 端点 <code>baseUrl</code> 和环境变量复用 Pi 为该模型解析的结果。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-10">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 220" width="100%" role="img" aria-labelledby="fig-title-10-title fig-title-10-desc">
+          <title id="fig-title-10-title">一轮结束后多出的命名请求</title>
+          <desc id="fig-title-10-desc">一轮结束后，自动会话命名在后台请求命名模型，30 秒后触发取消，成功时再改会话名；用户不用等待。代价是额度消耗和对外发送对话文本。对照：原位思考强度要先等分类器，最多 15 秒。</desc>
+          <defs>
+            <marker id="fig-title-10-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+          <line class="w" x1="144" y1="60" x2="198" y2="60" marker-end="url(#fig-title-10-ah)"/>
+          <line class="w" x1="400" y1="60" x2="462" y2="60" marker-end="url(#fig-title-10-ah)"/>
+          <rect class="n" x="16" y="36" width="128" height="48" rx="6"/>
+          <text class="t" x="80" y="56" text-anchor="middle">一轮结束</text>
+          <text class="t-sub" x="80" y="73" text-anchor="middle">agent_settled</text>
+          <rect class="n is-ext" x="200" y="36" width="200" height="48" rx="6"/>
+          <text class="t" x="300" y="56" text-anchor="middle">命名模型</text>
+          <text class="t-sub" x="300" y="73" text-anchor="middle">后台，30 秒后取消</text>
+          <rect class="n" x="464" y="36" width="160" height="48" rx="6"/>
+          <text class="t" x="544" y="56" text-anchor="middle">会话名</text>
+          <text class="t-sub" x="544" y="73" text-anchor="middle">setSessionName</text>
+          <g data-cue="title-25">
+            <path d="M200 96 V100 H400 V96" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
+            <text class="t-cap" x="300" y="122" text-anchor="middle">额度：不计入 Pi 会话用量统计</text>
+            <text class="t-cap" x="300" y="142" text-anchor="middle">外发：对话文本可能含业务信息</text>
+          </g>
+          <g data-cue="title-26">
+            <line x1="16" y1="168" x2="624" y2="168" style="stroke:var(--rule)"/>
+            <text class="t-cap" x="16" y="190">用户：一轮结束后直接输入下一条，不等命名结果</text>
+            <text class="t-cap" x="16" y="210">对照第 6 章：原位思考强度要先等分类器，最多 15 秒</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>虚线框是外部服务（命名模型的服务商）。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 命令（录屏） ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>命令：/auto-name</h3>
+      <p>
+        <span class="seg" data-seg="title-27" data-say="输入斜杠 auto name，查看状态、模型和思考强度。">输入 <code>/auto-name</code>，查看状态、模型和思考强度。</span>
+      </p>
+      <ul>
+        <li><code>/auto-name model</code>、<code>/auto-name thinking</code> 会先取消进行中的命名请求。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-9">
+      <div class="capture-frame"><video data-cue="title-27" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name，输出一行：自动命名开启、模型、思考强度和可用子命令"></video></div>
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>/auto-name</code>、<code>/auto-name status</code></td><td>显示 on/off 状态、命名模型和实际思考强度</td></tr>
+          <tr><td><code>/auto-name model</code></td><td>从已认证的 scoped-models 中选命名模型（全局）；换成另一个模型时，思考强度恢复继承</td></tr>
+          <tr><td><code>/auto-name thinking</code></td><td>选独立档位，或恢复继承（全局）；只列出模型支持的档位</td></tr>
+          <tr><td><code>/auto-name preview</code></td><td>Pi 空闲时预览建议标题，不改名；不受 on/off 状态和「相同输入跳过」限制，失败时每次都提醒</td></tr>
+          <tr><td><code>/auto-name off</code></td><td>暂停当前会话的自动命名</td></tr>
+          <tr><td><code>/auto-name on</code></td><td>开启当前会话的自动命名，接管当前会话名，下一轮结束后生效</td></tr>
+        </tbody>
+      </table>
+      <figcaption>录屏只保留命令输出那一段。</figcaption>
+    </figure>
+  </div>
+
+  <style>
+    #ch-title .title-demo-controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin-bottom: 12px; }
+    #ch-title .title-demo-controls label { display: inline-flex; gap: 8px; align-items: center; white-space: nowrap; }
+    #ch-title .title-demo-row { display: grid; grid-template-columns: 6.5em 1fr; gap: 12px; margin: 6px 0; }
+    #ch-title .title-demo-row > :first-child { color: var(--muted); }
+    #ch-title .title-demo-row code { overflow-wrap: anywhere; }
+    #ch-title .title-demo-term { display: grid; grid-template-columns: repeat(var(--cols, 28), 14px); grid-auto-rows: 24px; width: max-content; margin: 12px 0 8px; border: 1px solid var(--rule); background: var(--paper-2); }
+    #ch-title .title-demo-term .c { display: flex; align-items: center; justify-content: center; border-right: 1px dotted var(--rule); color: var(--muted); font-size: 12px; line-height: 1; }
+    #ch-title .title-demo-term .c-edit { grid-column: 1 / -1; justify-content: flex-start; padding-left: 4px; color: var(--ink); border-bottom: 1px solid var(--rule); }
+    #ch-title .title-demo-term .c-ch { background: var(--accent-tint); }
+  </style>
+
+  <script type="module">
+    // 演示 1：会话名清洗与右对齐排版（右下角会话标题）
+    {
+      const demo = document.querySelector("#ch-title #title-demo-width");
+      const ui = demo?.querySelector(".title-demo-ui");
+      if (demo && ui) {
+        const names = [
+          "实现会话标题 🐱",
+          "统一扩展管理入口并接入 d1-ultra 分类器",
+          "\x1b[31m标题\x1b[0m\n\t下一行\x07",
+          "",
+        ];
+        const $ = (s) => ui.querySelector(s);
+        const term = $("[data-term]");
+        const slider = $("[data-width]");
+        const select = $("[data-name]");
+        // shortcut: 演示只去掉 SGR 颜色序列；扩展用 stripVTControlCharacters 去掉全部终端转义序列。
+        const clean = (s) =>
+          s.replace(/\x1b\[[0-9;]*m/g, "").replace(/[\x00-\x1f\x7f-\x9f\u2028\u2029]/g, " ").trim() || "未命名会话";
+        // shortcut: 只按常见 CJK、全角与 emoji 区段算 2 列，真实宽度由 pi-tui 的 visibleWidth 计算。
+        const cw = (ch) => {
+          const c = ch.codePointAt(0);
+          return (c >= 0x1100 && c <= 0x115f) || (c >= 0x2e80 && c <= 0xa4cf) || (c >= 0xac00 && c <= 0xd7a3) ||
+            (c >= 0xf900 && c <= 0xfaff) || (c >= 0xfe30 && c <= 0xfe4f) || (c >= 0xff00 && c <= 0xff60) ||
+            (c >= 0xffe0 && c <= 0xffe6) || (c >= 0x1f300 && c <= 0x1faff) ? 2 : 1;
+        };
+        const truncate = (chars, w) => {
+          const total = chars.reduce((n, ch) => n + cw(ch), 0);
+          if (total <= w) return chars;
+          if (w < 1) return [];
+          const out = [];
+          let used = 0;
+          for (const ch of chars) {
+            if (used + cw(ch) > w - 1) break;
+            out.push(ch);
+            used += cw(ch);
+          }
+          return [...out, "…"];
+        };
+        const cell = (cls, text = "", span = 1) => {
+          const d = document.createElement("div");
+          d.className = `c ${cls}`;
+          d.textContent = text;
+          if (span > 1) d.style.gridColumn = `span ${span}`;
+          return d;
+        };
+        const draw = () => {
+          const w = Number(slider.value);
+          const raw = names[Number(select.value)];
+          const name = clean(raw);
+          const title = truncate([...name], w);
+          const tw = title.reduce((n, ch) => n + cw(ch), 0);
+          term.style.setProperty("--cols", w);
+          term.replaceChildren(
+            cell("c-edit", "> "),
+            ...Array.from({ length: w - tw }, () => cell("c-pad")),
+            ...title.map((ch) => cell("c-ch", ch === " " ? "" : ch, cw(ch))),
+          );
+          $("[data-width-out]").textContent = `${w} 列`;
+          $("[data-raw]").textContent = JSON.stringify(raw);
+          $("[data-clean]").textContent = JSON.stringify(name);
+          $("[data-layout]").textContent =
+            `会话名占 ${tw} 列，左侧补 ${w - tw} 个空格` + (title.at(-1) === "…" ? "，已截断" : "");
+        };
+        slider.addEventListener("input", draw);
+        select.addEventListener("change", draw);
+        demo.querySelector(".title-demo-fallback").hidden = true;
+        ui.hidden = false;
+        draw();
+      }
+    }
+
+    // 演示 2：标题格式校验（自动会话命名）
+    {
+      const demo = document.querySelector("#ch-title #title-demo-check");
+      if (demo) {
+        // 逐字复刻 extensions/auto-session-name.ts 的 parseSessionTitle（去掉类型标注）。
+        function parseSessionTitle(text) {
+          let result;
+          try {
+            result = JSON.parse(text.trim());
+          } catch (cause) {
+            throw new Error("命名结果不是有效 JSON", { cause });
+          }
+          if (
+            !result ||
+            typeof result !== "object" ||
+            Array.isArray(result) ||
+            !("title" in result) ||
+            Object.keys(result).length !== 1
+          )
+            throw new Error("命名结果缺少 title");
+          if (result.title === null) return null;
+          if (typeof result.title !== "string") throw new Error("标题不是文本");
+          const title = result.title.trim();
+          if (
+            [...title].length > 48 ||
+            /[\p{Cc}\p{Cf}\u2028\u2029]/u.test(title) ||
+            !/^(🎬|🧩|🔎|🎨|📝|📅|⚙️|💬) [^｜\s][^｜]*｜[^｜\s][^｜]*$/u.test(title)
+          )
+            throw new Error("标题格式无效");
+          const body = title.slice(title.indexOf(" ") + 1);
+          if (
+            body.split("｜").some((part) => part !== part.trim()) ||
+            /[|`@\p{Extended_Pictographic}]|https?:\/\/|sk-|(?:^|[\s｜])(?:\/|~\/|[A-Za-z]:[\\/]|\\\\)/u.test(
+              body,
+            )
+          )
+            throw new Error("标题含额外格式、路径或疑似敏感信息");
+          return title;
+        }
+        // 只用于解释被拒原因；通过与否只看上面的函数。
+        const reason = (raw) => {
+          const title = raw.trim();
+          const n = [...title].length;
+          if (n > 48) return `共 ${n} 个码点，超过 48。`;
+          if (/[\p{Cc}\p{Cf}\u2028\u2029]/u.test(title)) return "含控制字符或格式字符。";
+          if (!/^(🎬|🧩|🔎|🎨|📝|📅|⚙️|💬) [^｜\s][^｜]*｜[^｜\s][^｜]*$/u.test(title))
+            return "不符合「八个类别之一 + 一个空格 + 对象 + ｜ + 目标」。";
+          const body = title.slice(title.indexOf(" ") + 1);
+          if (body.split("｜").some((part) => part !== part.trim())) return "对象或目标两端有空白。";
+          return "对象或目标里有 |、`、@、Extended_Pictographic 字符、http(s)://、sk- 或绝对路径开头。";
+        };
+        const input = demo.querySelector("#title-demo-input");
+        const raw = demo.querySelector("#title-demo-raw");
+        const out = demo.querySelector("#title-demo-out");
+        const run = () => {
+          const json = JSON.stringify({ title: input.value });
+          raw.textContent = json;
+          try {
+            const title = parseSessionTitle(json);
+            out.dataset.ok = "true";
+            out.textContent = `格式校验通过：「${title}」。满足自动命名的其他条件时，扩展才会采用。`;
+          } catch (error) {
+            out.dataset.ok = "false";
+            out.textContent = `拒绝（${error.message}）：${reason(input.value)}扩展保留原名。`;
+          }
+        };
+        demo.querySelector(".demo-static").remove();
+        demo.querySelector(".demo-live").hidden = false;
+        input.addEventListener("input", run);
+        demo.querySelector(".demo-presets").addEventListener("click", (event) => {
+          const button = event.target.closest("button[data-title]");
+          if (!button) return;
+          input.value = button.dataset.title;
+          run();
+        });
+        run();
+      }
+    }
+  </script>
+</section>

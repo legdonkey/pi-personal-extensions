@@ -1,0 +1,571 @@
+<section class="chapter" id="ch-message" data-chapter="message" aria-labelledby="ch-message-h">
+  <header class="chapter-head">
+    <h2 id="ch-message-h">消息区：路径链接和橙色线框</h2>
+    <p class="chapter-sum">两项功能都改消息的显示：一项在渲染前把文件路径改写成链接，一项在渲染后给用户消息加边框。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>文件路径可点击 <code>clickable-paths</code>；用户消息橙色线框 <code>user-message-border</code></dd>
+      <dt>快捷命令</dt><dd><code>/clickable-paths</code>（用户消息橙色线框没有快捷命令）</dd>
+      <dt>配置文件</dt><dd>agent 目录下的 <code>clickable-paths.json</code>（默认 <code>~/.pi/agent/</code>，跟随 <code>PI_CODING_AGENT_DIR</code>）</dd>
+    </dl>
+  </header>
+
+  <!-- ============ 总图：两项功能在渲染链路上的位置 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <p>
+        <span class="seg" data-seg="message-01">Pi 默认把消息里的文件路径显示成普通文字。文件路径可点击把路径变成链接，用户消息橙色线框给用户消息加一圈边框。</span>
+        <span class="seg" data-seg="message-02" data-say="看图。文件路径可点击在 Markdown 渲染之前改写文本。用户消息和助手消息默认都经过这一步。">文件路径可点击在 Markdown 渲染之前改写文本。用户消息和助手消息默认都经过这一步。</span>
+        <span class="seg" data-seg="message-03">用户消息橙色线框在渲染之后工作：它包装用户消息组件的 render，给输出的行加边框。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-message-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 240" width="100%" role="img" aria-labelledby="fig-message-1-title fig-message-1-desc">
+          <title id="fig-message-1-title">两项功能在消息渲染链路上的位置</title>
+          <desc id="fig-message-1-desc">用户消息和助手消息都先经过文件路径可点击的改写，再由 Pi 内置的 Markdown 渲染；只有用户消息在渲染后再经过橙色线框，最后显示到终端屏幕。</desc>
+          <defs>
+            <marker id="fig-message-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <g data-cue="message-01">
+            <line class="w" x1="392" y1="164" x2="550" y2="164" marker-end="url(#fig-message-1-arrow)"/>
+            <rect class="n" x="8" y="40" width="96" height="48" rx="6"/>
+            <text class="t" x="56" y="69" text-anchor="middle">用户消息</text>
+            <rect class="n" x="8" y="140" width="96" height="48" rx="6"/>
+            <text class="t" x="56" y="169" text-anchor="middle">助手消息</text>
+            <rect class="n is-ext" x="280" y="28" width="112" height="172" rx="6"/>
+            <text class="t" x="336" y="104" text-anchor="middle">Markdown</text>
+            <text class="t" x="336" y="124" text-anchor="middle">渲染</text>
+            <text class="t-cap" x="336" y="144" text-anchor="middle">Pi 内置</text>
+            <rect class="n" x="552" y="28" width="120" height="172" rx="6"/>
+            <text class="t" x="612" y="118" text-anchor="middle">终端屏幕</text>
+          </g>
+
+          <g data-cue="message-02">
+            <line class="w" x1="104" y1="64" x2="130" y2="64" marker-end="url(#fig-message-1-arrow)"/>
+            <line class="w" x1="104" y1="164" x2="130" y2="164" marker-end="url(#fig-message-1-arrow)"/>
+            <line class="w" x1="252" y1="64" x2="278" y2="64" marker-end="url(#fig-message-1-arrow)"/>
+            <line class="w" x1="252" y1="164" x2="278" y2="164" marker-end="url(#fig-message-1-arrow)"/>
+            <rect class="n is-focal" x="132" y="28" width="120" height="172" rx="6"/>
+            <text class="t" x="192" y="104" text-anchor="middle">改写路径</text>
+            <text class="t-cap" x="192" y="124" text-anchor="middle">文件路径可点击</text>
+            <text class="t-sub" x="192" y="144" text-anchor="middle">渲染前</text>
+          </g>
+
+          <g data-cue="message-03">
+            <line class="w" x1="392" y1="64" x2="418" y2="64" marker-end="url(#fig-message-1-arrow)"/>
+            <line class="w" x1="524" y1="64" x2="550" y2="64" marker-end="url(#fig-message-1-arrow)"/>
+            <rect class="n is-focal" x="420" y="40" width="104" height="48" rx="6"/>
+            <text class="t" x="472" y="62" text-anchor="middle">加线框</text>
+            <text class="t-cap" x="472" y="80" text-anchor="middle">渲染后</text>
+          </g>
+
+          <text class="t-cap" x="8" y="228">改写只影响显示：会话记录和发给模型的内容不变。</text>
+        </svg>
+      </div>
+      <figcaption>两项功能分别挂在渲染前和渲染后。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：找候选、查文件 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>文件路径可点击 <code>clickable-paths</code></h3>
+      <p>
+        <span class="seg" data-seg="message-04" data-say="看图里的示例消息。扩展找两类候选：反引号里的行内代码，和带扩展名的裸路径。裸路径指正文里没加反引号的路径。">扩展找两类候选：反引号里的行内代码，和带扩展名的裸路径。裸路径指正文里没加反引号的路径。</span>
+        <span class="seg" data-seg="message-05" data-say="文件真实存在时，路径才变成链接。示例里的 node 点 js 不是文件，保持原样。">文件真实存在时，路径才变成链接。示例里的 <code>node.js</code> 不是文件，保持原样。</span>
+      </p>
+      <ul>
+        <li>裸路径的识别可以关闭：<code>/clickable-paths bare off</code>。</li>
+        <li>扩展缓存「文件是否存在」的结果，有效期 5 秒。缓存最多 4000 条；达到上限后，下次写入前清空整个缓存。有效期内删掉的文件，链接可能暂时还在。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 168" width="100%" role="img" aria-labelledby="fig-message-2-title fig-message-2-desc">
+          <title id="fig-message-2-title">从消息里找候选路径并确认文件存在</title>
+          <desc id="fig-message-2-desc">示例助手消息里有三个候选：行内代码 src/app.ts:12:5、裸路径 README.md 和 node.js。前两个文件存在，变成链接；node.js 不是文件，保持原样。</desc>
+          <rect class="n is-ghost" x="12" y="12" width="656" height="144" rx="6"/>
+          <text class="t-cap" x="28" y="36">助手消息（示例）</text>
+          <text class="t-cap" x="28" y="68">改了</text>
+          <text class="t-cap" x="216" y="68">，说明见</text>
+          <text class="t-cap" x="368" y="68">；运行时用</text>
+          <text class="t-cap" x="540" y="60">工作目录（示例）</text>
+          <text class="t-sub" x="540" y="80">/Users/me/proj</text>
+
+          <g data-cue="message-04">
+            <rect class="n" x="60" y="50" width="148" height="26" rx="4"/>
+            <text class="t-mono" x="68" y="68">`src/app.ts:12:5`</text>
+            <rect class="n" x="272" y="50" width="88" height="26" rx="4"/>
+            <text class="t-mono" x="280" y="68">README.md</text>
+            <rect class="n" x="436" y="50" width="72" height="26" rx="4"/>
+            <text class="t-mono" x="444" y="68">node.js</text>
+            <text class="t-sub" x="134" y="96" text-anchor="middle">行内代码</text>
+            <text class="t-sub" x="316" y="96" text-anchor="middle">裸路径</text>
+            <text class="t-sub" x="472" y="96" text-anchor="middle">裸路径</text>
+          </g>
+
+          <g data-cue="message-05">
+            <rect x="78" y="112" width="112" height="24" rx="4" style="fill:none;stroke:var(--ok)"/>
+            <text class="t-cap" x="134" y="128" text-anchor="middle" style="fill:var(--ok)">存在 → 链接</text>
+            <rect x="260" y="112" width="112" height="24" rx="4" style="fill:none;stroke:var(--ok)"/>
+            <text class="t-cap" x="316" y="128" text-anchor="middle" style="fill:var(--ok)">存在 → 链接</text>
+            <rect x="404" y="112" width="136" height="24" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="472" y="128" text-anchor="middle">不是文件 → 原样</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>示例消息和工作目录都是虚构的。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：一个候选怎么变成链接 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <p>
+        <span class="seg" data-seg="message-06">跟着第一个候选往下看。扩展拆出末尾的行号和列号，再按会话工作目录解析相对路径。</span>
+        <span class="seg" data-seg="message-07" data-say="扩展按设置的编辑器拼出 URL。默认编辑器是 VS Code，URL 带上行号和列号。">扩展按设置的编辑器拼出 URL。默认编辑器是 <code>vscode</code>，URL 带上行号和列号。</span>
+        <span class="seg" data-seg="message-08" data-say="最后，扩展把文本改写成 Markdown 链接。终端支持超链接时，Pi 输出 O S C 8 超链接：屏幕上只显示文字，点击文字打开背后的 URL。">最后，扩展把文本改写成 Markdown 链接。终端支持超链接时，Pi 输出 OSC 8 超链接：屏幕上只显示文字，点击文字打开背后的 URL。</span>
+      </p>
+      <ul>
+        <li>扩展按 <code>/</code> 把路径分段，逐段做 URL 编码。空格等字符会转义。</li>
+        <li>带 <code>:行</code> 的路径找不到文件时，扩展把整串当文件名再试一次（文件名本身带冒号的情况）。这时链接不带行号。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 280" width="100%" role="img" aria-labelledby="fig-message-3-title fig-message-3-desc">
+          <title id="fig-message-3-title">一个路径变成链接的五步</title>
+          <desc id="fig-message-3-desc">示例路径 src/app.ts:12:5 先拆出行号 12 和列号 5，再按工作目录解析成绝对路径，按 vscode 选项拼出 URL，改写成 Markdown 链接，最后在支持超链接的终端里显示为带下划线的链接文字。</desc>
+          <defs>
+            <marker id="fig-message-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <line class="w" x1="62" y1="56" x2="62" y2="66" marker-end="url(#fig-message-3-arrow)"/>
+          <line class="w" x1="62" y1="108" x2="62" y2="118" marker-end="url(#fig-message-3-arrow)"/>
+          <line class="w" x1="62" y1="160" x2="62" y2="170" marker-end="url(#fig-message-3-arrow)"/>
+          <line class="w" x1="62" y1="212" x2="62" y2="222" marker-end="url(#fig-message-3-arrow)"/>
+
+          <g data-cue="message-06">
+            <rect class="n" x="12" y="16" width="100" height="40" rx="6"/>
+            <text class="t" x="24" y="41">1 拆出行列</text>
+            <g>
+              <animateTransform attributeName="transform" type="translate" from="0 -24" to="0 0" dur="0.6s" begin="indefinite" fill="freeze"/>
+              <animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="indefinite" fill="freeze"/>
+              <rect class="n" x="128" y="22" width="96" height="28" rx="4"/>
+              <text class="t-mono" x="136" y="41">src/app.ts</text>
+              <rect class="n" x="232" y="22" width="56" height="28" rx="4"/>
+              <text class="t-mono" x="242" y="41">行 12</text>
+              <rect class="n" x="296" y="22" width="56" height="28" rx="4"/>
+              <text class="t-mono" x="308" y="41">列 5</text>
+              <text class="t-cap" x="368" y="41">末尾的 :行:列 单独拆出</text>
+            </g>
+            <rect class="n" x="12" y="68" width="100" height="40" rx="6"/>
+            <text class="t" x="24" y="93">2 解析路径</text>
+            <g>
+              <animateTransform attributeName="transform" type="translate" from="0 -52" to="0 0" dur="0.8s" begin="indefinite" fill="freeze"/>
+              <animate attributeName="opacity" from="0" to="1" dur="0.8s" begin="indefinite" fill="freeze"/>
+              <text class="t-mono" x="128" y="93">/Users/me/proj/src/app.ts</text>
+              <text class="t-cap" x="336" y="93">按工作目录解析，~/ 展开到主目录，再确认文件存在</text>
+            </g>
+          </g>
+
+          <g data-cue="message-07">
+            <rect class="n is-focal" x="12" y="120" width="100" height="40" rx="6"/>
+            <text class="t" x="24" y="145">3 拼 URL</text>
+            <g>
+              <animateTransform attributeName="transform" type="translate" from="0 -52" to="0 0" dur="0.6s" begin="indefinite" fill="freeze"/>
+              <animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="indefinite" fill="freeze"/>
+              <text class="t-mono" x="128" y="145">vscode://file/Users/me/proj/src/app.ts:12:5</text>
+              <text class="t-cap" x="476" y="145">编辑器 vscode（默认）</text>
+            </g>
+          </g>
+
+          <g data-cue="message-08">
+            <rect class="n" x="12" y="172" width="100" height="40" rx="6"/>
+            <text class="t" x="24" y="197">4 改写文本</text>
+            <g>
+              <animateTransform attributeName="transform" type="translate" from="0 -52" to="0 0" dur="0.6s" begin="indefinite" fill="freeze"/>
+              <animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="indefinite" fill="freeze"/>
+              <text class="t-mono" x="128" y="197">[`src/app.ts:12:5`](vscode://file/Users/me/proj/src/app.ts:12:5)</text>
+            </g>
+            <rect class="n" x="12" y="224" width="100" height="40" rx="6"/>
+            <text class="t" x="24" y="249">5 屏幕显示</text>
+            <g>
+              <animateTransform attributeName="transform" type="translate" from="0 -52" to="0 0" dur="0.9s" begin="indefinite" fill="freeze"/>
+              <animate attributeName="opacity" from="0" to="1" dur="0.9s" begin="indefinite" fill="freeze"/>
+              <text class="t-cap" x="128" y="249">改了</text>
+              <text class="t-mono" x="160" y="249" style="fill:var(--link);text-decoration:underline">src/app.ts:12:5</text>
+              <text class="t-cap" x="280" y="249">，说明见</text>
+              <text class="t-mono" x="336" y="249" style="fill:var(--link);text-decoration:underline">README.md</text>
+              <text class="t-cap" x="424" y="241">支持超链接：OSC 8，只显示文字</text>
+              <text class="t-cap" x="424" y="259">不支持：文字后加括号里的 URL</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <figcaption>示例：工作目录 <code>/Users/me/proj</code>，编辑器 <code>vscode</code>。第 5 步的反引号已渲染成行内代码样式。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：保持原样的文本 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>哪些文本不改写</h3>
+      <p>
+        <span class="seg" data-seg="message-09">匹配到的反引号或波浪线围栏代码块里，路径不改写。四空格缩进的代码块不算围栏，里面的路径照常改写。</span>
+        <span class="seg" data-seg="message-10">正则能识别的行内链接和图片原样保留。扩展仍可能改写引用式链接里的方括号文本。</span>
+        <span class="seg" data-seg="message-11">扩展也不改写流式输出中的消息和思考块。流式输出中的消息等最终渲染时再处理。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-message-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 320" width="100%" role="img" aria-labelledby="fig-message-4-title fig-message-4-desc">
+          <title id="fig-message-4-title">哪些文本保持原样</title>
+          <desc id="fig-message-4-desc">八个示例输入及结果：围栏代码块、行内链接、含协议的行内代码、流式输出中的消息、思考块和关闭 userMessages 时的用户消息保持原样；四空格缩进代码块里的路径和引用式链接的方括号文本会被改写。</desc>
+          <text class="t-cap" x="16" y="24">输入（示例，假定文件存在）</text>
+          <text class="t-cap" x="508" y="24">结果</text>
+          <line x1="12" y1="34" x2="668" y2="34" style="stroke:var(--rule-solid);stroke-width:1"/>
+
+          <g data-cue="message-09">
+            <text class="t-mono" x="16" y="61">```ts 围栏里的 src/app.ts</text>
+            <rect x="508" y="46" width="160" height="22" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="588" y="61" text-anchor="middle">原样</text>
+            <line x1="12" y1="74" x2="668" y2="74" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-mono" x="16" y="95">四空格缩进代码里的 src/app.ts</text>
+            <rect x="508" y="80" width="160" height="22" rx="4" style="fill:none;stroke:var(--warn)"/>
+            <text class="t-cap" x="588" y="95" text-anchor="middle" style="fill:var(--warn)">照常改写</text>
+            <line x1="12" y1="108" x2="668" y2="108" style="stroke:var(--rule);stroke-width:1"/>
+          </g>
+
+          <g data-cue="message-10">
+            <text class="t-mono" x="16" y="129">[说明](README.md)</text>
+            <rect x="508" y="114" width="160" height="22" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="588" y="129" text-anchor="middle">原样</text>
+            <line x1="12" y1="142" x2="668" y2="142" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-mono" x="16" y="163">[README.md][ref]（引用式链接）</text>
+            <rect x="508" y="148" width="160" height="22" rx="4" style="fill:none;stroke:var(--warn)"/>
+            <text class="t-cap" x="588" y="163" text-anchor="middle" style="fill:var(--warn)">会被改写，引用失效</text>
+            <line x1="12" y1="176" x2="668" y2="176" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-mono" x="16" y="197">`https://example.com/app.ts`</text>
+            <rect x="508" y="182" width="160" height="22" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="588" y="197" text-anchor="middle">原样（含 ://）</text>
+            <line x1="12" y1="210" x2="668" y2="210" style="stroke:var(--rule);stroke-width:1"/>
+          </g>
+
+          <g data-cue="message-11">
+            <text class="t-mono" x="16" y="231">流式输出中的消息</text>
+            <rect x="508" y="216" width="160" height="22" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="588" y="231" text-anchor="middle">原样，最终渲染再处理</text>
+            <line x1="12" y1="244" x2="668" y2="244" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-mono" x="16" y="265">思考块</text>
+            <rect x="508" y="250" width="160" height="22" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="588" y="265" text-anchor="middle">原样</text>
+            <line x1="12" y1="278" x2="668" y2="278" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-mono" x="16" y="299">userMessages 为 false 时的用户消息</text>
+            <rect x="508" y="284" width="160" height="22" rx="4" style="fill:none;stroke:var(--rule-solid)"/>
+            <text class="t-cap" x="588" y="299" text-anchor="middle">原样</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>围栏指以 <code>```</code> 或 <code>~~~</code> 开头的代码块。<code>://</code> 只拦截整个候选；正文里 URL 的片段仍可能被裸路径扫描改写。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：设置与 URL 演示 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>设置和打开方式</h3>
+      <p>
+        <span class="seg" data-seg="message-12" data-say="设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项用斜杠 clickable paths 修改，第四项只能改配置文件。">设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项用 <code>/clickable-paths</code> 修改，第四项只能改配置文件。</span>
+        <span class="seg" data-seg="message-13">编辑器选 file 时，扩展生成 file 协议的 URL，交给系统默认程序打开，不带行号。</span>
+      </p>
+      <ul>
+        <li>字段与默认值：<code>enabled: true</code>、<code>editor: "vscode"</code>、<code>bareText: true</code>、<code>userMessages: true</code>。</li>
+        <li><code>/personal</code> 的「文件路径可点击」二级菜单提供同样的设置项。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-5">
+      <div class="demo" data-cue="message-12">
+        <p class="demo-static">示例：工作目录是 <code>/Users/me/proj</code>，编辑器选 <code>vscode</code>。<code>src/app.ts:12:5</code> 生成 <code>vscode://file/Users/me/proj/src/app.ts:12:5</code>。</p>
+        <div class="message-demo-ui" hidden>
+          <label for="message-demo-editor">编辑器 <code>editor</code></label>
+          <select id="message-demo-editor">
+            <option value="vscode" selected>vscode</option>
+            <option value="vscode-insiders">vscode-insiders</option>
+            <option value="cursor">cursor</option>
+            <option value="windsurf">windsurf</option>
+            <option value="file">file</option>
+          </select>
+          <div class="demo-presets" role="group" aria-label="示例路径">
+            <button type="button" data-path="src/app.ts:12:5">src/app.ts:12:5</button>
+            <button type="button" data-path="~/notes/todo.md">~/notes/todo.md</button>
+            <button type="button" data-path="docs/my file.md:3">docs/my file.md:3</button>
+            <button type="button" data-path="/Users/me/proj/src/../app.ts">/Users/me/proj/src/../app.ts</button>
+          </div>
+          <label for="message-demo-input">路径文本（工作目录 <code>/Users/me/proj</code>，主目录 <code>/Users/me</code>，均为示例）</label>
+          <input type="text" id="message-demo-input" value="src/app.ts:12:5" spellcheck="false" autocomplete="off">
+          <output id="message-demo-url" for="message-demo-editor message-demo-input" aria-live="polite"></output>
+          <p class="fig-hint">演示假定文件存在。演示不模拟「带行号的路径找不到文件时，把整串当文件名再试一次」这一步。绝对路径按原样保留 <code>..</code>，和扩展一致。</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th><code>editor</code></th><th>生成的 URL（示例路径）</th></tr></thead>
+        <tbody>
+          <tr data-cue="message-13"><td><code>file</code></td><td><code>file:///Users/me/proj/src/app.ts</code>（不带行号）</td></tr>
+        </tbody>
+      </table>
+      <details>
+        <summary>其他四个编辑器的 URL</summary>
+        <table>
+          <tbody>
+            <tr><td><code>vscode</code>（默认）</td><td><code>vscode://file/Users/me/proj/src/app.ts:12:5</code></td></tr>
+            <tr><td><code>vscode-insiders</code></td><td><code>vscode-insiders://file/Users/me/proj/src/app.ts:12:5</code></td></tr>
+            <tr><td><code>cursor</code></td><td><code>cursor://file/Users/me/proj/src/app.ts:12:5</code></td></tr>
+            <tr><td><code>windsurf</code></td><td><code>windsurf://file/Users/me/proj/src/app.ts:12:5</code></td></tr>
+          </tbody>
+        </table>
+      </details>
+      <pre><code># 查看状态、编辑器、裸路径、工作目录
+/clickable-paths
+# 总开关，下一条消息生效
+/clickable-paths on | off
+# 选编辑器
+/clickable-paths editor &lt;vscode|vscode-insiders|cursor|windsurf|file&gt;
+# 是否识别裸路径
+/clickable-paths bare on | off</code></pre>
+      <figcaption>换编辑器或改路径文本，URL 跟着变。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 用户消息橙色线框：接进 Pi 与卸下 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>用户消息橙色线框 <code>user-message-border</code></h3>
+      <p>
+        <span class="seg" data-seg="message-14" data-say="Pi 没有给普通用户消息提供边框钩子，所以扩展替换 User Message Component 原型上的 render。源码注释写明这是临时方案。">Pi 没有给普通用户消息提供边框钩子，所以扩展替换 <code>UserMessageComponent</code> 原型上的 <code>render</code>。源码注释写明这是临时方案。</span>
+        <span class="seg" data-seg="message-15">会话关闭时，如果 render 还是线框这一层，扩展就把它改回原始方法。</span>
+        <span class="seg" data-seg="message-16">如果后来别的 Pi 扩展又包装了一层，扩展不动它，只把线框这一层改成直接转发。</span>
+      </p>
+      <ul>
+        <li>只在 TUI 模式生效，给普通用户消息加橙色圆角边框。</li>
+        <li>边框颜色 <code>rgb(217,154,82)</code>；边框字符的背景用主题的 <code>userMessageBg</code>。</li>
+        <li>改的是原型，对所有用户消息实例生效；<code>session_start</code> 重复触发时，包装不叠加。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-6">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 236" width="100%" role="img" aria-labelledby="fig-message-6-title fig-message-6-desc">
+          <title id="fig-message-6-title">render 包装的装上与卸下</title>
+          <desc id="fig-message-6-desc">加载后，原型的 render 指向线框的包装；会话关闭时，如果 render 仍是线框这一层就改回原始方法；如果后来别的 Pi 扩展又包装了一层，就保留那一层，线框这一层改为直接转发。</desc>
+          <defs>
+            <marker id="fig-message-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <g data-cue="message-14">
+            <text class="t-cap" x="8" y="50">加载后</text>
+            <line class="w" x1="232" y1="46" x2="390" y2="46" marker-end="url(#fig-message-6-arrow)"/>
+            <line class="w" x1="520" y1="46" x2="534" y2="46" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="n" x="104" y="24" width="128" height="44" rx="6"/>
+            <text class="t-sub" x="168" y="50" text-anchor="middle">prototype.render</text>
+            <rect class="n is-focal" x="392" y="24" width="128" height="44" rx="6"/>
+            <text class="t" x="456" y="44" text-anchor="middle">线框包装</text>
+            <text class="t-sub" x="456" y="60" text-anchor="middle">active = true</text>
+            <rect class="n" x="536" y="24" width="128" height="44" rx="6"/>
+            <text class="t-sub" x="600" y="50" text-anchor="middle">originalRender</text>
+          </g>
+
+          <g data-cue="message-15">
+            <text class="t-cap" x="8" y="122">关闭：无后来者</text>
+            <line class="w" x1="232" y1="118" x2="534" y2="118" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="mask" x="340" y="94" width="88" height="14"/>
+            <text class="t-sub" x="384" y="105" text-anchor="middle">改回原始方法</text>
+            <rect class="n" x="104" y="96" width="128" height="44" rx="6"/>
+            <text class="t-sub" x="168" y="122" text-anchor="middle">prototype.render</text>
+            <rect class="n" x="536" y="96" width="128" height="44" rx="6"/>
+            <text class="t-sub" x="600" y="122" text-anchor="middle">originalRender</text>
+          </g>
+
+          <g data-cue="message-16">
+            <text class="t-cap" x="8" y="194">关闭：有后来者</text>
+            <line class="w" x1="232" y1="190" x2="246" y2="190" marker-end="url(#fig-message-6-arrow)"/>
+            <line class="w" x1="376" y1="190" x2="390" y2="190" marker-end="url(#fig-message-6-arrow)"/>
+            <line class="w" x1="520" y1="190" x2="534" y2="190" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="n" x="104" y="168" width="128" height="44" rx="6"/>
+            <text class="t-sub" x="168" y="194" text-anchor="middle">prototype.render</text>
+            <rect class="n" x="248" y="168" width="128" height="44" rx="6"/>
+            <text class="t" x="312" y="188" text-anchor="middle">后来的包装</text>
+            <text class="t-sub" x="312" y="204" text-anchor="middle">别的 Pi 扩展</text>
+            <rect class="n is-ghost" x="392" y="168" width="128" height="44" rx="6"/>
+            <text class="t" x="456" y="188" text-anchor="middle">线框：转发</text>
+            <text class="t-sub" x="456" y="204" text-anchor="middle">active = false</text>
+            <rect class="n" x="536" y="168" width="128" height="44" rx="6"/>
+            <text class="t-sub" x="600" y="194" text-anchor="middle">originalRender</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>三行分别是加载后、关闭时没有后来者、关闭时有后来的包装。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 用户消息橙色线框：三步形变 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>每次渲染的三步</h3>
+      <p>
+        <span class="seg" data-seg="message-17" data-say="看图。第一步，按宽度减 2 调用原始渲染，给竖线留出两列。">第一步，按宽度减 2 调用原始渲染，给竖线留出两列。</span>
+        <span class="seg" data-seg="message-18">第二步，把首末空白行换成上下边框。</span>
+        <span class="seg" data-seg="message-19">第三步，中间每行两侧加竖线。边框不加行，但长行可能多折一行。</span>
+        <span class="seg" data-seg="message-20">宽度小于 8 或行结构检查不通过时，改用原始渲染，不画边框。</span>
+      </p>
+      <ul>
+        <li>退回原始渲染时，功能仍是「已加载」状态。升级 Pi 后先运行 <code>npm run check</code>。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-7">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 680 336" width="100%" role="img" aria-labelledby="fig-message-7-title fig-message-7-desc">
+          <title id="fig-message-7-title">用户消息橙色线框的三步渲染</title>
+          <desc id="fig-message-7-desc">第一步按宽度减 2 调用原始渲染；第二步把首末两行空白行换成上下边框；第三步给中间各行两侧加竖线。宽度小于 8 或行结构检查不通过时，按完整宽度调用原始渲染，不画边框。</desc>
+          <defs>
+            <marker id="fig-message-7-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <g data-cue="message-17">
+            <text class="t" x="24" y="28">1 缩窄两列</text>
+            <text class="t-sub" x="24" y="48">render(width - 2)</text>
+            <rect class="w is-dash" x="24" y="68" width="180" height="124" rx="2"/>
+            <g>
+              <rect class="n is-ghost" x="32" y="72" width="164" height="20" rx="2"><animate attributeName="x" from="24" to="32" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="width" from="180" to="164" dur="0.6s" begin="indefinite" fill="freeze"/></rect>
+              <rect class="n" x="32" y="96" width="164" height="20" rx="2"><animate attributeName="x" from="24" to="32" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="width" from="180" to="164" dur="0.6s" begin="indefinite" fill="freeze"/></rect>
+              <rect class="n" x="32" y="120" width="164" height="20" rx="2"><animate attributeName="x" from="24" to="32" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="width" from="180" to="164" dur="0.6s" begin="indefinite" fill="freeze"/></rect>
+              <rect class="n" x="32" y="144" width="164" height="20" rx="2"><animate attributeName="x" from="24" to="32" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="width" from="180" to="164" dur="0.6s" begin="indefinite" fill="freeze"/></rect>
+              <rect class="n is-ghost" x="32" y="168" width="164" height="20" rx="2"><animate attributeName="x" from="24" to="32" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="width" from="180" to="164" dur="0.6s" begin="indefinite" fill="freeze"/></rect>
+            </g>
+            <text class="t-cap" x="114" y="86" text-anchor="middle">空白行</text>
+            <text class="t-sub" x="114" y="110" text-anchor="middle">正文第 1 行</text>
+            <text class="t-sub" x="114" y="134" text-anchor="middle">正文第 2 行</text>
+            <text class="t-sub" x="114" y="158" text-anchor="middle">正文第 3 行</text>
+            <text class="t-cap" x="114" y="182" text-anchor="middle">空白行</text>
+            <text class="t-cap" x="114" y="212" text-anchor="middle">虚线框是终端宽度</text>
+          </g>
+
+          <g data-cue="message-18">
+            <line class="w" x1="208" y1="130" x2="244" y2="130" marker-end="url(#fig-message-7-arrow)"/>
+            <text class="t" x="252" y="28">2 换掉首末空白行</text>
+            <text class="t-sub" x="252" y="48">╭ user ─╮ / ╰──╯</text>
+            <rect class="n is-ghost" x="260" y="72" width="164" height="20" rx="2" opacity="0"><animate attributeName="opacity" from="1" to="0" dur="0.8s" begin="indefinite" fill="freeze"/></rect>
+            <rect class="n is-ghost" x="260" y="168" width="164" height="20" rx="2" opacity="0"><animate attributeName="opacity" from="1" to="0" dur="0.8s" begin="indefinite" fill="freeze"/></rect>
+            <path class="w" d="M252 92 V88 Q252 82 258 82 H426 Q432 82 432 88 V92" pathLength="1" style="stroke:var(--ink);stroke-dasharray:1"><animate attributeName="stroke-dashoffset" from="1" to="0" dur="0.8s" begin="indefinite" fill="freeze"/></path>
+            <rect class="mask" x="262" y="76" width="40" height="12"/>
+            <text class="t-sub" x="282" y="86" text-anchor="middle" style="fill:var(--ink)">user</text>
+            <rect class="n" x="260" y="96" width="164" height="20" rx="2"/>
+            <text class="t-sub" x="342" y="110" text-anchor="middle">正文第 1 行</text>
+            <rect class="n" x="260" y="120" width="164" height="20" rx="2"/>
+            <text class="t-sub" x="342" y="134" text-anchor="middle">正文第 2 行</text>
+            <rect class="n" x="260" y="144" width="164" height="20" rx="2"/>
+            <text class="t-sub" x="342" y="158" text-anchor="middle">正文第 3 行</text>
+            <path class="w" d="M252 168 V172 Q252 178 258 178 H426 Q432 178 432 172 V168" pathLength="1" style="stroke:var(--ink);stroke-dasharray:1"><animate attributeName="stroke-dashoffset" from="1" to="0" dur="0.8s" begin="indefinite" fill="freeze"/></path>
+            <text class="t-cap" x="342" y="212" text-anchor="middle">首末行变成满宽边框</text>
+          </g>
+
+          <g data-cue="message-19">
+            <line class="w" x1="436" y1="130" x2="472" y2="130" marker-end="url(#fig-message-7-arrow)"/>
+            <text class="t" x="480" y="28">3 两侧加竖线</text>
+            <text class="t-sub" x="480" y="48">│ + 正文行 + │</text>
+            <path class="w is-accent" d="M480 92 V88 Q480 82 486 82 H654 Q660 82 660 88 V92"/>
+            <path class="w is-accent" d="M480 168 V172 Q480 178 486 178 H654 Q660 178 660 172 V168"/>
+            <line class="w is-accent" x1="480" y1="92" x2="480" y2="168"><animateTransform attributeName="transform" type="translate" from="-16 0" to="0 0" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="indefinite" fill="freeze"/></line>
+            <line class="w is-accent" x1="660" y1="92" x2="660" y2="168"><animateTransform attributeName="transform" type="translate" from="16 0" to="0 0" dur="0.6s" begin="indefinite" fill="freeze"/><animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="indefinite" fill="freeze"/></line>
+            <rect class="mask" x="490" y="76" width="40" height="12"/>
+            <text class="t-sub" x="510" y="86" text-anchor="middle" style="fill:var(--accent)">user</text>
+            <rect class="n" x="488" y="96" width="164" height="20" rx="2"/>
+            <text class="t-sub" x="570" y="110" text-anchor="middle">正文第 1 行</text>
+            <rect class="n" x="488" y="120" width="164" height="20" rx="2"/>
+            <text class="t-sub" x="570" y="134" text-anchor="middle">正文第 2 行</text>
+            <rect class="n" x="488" y="144" width="164" height="20" rx="2"/>
+            <text class="t-sub" x="570" y="158" text-anchor="middle">正文第 3 行</text>
+            <text class="t-cap" x="570" y="212" text-anchor="middle">每行宽 width，不额外加行</text>
+          </g>
+
+          <g data-cue="message-20">
+            <line x1="24" y1="228" x2="664" y2="228" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <rect class="n is-ghost" x="24" y="240" width="284" height="84" rx="6"/>
+            <text class="t" x="40" y="262">前提不满足</text>
+            <text class="t-sub" x="40" y="280">width &lt; 8，或行数 &lt; 2</text>
+            <text class="t-sub" x="40" y="298">首末行缺 width − 2 个连续空格</text>
+            <text class="t-sub" x="40" y="316">任一行宽 ≠ width − 2</text>
+            <line class="w" x1="308" y1="282" x2="370" y2="282" marker-end="url(#fig-message-7-arrow)"/>
+            <rect class="n" x="372" y="240" width="292" height="84" rx="6"/>
+            <text class="t" x="388" y="262">退回原始渲染</text>
+            <text class="t-sub" x="388" y="280">render(width)</text>
+            <text class="t-cap" x="388" y="298">按完整宽度输出，不画边框</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>正文行用灰块示意，内容原样保留。</figcaption>
+    </figure>
+  </div>
+
+  <style>
+    #ch-message .message-demo-ui { display: grid; gap: 8px; }
+    #ch-message .message-demo-ui output { overflow-wrap: anywhere; font-family: var(--font-mono); }
+    #ch-message details { margin: -8px 0 16px; font-size: 14px; color: var(--muted); }
+    #ch-message details summary { cursor: pointer; }
+  </style>
+
+  <script type="module">
+    {
+      const demo = document.querySelector("#ch-message .demo");
+      const ui = demo?.querySelector(".message-demo-ui");
+      if (demo && ui) {
+        // 逻辑对应 extensions/clickable-paths.ts 的 splitLocation、resolveFile、buildUrl；演示无法访问文件系统，假定文件存在。
+        const HOME = "/Users/me";
+        const CWD = "/Users/me/proj";
+        const LOCATION_RE = /^(.*?)(?::(\d+))?(?::(\d+))?$/;
+        // 对应 path.join / path.resolve 的规范化：去掉 .、..、重复斜杠。
+        const normalize = (p) => {
+          const out = [];
+          for (const part of p.split("/")) {
+            if (!part || part === ".") continue;
+            if (part === "..") out.pop();
+            else out.push(part);
+          }
+          return "/" + out.join("/");
+        };
+        const resolve = (candidate) => {
+          if (!candidate || candidate.includes("://")) return null;
+          if (candidate.startsWith("~/")) return normalize(HOME + "/" + candidate.slice(2));
+          // 源码对绝对路径不做规范化（path.isAbsolute 为真时原样使用）
+          return candidate.startsWith("/") ? candidate : normalize(CWD + "/" + candidate);
+        };
+        const buildUrl = (editor, abs, line, column) => {
+          const encoded = abs.split("/").map(encodeURIComponent).join("/");
+          if (editor === "file") return `file://${encoded}`;
+          let url = `${editor}://file${encoded}`;
+          if (line) {
+            url += `:${line}`;
+            if (column) url += `:${column}`;
+          }
+          return url;
+        };
+        const select = ui.querySelector("#message-demo-editor");
+        const input = ui.querySelector("#message-demo-input");
+        const output = ui.querySelector("#message-demo-url");
+        const update = () => {
+          const trimmed = input.value.trim();
+          const [, file, line, column] = LOCATION_RE.exec(trimmed) ?? [];
+          const abs = trimmed ? resolve(file) : null;
+          output.textContent = abs ? buildUrl(select.value, abs, line, column) : "（不生成链接）";
+        };
+        ui.querySelectorAll("[data-path]").forEach((b) =>
+          b.addEventListener("click", () => { input.value = b.dataset.path; update(); }));
+        select.addEventListener("change", update);
+        input.addEventListener("input", update);
+        update();
+        demo.querySelector(".demo-static").hidden = true;
+        ui.hidden = false;
+      }
+    }
+  </script>
+</section>

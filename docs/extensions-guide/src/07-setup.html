@@ -1,0 +1,204 @@
+<section class="chapter" id="ch-setup" data-chapter="setup" aria-labelledby="ch-setup-h">
+  <header class="chapter-head">
+    <h2 id="ch-setup-h">安装、配置与升级</h2>
+    <p class="chapter-sum">怎样安装和开发这个包，五个配置文件放在哪里，升级 Pi 后检查什么。</p>
+    <dl class="meta">
+      <dt>运行要求</dt><dd>Pi ≥ 1.0.1，Node.js ≥ 22.19.0</dd>
+      <dt>默认配置目录</dt><dd><code>~/.pi/agent/</code></dd>
+      <dt>环境变量</dt><dd><code>PI_CODING_AGENT_DIR</code></dd>
+    </dl>
+  </header>
+
+  <!-- 节拍 1：安装与开发循环 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>安装与开发</h3>
+      <p>
+        <span class="seg" data-seg="setup-01" data-say="在仓库根目录依次执行三条命令：安装依赖，运行 npm run check，再用 pi install 安装这个仓库目录。">在仓库根目录依次执行三条命令：安装依赖，运行 <code>npm run check</code>，再用 <code>pi install</code> 安装这个仓库目录。</span>
+        <span class="seg" data-seg="setup-02" data-say="开发时循环三步：改代码，跑 npm run check，在 Pi 里执行斜杠 reload。">开发时循环三步：改代码，跑 <code>npm run check</code>，在 Pi 里执行 <code>/reload</code>。</span>
+      </p>
+      <pre><code># 依赖走 npmmirror 镜像，不运行依赖的安装脚本
+npm install --ignore-scripts \
+  --registry=https://registry.npmmirror.com
+npm run check
+pi install "$(pwd)"
+
+# 需要时对照官方源确认最新版本
+npm view &lt;包名&gt; version \
+  --registry=https://registry.npmjs.org</code></pre>
+      <ul>
+        <li>npmmirror 由 cnpm 团队维护（原淘宝 npm 镜像），同步有延迟。</li>
+        <li><code>npm run check</code> 先做类型检查，再跑全部测试。卸载用 <code>pi remove "$(pwd)"</code>。</li>
+        <li>这个包是 <code>private</code> 包，不发布到 npm，用本地路径安装。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-setup-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 304" width="100%" role="img" aria-labelledby="fig-setup-1-title fig-setup-1-desc">
+          <title id="fig-setup-1-title">安装与开发循环</title>
+          <desc id="fig-setup-1-desc">首次安装依次执行 npm install、npm run check、pi install；开发时改代码、运行 npm run check、在 Pi 里执行 /reload，再继续修改；卸载用 pi remove。</desc>
+          <defs>
+            <marker id="fig-setup-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+
+          <g data-cue="setup-01">
+            <path class="w is-flow" d="M200 52 H232" style="marker-end:url(#fig-setup-1-arrow)"/>
+            <path class="w is-flow" d="M408 52 H440" style="marker-end:url(#fig-setup-1-arrow)"/>
+            <rect class="n" x="24" y="24" width="176" height="56" rx="6"/>
+            <text class="t" x="40" y="46">安装依赖</text>
+            <text class="t-sub" x="40" y="66">npm install</text>
+            <rect class="n" x="232" y="24" width="176" height="56" rx="6"/>
+            <text class="t" x="248" y="46">检查</text>
+            <text class="t-sub" x="248" y="66">npm run check</text>
+            <rect class="n" x="440" y="24" width="176" height="56" rx="6"/>
+            <text class="t" x="456" y="46">安装到 Pi</text>
+            <text class="t-sub" x="456" y="66">pi install "$(pwd)"</text>
+          </g>
+
+          <g data-cue="setup-01">
+            <text class="t-cap" x="248" y="100">tsc --noEmit → node --test</text>
+          </g>
+
+          <g data-cue="setup-02">
+            <path class="w" d="M528 80 V112 Q528 120 520 120 H120 Q112 120 112 128 V168" style="marker-end:url(#fig-setup-1-arrow)"/>
+            <path class="w is-flow" d="M200 196 H232" style="marker-end:url(#fig-setup-1-arrow)"/>
+            <path class="w is-flow" d="M408 196 H440" style="marker-end:url(#fig-setup-1-arrow)"/>
+            <path class="w is-dash" d="M528 224 V244 Q528 252 520 252 H120 Q112 252 112 244 V224" style="marker-end:url(#fig-setup-1-arrow)"/>
+            <rect class="mask" x="296" y="258" width="48" height="16" rx="2"/>
+            <text class="t-sub" x="320" y="270" text-anchor="middle">再改</text>
+            <rect class="n" x="24" y="168" width="176" height="56" rx="6"/>
+            <text class="t" x="40" y="190">改代码</text>
+            <text class="t-sub" x="40" y="210">extensions/*.ts</text>
+            <rect class="n" x="232" y="168" width="176" height="56" rx="6"/>
+            <text class="t" x="248" y="190">检查</text>
+            <text class="t-sub" x="248" y="210">npm run check</text>
+            <rect class="n is-focal" x="440" y="168" width="176" height="56" rx="6"/>
+            <text class="t" x="456" y="190">在 Pi 里重载</text>
+            <text class="t-sub" x="456" y="210">/reload</text>
+            <text class="t-cap" x="24" y="292">卸载：pi remove "$(pwd)"</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>上排是首次安装，下排是开发循环：改代码、检查、重载。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 2：配置文件 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>五个配置文件</h3>
+      <p>
+        <span class="seg" data-seg="setup-03" data-say="看图。五个配置文件默认都在主目录下的点 pi 斜杠 agent。">五个配置文件默认都在 <code>~/.pi/agent/</code>。</span>
+        <span class="seg" data-seg="setup-04" data-say="设置环境变量 PI CODING AGENT DIR 后，五个文件都改放在它指定的目录。">设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，五个文件都改放在它指定的目录。</span>
+      </p>
+      <ul>
+        <li>五个文件的路径都由 Pi 的 <code>getAgentDir()</code> 决定。</li>
+        <li><code>clickable-paths.json</code> 直接覆盖写入、失败不报错；其余四个先写临时文件再 rename。命名和分类器设置不改 Pi 的 <code>settings.json</code>。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-setup-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 336" width="100%" role="img" aria-labelledby="fig-setup-2-title fig-setup-2-desc">
+          <title id="fig-setup-2-title">配置文件的目录来源</title>
+          <desc id="fig-setup-2-desc">五个配置文件都放在 getAgentDir() 返回的目录：默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录。</desc>
+          <defs>
+            <marker id="fig-setup-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+
+          <g data-cue="setup-03">
+            <rect class="n" x="336" y="24" width="280" height="40" rx="6"/>
+            <text class="t-mono" x="348" y="49">personal-extensions.json</text>
+            <text class="t-cap" x="604" y="49" text-anchor="end">功能开关</text>
+            <rect class="n" x="336" y="84" width="280" height="40" rx="6"/>
+            <text class="t-mono" x="348" y="109">auto-session-name.json</text>
+            <text class="t-cap" x="604" y="109" text-anchor="end">命名设置</text>
+            <rect class="n" x="336" y="148" width="280" height="40" rx="6"/>
+            <text class="t-mono" x="348" y="173">jev-inline-effort.json</text>
+            <text class="t-cap" x="604" y="173" text-anchor="end">分类器设置</text>
+            <rect class="n" x="336" y="212" width="280" height="40" rx="6"/>
+            <text class="t-mono" x="348" y="237">clickable-paths.json</text>
+            <text class="t-cap" x="604" y="237" text-anchor="end">文件路径可点击</text>
+            <rect class="n" x="336" y="272" width="280" height="40" rx="6"/>
+            <text class="t-mono" x="348" y="297">pi-statusline.json</text>
+            <text class="t-cap" x="604" y="297" text-anchor="end">状态栏配色</text>
+          </g>
+
+          <g data-cue="setup-04">
+            <path class="w" d="M232 136 H248 Q256 136 256 128 V52 Q256 44 264 44 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
+            <path class="w" d="M232 152 H264 Q272 152 272 144 V112 Q272 104 280 104 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
+            <path class="w is-flow" d="M232 168 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
+            <path class="w" d="M232 184 H264 Q272 184 272 192 V224 Q272 232 280 232 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
+            <path class="w" d="M232 200 H248 Q256 200 256 208 V284 Q256 292 264 292 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
+            <rect class="n is-focal" x="24" y="120" width="208" height="96" rx="6"/>
+            <text class="t" x="40" y="148">agent 目录</text>
+            <text class="t-mono" x="40" y="172">PI_CODING_AGENT_DIR</text>
+            <text class="t-sub" x="40" y="194">未设置时 ~/.pi/agent</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>五个文件都在 agent 目录下，由同一个环境变量决定位置。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 3：升级检查 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>升级 Pi 之后</h3>
+      <p>
+        <span class="seg" data-seg="setup-05">升级 Pi 后，先把开发依赖升到和新 Pi 相同的版本。</span>
+        <span class="seg" data-seg="setup-06" data-say="再跑通 npm run check。边框测试加载 node modules 里真实的 Pi 组件，所以新版 Pi 改了这个组件时，测试可能先报错。">再跑通 <code>npm run check</code>。边框测试加载 <code>node_modules</code> 里真实的 Pi 组件，所以新版 Pi 改了这个组件时，测试可能先报错。</span>
+        <span class="seg" data-seg="setup-07">最后在 Pi 里发一条消息，确认边框正常显示。</span>
+      </p>
+      <ul>
+        <li>原因见第 3 章：用户消息橙色线框替换了 <code>UserMessageComponent.prototype.render</code>，只在 TUI 模式下替换。会话关闭时停用这一层包装；如果当前 <code>render</code> 仍是这一层，就恢复原始方法。</li>
+        <li>宽度小于 8 列，或原始渲染结果没通过行结构检查时，扩展直接返回原始渲染，不画边框。原始 <code>render</code> 抛错时没有兜底。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-setup-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 336" width="100%" role="img" aria-labelledby="fig-setup-3-title fig-setup-3-desc">
+          <title id="fig-setup-3-title">升级 Pi 后的检查顺序</title>
+          <desc id="fig-setup-3-desc">升级 Pi 后，把开发依赖升到同一版本，运行 npm run check，再在 Pi 里发一条消息确认边框；没有边框时，先查 Pi 是否改了用户消息的行结构。</desc>
+          <defs>
+            <marker id="fig-setup-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+
+          <g data-cue="setup-05">
+            <path class="w is-flow" d="M160 72 V104" style="marker-end:url(#fig-setup-3-arrow)"/>
+            <rect class="n" x="24" y="24" width="272" height="48" rx="6"/>
+            <text class="t" x="40" y="44">升级 Pi</text>
+            <text class="t-sub" x="40" y="62">render 被包装，需要复查</text>
+            <rect class="n" x="24" y="104" width="272" height="48" rx="6"/>
+            <text class="t" x="40" y="124">升级开发依赖</text>
+            <text class="t-sub" x="40" y="142">@earendil-works/pi-* 同一版本</text>
+          </g>
+
+          <g data-cue="setup-06">
+            <path class="w is-flow" d="M160 152 V184" style="marker-end:url(#fig-setup-3-arrow)"/>
+            <rect class="n" x="24" y="184" width="272" height="48" rx="6"/>
+            <text class="t-mono" x="40" y="204">npm run check</text>
+            <text class="t-sub" x="40" y="222">边框测试加载真实组件</text>
+          </g>
+
+          <g data-cue="setup-07">
+            <path class="w is-flow" d="M160 232 V264" style="marker-end:url(#fig-setup-3-arrow)"/>
+            <path class="w is-dash" d="M296 288 H360" style="marker-end:url(#fig-setup-3-arrow)"/>
+            <rect class="n is-focal" x="24" y="264" width="272" height="48" rx="6"/>
+            <text class="t" x="40" y="284">发一条消息</text>
+            <text class="t-sub" x="40" y="302">确认橙色线框正常显示</text>
+            <rect class="n is-ghost" x="360" y="264" width="256" height="48" rx="6"/>
+            <text class="t" x="376" y="284">没有边框时</text>
+            <text class="t-sub" x="376" y="302">先查 Pi 是否改了消息行结构</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>每一步通过，再做下一步。</figcaption>
+    </figure>
+  </div>
+</section>

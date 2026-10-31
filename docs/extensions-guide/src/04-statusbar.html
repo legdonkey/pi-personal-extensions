@@ -1,0 +1,376 @@
+<section class="chapter" id="ch-statusbar" data-chapter="statusbar" aria-labelledby="ch-statusbar-h">
+  <header class="chapter-head">
+    <h2 id="ch-statusbar-h">状态栏：额度与配色</h2>
+    <p class="chapter-sum">额度与会话 ID 往状态栏写数据，状态栏风格选择给状态栏换配色。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>额度与会话 ID（<code>substatusline</code>）· 状态栏风格选择（<code>statusline-style-picker</code>）</dd>
+      <dt>快捷命令</dt><dd><code>/statusline-style</code></dd>
+      <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
+      <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包</dd>
+    </dl>
+  </header>
+
+  <!-- ============ 额度与会话 ID：什么时候刷新 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>额度与会话 ID：什么时候刷新</h3>
+      <p>
+        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以用额度与会话 ID。它在状态栏写两样东西：会话 ID 的末尾 8 位，和服务商剩余额度。</span>
+        <span class="seg" data-seg="statusbar-02">会话开始、树导航、切换模型时，扩展立即刷新额度。会话开始或树导航后，定时器每 5 分钟再刷新一次。</span>
+        <span class="seg" data-seg="statusbar-03">agent 一轮运行结束时，扩展也刷新额度。如果距上次刷新开始少于 30 秒，扩展跳过这次刷新。</span>
+      </p>
+      <ul>
+        <li>会话 ID 只显示末尾 8 位。Pi 默认用 UUIDv7 生成会话 ID，开头是时间戳，相近时间新建的会话开头相同，所以扩展取末尾。</li>
+        <li>切换模型时，扩展取消还没完成的请求。会话关闭时，扩展停止定时器、取消请求，并清空两项状态。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-statusbar-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
+          <title id="fig-statusbar-1-title">额度刷新时间线（示例）</title>
+          <desc id="fig-statusbar-1-desc">上方是状态栏第二行的一段（示例）：7c3e9a41 是会话 ID 的末尾 8 位，weekly 88% left 是额度。下方是一条 11 分钟的示例时间线。轴上方是强制刷新：0 分会话开始，3 分 10 秒切换模型，5 分和 10 分定时器。轴下方是 agent 运行结束：0 分 20 秒和 3 分 30 秒距上次刷新开始少于 30 秒，跳过；2 分时刷新。每次刷新开始后有 30 秒的灰色冷却区。</desc>
+
+          <!-- 状态栏片段 -->
+          <g data-cue="statusbar-01">
+            <rect class="n" x="12" y="16" width="232" height="32" rx="4"/>
+            <text class="t-mono" x="24" y="37">7c3e9a41</text>
+            <text class="t-mono" x="96" y="37">•</text>
+            <text class="t-mono" x="112" y="37">weekly 88% left</text>
+            <path class="w" d="M24 56 V60 H84 V56"/>
+            <text class="t-cap" x="24" y="76">会话 ID 末 8 位</text>
+            <path class="w" d="M112 56 V60 H228 V56"/>
+            <text class="t-cap" x="132" y="76">额度</text>
+            <text class="t-cap" x="264" y="37">状态栏第二行的一段（示例值）</text>
+          </g>
+
+          <!-- 冷却区（agent 运行结束时检查） -->
+          <g data-cue="statusbar-03">
+            <rect x="40" y="176" width="26" height="16" style="fill:var(--rule)"/>
+            <rect x="144" y="176" width="26" height="16" style="fill:var(--rule)"/>
+            <rect x="205" y="176" width="26" height="16" style="fill:var(--rule)"/>
+            <rect x="300" y="176" width="26" height="16" style="fill:var(--rule)"/>
+            <rect x="560" y="176" width="26" height="16" style="fill:var(--rule)"/>
+          </g>
+
+          <!-- 时间轴：1 分钟 = 56 -->
+          <line x1="40" y1="184" x2="624" y2="184" style="stroke:var(--muted);stroke-width:1.5"/>
+          <text class="t-sub" x="40" y="208" text-anchor="middle">0</text>
+          <text class="t-sub" x="300" y="208" text-anchor="middle">5 分</text>
+          <text class="t-sub" x="560" y="208" text-anchor="middle">10 分</text>
+
+          <!-- 强制刷新：会话开始、切换模型、定时器 -->
+          <g data-cue="statusbar-02">
+            <path class="w is-dash" d="M40 128 V120 H300 V128"/>
+            <path class="w is-dash" d="M300 128 V120 H560 V128"/>
+            <rect class="mask" x="142" y="100" width="56" height="14"/>
+            <text class="t-cap" x="170" y="111" text-anchor="middle">5 分钟</text>
+            <rect class="mask" x="402" y="100" width="56" height="14"/>
+            <text class="t-cap" x="430" y="111" text-anchor="middle">5 分钟</text>
+            <path class="w" d="M40 152 V176"/><circle cx="40" cy="184" r="6" style="fill:var(--ink)"/>
+            <text class="t" x="40" y="146" text-anchor="middle">会话开始</text>
+            <path class="w" d="M205 152 V176"/><circle cx="205" cy="184" r="6" style="fill:var(--ink)"/>
+            <text class="t" x="205" y="146" text-anchor="middle">切换模型</text>
+            <path class="w" d="M300 152 V176"/><circle cx="300" cy="184" r="6" style="fill:var(--ink)"/>
+            <text class="t" x="300" y="146" text-anchor="middle">定时器</text>
+            <path class="w" d="M560 152 V176"/><circle cx="560" cy="184" r="6" style="fill:var(--ink)"/>
+            <text class="t" x="560" y="146" text-anchor="middle">定时器</text>
+          </g>
+
+          <!-- agent 运行结束：冷却检查 -->
+          <g data-cue="statusbar-03">
+            <circle cx="57" cy="184" r="5" style="fill:var(--paper-2);stroke:var(--muted);stroke-width:1.5"/>
+            <path class="w" d="M57 192 V216"/>
+            <text class="t-cap" x="57" y="232" text-anchor="middle">跳过</text>
+            <circle cx="144" cy="184" r="6" style="fill:var(--ink)"/>
+            <path class="w" d="M144 192 V216"/>
+            <text class="t-cap" x="144" y="232" text-anchor="middle">刷新</text>
+            <circle cx="222" cy="184" r="5" style="fill:var(--paper-2);stroke:var(--muted);stroke-width:1.5"/>
+            <path class="w" d="M222 192 V216"/>
+            <text class="t-cap" x="222" y="232" text-anchor="middle">跳过</text>
+            <text class="t-cap" x="350" y="232">轴下方：agent 一轮运行结束</text>
+          </g>
+
+          <!-- 图例 -->
+          <line x1="12" y1="256" x2="628" y2="256" style="stroke:var(--rule);stroke-width:1"/>
+          <circle cx="20" cy="276" r="5" style="fill:var(--ink)"/>
+          <text class="t-cap" x="32" y="280">刷新</text>
+          <circle cx="88" cy="276" r="5" style="fill:var(--paper-2);stroke:var(--muted);stroke-width:1.5"/>
+          <text class="t-cap" x="100" y="280">跳过</text>
+          <rect x="148" y="268" width="24" height="16" style="fill:var(--rule)"/>
+          <text class="t-cap" x="180" y="280">刷新开始后的 30 秒冷却区</text>
+          <text class="t-cap" x="350" y="280">轴上方：强制刷新，不看冷却</text>
+
+          <!-- 时间推进 -->
+          <g data-cue="statusbar-03" data-cue-mode="active">
+            <line x1="40" y1="164" x2="40" y2="192" style="stroke:var(--accent);stroke-width:1.5">
+              <animateTransform attributeName="transform" type="translate" from="0 0" to="260 0" dur="3s" begin="indefinite" fill="freeze"/>
+            </line>
+          </g>
+        </svg>
+      </div>
+      <figcaption>时间和状态栏数值均为示例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 额度与会话 ID：一次刷新 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>一次刷新做什么</h3>
+      <p>
+        <span class="seg" data-seg="statusbar-04">一次刷新分三步。第一步，扩展调用 pi auth，读取当前模型所属服务商的凭据。</span>
+        <span class="seg" data-seg="statusbar-05">第二步，扩展带凭据请求服务商的用量接口。读凭据和请求接口各有 15 秒超时。</span>
+        <span class="seg" data-seg="statusbar-06" data-say="第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。openai codex 显示周额度，zai coding cn 显示 5 小时和周额度。">第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。<code>openai-codex</code> 显示周额度，<code>zai-coding-cn</code> 显示 5 小时和周额度。</span>
+        <span class="seg" data-seg="statusbar-07">请求失败时，状态栏保留这个服务商上次成功的值。从没成功过时，额度一项为空。</span>
+      </p>
+      <ul>
+        <li>当前模型来自其他服务商时，额度一项为空。</li>
+        <li>剩余百分比 = 100 − 已用百分比，限制在 0～100，四舍五入。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-statusbar-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 324" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
+          <title id="fig-statusbar-2-title">两个服务商的一次刷新</title>
+          <desc id="fig-statusbar-2-desc">两条泳道。openai-codex：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 chatgpt.com/backend-api/wham/usage，取 6～8 天的周窗口，显示 weekly 63% left（示例）。zai-coding-cn：pi auth print-api-key 读取 API Key，请求 open.bigmodel.cn/api/monitor/usage/quota/limit，取 5 小时窗口和周窗口，显示 5h 82% left · weekly 47% left（示例）。读凭据和请求接口各有 15 秒超时。请求失败或缺少所需窗口时，保留该服务商上次成功的值，从没成功过就为空。</desc>
+          <defs>
+            <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+            <marker id="fig-statusbar-2-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--link)"/></marker>
+          </defs>
+
+          <text class="t-cap" x="12" y="20">① 读取凭据（15 秒）</text>
+          <text class="t-cap" x="200" y="20">② 请求用量接口（15 秒）</text>
+          <text class="t-cap" x="404" y="20">③ 显示（示例值）</text>
+          <text class="t" x="12" y="48">openai-codex</text>
+          <text class="t" x="12" y="160">zai-coding-cn</text>
+
+          <g data-cue="statusbar-04">
+            <rect class="n" x="12" y="56" width="164" height="80" rx="6"/>
+            <text class="t" x="24" y="80">pi auth</text>
+            <text class="t-sub" x="24" y="102">print-bearer-token</text>
+            <text class="t-sub" x="24" y="120">--min-expiry 5m</text>
+            <rect class="n" x="12" y="168" width="164" height="80" rx="6"/>
+            <text class="t" x="24" y="192">pi auth</text>
+            <text class="t-sub" x="24" y="214">print-api-key</text>
+          </g>
+
+          <g data-cue="statusbar-05">
+            <path class="w is-link" d="M176 96 H200" marker-end="url(#fig-statusbar-2-arrow-link)"/>
+            <path class="w is-link" d="M176 208 H200" marker-end="url(#fig-statusbar-2-arrow-link)"/>
+            <rect class="n is-ext" x="200" y="56" width="180" height="80" rx="6"/>
+            <text class="t" x="212" y="80">chatgpt.com</text>
+            <text class="t-sub" x="212" y="102">/backend-api/</text>
+            <text class="t-sub" x="212" y="120">wham/usage</text>
+            <rect class="n is-ext" x="200" y="168" width="180" height="80" rx="6"/>
+            <text class="t" x="212" y="192">open.bigmodel.cn</text>
+            <text class="t-sub" x="212" y="214">/api/monitor/usage/</text>
+            <text class="t-sub" x="212" y="232">quota/limit</text>
+          </g>
+
+          <g data-cue="statusbar-06">
+            <path class="w" d="M380 96 H404" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <path class="w" d="M380 208 H404" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <rect class="n is-focal" x="404" y="56" width="224" height="80" rx="6"/>
+            <text class="t" x="416" y="80">周窗口（6～8 天）</text>
+            <text class="t-sub" x="416" y="108">weekly 63% left</text>
+            <rect class="n is-focal" x="404" y="168" width="224" height="80" rx="6"/>
+            <text class="t" x="416" y="192">5 小时窗口 + 周窗口</text>
+            <text class="t-sub" x="416" y="214">5h 82% left ·</text>
+            <text class="t-sub" x="416" y="232">weekly 47% left</text>
+          </g>
+
+          <g data-cue="statusbar-07">
+            <line x1="12" y1="268" x2="628" y2="268" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="12" y="290">请求失败或缺少所需窗口：保留该服务商上次成功的值</text>
+            <text class="t-cap" x="12" y="312">从没成功过：额度一项为空</text>
+          </g>
+
+          <g data-cue="statusbar-05" data-cue-mode="active">
+            <circle class="dot" r="4" cx="176" cy="96">
+              <animateMotion dur="1.4s" begin="indefinite" fill="freeze" path="M0 0 H228"/>
+            </circle>
+            <circle class="dot" r="4" cx="176" cy="208">
+              <animateMotion dur="1.4s" begin="indefinite" fill="freeze" path="M0 0 H228"/>
+            </circle>
+          </g>
+        </svg>
+      </div>
+      <table>
+        <thead><tr><th></th><th><code>openai-codex</code></th><th><code>zai-coding-cn</code></th></tr></thead>
+        <tbody>
+          <tr><th>请求头</th><td><code>Bearer &lt;token&gt;</code><br><code>ChatGPT-Account-ID</code>（可选）</td><td><code>&lt;API Key&gt;</code>（无 <code>Bearer</code>）</td></tr>
+          <tr><th>限额来源</th><td><code>rate_limit</code><br><code>additional_rate_limits</code></td><td><code>TOKENS_LIMIT</code><br><code>CREDIT_LIMIT</code></td></tr>
+          <tr><th>5 小时窗口</th><td>—</td><td><code>unit 3, number 5</code></td></tr>
+          <tr><th>周窗口</th><td><code>primary_window</code><br><code>secondary_window</code>（6～8 天）</td><td><code>unit 6, number 1</code></td></tr>
+        </tbody>
+      </table>
+      <figcaption>两个服务商各走一条泳道；第 ③ 列的数值是示例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 状态栏风格选择：选择器 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>状态栏风格选择</h3>
+      <p>
+        <span class="seg" data-seg="statusbar-08" data-say="状态栏风格选择提供斜杠 statusline style 命令，预览并应用 11 套配色。状态栏本体来自 pi statusline 包，需要另外启用。">状态栏风格选择提供 <code>/statusline-style</code> 命令，预览并应用 11 套配色。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
+        <span class="seg" data-seg="statusbar-09" data-say="命令不带参数时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">命令不带参数时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
+      </p>
+      <ul>
+        <li>带编号或名称时直接应用，例如 <code>/statusline-style 11</code>。名称不区分大小写，必须完整匹配；找不到时提示「未知风格」，不写文件、不重载。</li>
+        <li>不带参数且不在 TUI 模式时，命令只提示一条警告。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /statusline-style，出现带色点的 11 套配色列表，上下移动时示例状态栏实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：上下移动时，示例状态栏实时换色；按 Esc 退出，不应用。录屏录于改动之前，底部状态栏显示的是会话 ID 前 7 位；ponytail 是本机另一个扩展，不属于本包。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 状态栏风格选择：配色结构 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>11 套配色怎么分组</h3>
+      <p>
+        <span class="seg" data-seg="statusbar-10" data-say="看图。每行是一套配色。每套有 6 组颜色，每组是一对前景色和背景色。">每行是一套配色。每套有 6 组颜色，每组是一对前景色和背景色。</span>
+        <span class="seg" data-seg="statusbar-11">状态栏的 13 个字段按表头分成 6 组，同组字段共用一组颜色。</span>
+        <span class="seg" data-seg="statusbar-12">终端宽度小于 68 列时，预览拆成两行。每行都按终端宽度截断。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-statusbar-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 444" role="img" aria-labelledby="fig-statusbar-4-title fig-statusbar-4-desc">
+          <title id="fig-statusbar-4-title">11 套状态栏配色与字段分组</title>
+          <desc id="fig-statusbar-4-desc">11 行色板，每行是一套配色：茶墨渐层、冰川蓝阶、靛夜层云、琥珀余温、紫藤暮色、松林雾径、陶火晚照、玫瑰尘光、石墨银阶、潮汐青绿、Claude 暖纸。每套 6 组前景色和背景色。表头说明 13 个状态栏字段的分组：第 1 组 brand、provider、model；第 2 组 thinking、tools；第 3 组 cwd；第 4 组 branch；第 5 组 context、tokens、cost；第 6 组 cache、time、turn。底部对比预览布局：终端宽度不小于 68 列时一行显示 6 段，小于 68 列时拆成两行各 3 段。</desc>
+          <g data-cue="statusbar-10">
+            <text class="t-sub" x="12" y="76">01</text><text class="t" x="36" y="77">茶墨渐层</text>
+            <rect x="164" y="62" width="74" height="20" rx="3" style="fill:#2e1a0c"/><text class="t-sub" x="201" y="76" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="62" width="74" height="20" rx="3" style="fill:#473123"/><text class="t-sub" x="279" y="76" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="62" width="74" height="20" rx="3" style="fill:#624b3b"/><text class="t-sub" x="357" y="76" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="62" width="74" height="20" rx="3" style="fill:#7e6555"/><text class="t-sub" x="435" y="76" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="62" width="74" height="20" rx="3" style="fill:#9b8171"/><text class="t-sub" x="513" y="76" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="62" width="74" height="20" rx="3" style="fill:#b99f8d"/><text class="t-sub" x="591" y="76" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="102">02</text><text class="t" x="36" y="103">冰川蓝阶</text>
+            <rect x="164" y="88" width="74" height="20" rx="3" style="fill:#002436"/><text class="t-sub" x="201" y="102" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="88" width="74" height="20" rx="3" style="fill:#0c3c50"/><text class="t-sub" x="279" y="102" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="88" width="74" height="20" rx="3" style="fill:#29566b"/><text class="t-sub" x="357" y="102" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="88" width="74" height="20" rx="3" style="fill:#457287"/><text class="t-sub" x="435" y="102" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="88" width="74" height="20" rx="3" style="fill:#618fa5"/><text class="t-sub" x="513" y="102" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="88" width="74" height="20" rx="3" style="fill:#7eacc3"/><text class="t-sub" x="591" y="102" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="128">03</text><text class="t" x="36" y="129">靛夜层云</text>
+            <rect x="164" y="114" width="74" height="20" rx="3" style="fill:#161944"/><text class="t-sub" x="201" y="128" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="114" width="74" height="20" rx="3" style="fill:#2b3260"/><text class="t-sub" x="279" y="128" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="114" width="74" height="20" rx="3" style="fill:#444c7c"/><text class="t-sub" x="357" y="128" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="114" width="74" height="20" rx="3" style="fill:#5e679a"/><text class="t-sub" x="435" y="128" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="114" width="74" height="20" rx="3" style="fill:#7984b8"/><text class="t-sub" x="513" y="128" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="114" width="74" height="20" rx="3" style="fill:#96a1d7"/><text class="t-sub" x="591" y="128" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="154">04</text><text class="t" x="36" y="155">琥珀余温</text>
+            <rect x="164" y="140" width="74" height="20" rx="3" style="fill:#391300"/><text class="t-sub" x="201" y="154" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="140" width="74" height="20" rx="3" style="fill:#542c00"/><text class="t-sub" x="279" y="154" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="140" width="74" height="20" rx="3" style="fill:#704600"/><text class="t-sub" x="357" y="154" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="140" width="74" height="20" rx="3" style="fill:#8d621b"/><text class="t-sub" x="435" y="154" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="140" width="74" height="20" rx="3" style="fill:#ab7e3c"/><text class="t-sub" x="513" y="154" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="140" width="74" height="20" rx="3" style="fill:#c99b5a"/><text class="t-sub" x="591" y="154" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="180">05</text><text class="t" x="36" y="181">紫藤暮色</text>
+            <rect x="164" y="166" width="74" height="20" rx="3" style="fill:#2f0d3c"/><text class="t-sub" x="201" y="180" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="166" width="74" height="20" rx="3" style="fill:#482656"/><text class="t-sub" x="279" y="180" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="166" width="74" height="20" rx="3" style="fill:#634072"/><text class="t-sub" x="357" y="180" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="166" width="74" height="20" rx="3" style="fill:#7f5b8f"/><text class="t-sub" x="435" y="180" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="166" width="74" height="20" rx="3" style="fill:#9c77ad"/><text class="t-sub" x="513" y="180" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="166" width="74" height="20" rx="3" style="fill:#ba94cc"/><text class="t-sub" x="591" y="180" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="206">06</text><text class="t" x="36" y="207">松林雾径</text>
+            <rect x="164" y="192" width="74" height="20" rx="3" style="fill:#0c260e"/><text class="t-sub" x="201" y="206" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="192" width="74" height="20" rx="3" style="fill:#243e25"/><text class="t-sub" x="279" y="206" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="192" width="74" height="20" rx="3" style="fill:#3d583d"/><text class="t-sub" x="357" y="206" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="192" width="74" height="20" rx="3" style="fill:#577458"/><text class="t-sub" x="435" y="206" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="192" width="74" height="20" rx="3" style="fill:#739173"/><text class="t-sub" x="513" y="206" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="192" width="74" height="20" rx="3" style="fill:#90ae90"/><text class="t-sub" x="591" y="206" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="232">07</text><text class="t" x="36" y="233">陶火晚照</text>
+            <rect x="164" y="218" width="74" height="20" rx="3" style="fill:#430000"/><text class="t-sub" x="201" y="232" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="218" width="74" height="20" rx="3" style="fill:#601e0d"/><text class="t-sub" x="279" y="232" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="218" width="74" height="20" rx="3" style="fill:#7e3928"/><text class="t-sub" x="357" y="232" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="218" width="74" height="20" rx="3" style="fill:#9c5442"/><text class="t-sub" x="435" y="232" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="218" width="74" height="20" rx="3" style="fill:#bb705d"/><text class="t-sub" x="513" y="232" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="218" width="74" height="20" rx="3" style="fill:#db8e7a"/><text class="t-sub" x="591" y="232" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="258">08</text><text class="t" x="36" y="259">玫瑰尘光</text>
+            <rect x="164" y="244" width="74" height="20" rx="3" style="fill:#3a0b1a"/><text class="t-sub" x="201" y="258" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="244" width="74" height="20" rx="3" style="fill:#562432"/><text class="t-sub" x="279" y="258" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="244" width="74" height="20" rx="3" style="fill:#723e4b"/><text class="t-sub" x="357" y="258" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="244" width="74" height="20" rx="3" style="fill:#905865"/><text class="t-sub" x="435" y="258" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="244" width="74" height="20" rx="3" style="fill:#ae7481"/><text class="t-sub" x="513" y="258" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="244" width="74" height="20" rx="3" style="fill:#ce919e"/><text class="t-sub" x="591" y="258" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="284">09</text><text class="t" x="36" y="285">石墨银阶</text>
+            <rect x="164" y="270" width="74" height="20" rx="3" style="fill:#1f1f1f"/><text class="t-sub" x="201" y="284" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="270" width="74" height="20" rx="3" style="fill:#373737"/><text class="t-sub" x="279" y="284" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="270" width="74" height="20" rx="3" style="fill:#505050"/><text class="t-sub" x="357" y="284" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="270" width="74" height="20" rx="3" style="fill:#6b6b6b"/><text class="t-sub" x="435" y="284" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="270" width="74" height="20" rx="3" style="fill:#878787"/><text class="t-sub" x="513" y="284" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="270" width="74" height="20" rx="3" style="fill:#a4a4a4"/><text class="t-sub" x="591" y="284" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="310">10</text><text class="t" x="36" y="311">潮汐青绿</text>
+            <rect x="164" y="296" width="74" height="20" rx="3" style="fill:#002725"/><text class="t-sub" x="201" y="310" text-anchor="middle" style="fill:#f8fafc">M sol</text><rect x="242" y="296" width="74" height="20" rx="3" style="fill:#06403d"/><text class="t-sub" x="279" y="310" text-anchor="middle" style="fill:#f8fafc">T high</text><rect x="320" y="296" width="74" height="20" rx="3" style="fill:#275a57"/><text class="t-sub" x="357" y="310" text-anchor="middle" style="fill:#f8fafc">D pi</text><rect x="398" y="296" width="74" height="20" rx="3" style="fill:#437672"/><text class="t-sub" x="435" y="310" text-anchor="middle" style="fill:#f8fafc">G main</text><rect x="476" y="296" width="74" height="20" rx="3" style="fill:#5f928f"/><text class="t-sub" x="513" y="310" text-anchor="middle" style="fill:#11161a">C 42%</text><rect x="554" y="296" width="74" height="20" rx="3" style="fill:#7cb0ac"/><text class="t-sub" x="591" y="310" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <text class="t-sub" x="12" y="336">11</text><text class="t" x="36" y="337">Claude 暖纸</text>
+            <rect x="164" y="322" width="74" height="20" rx="3" style="fill:#141413"/><text class="t-sub" x="201" y="336" text-anchor="middle" style="fill:#d97757">M sol</text><rect x="242" y="322" width="74" height="20" rx="3" style="fill:#30302e"/><text class="t-sub" x="279" y="336" text-anchor="middle" style="fill:#faf9f5">T high</text><rect x="320" y="322" width="74" height="20" rx="3" style="fill:#5e5d59"/><text class="t-sub" x="357" y="336" text-anchor="middle" style="fill:#faf9f5">D pi</text><rect x="398" y="322" width="74" height="20" rx="3" style="fill:#87867f"/><text class="t-sub" x="435" y="336" text-anchor="middle" style="fill:#141413">G main</text><rect x="476" y="322" width="74" height="20" rx="3" style="fill:#b0aea5"/><text class="t-sub" x="513" y="336" text-anchor="middle" style="fill:#141413">C 42%</text><rect x="554" y="322" width="74" height="20" rx="3" style="fill:#d1cfc5"/><text class="t-sub" x="591" y="336" text-anchor="middle" style="fill:#141413">K 76%</text>
+          </g>
+
+          <g data-cue="statusbar-11">
+            <text class="t-sub" x="201" y="20" text-anchor="middle">brand</text>
+            <text class="t-sub" x="201" y="34" text-anchor="middle">provider</text>
+            <text class="t-sub" x="201" y="48" text-anchor="middle">model</text>
+            <text class="t-sub" x="279" y="34" text-anchor="middle">thinking</text>
+            <text class="t-sub" x="279" y="48" text-anchor="middle">tools</text>
+            <text class="t-sub" x="357" y="48" text-anchor="middle">cwd</text>
+            <text class="t-sub" x="435" y="48" text-anchor="middle">branch</text>
+            <text class="t-sub" x="513" y="20" text-anchor="middle">context</text>
+            <text class="t-sub" x="513" y="34" text-anchor="middle">tokens</text>
+            <text class="t-sub" x="513" y="48" text-anchor="middle">cost</text>
+            <text class="t-sub" x="591" y="20" text-anchor="middle">cache</text>
+            <text class="t-sub" x="591" y="34" text-anchor="middle">time</text>
+            <text class="t-sub" x="591" y="48" text-anchor="middle">turn</text>
+          </g>
+
+          <g data-cue="statusbar-12">
+            <line x1="12" y1="360" x2="628" y2="360" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="12" y="380">宽度 ≥ 68 列：一行</text>
+            <text class="t-cap" x="372" y="380">宽度 &lt; 68 列：两行</text>
+            <rect x="12" y="392" width="54" height="20" rx="3" style="fill:#2e1a0c"/><text class="t-sub" x="39" y="406" text-anchor="middle" style="fill:#f8fafc">M sol</text>
+            <rect x="70" y="392" width="54" height="20" rx="3" style="fill:#473123"/><text class="t-sub" x="97" y="406" text-anchor="middle" style="fill:#f8fafc">T high</text>
+            <rect x="128" y="392" width="54" height="20" rx="3" style="fill:#624b3b"/><text class="t-sub" x="155" y="406" text-anchor="middle" style="fill:#f8fafc">D pi</text>
+            <rect x="186" y="392" width="54" height="20" rx="3" style="fill:#7e6555"/><text class="t-sub" x="213" y="406" text-anchor="middle" style="fill:#f8fafc">G main</text>
+            <rect x="244" y="392" width="54" height="20" rx="3" style="fill:#9b8171"/><text class="t-sub" x="271" y="406" text-anchor="middle" style="fill:#11161a">C 42%</text>
+            <rect x="302" y="392" width="54" height="20" rx="3" style="fill:#b99f8d"/><text class="t-sub" x="329" y="406" text-anchor="middle" style="fill:#11161a">K 76%</text>
+            <rect x="372" y="392" width="54" height="20" rx="3" style="fill:#2e1a0c"/><text class="t-sub" x="399" y="406" text-anchor="middle" style="fill:#f8fafc">M sol</text>
+            <rect x="430" y="392" width="54" height="20" rx="3" style="fill:#473123"/><text class="t-sub" x="457" y="406" text-anchor="middle" style="fill:#f8fafc">T high</text>
+            <rect x="488" y="392" width="54" height="20" rx="3" style="fill:#624b3b"/><text class="t-sub" x="515" y="406" text-anchor="middle" style="fill:#f8fafc">D pi</text>
+            <rect x="372" y="418" width="54" height="20" rx="3" style="fill:#7e6555"/><text class="t-sub" x="399" y="432" text-anchor="middle" style="fill:#f8fafc">G main</text>
+            <rect x="430" y="418" width="54" height="20" rx="3" style="fill:#9b8171"/><text class="t-sub" x="457" y="432" text-anchor="middle" style="fill:#11161a">C 42%</text>
+            <rect x="488" y="418" width="54" height="20" rx="3" style="fill:#b99f8d"/><text class="t-sub" x="515" y="432" text-anchor="middle" style="fill:#11161a">K 76%</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>色值和预览标签照抄源码；底部用第 1 套配色演示预览布局。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 状态栏风格选择：写入 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>应用配色时写什么</h3>
+      <p>
+        <span class="seg" data-seg="statusbar-13" data-say="应用配色时，扩展先读出原来的 pi statusline 点 json。">应用配色时，扩展先读出原来的 <code>pi-statusline.json</code>。</span>
+        <span class="seg" data-seg="statusbar-14">扩展整体替换四个字段：配色预设、配色、密度和分隔符。其他顶层字段保留。</span>
+        <span class="seg" data-seg="statusbar-15">写入方式和第 2 章的启停相同：临时文件加 rename，成功后重载，失败不重载。</span>
+      </p>
+      <ul>
+        <li>文件位置：agent 目录下的 <code>pi-statusline.json</code>，和 pi-statusline 读取的位置相同。agent 目录默认是 <code>~/.pi/agent/</code>，设置了 <code>PI_CODING_AGENT_DIR</code> 时用这个变量指定的目录。</li>
+        <li>文件不存在时，扩展从空对象开始写；读取出错或不是合法 JSON 时，算作失败。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-statusbar-5">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 232" role="img" aria-labelledby="fig-statusbar-5-title fig-statusbar-5-desc">
+          <title id="fig-statusbar-5-title">应用配色时的写入流程</title>
+          <desc id="fig-statusbar-5-desc">左边是原来的 pi-statusline.json（示例），中间是写入内容：其他顶层字段保留；palettePreset 改为 custom，palette 整体换成 13 个字段的配色，density 改为 compact，separator 改为 round。右边：原子写入（临时文件加 rename，同第 2 章），再调用 ctx.reload() 重载 Pi。写入失败时提示「应用失败」，不重载。</desc>
+          <defs>
+            <marker id="fig-statusbar-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <text class="t-sub" x="12" y="20">&lt;agent 目录&gt;/pi-statusline.json（默认 ~/.pi/agent/，跟随 PI_CODING_AGENT_DIR）</text>
+
+          <g data-cue="statusbar-13">
+            <rect class="n" x="12" y="36" width="176" height="168" rx="6"/>
+            <text class="t" x="24" y="60">原文件（示例）</text>
+            <text class="t-mono" x="24" y="88">其他顶层字段…</text>
+            <text class="t-mono" x="24" y="114">palettePreset</text>
+            <text class="t-mono" x="24" y="138">palette</text>
+            <text class="t-mono" x="24" y="162">density</text>
+            <text class="t-mono" x="24" y="186">separator</text>
+          </g>
+
+          <g data-cue="statusbar-14">
+            <path class="w" d="M188 120 H220" marker-end="url(#fig-statusbar-5-arrow)"/>
+            <rect class="mask" x="190" y="98" width="28" height="14"/>
+            <text class="t-cap" x="204" y="109" text-anchor="middle">合并</text>
+            <rect class="n" x="220" y="36" width="224" height="168" rx="6"/>
+            <rect x="221" y="98" width="222" height="102" style="fill:var(--accent-tint)"/>
+            <text class="t" x="232" y="60">写入内容</text>
+            <text class="t-mono" x="232" y="88">其他顶层字段…</text>
+            <text class="t-cap" x="436" y="88" text-anchor="end" style="fill:var(--ok)">保留</text>
+            <text class="t-mono" x="232" y="114">palettePreset: "custom"</text>
+            <text class="t-mono" x="232" y="138">palette: 13 个字段</text>
+            <text class="t-mono" x="232" y="162">density: "compact"</text>
+            <text class="t-mono" x="232" y="186">separator: "round"</text>
+          </g>
+
+          <g data-cue="statusbar-15">
+            <path class="w" d="M444 68 H476" marker-end="url(#fig-statusbar-5-arrow)"/>
+            <path class="w" d="M552 100 V124" marker-end="url(#fig-statusbar-5-arrow)"/>
+            <rect class="n" x="476" y="36" width="152" height="64" rx="6"/>
+            <text class="t" x="488" y="58">原子写入</text>
+            <text class="t-sub" x="488" y="76">临时文件 + rename</text>
+            <text class="t-sub" x="488" y="92">同第 2 章</text>
+            <rect class="n" x="476" y="124" width="152" height="48" rx="6"/>
+            <text class="t" x="488" y="144">重载 Pi</text>
+            <text class="t-sub" x="488" y="162">ctx.reload()</text>
+            <text class="t-cap" x="476" y="198">写入失败：提示</text>
+            <text class="t-cap" x="476" y="216">「应用失败」，不重载</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>原文件里的字段名是示例；<code>palette</code> 整体替换，不与原值逐项合并。</figcaption>
+    </figure>
+  </div>
+</section>

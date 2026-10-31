@@ -1,0 +1,21 @@
+# overview 事实清单
+
+- 包名 pi-personal-extensions，是 Pi 扩展合集 —— package.json:2-4；README.md:3
+- 包只声明一个扩展入口 ./extensions/pi-personal-extensions.ts —— package.json:20-24；tests/personal.test.mjs:43-45
+- 入口按 personal-extensions.json 的开关加载七项功能 —— extensions/pi-personal-extensions.ts:123-134
+- 入口注册 /personal，用于启停和设置 —— extensions/pi-personal-extensions.ts:136-238
+- 开关文件路径来自 getAgentDir()，默认 ~/.pi/agent，可由 PI_CODING_AGENT_DIR 改变 —— extensions/pi-personal-extensions.ts:123；tests/personal.test.mjs:35-38；node_modules/@earendil-works/pi-coding-agent/dist/config.js:453-458（非本仓库）
+- 七项功能的 label：右下角会话标题、自动会话命名、额度与会话 ID、文件路径可点击、用户消息橙色线框、状态栏风格选择、原位思考强度（Jev / d1-ultra） —— extensions/pi-personal-extensions.ts:18-61
+- 按屏幕区域归类、章号是讲解页的组织方式，源码没有分组概念
+- 用户消息橙色线框：给 TUI 普通用户消息加橙色边框，左上角显示 user —— extensions/user-message-border.ts:7、33-39
+- 文件路径可点击：把本地文件路径改写成可点击链接 —— extensions/clickable-paths.ts:2-10、243
+- 额度与会话 ID：用 setStatus 显示剩余额度和会话 ID 末尾 8 位（shortSessionId） —— extensions/substatusline.ts:28、30-35
+- 图中第二行示例 `7c41e0a2 · weekly 88% left`：会话 ID 是虚构的 8 位示例值（框内标「示例画面」），`weekly 88% left` 的格式见 extensions/substatusline.ts:191（formatRemaining）
+- 状态栏风格选择：改 pi-statusline 的配色（同时设置 compact 密度和 round 分隔符，细节在第 4 章）—— extensions/statusline-style-picker.ts:225-234；extensions/pi-personal-extensions.ts:52
+- 右下角会话标题：在输入框下方右对齐显示会话名 —— extensions/session-title.ts:17-29
+- 自动会话命名：agent_settled 后触发检查，满足条件（有 UI、空闲、开启、未被手动名保护等）才后台请求 —— extensions/auto-session-name.ts:163-181、352-354
+- 原位思考强度：只在 openai-codex-responses 接口的 GPT-6 系列、thinking 不为 off 时工作；状态栏显示 `🧠 当前 · 基线 … · 分类器`，始终带分类器名；当前强度等于基线时省略基线段（图中示例 `🧠 low · 基线 medium · d1-ultra`） —— extensions/jev-inline-effort.ts:60、71、350-352、378；README.md:67
+- 「为新用户消息选择思考强度」：同批多条消息可共用一次分类，空白文本不调用 —— extensions/jev-inline-effort.ts:84-89、289-290、310-334（细节在第 6 章）
+- 七项功能默认全部开启 —— extensions/pi-personal-extensions.ts:98-100；README.md:28
+- 每项可以单独关闭 —— extensions/pi-personal-extensions.ts:132-134、172
+- 入口是 Pi 加载的那个文件 —— package.json:20-24

@@ -9,9 +9,9 @@
 - 包是 private —— package.json:6
 - 改代码后 /reload；卸载 pi remove "$(pwd)" —— README.md:15
 - 五个配置文件默认在 ~/.pi/agent/ —— README.md:97-105
-- 五个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:130；extensions/auto-session-name.ts:37、61-62；extensions/inline-effort.ts:25、48；extensions/clickable-paths.ts:235；extensions/statusline.ts:629-630；README.md:97-107；tests/personal.test.mjs:36-39
+- 五个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:127；extensions/auto-session-name.ts:37、61-62；extensions/inline-effort.ts:25、48；extensions/clickable-paths.ts:235；extensions/statusline.ts:642-643；README.md:97-107；tests/personal.test.mjs:36-39
 - clickable-paths.json 直接覆盖写入，失败静默 —— extensions/clickable-paths.ts:48-55
-- 其余四个文件先写临时文件再 rename —— extensions/pi-personal-extensions.ts:245-251；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/statusline.ts:645-650
+- 其余四个文件先写临时文件再 rename —— extensions/pi-personal-extensions.ts:242-248；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/statusline.ts:658-663
 - 命名和分类器设置不修改 Pi 的 settings.json —— README.md:106
 - Pi 没有普通用户消息的边框钩子 —— extensions/user-message-border.ts:15
 - 替换 UserMessageComponent.prototype.render，只在 TUI 模式 —— extensions/user-message-border.ts:13、16-17、43

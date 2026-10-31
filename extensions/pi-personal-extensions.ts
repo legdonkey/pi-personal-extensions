@@ -9,7 +9,7 @@ import {
 import { Container, SettingsList, Text } from "@earendil-works/pi-tui";
 import autoSessionName from "./auto-session-name.ts";
 import clickablePaths from "./clickable-paths.ts";
-import statusline, { STYLES } from "./statusline.ts";
+import statusline from "./statusline.ts";
 import sessionTitle from "./session-title.ts";
 import userMessageBorder from "./user-message-border.ts";
 import inlineEffort from "./inline-effort.ts";
@@ -83,10 +83,7 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
     { label: "不识别裸路径", command: "clickable-paths", args: "bare off" },
   ],
   "statusline": [
-    { label: "预览并选择配色", command: "statusline-style", args: "" },
-    ...STYLES.map(({ id, name }) => ({
-      label: `应用配色：${id}. ${name}`, command: "statusline-style", args: String(id),
-    })),
+    { label: "选择 pi-statusline 自定义配色", command: "statusline-style", args: "" },
   ],
 };
 

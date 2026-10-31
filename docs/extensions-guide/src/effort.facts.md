@@ -15,7 +15,7 @@
 ## 头部
 
 - 功能 ID `inline-effort`，菜单 label「原位思考强度（Jev / d1-ultra）」 —— entry:49-50
-- 入口 `/personal` → 原位思考强度（Jev / d1-ultra）→ 菜单项；处理函数以 `effort` 名存进 commands 表，不注册成斜杠命令 —— ext:223；entry:50, entry:70-74, entry:132-137, entry:142
+- 入口 `/personal` → 原位思考强度（Jev / d1-ultra）→ 菜单项；处理函数以 `effort` 名存进 commands 表，不注册成斜杠命令 —— ext:223；entry:50, entry:70-74, entry:129-134, entry:139
 - 配置文件在 agent 目录下的 `inline-effort.json`；agent 目录默认 `~/.pi/agent/`，`PI_CODING_AGENT_DIR` 可覆盖 —— ext:23-26, ext:48；config:453-458；README.md:96, README.md:106
 - 默认分类器 Jev，可选 d1-ultra —— ext:11-14, ext:35, ext:40
 
@@ -58,7 +58,7 @@
 
 - Pi 每次请求前按当前上下文构造完整 input —— codex:379-394
 - 基线在请求顶层 `reasoning.effort` —— ext:65, ext:357；codex:414-424
-- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:75；CHANGELOG.md:23（仓库未验证服务端 prompt cache 命中规则）
+- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:75；CHANGELOG.md:25（仓库未验证服务端 prompt cache 命中规则）
 - 启用缓存且有会话 ID 时，请求带 `prompt_cache_key` —— codex:171-173, codex:397
 - WebSocket 增量续传：传输方式为 auto 或 websocket-cached；当前连接保留 continuation 和有效 lastResponseId；除 input、previous_response_id 外其余字段一致；新 input 以上次 input 加上次响应开头。全部满足才只发新增部分并带 `previous_response_id`，否则发完整请求 —— codex:184, codex:1121-1160, codex:1175-1177
 - 默认传输方式是 auto —— codex:184
@@ -101,9 +101,9 @@
 
 ## 7. 在 /personal 里管理（图 7 录屏 + 表）
 
-- 菜单项与处理函数参数：查看分类模型与状态（status）、选择分类模型（model）、测试分类模型可用性（test） —— entry:70-74, entry:174-181
-- 本项目只注册 `/personal`；功能的 registerCommand 被 featureApi 截住，只存进 commands 表 —— entry:132-137, entry:142
-- `/personal` 有 UI 就能用（TUI、RPC）；没有 UI 时提示并返回；批量功能开关只在 TUI —— entry:145-148, entry:193-196
+- 菜单项与处理函数参数：查看分类模型与状态（status）、选择分类模型（model）、测试分类模型可用性（test） —— entry:70-74, entry:171-178
+- 本项目只注册 `/personal`；功能的 registerCommand 被 featureApi 截住，只存进 commands 表 —— entry:129-134, entry:139
+- `/personal` 有 UI 就能用（TUI、RPC）；没有 UI 时提示并返回；批量功能开关只在 TUI —— entry:142-145, entry:190-193
 - 查看状态：是否适用、后续分类器、当前分支最近决策 —— ext:232-239
 - 「查看分类模型与状态」在 agent 运行时也可用；选择和测试要求空闲 —— ext:232-244, ext:285-288；test:533-552
 - 「选择分类模型」打开选择器，Esc 取消不保存 —— ext:259-279
@@ -124,5 +124,5 @@
 - 文件、功能 ID、配置文件名从 jev-inline-effort 改为 inline-effort —— entry:15, entry:49；ext:23, ext:48；README.md:102
 - `inline-effort.json` 读取返回 ENOENT 时才读 `jev-inline-effort.json`；新文件格式或内容无效时报错，不回退 —— ext:23-44；README.md:112
 - 保存只写 `inline-effort.json`，旧文件保留不改写 —— ext:46-59；test:374-417；README.md:112
-- 开关新键 `inline-effort` 存在时以新键为准，否则读旧键 `jev-inline-effort`；旧键仍须为布尔值 —— entry:109-116, entry:124-125；README.md:111
+- 开关新键 `inline-effort` 存在时以新键为准，否则读旧键 `jev-inline-effort`；旧键仍须为布尔值 —— entry:106-113, entry:121-122；README.md:111
 - 会话决策条目类型和状态栏键仍为 `jev-inline-effort`，旧会话可直接恢复 —— ext:67-69；README.md:113

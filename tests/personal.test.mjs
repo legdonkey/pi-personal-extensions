@@ -291,7 +291,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
     const expected = {
       1: ["查看状态", "选择命名模型", "选择命名思考强度", "预览建议标题", "暂停当前会话命名", "恢复当前会话命名"],
       3: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
-      2: ["预览并选择配色", ...styleNames.map((name, index) => `应用配色：${index + 1}. ${name}`)],
+      2: ["选择 pi-statusline 自定义配色"],
       5: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "测试分类模型可用性"],
     };
     for (let feature = 0; feature < ids.length; feature++) {
@@ -326,7 +326,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       await choose(3, action);
       assert.equal(JSON.parse(readFileSync(join(dir, "clickable-paths.json"), "utf8"))[key], value);
     }
-    await choose(2, "预览并选择配色");
+    await choose(2, "选择 pi-statusline 自定义配色");
     assert.equal(calls.at(-1), "custom");
     await choose(5, "查看分类模型与状态");
     assert.match(notices.at(-1)[0], /后续分类：openrouter\/~typesafe\/jev-latest/);
@@ -455,7 +455,7 @@ test("RPC 支持逐项启停，批量开关提示替代路径；没有 UI 时提
   }
 });
 
-test("RPC 可从 personal 子菜单直接应用全部 11 套配色，无需 custom", async () => {
+test("RPC 从统一配色选择器应用全部 11 套自定义配色，无需 custom", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-rpc-style-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -476,10 +476,10 @@ test("RPC 可从 personal 子菜单直接应用全部 11 套配色，无需 cust
       },
     };
     for (const [index, name] of styleNames.entries()) {
-      choices = [2, index + 1];
+      choices = [2, 0, index];
       await command.handler("", ctx);
       assert.equal(choices.length, 0);
-      assert.deepEqual(notices.at(-1), [`已应用：${name}`, "info"]);
+      assert.deepEqual(notices.at(-1), [`已应用 pi-statusline 自定义配色：${name}（紧凑布局、圆角分隔符）`, "info"]);
       const config = JSON.parse(readFileSync(path, "utf8"));
       assert.equal(config.preserved, "保留原有配置");
       assert.equal(config.palettePreset, "custom");

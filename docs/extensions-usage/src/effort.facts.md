@@ -17,7 +17,7 @@
 - 「查看分类模型与状态」输出「适用」或「当前主模型或 thinking 不适用」；「适用」只检查主模型和 thinking，不检查登录、分类器连通 —— ext:236, ext:299-300
 - 确认步骤：「测试分类模型可用性」检查分类器；发消息后看 🧠 段的档位，弹出分类警告表示分类失败、沿用当前档位（仍按最近一次决策照常调整，不显示「未调整」）；出现「未调整」表示请求对齐失败、这次没有调整、按基线发出 —— ext:248-255, ext:326, ext:340, ext:344, ext:361-364, ext:381, ext:388
 - 不能和服务端自动压缩、自动截断或 `/responses/compact` 一起用；Pi 客户端压缩不受影响 —— README.md:84
-- 功能默认开启，可在 `/personal` 里关闭 —— entry:50, entry:94-96, entry:165-183
+- 功能默认开启，可在 `/personal` 里关闭 —— entry:50, entry:91-93, entry:162-180
 
 ## 状态栏的 🧠 段
 
@@ -66,12 +66,12 @@
 
 ## 单一入口（/personal）
 
-- 本项目只注册 `/personal`；原位思考强度的操作都在 `/personal` → 原位思考强度（Jev / d1-ultra）的菜单项里 —— entry:50, entry:70-74, entry:132-142
+- 本项目只注册 `/personal`；原位思考强度的操作都在 `/personal` → 原位思考强度（Jev / d1-ultra）的菜单项里 —— entry:50, entry:70-74, entry:129-139
 - 菜单项：查看分类模型与状态、选择分类模型（Jev / d1-ultra）、测试分类模型可用性 —— entry:71-73
 - 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，输出原文见 scratchpad/recapture-actual.md（最近决策：尚无，指向菜单路径） —— ext:236；entry:71
-- 录屏 effort-model：选择器标题当前 d1-ultra，光标 Jev → d1-ultra → Jev，Esc 退出；二级菜单含三个设置项，加上「禁用此功能并重载」共四项 —— entry:71-73, entry:165-171；ext:271
+- 录屏 effort-model：选择器标题当前 d1-ultra，光标 Jev → d1-ultra → Jev，Esc 退出；二级菜单含三个设置项，加上「禁用此功能并重载」共四项 —— entry:71-73, entry:162-168；ext:271
 
 ## 改名与兼容
 
-- 配置文件为 agent 目录下的 `inline-effort.json`；升级后原有设置自动保留（旧 `jev-inline-effort.json` 和旧开关仍能读取） —— ext:23-33, ext:48；entry:124-125；README.md:102, README.md:111-112
+- 配置文件为 agent 目录下的 `inline-effort.json`；升级后原有设置自动保留（旧 `jev-inline-effort.json` 和旧开关仍能读取） —— ext:23-33, ext:48；entry:121-122；README.md:102, README.md:111-112
 - Esc 逐级返回，取消不保存；设置保存后回到二级菜单，重载后结束导航；批量开关从一级进入时取消返回一级，直接 switches 取消退出 —— tests/personal-navigation.test.mjs；tests/personal.test.mjs「统一入口按开关注册六项功能」

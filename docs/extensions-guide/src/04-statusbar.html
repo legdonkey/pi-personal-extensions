@@ -213,17 +213,15 @@
     <div class="beat-text">
       <h3>换配色</h3>
       <p>
-        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的「状态栏：额度、会话 ID 与配色」里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> →「状态栏：额度、会话 ID 与配色」里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
-        <span class="seg" data-seg="statusbar-09" data-say="选「预览并选择配色」时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">选「预览并选择配色」时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
+        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的「状态栏：额度、会话 ID 与配色」里，选择 pi statusline 自定义配色。需要另外安装并启用 pi statusline，不改变 Pi 主题。">在 <code>/personal</code> 的「状态栏：额度、会话 ID 与配色」里，选择 <code>pi-statusline</code> 自定义配色。需要另外安装并启用 <code>pi-statusline</code>，不改变 Pi 主题。</span>
+        <span class="seg" data-seg="statusbar-09">终端里上下键实时预览，Enter 应用，Esc 取消；RPC 客户端使用普通列表。应用后覆盖自定义配色，并设置紧凑布局和圆角分隔符。</span>
       </p>
       <ul>
-        <li>二级菜单里的 11 项「应用配色：编号. 名称」直接应用对应配色，不打开选择器。<code>/personal</code> 有 UI 就能用，所以 RPC 客户端也能直接应用。</li>
-        <li>在 TUI 以外选「预览并选择配色」时，只提示一条警告，建议改用直接应用的菜单项。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
-      <figcaption>录屏：/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，打开「选择 pi-statusline 自定义配色」；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：/personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。</figcaption>
     </figure>
   </div>
 

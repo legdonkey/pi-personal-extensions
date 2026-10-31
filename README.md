@@ -22,7 +22,7 @@ pi install "$(pwd)"
 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）
 /personal → 自动会话命名 → 选择命名模型
 /personal → 文件路径可点击 → 打开方式：cursor
-/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色
+/personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色
 ```
 
 默认全部开启。禁用的功能只提供启用入口，不注册其事件。启停保存后自动重载；其他已打开的会话需各自 `/reload`。菜单显示的是功能是否已加载，各功能自身状态在对应子菜单中查看。
@@ -87,7 +87,7 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 在 `/personal → 文件路径可点击` 中查看设置、开启或暂停路径链接。通过「打开方式：vscode」等菜单项选择 `vscode`、`vscode-insiders`、`cursor`、`windsurf` 或 `file`。通过「识别裸路径」或「不识别裸路径」控制不带反引号的路径识别。
 
-在 `/personal → 状态栏：额度、会话 ID 与配色` 中统一启停额度、会话 ID 和配色选择功能。二级菜单的「预览并选择配色」可预览全部 11 套配色；「应用配色：1. 茶墨渐层」等 11 个直达项可直接应用，支持 RPC。应用后自动重载；配色预览需要 TUI。
+在 `/personal → 状态栏：额度、会话 ID 与配色` 中统一启停额度、会话 ID 和配色选择功能。通过「选择 pi-statusline 自定义配色」选择 11 套配色：TUI 支持实时预览，RPC 使用普通列表。应用后覆盖 `pi-statusline.json` 中的自定义配色（`palettePreset: "custom"`），并设为紧凑布局、圆角分隔符，再自动重载；不改变 Pi 主题。需另行安装并启用 pi-statusline。
 
 额度与会话 ID 由本包提供。配色需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含该状态栏本体。额度显示支持 `openai-codex` 周额度，以及 `zai-coding-cn` 的 5 小时和周额度。
 

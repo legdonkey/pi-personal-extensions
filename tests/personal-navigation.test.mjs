@@ -57,7 +57,9 @@ test("菜单逐级返回，取消不保存，保存后留在二级菜单，重�
         await command.handler("", ctx);
         assert.equal(steps.length, 0, "配色预览取消后返回二级菜单");
       }
-      steps.push([/统一管理/, 2], [/状态栏.*返回上一级/, 1]);
+      steps.push([/统一管理/, 2], [/状态栏.*返回上一级/, 0]);
+      if (mode === "rpc") steps.push([/选择 pi-statusline 自定义配色/, 0]);
+      else ctx.ui.custom = async () => 0;
       await command.handler("", ctx);
       assert.equal(reloads, 1);
       assert.equal(steps.length, 0);

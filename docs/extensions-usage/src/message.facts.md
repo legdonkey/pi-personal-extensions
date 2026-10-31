@@ -7,9 +7,9 @@
 - 功能名「用户消息橙色线框」，「文件路径可点击」 —— pi-personal-extensions.ts:38, 44
 - 用户消息外加橙色圆角线框，左上角写 `user` —— user-message-border.ts:7, 35-39
 - 只在 TUI（终端界面）模式生效 —— user-message-border.ts:13
-- 不用设置：`/personal` 二级菜单里只有启用 / 禁用 —— pi-personal-extensions.ts:61-91（actions 表里没有 user-message-border）, 167-168
+- 不用设置：`/personal` 二级菜单里只有启用 / 禁用 —— pi-personal-extensions.ts:61-88（actions 表里没有 user-message-border）, 167-168
 - 只改显示，不改消息内容 —— README.md:38；user-message-border.ts:20-41（只包装 render）
-- 可以在 `/personal` 里关闭这项功能（步骤在第 1 章） —— pi-personal-extensions.ts:157-172
+- 可以在 `/personal` 里关闭这项功能（步骤在第 1 章） —— pi-personal-extensions.ts:154-169
 - 升级 Pi 后线框可能不再显示，消息照常显示（行结构检查不通过时退回原始渲染） —— user-message-border.ts:15, 25-31；README.md:122
 
 ## 文件路径可点击
@@ -25,7 +25,7 @@
 - 手改配置后要 `/reload`：配置只在功能加载时读取一次 —— clickable-paths.ts:235-236
 - 默认编辑器 vscode —— clickable-paths.ts:35
 - 编辑器选项 vscode / vscode-insiders / cursor / windsurf / file —— clickable-paths.ts:20, 232
-- 换编辑器：`/personal` →「文件路径可点击」→「打开方式：…」（菜单是唯一入口） —— pi-personal-extensions.ts:79-81, 142, 157-180；clickable-paths.ts:266-275
+- 换编辑器：`/personal` →「文件路径可点击」→「打开方式：…」（菜单是唯一入口） —— pi-personal-extensions.ts:79-81, 139, 154-177；clickable-paths.ts:266-275
 - file 选项由系统默认程序打开，不跳到行 —— clickable-paths.ts:59-62, 68-70
 - 演示里的链接地址格式 —— clickable-paths.ts:64-77（示例路径与工作目录为虚构）
 - 裸路径（没加反引号）要带扩展名才识别 —— clickable-paths.ts:162-167

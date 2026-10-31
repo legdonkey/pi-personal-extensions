@@ -48,6 +48,11 @@ test("迁入的风格选择器保留 11 套配色、预览、配置和重载行�
                 .every((line) => visibleWidth(line) <= width),
             );
           }
+          const rendered = component.render(80).join("\n");
+          assert.match(rendered, /pi-statusline 自定义配色/);
+          assert.match(rendered, /需安装并启用 pi-statusline/);
+          assert.match(rendered, /不改变 Pi 主题/);
+          assert.match(rendered, /紧凑布局、圆角分隔符/);
           component.handleInput("\x1b");
           return result;
         },
@@ -65,7 +70,27 @@ test("迁入的风格选择器保留 11 套配色、预览、配置和重载行�
     await command.handler("不存在的风格", ctx);
     assert.equal(reloads, 1);
     assert.equal(notices.at(-1)[1], "error");
-    await command.handler("", { ...ctx, mode: "rpc" });
+    const saved = readFileSync(path, "utf8");
+    let choice;
+    const rpc = { ...ctx, mode: "rpc", hasUI: true, ui: { ...ctx.ui,
+      custom: async () => assert.fail("RPC 不使用 TUI 预览"),
+      select: async (title, options) => {
+        assert.match(title, /需安装并启用 pi-statusline/);
+        assert.match(title, /不改变 Pi 主题/);
+        assert.match(title, /覆盖其自定义配色/);
+        assert.match(title, /紧凑布局、圆角分隔符/);
+        assert.equal(options.length, 11);
+        return choice;
+      },
+    } };
+    await command.handler("", rpc);
+    assert.equal(readFileSync(path, "utf8"), saved, "取消不改配置");
+    choice = "无效配色";
+    await command.handler("", rpc);
+    assert.equal(notices.at(-1)[1], "error");
+    assert.equal(readFileSync(path, "utf8"), saved);
+    assert.equal(reloads, 1);
+    await command.handler("", { ...rpc, hasUI: false });
     assert.equal(notices.at(-1)[1], "warning");
   } finally {
     rmSync(process.env.PI_CODING_AGENT_DIR, { recursive: true, force: true });

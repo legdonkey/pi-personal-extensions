@@ -181,49 +181,62 @@ export default function statusline(pi: ExtensionAPI) {
 		async handler(args, ctx) {
 			let style = args.trim() ? findStyle(args) : undefined;
 			if (!args.trim()) {
+				const title = "选择 pi-statusline 自定义配色";
+				const notes = [
+					"需安装并启用 pi-statusline；不改变 Pi 主题。",
+					"应用后覆盖其自定义配色，并设为紧凑布局、圆角分隔符。",
+				];
 				if (ctx.mode !== "tui") {
-					ctx.ui.notify("预览需要 pi 终端交互模式；可在 /personal → 状态栏：额度、会话 ID 与配色 中直接应用配色。", "warning");
-					return;
+					if (!ctx.hasUI) {
+						ctx.ui.notify("请在支持 UI 的客户端中打开 /personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色。", "warning");
+						return;
+					}
+					const choices = STYLES.map(({ id, name }) => `${id}. ${name}`);
+					const choice = await ctx.ui.select([title, ...notes].join("\n"), choices);
+					if (choice === undefined) return;
+					style = STYLES[choices.indexOf(choice)];
+				} else {
+					const { Key, matchesKey, truncateToWidth, wrapTextWithAnsi } = await import(
+						"@earendil-works/pi-tui"
+					);
+					const selected = await ctx.ui.custom<number | null>(
+						(tui, theme, _keybindings, done) => {
+							let index = 0;
+							return {
+								render(width: number) {
+									const lines = [
+										theme.fg("accent", title),
+										...notes.flatMap((note) => wrapTextWithAnsi(theme.fg("dim", note), width)),
+										"",
+									];
+									for (let item = 0; item < STYLES.length; item++) {
+										const marker = item === index ? theme.fg("accent", ">") : " ";
+										const name = `${String(STYLES[item].id).padStart(2, "0")}  ${STYLES[item].name}`;
+										lines.push(
+											`${marker} ${item === index ? theme.bold(name) : name}  ${swatches(STYLES[item])}`,
+										);
+									}
+									lines.push("", theme.fg("muted", `预览 · ${STYLES[index].name}`));
+									lines.push(...previewLines(STYLES[index], width));
+									lines.push("", theme.fg("dim", "↑↓ 选择 · Enter 应用 · Esc 取消"));
+									return lines.map((line) => truncateToWidth(line, width));
+								},
+								invalidate() {},
+								handleInput(data: string) {
+									if (matchesKey(data, Key.up))
+										index = (index - 1 + STYLES.length) % STYLES.length;
+									else if (matchesKey(data, Key.down))
+										index = (index + 1) % STYLES.length;
+									else if (matchesKey(data, Key.enter)) return done(index);
+									else if (matchesKey(data, Key.escape)) return done(null);
+									tui.requestRender();
+								},
+							};
+						},
+					);
+					if (selected === null || selected === undefined) return;
+					style = STYLES[selected];
 				}
-				const { Key, matchesKey, truncateToWidth } = await import(
-					"@earendil-works/pi-tui"
-				);
-				const selected = await ctx.ui.custom<number | null>(
-					(tui, theme, _keybindings, done) => {
-						let index = 0;
-						return {
-							render(width: number) {
-								const lines = [
-									theme.fg("accent", "选择状态栏风格（上下键实时预览）"),
-									"",
-								];
-								for (let item = 0; item < STYLES.length; item++) {
-									const marker = item === index ? theme.fg("accent", ">") : " ";
-									const name = `${String(STYLES[item].id).padStart(2, "0")}  ${STYLES[item].name}`;
-									lines.push(
-										`${marker} ${item === index ? theme.bold(name) : name}  ${swatches(STYLES[item])}`,
-									);
-								}
-								lines.push("", theme.fg("muted", `预览 · ${STYLES[index].name}`));
-								lines.push(...previewLines(STYLES[index], width));
-								lines.push("", theme.fg("dim", "↑↓ 选择 · Enter 应用 · Esc 取消"));
-								return lines.map((line) => truncateToWidth(line, width));
-							},
-							invalidate() {},
-							handleInput(data: string) {
-								if (matchesKey(data, Key.up))
-									index = (index - 1 + STYLES.length) % STYLES.length;
-								else if (matchesKey(data, Key.down))
-									index = (index + 1) % STYLES.length;
-								else if (matchesKey(data, Key.enter)) return done(index);
-								else if (matchesKey(data, Key.escape)) return done(null);
-								tui.requestRender();
-							},
-						};
-					},
-				);
-				if (selected === null || selected === undefined) return;
-				style = STYLES[selected];
 			}
 
 			if (!style) {
@@ -233,7 +246,7 @@ export default function statusline(pi: ExtensionAPI) {
 
 			try {
 				await applyStyle(style);
-				ctx.ui.notify(`已应用：${style.name}`, "info");
+				ctx.ui.notify(`已应用 pi-statusline 自定义配色：${style.name}（紧凑布局、圆角分隔符）`, "info");
 				await ctx.reload();
 			} catch (error) {
 				ctx.ui.notify(

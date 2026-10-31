@@ -2,7 +2,7 @@
 Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/clickable-paths-status.mp4"
 Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/clickable-paths-status.txt"
 Set Width 960
-Set Height 600
+Set Height 900
 Source "docs/extensions-usage/tapes/_settings.tape"
 
 Hide

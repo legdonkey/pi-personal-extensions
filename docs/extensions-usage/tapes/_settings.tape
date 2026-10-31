@@ -13,8 +13,8 @@
 #   statusline-style        132 576  0.2  8.2  5.2
 #   auto-name-model         88  434  0.2  8.4  6.5
 #   effort-model            156 432  0.2  7.9  5.8
-#   clickable-paths-status  14  574  0.2  7.0  end
-#   auto-name-status        36  552  0.2  6.8  end
+#   clickable-paths-status  0   888  0.2  7.0  end
+#   auto-name-status        0   788  0.2  6.8  end
 #   effort-status           34  596  0.2  7.6  end
 Set Shell "bash"
 Set FontSize 18

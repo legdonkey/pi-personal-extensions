@@ -3,7 +3,7 @@
 - 包名 pi-personal-extensions，是 Pi 扩展合集 —— package.json:2-4；README.md:3
 - 包只声明一个扩展入口 ./extensions/pi-personal-extensions.ts —— package.json:20-24；tests/personal.test.mjs:41-46
 - 入口按 personal-extensions.json 的开关加载六项功能 —— extensions/pi-personal-extensions.ts:130-140
-- 入口注册 /personal，用于启停和设置 —— extensions/pi-personal-extensions.ts:142-249
+- 入口注册 /personal，用于启停和设置 —— extensions/pi-personal-extensions.ts:142-263
 - 开关文件路径来自 getAgentDir()，默认 ~/.pi/agent，可由 PI_CODING_AGENT_DIR 改变 —— extensions/pi-personal-extensions.ts:130；tests/personal.test.mjs:36-39；node_modules/@earendil-works/pi-coding-agent/dist/config.js:453-458（非本仓库）
 - 六项功能的 label：右下角会话标题、自动会话命名、状态栏：额度、会话 ID 与配色、文件路径可点击、用户消息橙色线框、原位思考强度（Jev / d1-ultra） —— extensions/pi-personal-extensions.ts:17-54
 - 按屏幕区域归类、章号是讲解页的组织方式，源码没有分组概念
@@ -17,6 +17,6 @@
 - 原位思考强度：只在 openai-codex-responses 接口的 GPT-6 系列、thinking 不为 off 时工作；状态栏显示 `🧠 当前 · 基线 … · 分类器`，始终带分类器名；当前强度等于基线时省略基线段（图中示例 `🧠 low · 基线 medium · d1-ultra`） —— extensions/inline-effort.ts:70、81、299-300、360、388；README.md:58
 - 「为新用户消息选择思考强度」：同批多条消息可共用一次分类，空白文本不调用 —— extensions/inline-effort.ts:94-99、299-300、320-344（细节在第 6 章）
 - 六项功能默认全部开启 —— extensions/pi-personal-extensions.ts:94-96；README.md:28
-- 每项可以单独关闭 —— extensions/pi-personal-extensions.ts:138-140、178
+- 每项可以单独关闭 —— extensions/pi-personal-extensions.ts:138-140、183
 - 入口是 Pi 加载的那个文件 —— package.json:20-24
 - 额度、会话 ID 和配色合并为一项功能、一个开关（功能 ID statusline）—— extensions/pi-personal-extensions.ts:30-35；extensions/statusline.ts（合并后的单文件）

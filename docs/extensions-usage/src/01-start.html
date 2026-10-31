@@ -176,7 +176,7 @@ pi remove "$(pwd)"</code></pre>
         <li><span class="seg" data-seg="start-08" data-say="在 Pi 里输入斜杠 personal，打开统一管理菜单。菜单列出六项功能，并标出已加载或未加载。">在 Pi 里输入 <code>/personal</code>，打开统一管理菜单。菜单列出六项功能，并标出已加载或未加载。</span></li>
         <li><span class="seg" data-seg="start-09">选中一项功能，进入它的二级菜单。</span></li>
         <li><span class="seg" data-seg="start-10">如果要关闭这项功能，选二级菜单的最后一项「禁用此功能并重载」。Pi 会自动重载。</span></li>
-        <li><span class="seg" data-seg="start-11" data-say="如果什么都不改，按 Esc 键退出菜单。">如果什么都不改，按 <kbd>Esc</kbd> 键退出菜单。</span></li>
+        <li><span class="seg" data-seg="start-11" data-say="按 Esc 键逐级返回，一级菜单才退出。保存设置后仍留在二级菜单；需要重载时退出。">按 <kbd>Esc</kbd> 键逐级返回，一级菜单才退出。保存设置后仍留在二级菜单；需要重载时退出。</span></li>
       </ol>
       <ul>
         <li>Pi 正在回复或压缩时，重载会被拒绝。等它结束再操作，或结束后手动输入 <code>/reload</code>。</li>
@@ -185,11 +185,11 @@ pi remove "$(pwd)"</code></pre>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="personal-menu" id="fig-start-3">
-      <div class="capture-frame"><video data-cue="start-08" src="media/personal-menu.mp4" poster="media/personal-menu.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal，进入自动会话命名的二级菜单，看到禁用此功能并重载但不执行，再按 Esc 键退出"></video></div>
+      <div class="capture-frame"><video data-cue="start-08" src="media/personal-menu.mp4" poster="media/personal-menu.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal，进入自动会话命名的二级菜单，看到禁用此功能并重载但不执行，再按 Esc 键返回一级菜单"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 96" width="100%" role="img" aria-labelledby="fig-start-3-title fig-start-3-desc">
           <title id="fig-start-3-title">/personal 菜单的操作步骤</title>
-          <desc id="fig-start-3-desc">输入 /personal，选功能进入二级菜单，然后选「禁用此功能并重载」关闭功能，或按 Esc 键退出不改。</desc>
+          <desc id="fig-start-3-desc">输入 /personal，选功能进入二级菜单，然后选「禁用此功能并重载」关闭功能，或按 Esc 键返回上一级，不改设置。</desc>
           <defs>
             <marker id="fig-start-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -212,11 +212,11 @@ pi remove "$(pwd)"</code></pre>
           <g data-cue="start-11">
             <path class="w is-dash" d="M312 56 H336" style="marker-end:url(#fig-start-3-arrow)"/>
             <rect class="n is-ghost" x="336" y="50" width="288" height="36" rx="6"/>
-            <rect class="n" x="344" y="54" width="44" height="28" rx="4"/><line x1="347" y1="81" x2="385" y2="81" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="366" y="73" text-anchor="middle">Esc</text><text class="t-cap" x="400" y="73" style="fill:var(--ink)">退出，什么都不改</text>
+            <rect class="n" x="344" y="54" width="44" height="28" rx="4"/><line x1="347" y1="81" x2="385" y2="81" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="366" y="73" text-anchor="middle">Esc</text><text class="t-cap" x="400" y="73" style="fill:var(--ink)">返回，不改设置</text>
           </g>
         </svg>
       </div>
-      <figcaption>录屏：进入「自动会话命名」的二级菜单，能看到「禁用此功能并重载」，但没有执行，按 Esc 键退出。状态栏里的 ponytail 来自本机另一个扩展。</figcaption>
+      <figcaption>录屏：进入「自动会话命名」的二级菜单，能看到「禁用此功能并重载」，但没有执行，按 Esc 键返回一级菜单。</figcaption>
     </figure>
   </div>
 

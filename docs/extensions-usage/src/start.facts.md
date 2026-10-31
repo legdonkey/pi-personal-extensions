@@ -13,13 +13,13 @@
 - 需要 Pi ≥ 1.0.1、Node.js ≥ 22.19 —— README.md:7；package.json:25-29、38
 - 安装三条命令 —— README.md:9-13；npmmirror 镜像 —— README.md:15
 - 已打开的会话执行 /reload 加载 —— README.md:15
-- /personal 一级菜单列出六项功能和已加载 / 未加载 —— extensions/pi-personal-extensions.ts:156-158
+- /personal 一级菜单列出六项功能和已加载 / 未加载 —— extensions/pi-personal-extensions.ts:157-159
 - 二级菜单：四项功能有设置项（自动会话命名、原位思考强度、文件路径可点击、状态栏：额度、会话 ID 与配色）；自动会话命名有「选择命名模型」 —— extensions/pi-personal-extensions.ts:61-91
-- 二级菜单最后一项「禁用此功能并重载」，选后保存并自动重载 —— extensions/pi-personal-extensions.ts:164-169、178、229-246
-- Esc 取消时不改任何东西 —— extensions/pi-personal-extensions.ts:159、171、204、229-230
-- /personal switches 打开「批量功能开关」；空格切换、Enter 保存、Esc 取消 —— extensions/pi-personal-extensions.ts:154、186-228；README.md:30
-- 保存后当前会话自动重载，其他会话各自 /reload —— extensions/pi-personal-extensions.ts:246；README.md:28
-- /personal 有 UI 就能用（TUI、RPC 客户端）；批量功能开关只在 TUI —— extensions/pi-personal-extensions.ts:145-148、181-185
+- 二级菜单最后一项「禁用此功能并重载」，选后保存并自动重载 —— extensions/pi-personal-extensions.ts:165-171、183、240-259
+- Esc 取消时不改任何东西 —— extensions/pi-personal-extensions.ts:160、173、215、240-241
+- /personal switches 打开「批量功能开关」；空格切换、Enter 保存、Esc 取消 —— extensions/pi-personal-extensions.ts:155、197-239；README.md:30
+- 保存后当前会话自动重载，其他会话各自 /reload —— extensions/pi-personal-extensions.ts:259；README.md:28
+- /personal 有 UI 就能用（TUI、RPC 客户端）；批量功能开关只在 TUI —— extensions/pi-personal-extensions.ts:145-148、192-196
 - 启停不清除功能自己的配置 —— README.md:41
 - 录屏 personal-menu / personal-switches 的画面按 USAGE.md 录屏表描述
 - 安装前取得仓库：git clone https://github.com/legdonkey/pi-personal-extensions.git —— 仓库 origin 远程地址（git remote -v）
@@ -27,14 +27,15 @@
 - npm run check 标为可选（确认代码完整）—— package.json:15-19（typecheck + test，不影响安装）
 - 六项里四项有设置项 —— extensions/pi-personal-extensions.ts:61-91
 - 「已加载」只表示功能已注册，功能自身状态另查 —— README.md:28
-- 步骤条「禁用此功能并重载 → 自动重载」「Esc 键 → 退出」—— extensions/pi-personal-extensions.ts:164-171、246；录屏里只有进入二级菜单和 Esc（USAGE.md 录屏表）
-- 批量开关按键：上下选择、空格切换、Enter 保存并重载、Esc 放弃 —— README.md:30；extensions/pi-personal-extensions.ts:211、221-223
-- personal-menu 录屏：进入「自动会话命名」二级菜单，看到「禁用此功能并重载」未执行，Esc 退出 —— scratchpad/usage-captures.md；docs/extensions-usage/media/personal-menu.png
+- 步骤条「禁用此功能并重载 → 自动重载」「Esc 键 → 返回上一级」—— extensions/pi-personal-extensions.ts:165-173、259；录屏里只有进入二级菜单和 Esc（USAGE.md 录屏表）
+- 批量开关按键：上下选择、空格切换、Enter 保存并重载、Esc 放弃 —— README.md:30；extensions/pi-personal-extensions.ts:222、232-234
+- personal-menu 录屏：进入「自动会话命名」二级菜单，看到「禁用此功能并重载」未执行，Esc 返回一级菜单 —— scratchpad/usage-captures.md；docs/extensions-usage/media/personal-menu.png
 - personal-switches 录屏：下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃，未按 Enter —— scratchpad/recapture4-actual.md —— scratchpad/usage-captures.md；media/personal-switches.png
-- 列表自带提示「Enter/Space to change」，但入口先截获确认键（tui.select.confirm）保存并重载 —— extensions/pi-personal-extensions.ts:221-225；media/personal-switches.png
+- 列表自带提示「Enter/Space to change」，但入口先截获确认键（tui.select.confirm）保存并重载 —— extensions/pi-personal-extensions.ts:232-236；media/personal-switches.png
 - 「一轮」定义：你发出一条消息到 Pi 回复完 —— 讲解用语（usage-review-zh-2 术语表）
 - 原位思考强度给每条新消息选档位；朗读提示接口要求见条件列表 —— extensions/inline-effort.ts:299-300；README.md:58、78
 - 地图卡片使用 /personal 菜单 label —— extensions/pi-personal-extensions.ts:17-54
 - 自动重载在 Pi 回复或压缩时会被拒绝 —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:5300-5307（回复或压缩中拒绝 /reload）
 - 更新扩展见 faq —— faq.facts.md
 - 地图上状态栏卡片：额度、会话 ID 和配色是同一项功能 —— extensions/pi-personal-extensions.ts:30-35
+- Esc 逐级返回，取消不保存；设置保存后回到二级菜单，重载后结束导航；批量开关从一级进入时取消返回一级，直接 switches 取消退出 —— tests/personal-navigation.test.mjs；tests/personal.test.mjs「统一入口按开关注册六项功能」

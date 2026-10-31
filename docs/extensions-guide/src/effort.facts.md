@@ -58,7 +58,7 @@
 
 - Pi 每次请求前按当前上下文构造完整 input —— codex:379-394
 - 基线在请求顶层 `reasoning.effort` —— ext:65, ext:357；codex:414-424
-- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:75；CHANGELOG.md:21（仓库未验证服务端 prompt cache 命中规则）
+- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:75；CHANGELOG.md:23（仓库未验证服务端 prompt cache 命中规则）
 - 启用缓存且有会话 ID 时，请求带 `prompt_cache_key` —— codex:171-173, codex:397
 - WebSocket 增量续传：传输方式为 auto 或 websocket-cached；当前连接保留 continuation 和有效 lastResponseId；除 input、previous_response_id 外其余字段一致；新 input 以上次 input 加上次响应开头。全部满足才只发新增部分并带 `previous_response_id`，否则发完整请求 —— codex:184, codex:1121-1160, codex:1175-1177
 - 默认传输方式是 auto —— codex:184
@@ -101,9 +101,9 @@
 
 ## 7. 在 /personal 里管理（图 7 录屏 + 表）
 
-- 菜单项与处理函数参数：查看分类模型与状态（status）、选择分类模型（model）、测试分类模型可用性（test） —— entry:70-74, entry:172-176
+- 菜单项与处理函数参数：查看分类模型与状态（status）、选择分类模型（model）、测试分类模型可用性（test） —— entry:70-74, entry:174-181
 - 本项目只注册 `/personal`；功能的 registerCommand 被 featureApi 截住，只存进 commands 表 —— entry:132-137, entry:142
-- `/personal` 有 UI 就能用（TUI、RPC）；没有 UI 时提示并返回；批量功能开关只在 TUI —— entry:145-148, entry:182-185
+- `/personal` 有 UI 就能用（TUI、RPC）；没有 UI 时提示并返回；批量功能开关只在 TUI —— entry:145-148, entry:193-196
 - 查看状态：是否适用、后续分类器、当前分支最近决策 —— ext:232-239
 - 「查看分类模型与状态」在 agent 运行时也可用；选择和测试要求空闲 —— ext:232-244, ext:285-288；test:533-552
 - 「选择分类模型」打开选择器，Esc 取消不保存 —— ext:259-279

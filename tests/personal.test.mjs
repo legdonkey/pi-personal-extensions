@@ -130,14 +130,14 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
     };
     const command = loaded.commands.get("personal");
     keys = [" ", "\x1b"];
-    await command.handler("", ctx);
+    await command.handler("switches", ctx);
     assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), off);
     assert.equal(reloads, 0);
     keys = ["\r"];
-    await command.handler("", ctx);
+    await command.handler("switches", ctx);
     assert.equal(reloads, 0, "未修改时不重载");
     keys = [" ", "\r"];
-    await command.handler("", ctx);
+    await command.handler("switches", ctx);
     assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), {
       ...off,
       "session-title": true,
@@ -154,7 +154,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
     process.env.PI_CODING_AGENT_DIR = failureDir;
     const failure = load().commands.get("personal");
     mkdirSync(join(failureDir, "personal-extensions.json"));
-    await failure.handler("", ctx);
+    await failure.handler("switches", ctx);
     assert.equal(reloads, 1);
     assert.equal(notices.at(-1)[1], "error");
     rmSync(failureDir, { recursive: true, force: true });
@@ -297,7 +297,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
     for (let feature = 0; feature < ids.length; feature++) {
       choices = [feature, undefined];
       await personal.handler("", ctx);
-      assert.deepEqual(menus.at(-1).options, [...(expected[feature] ?? []), "禁用此功能并重载"]);
+      assert.deepEqual(menus.at(-2).options, [...(expected[feature] ?? []), "禁用此功能并重载"]);
     }
     const choose = async (feature, action) => {
       choices = [feature, action];
@@ -307,9 +307,9 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
     await choose(1, "查看状态");
     assert.match(notices.at(-1)[0], /自动命名：开启.*选择：\/personal → 自动会话命名/);
     await choose(1, "选择命名模型");
-    assert.match(menus.at(-1).title, /^命名模型（全局）/);
+    assert.match(menus.at(-3).title, /^命名模型（全局）/);
     await choose(1, "选择命名思考强度");
-    assert.match(menus.at(-1).title, /^命名思考强度（全局）/);
+    assert.match(menus.at(-3).title, /^命名思考强度（全局）/);
     await choose(1, "预览建议标题");
     assert.match(notices.at(-1)[0], /还没有可用于命名的用户文本/);
     await choose(1, "暂停当前会话命名");
@@ -331,8 +331,8 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
     await choose(5, "查看分类模型与状态");
     assert.match(notices.at(-1)[0], /后续分类：openrouter\/~typesafe\/jev-latest/);
     await choose(5, "选择分类模型（Jev / d1-ultra）");
-    assert.match(menus.at(-1).title, /^思考分类模型（全局）/);
-    assert.equal(menus.at(-1).options.length, 2);
+    assert.match(menus.at(-3).title, /^思考分类模型（全局）/);
+    assert.equal(menus.at(-3).options.length, 2);
     for (const [index, model] of [[0, "jev"], [1, "d1-ultra"]]) {
       choices = [5, "选择分类模型（Jev / d1-ultra）", index];
       await personal.handler("", ctx);
@@ -357,7 +357,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
     assert.deepEqual([...disabled.commands.keys()], ["personal"]);
     choices = [5, undefined];
     await disabled.commands.get("personal").handler("", ctx);
-    assert.deepEqual(menus.at(-1).options, ["启用此功能并重载"]);
+    assert.deepEqual(menus.at(-2).options, ["启用此功能并重载"]);
     choices = [5, 0];
     await disabled.commands.get("personal").handler("", ctx);
     assert.equal(reloads, 2);

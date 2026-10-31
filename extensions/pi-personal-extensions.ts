@@ -150,101 +150,115 @@ export default function personalExtensions(pi: ExtensionAPI) {
         ctx.ui.notify("用法：/personal 或 /personal switches", "warning");
         return;
       }
-      let selected: FeatureSettings | undefined;
-      let batch = args.trim() === "switches";
-      if (!batch) {
-        const labels = features.map((feature) => `${feature.label} · ${enabled[feature.id] ? "已加载" : "未加载"}`);
-        const batchLabel = "批量功能开关";
-        const choice = await ctx.ui.select("个人扩展 · 统一管理", [...labels, batchLabel]);
-        if (choice === undefined) return;
-        batch = choice === batchLabel;
-        if (!batch) {
+      while (true) {
+        let selected: FeatureSettings | undefined;
+        let batch = args.trim() === "switches";
+        while (!batch && !selected) {
+          const labels = features.map((feature) => `${feature.label} · ${enabled[feature.id] ? "已加载" : "未加载"}`);
+          const batchLabel = "批量功能开关";
+          const choice = await ctx.ui.select("个人扩展 · 统一管理（Esc 退出）", [...labels, batchLabel]);
+          if (choice === undefined) return;
+          batch = choice === batchLabel;
+          if (batch) break;
           const feature = features[labels.indexOf(choice)];
           if (!feature) return;
           const loaded = enabled[feature.id];
           const entries = loaded ? actions[feature.id] ?? [] : [];
           const toggle = loaded ? "禁用此功能并重载" : "启用此功能并重载";
-          const action = await ctx.ui.select(
-            `${feature.label} · ${feature.description}${loaded ? "" : "；启用后可管理设置"}`,
-            [...entries.map(({ label }) => label), toggle],
-          );
-          if (action === undefined) return;
-          if (action !== toggle) {
+          while (!selected) {
+            const action = await ctx.ui.select(
+              `${feature.label} · ${feature.description}${loaded ? "" : "；启用后可管理设置"}（Esc 返回上一级）`,
+              [...entries.map(({ label }) => label), toggle],
+            );
+            if (action === undefined) break;
+            if (action === toggle) {
+              selected = { ...enabled, [feature.id]: !loaded };
+              break;
+            }
             const entry = entries.find(({ label }) => label === action);
             const command = entry && commands.get(entry.command);
-            if (entry && command) await command.handler(entry.args, ctx);
-            return;
+            if (!entry || !command) return;
+            let reloaded = false;
+            await command.handler(entry.args, Object.assign(Object.create(ctx), {
+              reload: async () => {
+                reloaded = true;
+                await ctx.reload();
+              },
+            }));
+            // 重载后旧菜单及其功能实例已失效，不能继续使用。
+            if (reloaded) return;
           }
-          selected = { ...enabled, [feature.id]: !loaded };
         }
-      }
-      // RPC 的 custom 直接返回 undefined，批量界面仅在 TUI 中提供。
-      if (batch && ctx.mode !== "tui") {
-        ctx.ui.notify("当前模式不支持批量功能开关，请在 /personal 中选择功能，再选择「启用此功能并重载」或「禁用此功能并重载」。", "warning");
-        return;
-      }
-      if (batch) selected = await ctx.ui.custom<FeatureSettings | undefined>(
-        (tui, theme, keybindings, done) => {
-          const draft = { ...enabled };
-          const container = new Container();
-          container.addChild(new Text(theme.bold("个人扩展 · 功能开关"), 1, 1));
-          const list = new SettingsList(
-            features.map(({ id, label, description }) => ({
-              id,
-              label,
-              description,
-              currentValue: draft[id] ? "开启" : "关闭",
-              values: ["开启", "关闭"],
-            })),
-            features.length,
-            getSettingsListTheme(),
-            (id, value) => {
-              draft[id as FeatureId] = value === "开启";
-            },
-            () => done(undefined),
-          );
-          container.addChild(list);
-          container.addChild(
-            new Text(
-              theme.fg(
-                "dim",
-                "上下选择 · 空格切换 · 确认键保存并重载 · 取消键放弃",
+        // RPC 的 custom 直接返回 undefined，批量界面仅在 TUI 中提供。
+        if (batch && ctx.mode !== "tui") {
+          ctx.ui.notify("当前模式不支持批量功能开关，请在 /personal 中选择功能，再选择「启用此功能并重载」或「禁用此功能并重载」。", "warning");
+          return;
+        }
+        if (batch) selected = await ctx.ui.custom<FeatureSettings | undefined>(
+          (tui, theme, keybindings, done) => {
+            const draft = { ...enabled };
+            const container = new Container();
+            container.addChild(new Text(theme.bold("个人扩展 · 功能开关"), 1, 1));
+            const list = new SettingsList(
+              features.map(({ id, label, description }) => ({
+                id,
+                label,
+                description,
+                currentValue: draft[id] ? "开启" : "关闭",
+                values: ["开启", "关闭"],
+              })),
+              features.length,
+              getSettingsListTheme(),
+              (id, value) => {
+                draft[id as FeatureId] = value === "开启";
+              },
+              () => done(undefined),
+            );
+            container.addChild(list);
+            container.addChild(
+              new Text(
+                theme.fg(
+                  "dim",
+                  "上下选择 · 空格切换 · 确认键保存并重载 · 取消键放弃",
+                ),
+                1,
+                1,
               ),
-              1,
-              1,
-            ),
-          );
-          return {
-            render: (width) => container.render(width),
-            invalidate: () => container.invalidate(),
-            handleInput(data) {
-              if (keybindings.matches(data, "tui.select.confirm"))
-                return done(draft);
-              list.handleInput(data);
-              tui.requestRender();
-            },
-          };
-        },
-      );
-      if (!selected || features.every(({ id }) => selected[id] === enabled[id]))
-        return;
-      try {
-        mkdirSync(dirname(configPath), { recursive: true });
-        const temporaryPath = `${configPath}.${randomUUID()}.tmp`;
-        writeFileSync(temporaryPath, `${JSON.stringify(selected, null, 2)}\n`, {
-          flag: "wx",
-          mode: 0o600,
-        });
-        renameSync(temporaryPath, configPath);
-      } catch (error) {
-        ctx.ui.notify(
-          `保存失败，当前功能保持不变：${error instanceof Error ? error.message : String(error)}`,
-          "error",
+            );
+            return {
+              render: (width) => container.render(width),
+              invalidate: () => container.invalidate(),
+              handleInput(data) {
+                if (keybindings.matches(data, "tui.select.confirm"))
+                  return done(draft);
+                list.handleInput(data);
+                tui.requestRender();
+              },
+            };
+          },
         );
+        if (!selected || features.every(({ id }) => selected[id] === enabled[id])) {
+          if (args.trim() === "switches") return;
+          continue;
+        }
+        try {
+          mkdirSync(dirname(configPath), { recursive: true });
+          const temporaryPath = `${configPath}.${randomUUID()}.tmp`;
+          writeFileSync(temporaryPath, `${JSON.stringify(selected, null, 2)}\n`, {
+            flag: "wx",
+            mode: 0o600,
+          });
+          renameSync(temporaryPath, configPath);
+        } catch (error) {
+          ctx.ui.notify(
+            `保存失败，当前功能保持不变：${error instanceof Error ? error.message : String(error)}`,
+            "error",
+          );
+          return;
+        }
+        await ctx.reload();
         return;
       }
-      await ctx.reload();
-      return;
     },
   });
 }

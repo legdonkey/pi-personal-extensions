@@ -197,7 +197,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <p>
         <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出六项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出六项功能和加载状态，最后一行是「批量功能开关」。</span>
         <span class="seg" data-seg="entry-09">如果选中已加载的功能，二级菜单列出 actions 表里的设置项，最后一项是「禁用此功能并重载」。</span>
-        <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。</span>
+        <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。三级菜单按 Esc 返回二级，二级返回一级，一级才退出。保存设置或查看状态后留在二级菜单；需要重载时退出。</span>
       </p>
       <ul>
         <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 12 项（预览选择，加 11 套配色直接应用）。其余两项的二级菜单只有启停。</li>
@@ -205,8 +205,8 @@ const featureApi = Object.assign(Object.create(pi), {
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="personal-menu" id="fig-entry-3">
-      <div class="capture-frame"><video data-cue="entry-08" src="media/personal-menu.mp4" poster="media/personal-menu.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal，进入自动会话命名的二级菜单，再按 Esc 返回输入框"></video></div>
-      <figcaption>真实 Pi 录屏：<code>/personal</code> → 自动会话命名 → Esc。</figcaption>
+      <div class="capture-frame"><video data-cue="entry-08" src="media/personal-menu.mp4" poster="media/personal-menu.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal，进入自动会话命名的二级菜单，再按 Esc 返回一级菜单"></video></div>
+      <figcaption>真实 Pi 录屏：<code>/personal</code> → 自动会话命名 → Esc 返回一级菜单。</figcaption>
       <details class="demo-try">
         <summary>试一试：模拟菜单</summary>
       <div class="demo" id="ch-entry-demo">

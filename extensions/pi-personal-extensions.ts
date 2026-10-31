@@ -70,8 +70,6 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
   "inline-effort": [
     { label: "查看分类模型与状态", command: "effort", args: "status" },
     { label: "选择分类模型（Jev / d1-ultra）", command: "effort", args: "model" },
-    { label: "使用 Jev 分类模型", command: "effort", args: "model jev" },
-    { label: "使用 d1-ultra 分类模型", command: "effort", args: "model d1-ultra" },
     { label: "测试分类模型可用性", command: "effort", args: "test" },
   ],
   "clickable-paths": [

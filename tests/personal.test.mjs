@@ -292,7 +292,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       1: ["查看状态", "选择命名模型", "选择命名思考强度", "预览建议标题", "暂停当前会话命名", "恢复当前会话命名"],
       3: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
       2: ["预览并选择配色", ...styleNames.map((name, index) => `应用配色：${index + 1}. ${name}`)],
-      5: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "使用 Jev 分类模型", "使用 d1-ultra 分类模型", "测试分类模型可用性"],
+      5: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "测试分类模型可用性"],
     };
     for (let feature = 0; feature < ids.length; feature++) {
       choices = [feature, undefined];
@@ -333,10 +333,10 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
     await choose(5, "选择分类模型（Jev / d1-ultra）");
     assert.match(menus.at(-1).title, /^思考分类模型（全局）/);
     assert.equal(menus.at(-1).options.length, 2);
-    for (const [action, model] of [["使用 Jev 分类模型", "jev"], ["使用 d1-ultra 分类模型", "d1-ultra"]]) {
-      const count = menus.length;
-      await choose(5, action);
-      assert.equal(menus.length, count + 2, "直达项无需第三层选择");
+    for (const [index, model] of [[0, "jev"], [1, "d1-ultra"]]) {
+      choices = [5, "选择分类模型（Jev / d1-ultra）", index];
+      await personal.handler("", ctx);
+      assert.equal(choices.length, 0);
       assert.deepEqual(JSON.parse(readFileSync(join(dir, "inline-effort.json"), "utf8")), { model });
     }
     await choose(5, "测试分类模型可用性");

@@ -65,7 +65,6 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 - 「查看分类模型与状态」：查看分类模型和当前分支的最近决策。
 - 「选择分类模型（Jev / d1-ultra）」：选择并保存；取消不保存。
-- 「使用 Jev 分类模型」或「使用 d1-ultra 分类模型」：直接保存对应选择。
 - 「测试分类模型可用性」：用固定公开样例测试，不改强度或会话决策。
 
 | 选择 | OpenRouter 模型 ID |

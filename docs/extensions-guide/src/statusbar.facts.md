@@ -5,8 +5,8 @@
 ## 功能名
 
 - 一项功能：ID `statusline`，label「状态栏：额度、会话 ID 与配色」，源码 `extensions/statusline.ts`，一个开关 —— pi-personal-extensions.ts:30-35
-- 迁移：旧开关 `substatusline`、`statusline-style-picker` 仍做布尔校验；新键缺失时，两个旧键都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:111-118, 123-125
-- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:93；pi-personal-extensions.ts:33
+- 迁移：旧开关 `substatusline`、`statusline-style-picker` 仍做布尔校验；新键缺失时，两个旧键都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:109-116, 121-123
+- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:92；pi-personal-extensions.ts:33
 
 ## 额度：什么时候刷新（fig-statusbar-1）
 
@@ -44,11 +44,11 @@
 
 ## 换配色：选择器（fig-statusbar-3 录屏）
 
-- 功能注册的 `statusline-style` 处理函数只进 `/personal` 的 commands 表，不再注册成斜杠命令；入口是 `/personal` →「状态栏：额度、会话 ID 与配色」 —— pi-personal-extensions.ts:134-139, 31-32；statusline.ts:168-169
-- 二级菜单：「预览并选择配色」（不带参数）和 11 项「应用配色：编号. 名称」（参数为编号） —— pi-personal-extensions.ts:87-91；statusline.ts:422-555
+- 功能注册的 `statusline-style` 处理函数只进 `/personal` 的 commands 表，不再注册成斜杠命令；入口是 `/personal` →「状态栏：额度、会话 ID 与配色」 —— pi-personal-extensions.ts:132-137, 31-32；statusline.ts:168-169
+- 二级菜单：「预览并选择配色」（不带参数）和 11 项「应用配色：编号. 名称」（参数为编号） —— pi-personal-extensions.ts:85-89；statusline.ts:422-555
 - 不带参数时打开选择器：上下键切换（循环）并实时预览，Enter 应用，Esc 取消 —— statusline.ts:182-225
 - 选择器只在 TUI 模式下打开；不在 TUI 时选「预览并选择配色」只给警告，提示改用直接应用 —— statusline.ts:183-187
-- 「应用配色」项带编号参数，直接应用，不检查 TUI；`/personal` 只要求有 UI（含 RPC） —— statusline.ts:582-587, 182, 228-237；pi-personal-extensions.ts:147-150
+- 「应用配色」项带编号参数，直接应用，不检查 TUI；`/personal` 只要求有 UI（含 RPC） —— statusline.ts:582-587, 182, 228-237；pi-personal-extensions.ts:145-148
 - 新录屏底部状态栏显示会话 ID 末尾 8 位；其中 ponytail 是本机另一个扩展，extensions/ 下没有相关代码 —— media/statusline-style.png
 - 录屏画面（video 的 data-cue 挂在 beat 第一句 statusbar-08）：打开配色选择器，上下移动预览，Esc 退出（录屏：/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色） —— docs/extensions-usage/tapes/statusline-style.tape:15-33（技术版共用使用者版的录屏）；statusline.ts:214-219, 225
 

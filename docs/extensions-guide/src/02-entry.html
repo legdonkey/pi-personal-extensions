@@ -200,7 +200,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。</span>
       </p>
       <ul>
-        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 5 项、文件路径可点击 10 项、状态栏 12 项（预览选择，加 11 套配色直接应用）。其余两项的二级菜单只有启停。</li>
+        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 12 项（预览选择，加 11 套配色直接应用）。其余两项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -376,7 +376,7 @@ const featureApi = Object.assign(Object.create(pi), {
         { label: "状态栏：额度、会话 ID 与配色", command: "statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""], ...STYLE_NAMES.map((n, i) => [`应用配色：${i + 1}. ${n}`, String(i + 1)])]) },
         { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
-        { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["使用 Jev 分类模型", "model jev"], ["使用 d1-ultra 分类模型", "model d1-ultra"], ["测试分类模型可用性", "test"]]) },
+        { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["测试分类模型可用性", "test"]]) },
       ];
       const on = features.map(() => true);
       let picked = 1;

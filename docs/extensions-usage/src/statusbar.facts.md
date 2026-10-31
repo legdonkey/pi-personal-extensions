@@ -5,7 +5,7 @@
 ## 看懂额度和会话 ID（fig-statusbar-1）
 
 - 一项功能、一个开关：label「状态栏：额度、会话 ID 与配色」 —— pi-personal-extensions.ts:30-35
-- 升级时两个旧开关合成一个：只有两个旧开关都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:111-118, 123-125
+- 升级时两个旧开关合成一个：只有两个旧开关都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:109-116, 121-123
 - 状态栏显示两项：会话 ID 和服务商剩余额度 —— statusline.ts:9-10, 33-38, 108
 - 会话 ID 显示末尾 8 位 —— statusline.ts:31
 - openai-codex 显示 `weekly N% left`（周额度剩余） —— statusline.ts:274-276
@@ -28,11 +28,11 @@
 
 ## 换配色（fig-statusbar-3 录屏）
 
-- 状态栏本体来自 `npm:@narumitw/pi-statusline`，需要另外安装启用 —— README.md:93；pi-personal-extensions.ts:33
+- 状态栏本体来自 `npm:@narumitw/pi-statusline`，需要另外安装启用 —— README.md:92；pi-personal-extensions.ts:33
 - 安装命令格式 `pi install npm:@scope/package` —— cli.md:241
-- 入口：`/personal` →「状态栏：额度、会话 ID 与配色」→「预览并选择配色」打开配色列表；上下键挑选并实时预览，Enter 应用，Esc 放弃 —— pi-personal-extensions.ts:32, 87-88；statusline.ts:182-225
-- 配色列表只在 TUI（Pi 终端界面）打开；直接应用项在其他带 UI 的客户端也能用 —— statusline.ts:183-187；pi-personal-extensions.ts:147-150
-- 二级菜单 11 项「应用配色：编号. 名称」直接应用，例如「应用配色：11. Claude 暖纸」 —— pi-personal-extensions.ts:89-91；statusline.ts:544-545, 582-587
+- 入口：`/personal` →「状态栏：额度、会话 ID 与配色」→「预览并选择配色」打开配色列表；上下键挑选并实时预览，Enter 应用，Esc 放弃 —— pi-personal-extensions.ts:32, 85-86；statusline.ts:182-225
+- 配色列表只在 TUI（Pi 终端界面）打开；直接应用项在其他带 UI 的客户端也能用 —— statusline.ts:183-187；pi-personal-extensions.ts:145-148
+- 二级菜单 11 项「应用配色：编号. 名称」直接应用，例如「应用配色：11. Claude 暖纸」 —— pi-personal-extensions.ts:87-89；statusline.ts:544-545, 582-587
 - 录屏画面（录屏：/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色）：配色列表 01–11，上下移动时菜单内「预览」条换色，底部真实状态栏不变，Esc 不应用（预览条见 statusline.ts:207-208） —— docs/extensions-usage/tapes/statusline-style.tape；statusline.ts:214-225
 
 ## 应用后改什么（并入换配色一节；录屏下方的键帽步骤条 statusbar-07～10 一步一个 cue）

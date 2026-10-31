@@ -424,7 +424,7 @@
       <h3>在 <code>/personal</code> 里管理</h3>
       <p>
         <span class="seg" data-seg="effort-20" data-say="在斜杠 personal 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">在 <code>/personal</code> 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
-        <span class="seg" data-seg="effort-21" data-say="「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 D1 Ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。">「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 d1-ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。</span>
+        <span class="seg" data-seg="effort-21">通过「选择分类模型」打开选择器，选择后保存到全局配置，从下一条未分类的消息生效。其他会话和子代理的后续分类也读取这份配置。</span>
         <span class="seg" data-seg="effort-22">「测试分类模型可用性」用固定样例测试分类器，不写决策。Pi 运行 agent 时，选择和测试都不可用。</span>
         <span class="seg" data-seg="effort-23" data-say="功能 ID 从 jev inline effort 改为 inline effort。旧的开关和配置文件仍能读取，保存时只写新文件；会话里的决策条目沿用旧类型名，旧会话可以直接恢复。">功能 ID 从 <code>jev-inline-effort</code> 改为 <code>inline-effort</code>。旧的开关和配置文件仍能读取，保存时只写新文件；会话里的决策条目沿用旧类型名，旧会话可以直接恢复。</span>
       </p>
@@ -436,7 +436,6 @@
         <tbody>
           <tr><td>查看分类模型与状态</td><td><code>status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
           <tr data-cue="effort-21"><td>选择分类模型（Jev / d1-ultra）</td><td><code>model</code></td><td>选择器，<kbd>Esc</kbd> 键取消不保存</td><td>不可用</td></tr>
-          <tr data-cue="effort-21"><td>使用 Jev 分类模型<br>使用 d1-ultra 分类模型</td><td><code>model jev</code><br><code>model d1-ultra</code></td><td>直接保存；其他会话和子代理的后续分类也读这份配置</td><td>不可用</td></tr>
           <tr data-cue="effort-22"><td>测试分类模型可用性</td><td><code>test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
         </tbody>
       </table>

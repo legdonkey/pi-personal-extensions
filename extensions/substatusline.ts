@@ -24,10 +24,13 @@ interface ZaiLimit {
 	percentage?: unknown;
 }
 
+// UUIDv7 的开头是时间戳，相近时间新建的会话前缀相同；末尾是随机位，取末 8 位才能区分。
+export const shortSessionId = (id: string) => id.slice(-8);
+
 const showSessionId = (ctx: ExtensionContext) => {
 	ctx.ui.setStatus(
 		SESSION_STATUS_KEY,
-		ctx.sessionManager.getSessionId().slice(0, 7),
+		shortSessionId(ctx.sessionManager.getSessionId()),
 	);
 };
 

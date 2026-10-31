@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { ExtensionAPI, MarkdownTransformContext } from "@earendil-works/pi-coding-agent";
+import { getAgentDir, type ExtensionAPI, type MarkdownTransformContext } from "@earendil-works/pi-coding-agent";
 
 // ---------------------------------------------------------------- 配置
 
@@ -37,20 +37,18 @@ const DEFAULTS: Config = {
   userMessages: true,
 };
 
-const CONFIG_PATH = path.join(os.homedir(), ".pi", "agent", "clickable-paths.json");
-
-function loadConfig(): Config {
+function loadConfig(configPath: string): Config {
   try {
-    const raw = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
+    const raw = JSON.parse(fs.readFileSync(configPath, "utf8"));
     return { ...DEFAULTS, ...raw };
   } catch {
     return { ...DEFAULTS };
   }
 }
 
-function saveConfig(config: Config): void {
+function saveConfig(configPath: string, config: Config): void {
   try {
-    fs.writeFileSync(CONFIG_PATH, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+    fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
   } catch {
     // 存不下就算了，本次会话内的改动依然生效
   }
@@ -234,7 +232,8 @@ function transform(config: Config, markdown: string): string {
 const EDITORS: EditorScheme[] = ["vscode", "vscode-insiders", "cursor", "windsurf", "file"];
 
 export default function (pi: ExtensionAPI) {
-  const config = loadConfig();
+  const configPath = path.join(getAgentDir(), "clickable-paths.json");
+  const config = loadConfig(configPath);
 
   pi.on("session_start", async (_event, ctx) => {
     workingDir = ctx.cwd ?? process.cwd();
@@ -259,7 +258,7 @@ export default function (pi: ExtensionAPI) {
         case "on":
         case "off": {
           config.enabled = action === "on";
-          saveConfig(config);
+          saveConfig(configPath, config);
           ctx.ui.notify(`路径链接已${config.enabled ? "开启" : "关闭"}（下一条消息生效）`, "info");
           return;
         }
@@ -270,14 +269,14 @@ export default function (pi: ExtensionAPI) {
             return;
           }
           config.editor = value as EditorScheme;
-          saveConfig(config);
+          saveConfig(configPath, config);
           ctx.ui.notify(`点击后用 ${config.editor} 打开`, "info");
           return;
         }
 
         case "bare": {
           config.bareText = value !== "off";
-          saveConfig(config);
+          saveConfig(configPath, config);
           ctx.ui.notify(`裸路径（不带反引号）识别已${config.bareText ? "开启" : "关闭"}`, "info");
           return;
         }

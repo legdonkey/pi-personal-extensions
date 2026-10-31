@@ -33,7 +33,7 @@ pi install "$(pwd)"
 | --- | --- |
 | `session-title` | 输入框下方右对齐显示会话名，长标题自动省略，不调用模型 |
 | `auto-session-name` | 工作完成后后台命名，保护手动标题 |
-| `substatusline` | 显示服务商剩余额度和会话 ID |
+| `substatusline` | 显示服务商剩余额度和会话 ID（末尾 8 位） |
 | `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
 | `user-message-border` | 为 TUI 普通用户消息添加橙色圆角边框，不修改上下文 |
 | `statusline-style-picker` | 预览并应用 11 套状态栏配色 |
@@ -121,7 +121,7 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 | `clickable-paths.json` | 路径链接设置 |
 | `pi-statusline.json` | 状态栏配色 |
 
-前四项跟随 `PI_CODING_AGENT_DIR`，配色配置支持 `PI_AGENT_DIR`。配置选择器取消不保存；命名和分类设置不修改 Pi 的 `settings.json`。
+设置 `PI_CODING_AGENT_DIR` 后，以上文件都改用该目录。配置选择器取消不保存；命名和分类设置不修改 Pi 的 `settings.json`。
 
 ## 项目结构
 

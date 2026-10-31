@@ -1,6 +1,5 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { getAgentDir, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 interface Style {
@@ -216,8 +215,8 @@ function previewLines(style: Style, width: number): string[] {
 }
 
 async function applyStyle(style: Style) {
-	const agentDir = process.env.PI_AGENT_DIR || join(homedir(), ".pi", "agent");
-	const path = join(agentDir, "pi-statusline.json");
+	// 与 pi-statusline 一致：它只读 getAgentDir()/pi-statusline.json
+	const path = join(getAgentDir(), "pi-statusline.json");
 	let current: Record<string, unknown> = {};
 	try {
 		current = JSON.parse(await readFile(path, "utf8"));

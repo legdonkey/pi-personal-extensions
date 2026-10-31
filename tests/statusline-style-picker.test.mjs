@@ -7,8 +7,8 @@ import { visibleWidth } from "@earendil-works/pi-tui";
 import picker from "../extensions/statusline-style-picker.ts";
 
 test("迁入的风格选择器保留 11 套配色、预览、配置和重载行为", async () => {
-  const previous = process.env.PI_AGENT_DIR;
-  process.env.PI_AGENT_DIR = mkdtempSync(join(tmpdir(), "pi-style-test-"));
+  const previous = process.env.PI_CODING_AGENT_DIR;
+  process.env.PI_CODING_AGENT_DIR = mkdtempSync(join(tmpdir(), "pi-style-test-"));
   try {
     let command;
     picker({
@@ -18,7 +18,7 @@ test("迁入的风格选择器保留 11 套配色、预览、配置和重载行�
       },
     });
     assert.equal(command.getArgumentCompletions("").length, 11);
-    const path = join(process.env.PI_AGENT_DIR, "pi-statusline.json");
+    const path = join(process.env.PI_CODING_AGENT_DIR, "pi-statusline.json");
     writeFileSync(path, JSON.stringify({ preserved: "保留原有配置" }));
     let reloads = 0;
     const notices = [];
@@ -66,7 +66,7 @@ test("迁入的风格选择器保留 11 套配色、预览、配置和重载行�
     await command.handler("", { ...ctx, mode: "rpc" });
     assert.equal(notices.at(-1)[1], "warning");
   } finally {
-    if (previous === undefined) delete process.env.PI_AGENT_DIR;
-    else process.env.PI_AGENT_DIR = previous;
+    if (previous === undefined) delete process.env.PI_CODING_AGENT_DIR;
+    else process.env.PI_CODING_AGENT_DIR = previous;
   }
 });

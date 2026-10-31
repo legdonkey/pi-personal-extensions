@@ -9,11 +9,10 @@ import {
 import { Container, SettingsList, Text } from "@earendil-works/pi-tui";
 import autoSessionName from "./auto-session-name.ts";
 import clickablePaths from "./clickable-paths.ts";
-import statuslineStylePicker, { STYLES } from "./statusline-style-picker.ts";
+import statusline, { STYLES } from "./statusline.ts";
 import sessionTitle from "./session-title.ts";
-import subStatusline from "./substatusline.ts";
 import userMessageBorder from "./user-message-border.ts";
-import jevInlineEffort from "./jev-inline-effort.ts";
+import inlineEffort from "./inline-effort.ts";
 
 const features = [
   {
@@ -29,10 +28,10 @@ const features = [
     register: autoSessionName,
   },
   {
-    id: "substatusline",
-    label: "额度与会话 ID",
-    description: "在状态栏显示服务商剩余额度及会话 ID",
-    register: subStatusline,
+    id: "statusline",
+    label: "状态栏：额度、会话 ID 与配色",
+    description: "显示服务商剩余额度及会话 ID，预览或应用 11 套配色；配色需要另外启用 pi-statusline",
+    register: statusline,
   },
   {
     id: "clickable-paths",
@@ -47,16 +46,10 @@ const features = [
     register: userMessageBorder,
   },
   {
-    id: "statusline-style-picker",
-    label: "状态栏风格选择",
-    description: "通过 /personal → 状态栏风格选择 预览或直接应用配色；需要另外启用 pi-statusline",
-    register: statuslineStylePicker,
-  },
-  {
-    id: "jev-inline-effort",
+    id: "inline-effort",
     label: "原位思考强度（Jev / d1-ultra）",
     description: "通过 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 配置分类器，原位调整强度并保留缓存",
-    register: jevInlineEffort,
+    register: inlineEffort,
   },
 ] as const;
 
@@ -74,7 +67,7 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
     { label: "暂停当前会话命名", command: "auto-name", args: "off" },
     { label: "恢复当前会话命名", command: "auto-name", args: "on" },
   ],
-  "jev-inline-effort": [
+  "inline-effort": [
     { label: "查看分类模型与状态", command: "effort", args: "status" },
     { label: "选择分类模型（Jev / d1-ultra）", command: "effort", args: "model" },
     { label: "使用 Jev 分类模型", command: "effort", args: "model jev" },
@@ -91,7 +84,7 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
     { label: "识别裸路径", command: "clickable-paths", args: "bare on" },
     { label: "不识别裸路径", command: "clickable-paths", args: "bare off" },
   ],
-  "statusline-style-picker": [
+  "statusline": [
     { label: "预览并选择配色", command: "statusline-style", args: "" },
     ...STYLES.map(({ id, name }) => ({
       label: `应用配色：${id}. ${name}`, command: "statusline-style", args: String(id),
@@ -114,13 +107,24 @@ function readSettings(path: string): FeatureSettings {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
     throw new Error(`功能配置必须是 JSON 对象：${path}`);
   }
-  for (const { id } of features) {
+  const values = raw as Record<string, unknown>;
+  for (const id of [
+    ...features.map(({ id }) => id),
+    "substatusline", "statusline-style-picker", "jev-inline-effort",
+  ]) {
     if (!Object.hasOwn(raw, id)) continue;
-    const value = (raw as Record<string, unknown>)[id];
-    if (typeof value !== "boolean")
+    if (typeof values[id] !== "boolean")
       throw new Error(`功能配置 ${id} 必须为 true 或 false：${path}`);
-    settings[id] = value;
   }
+  for (const { id } of features) {
+    const value = values[id];
+    if (typeof value === "boolean") settings[id] = value;
+  }
+  // 缺失的旧开关按原默认值开启；仅两个旧开关都关闭时关闭合并功能。
+  if (!Object.hasOwn(values, "statusline"))
+    settings.statusline = values.substatusline !== false || values["statusline-style-picker"] !== false;
+  if (!Object.hasOwn(values, "inline-effort") && typeof values["jev-inline-effort"] === "boolean")
+    settings["inline-effort"] = values["jev-inline-effort"];
   return settings;
 }
 

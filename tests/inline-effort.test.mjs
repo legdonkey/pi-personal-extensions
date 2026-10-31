@@ -6,11 +6,11 @@ import { once } from "node:events";
 import { ModelRegistry, ModelRuntime } from "@earendil-works/pi-coding-agent";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readEffortSettings, saveEffortSettings } from "../extensions/jev-inline-effort.ts";
+import { readEffortSettings, saveEffortSettings } from "../extensions/inline-effort.ts";
 
 let previousDir;
 let dir;
-const configPath = () => join(dir, "jev-inline-effort.json");
+const configPath = () => join(dir, "inline-effort.json");
 beforeEach(() => {
   previousDir = process.env.PI_CODING_AGENT_DIR;
   dir = mkdtempSync(join(tmpdir(), "pi-effort-test-"));
@@ -21,7 +21,7 @@ afterEach(() => {
   else process.env.PI_CODING_AGENT_DIR = previousDir;
   rmSync(dir, { recursive: true, force: true });
 });
-import register from "../extensions/jev-inline-effort.ts";
+import register from "../extensions/inline-effort.ts";
 
 const codexModel = (id = "gpt-6.1-sol") => ({
   provider: "openai-codex", id, api: "openai-codex-responses",
@@ -362,13 +362,57 @@ test("配置默认 Jev，选择保存并跨实例读取；取消和无效选择�
   }
   assert.equal(readFileSync(configPath(), "utf8"), saved);
   assert.equal(statSync(configPath()).mode & 0o777, 0o600);
-  assert.deepEqual(readdirSync(dir), ["jev-inline-effort.json"]);
+  assert.deepEqual(readdirSync(dir), ["inline-effort.json"]);
   const resumed = setup();
   await resumed.request([system, user(1)]);
   assert.equal(resumed.classifierModels[0].id, "liquid/d1-ultra");
   h.selectResult = 0;
   await h.command("model");
   assert.deepEqual(readEffortSettings(), { model: "jev" });
+});
+
+test("新配置缺失时读取旧文件，保存只写新文件并保留旧文件，新文件始终优先", async () => {
+  const legacyPath = join(dir, "jev-inline-effort.json");
+  const legacy = '{"model":"d1-ultra"}';
+  writeFileSync(legacyPath, legacy);
+  assert.deepEqual(readEffortSettings(), { model: "d1-ultra" });
+  assert.equal(existsSync(configPath()), false, "读取旧文件不自动写入");
+  const h = setup();
+  await h.request([system, user(1)]);
+  assert.equal(h.classifierModels[0].id, "liquid/d1-ultra");
+  await h.command("model jev");
+  assert.deepEqual(JSON.parse(readFileSync(configPath(), "utf8")), { model: "jev" });
+  assert.equal(readFileSync(legacyPath, "utf8"), legacy);
+  assert.deepEqual(readEffortSettings(), { model: "jev" });
+
+  for (const invalid of ["{", "null", '{"model":"paid"}']) {
+    writeFileSync(configPath(), invalid);
+    assert.throws(readEffortSettings, /inline-effort.json|配置/);
+    assert.equal(readFileSync(legacyPath, "utf8"), legacy);
+  }
+  rmSync(configPath());
+  mkdirSync(configPath());
+  assert.throws(readEffortSettings, /无法读取 inline-effort.json/, "新文件不可读时不回退旧文件");
+  rmSync(configPath(), { recursive: true });
+  for (const invalid of ["{", "null", '{"model":"paid"}']) {
+    writeFileSync(legacyPath, invalid);
+    assert.throws(readEffortSettings, /jev-inline-effort.json|配置/);
+    assert.equal(existsSync(configPath()), false);
+  }
+});
+
+test("沿用旧会话条目类型和状态栏键，恢复旧决策时不重新分类", async () => {
+  const h = setup();
+  const historical = { type: "custom", customType: "jev-inline-effort", data: { timestamp: 1, thinkingLevel: "xhigh" } };
+  h.branch.push(structuredClone(historical));
+  h.events.get("session_start")({}, h.ctx);
+  const payload = await h.request([system, user(1)]);
+  assert.deepEqual(updates(payload), [[1, "xhigh"]]);
+  assert.equal(h.calls, 0);
+  assert.equal(h.status, "🧠 xhigh · 基线 medium · Jev");
+  assert.deepEqual(h.branch, [historical]);
+  await h.request([system, user(1), assistant(2), user(3)]);
+  assert.equal(h.branch.at(-1).customType, "jev-inline-effort");
 });
 
 test("配置无效时不偷用 Jev；选择器可修复配置，保存失败保留原状", async () => {
@@ -396,7 +440,7 @@ test("配置无效时不偷用 Jev；选择器可修复配置，保存失败保�
   mkdirSync(configPath());
   await h.command("model d1-ultra");
   assert.match(h.warnings.at(-1).message, /保存.*失败.*原配置/);
-  assert.deepEqual(readdirSync(dir), ["jev-inline-effort.json"], "失败后不留下临时文件");
+  assert.deepEqual(readdirSync(dir), ["inline-effort.json"], "失败后不留下临时文件");
   assert.throws(() => saveEffortSettings("paid"), /请选择/);
 });
 

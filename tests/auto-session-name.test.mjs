@@ -319,6 +319,27 @@ test("保护已有名称和手动 /name，预览不改名，显式 on 后恢复�
   assert.equal(paused.calls.length, 0);
 });
 
+test("合并配置模块后仍读取并写入 personal-auto-session-name 会话状态", async () => {
+  const sm = SessionManager.inMemory();
+  sm.appendSessionInfo(TITLE);
+  sm.appendCustomEntry("personal-auto-session-name", { enabled: true, lastAutoName: TITLE });
+  const h = harness({ sm });
+  await h.emit("session_start");
+  h.turn();
+  await h.emit("agent_settled");
+  await nextTick();
+  assert.equal(h.calls.length, 1, "旧条目保留自动命名所有权");
+  await h.command("off");
+  const last = sm.getEntries().at(-1);
+  assert.equal(last.customType, "personal-auto-session-name");
+  assert.equal(last.data.enabled, false);
+  const restored = harness({ sm });
+  await restored.emit("session_start");
+  restored.turn();
+  await restored.emit("agent_settled");
+  assert.equal(restored.calls.length, 0);
+});
+
 test("切换、重载、退出、新任务、树导航和暂停后丢弃迟到结果，即使模型忽略取消", async () => {
   for (const event of [
     "session_shutdown",

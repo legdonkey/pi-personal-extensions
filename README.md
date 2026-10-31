@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理七项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理六项功能。每项功能各用一个实现文件。
 
 ## 安装与开发
 
@@ -22,7 +22,7 @@ pi install "$(pwd)"
 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）
 /personal → 自动会话命名 → 选择命名模型
 /personal → 文件路径可点击 → 打开方式：cursor
-/personal → 状态栏风格选择 → 预览并选择配色
+/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色
 ```
 
 默认全部开启。禁用的功能只提供启用入口，不注册其事件。启停保存后自动重载；其他已打开的会话需各自 `/reload`。菜单显示的是功能是否已加载，各功能自身状态在对应子菜单中查看。
@@ -33,13 +33,12 @@ pi install "$(pwd)"
 | --- | --- |
 | `session-title` | 输入框下方右对齐显示会话名，长标题自动省略，不调用模型 |
 | `auto-session-name` | 工作完成后后台命名，保护手动标题 |
-| `substatusline` | 显示服务商剩余额度和会话 ID（末尾 8 位） |
+| `statusline` | 显示服务商剩余额度和会话 ID（末尾 8 位），预览并应用 11 套配色 |
 | `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
 | `user-message-border` | 为 TUI 普通用户消息添加橙色圆角边框，不修改上下文 |
-| `statusline-style-picker` | 预览并应用 11 套状态栏配色 |
-| `jev-inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex 思考强度 |
+| `inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex 思考强度 |
 
-`pi config` 管理整个扩展包。各功能设置均从 `/personal` 进入；启停功能不会清除其独立配置。
+`pi config` 管理整个扩展包。各功能设置均从 `/personal` 进入（例外：路径链接的 `userMessages` 只能在 `clickable-paths.json` 里改）；启停功能不会清除其独立配置。
 
 ## 自动会话命名
 
@@ -89,9 +88,9 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 在 `/personal → 文件路径可点击` 中查看设置、开启或暂停路径链接。通过「打开方式：vscode」等菜单项选择 `vscode`、`vscode-insiders`、`cursor`、`windsurf` 或 `file`。通过「识别裸路径」或「不识别裸路径」控制不带反引号的路径识别。
 
-在 `/personal → 状态栏风格选择 → 预览并选择配色` 中预览全部 11 套配色。也可通过「应用配色：1. 茶墨渐层」等 11 个直达项直接应用，支持 RPC。应用后自动重载；配色预览需要 TUI。
+在 `/personal → 状态栏：额度、会话 ID 与配色` 中统一启停额度、会话 ID 和配色选择功能。二级菜单的「预览并选择配色」可预览全部 11 套配色；「应用配色：1. 茶墨渐层」等 11 个直达项可直接应用，支持 RPC。应用后自动重载；配色预览需要 TUI。
 
-配色选择器需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含状态栏本体。额度显示支持 `openai-codex` 周额度，以及 `zai-coding-cn` 的 5 小时和周额度。
+额度与会话 ID 由本包提供。配色需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含该状态栏本体。额度显示支持 `openai-codex` 周额度，以及 `zai-coding-cn` 的 5 小时和周额度。
 
 ## 配置文件
 
@@ -99,13 +98,20 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 | 文件 | 内容 |
 | --- | --- |
-| `personal-extensions.json` | 七项功能的布尔开关 |
+| `personal-extensions.json` | 六项功能的布尔开关 |
 | `auto-session-name.json` | 命名模型 `model` 和思考设置 `thinking` |
-| `jev-inline-effort.json` | 分类模型：`{"model":"jev"}` 或 `{"model":"d1-ultra"}` |
+| `inline-effort.json` | 分类模型：`{"model":"jev"}` 或 `{"model":"d1-ultra"}`；新文件缺失时兼容读取 `jev-inline-effort.json` |
 | `clickable-paths.json` | 路径链接设置 |
 | `pi-statusline.json` | 状态栏配色 |
 
 设置 `PI_CODING_AGENT_DIR` 后，以上文件都改用该目录。配置选择器取消不保存；命名和分类设置不修改 Pi 的 `settings.json`。
+
+旧配置自动兼容：
+
+- `personal-extensions.json` 中的 `substatusline` 和 `statusline-style-picker` 合并为 `statusline`。缺失的旧键按默认开启处理；任一旧键为 `true` 即开启，两个旧键都为 `false` 才关闭。
+- `jev-inline-effort` 开关映射到 `inline-effort`。新键存在时以新键为准；旧键仍须为布尔值。读取不改写配置，下次保存功能开关时只写六个新键。
+- 仅在 `inline-effort.json` 缺失时读取 `jev-inline-effort.json`；保存只写新文件，保留旧文件。新文件格式或权限有误时提示错误。
+- 会话中的思考决策条目类型和状态栏键仍为 `jev-inline-effort`；自动命名会话状态仍为 `personal-auto-session-name`。状态栏继续使用 `usage` 和 `session-id`，旧会话可直接恢复。
 
 ## 项目结构
 

@@ -10,11 +10,10 @@ import personal from "../extensions/pi-personal-extensions.ts";
 const ids = [
   "session-title",
   "auto-session-name",
-  "substatusline",
+  "statusline",
   "clickable-paths",
   "user-message-border",
-  "statusline-style-picker",
-  "jev-inline-effort",
+  "inline-effort",
 ];
 const off = Object.fromEntries(ids.map((id) => [id, false]));
 const styleNames = ["茶墨渐层", "冰川蓝阶", "靛夜层云", "琥珀余温", "紫藤暮色", "松林雾径", "陶火晚照", "玫瑰尘光", "石墨银阶", "潮汐青绿", "Claude 暖纸"];
@@ -33,7 +32,7 @@ function load(overrides = {}) {
   return { commands, events, transformers, virtualModels };
 }
 
-test("统一入口按开关注册七项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册六项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -63,7 +62,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
       assert.deepEqual([...loaded.commands.keys()], ["personal"]);
       assert.equal(
         loaded.events.includes("model_select"),
-        ["substatusline", "jev-inline-effort"].includes(id),
+        ["statusline", "inline-effort"].includes(id),
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
@@ -79,9 +78,9 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
         [
           "session-title",
           "auto-session-name",
-          "substatusline",
+          "statusline",
           "user-message-border",
-          "jev-inline-effort",
+          "inline-effort",
         ].includes(id),
       );
     }
@@ -166,6 +165,80 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
   }
 });
 
+test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写六个新键", async () => {
+  const previous = process.env.PI_CODING_AGENT_DIR;
+  const dir = mkdtempSync(join(tmpdir(), "pi-personal-migration-"));
+  process.env.PI_CODING_AGENT_DIR = dir;
+  const path = join(dir, "personal-extensions.json");
+  try {
+    for (const usage of [undefined, false, true]) {
+      for (const style of [undefined, false, true]) {
+        for (const current of [undefined, false, true]) {
+          const raw = { ...off };
+          delete raw.statusline;
+          if (usage !== undefined) raw.substatusline = usage;
+          if (style !== undefined) raw["statusline-style-picker"] = style;
+          if (current !== undefined) raw.statusline = current;
+          const source = JSON.stringify(raw);
+          writeFileSync(path, source);
+          const expected = current ?? (usage !== false || style !== false);
+          assert.equal(load().events.includes("session_tree"), expected, source);
+          assert.equal(readFileSync(path, "utf8"), source, "加载不改写旧配置");
+        }
+      }
+    }
+    for (const legacy of [undefined, false, true]) {
+      for (const current of [undefined, false, true]) {
+        const raw = { ...off };
+        delete raw["inline-effort"];
+        if (legacy !== undefined) raw["jev-inline-effort"] = legacy;
+        if (current !== undefined) raw["inline-effort"] = current;
+        writeFileSync(path, JSON.stringify(raw));
+        assert.equal(load().events.includes("context_with_system"), current ?? legacy ?? true);
+      }
+    }
+    for (const id of ["substatusline", "statusline-style-picker", "jev-inline-effort"]) {
+      for (const value of [null, "false", 0, [], {}]) {
+        writeFileSync(path, JSON.stringify({ ...off, [id]: value }));
+        assert.throws(load, /必须为 true 或 false/, `${id}: ${JSON.stringify(value)}`);
+      }
+    }
+    const raw = {
+      ...off,
+      substatusline: false,
+      "statusline-style-picker": false,
+      "jev-inline-effort": true,
+    };
+    delete raw.statusline;
+    delete raw["inline-effort"];
+    writeFileSync(path, JSON.stringify(raw));
+    const command = load().commands.get("personal");
+    const choices = [0, "启用此功能并重载"];
+    let reloads = 0;
+    await command.handler("", {
+      mode: "rpc", hasUI: true,
+      reload: async () => { reloads++; },
+      ui: {
+        select: async (_title, options) => {
+          const choice = choices.shift();
+          return typeof choice === "number" ? options[choice] : choice;
+        },
+        notify: (message) => assert.fail(message),
+      },
+    });
+    assert.equal(reloads, 1);
+    assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), {
+      ...off, "session-title": true, "inline-effort": true,
+    });
+    assert.equal(load().events.includes("session_tree"), false);
+    assert.equal(load().events.includes("context_with_system"), true);
+  } finally {
+    if (previous === undefined) delete process.env.PI_CODING_AGENT_DIR;
+    else process.env.PI_CODING_AGENT_DIR = previous;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("统一菜单覆盖全部功能和设置，调用内部处理器，取消不保存", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-menu-"));
@@ -211,13 +284,15 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       },
     };
     await personal.handler("", ctx);
-    assert.equal(menus[0].options.length, 8);
+    assert.equal(menus[0].options.length, 7);
+    assert.equal(menus[0].options.filter((label) => label.startsWith("状态栏：")).length, 1);
+    assert.equal(menus[0].options[2], "状态栏：额度、会话 ID 与配色 · 已加载");
     assert.equal(readFileSync(path, "utf8"), "{}");
     const expected = {
       1: ["查看状态", "选择命名模型", "选择命名思考强度", "预览建议标题", "暂停当前会话命名", "恢复当前会话命名"],
       3: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
-      5: ["预览并选择配色", ...styleNames.map((name, index) => `应用配色：${index + 1}. ${name}`)],
-      6: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "使用 Jev 分类模型", "使用 d1-ultra 分类模型", "测试分类模型可用性"],
+      2: ["预览并选择配色", ...styleNames.map((name, index) => `应用配色：${index + 1}. ${name}`)],
+      5: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "使用 Jev 分类模型", "使用 d1-ultra 分类模型", "测试分类模型可用性"],
     };
     for (let feature = 0; feature < ids.length; feature++) {
       choices = [feature, undefined];
@@ -251,42 +326,42 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       await choose(3, action);
       assert.equal(JSON.parse(readFileSync(join(dir, "clickable-paths.json"), "utf8"))[key], value);
     }
-    await choose(5, "预览并选择配色");
+    await choose(2, "预览并选择配色");
     assert.equal(calls.at(-1), "custom");
-    await choose(6, "查看分类模型与状态");
+    await choose(5, "查看分类模型与状态");
     assert.match(notices.at(-1)[0], /后续分类：openrouter\/~typesafe\/jev-latest/);
-    await choose(6, "选择分类模型（Jev / d1-ultra）");
+    await choose(5, "选择分类模型（Jev / d1-ultra）");
     assert.match(menus.at(-1).title, /^思考分类模型（全局）/);
     assert.equal(menus.at(-1).options.length, 2);
     for (const [action, model] of [["使用 Jev 分类模型", "jev"], ["使用 d1-ultra 分类模型", "d1-ultra"]]) {
       const count = menus.length;
-      await choose(6, action);
+      await choose(5, action);
       assert.equal(menus.length, count + 2, "直达项无需第三层选择");
-      assert.deepEqual(JSON.parse(readFileSync(join(dir, "jev-inline-effort.json"), "utf8")), { model });
+      assert.deepEqual(JSON.parse(readFileSync(join(dir, "inline-effort.json"), "utf8")), { model });
     }
-    await choose(6, "测试分类模型可用性");
+    await choose(5, "测试分类模型可用性");
     assert.equal(classifierCalls, 1);
     assert.match(notices.at(-1)[0], /测试成功/);
     assert.equal(readFileSync(path, "utf8"), "{}");
     assert.equal(reloads, 0);
-    choices = [7];
+    choices = [6];
     await personal.handler("", ctx);
     assert.equal(calls.at(-1), "custom");
     await personal.handler("switches", ctx);
     assert.equal(calls.at(-1), "custom");
-    choices = [6, "禁用此功能并重载"];
+    choices = [5, "禁用此功能并重载"];
     await personal.handler("", ctx);
     assert.equal(reloads, 1);
-    assert.equal(JSON.parse(readFileSync(path, "utf8"))["jev-inline-effort"], false);
+    assert.equal(JSON.parse(readFileSync(path, "utf8"))["inline-effort"], false);
     const disabled = load();
     assert.deepEqual([...disabled.commands.keys()], ["personal"]);
-    choices = [6, undefined];
+    choices = [5, undefined];
     await disabled.commands.get("personal").handler("", ctx);
     assert.deepEqual(menus.at(-1).options, ["启用此功能并重载"]);
-    choices = [6, 0];
+    choices = [5, 0];
     await disabled.commands.get("personal").handler("", ctx);
     assert.equal(reloads, 2);
-    assert.equal(JSON.parse(readFileSync(path, "utf8"))["jev-inline-effort"], true);
+    assert.equal(JSON.parse(readFileSync(path, "utf8"))["inline-effort"], true);
     await personal.handler("invalid", ctx);
     assert.match(notices.at(-1)[0], /用法/);
     assert.equal(reloads, 2);
@@ -305,7 +380,7 @@ test("TUI 和有 UI 的 RPC 均可从 personal 子菜单保存分类模型，不
     const loaded = load();
     let reloads = 0;
     for (const mode of ["tui", "rpc"]) {
-      const choices = [6, 1, 1];
+      const choices = [5, 1, 1];
       const ctx = {
         mode, hasUI: true, isIdle: () => true,
         reload: async () => { reloads++; },
@@ -315,7 +390,7 @@ test("TUI 和有 UI 的 RPC 均可从 personal 子菜单保存分类模型，不
         },
       };
       await loaded.commands.get("personal").handler("", ctx);
-      assert.deepEqual(JSON.parse(readFileSync(join(dir, "jev-inline-effort.json"), "utf8")), { model: "d1-ultra" });
+      assert.deepEqual(JSON.parse(readFileSync(join(dir, "inline-effort.json"), "utf8")), { model: "d1-ultra" });
       assert.equal(reloads, 0);
       assert.equal(choices.length, 0);
     }
@@ -401,7 +476,7 @@ test("RPC 可从 personal 子菜单直接应用全部 11 套配色，无需 cust
       },
     };
     for (const [index, name] of styleNames.entries()) {
-      choices = [5, index + 1];
+      choices = [2, index + 1];
       await command.handler("", ctx);
       assert.equal(choices.length, 0);
       assert.deepEqual(notices.at(-1), [`已应用：${name}`, "info"]);

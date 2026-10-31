@@ -1,6 +1,6 @@
 ---
 name: pi-personal-extensions 讲解页
-description: 一个入口七项功能的图解与朗读讲解，Stripe Docs 式左文右图双栏
+description: 一个入口六项功能的图解与朗读讲解，Stripe Docs 式左文右图双栏
 colors:
   paper: "#ffffff"
   paper-2: "#f6f9fc"
@@ -292,7 +292,7 @@ components:
 
 ### Navigation
 - **顶栏：** 60px sticky，品牌图标是墨色圆角方块里白色「π」加一个橙点。右侧是浅色 / 跟随系统 / 深色三按钮分段开关，按下态 paper-3 底。
-- **侧栏目录：** 每项是两列网格：章节名 + 等宽时长，下方 2px 进度条用橙色填充朗读进度，再下一行是等宽的功能名。当前章 paper-2 底、600 字重。
+- **侧栏目录：** 每项是两列网格：章节名 + 等宽时长，下方 2px 进度条用橙色填充朗读进度。当前章 paper-2 底、600 字重。
 
 ### 朗读段与「从这里朗读」
 正文中的每句朗读文字包在 `.seg` 里，点击从该句开始朗读；hover 显示 paper-3 底。正在读的句子用 accent-tint 底加 2px 橙色下划线，`box-decoration-break: clone` 保证跨行一致。每个可朗读段落左侧外挂一个 24px 圆形播放按钮，默认隐藏，hover 段落时出现；所在 beat 正在朗读时常驻 35% 透明度。图注里的按钮放在右上角。

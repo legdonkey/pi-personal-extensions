@@ -20,14 +20,23 @@ function isDecisionModel(value: unknown): value is DecisionModel {
 
 export function readEffortSettings(): { model: DecisionModel } {
   let raw: unknown;
+  let filename = "inline-effort.json";
   try {
-    raw = JSON.parse(readFileSync(join(getAgentDir(), "jev-inline-effort.json"), "utf8"));
+    let text: string;
+    try {
+      text = readFileSync(join(getAgentDir(), filename), "utf8");
+    } catch (cause) {
+      if (!(cause instanceof Error && "code" in cause && cause.code === "ENOENT")) throw cause;
+      filename = "jev-inline-effort.json";
+      text = readFileSync(join(getAgentDir(), filename), "utf8");
+    }
+    raw = JSON.parse(text);
   } catch (cause) {
     if (cause instanceof Error && "code" in cause && cause.code === "ENOENT") return { model: "jev" };
-    throw new Error("无法读取 jev-inline-effort.json，请检查格式和权限，或在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。", { cause });
+    throw new Error(`无法读取 ${filename}，请检查格式和权限，或在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。`, { cause });
   }
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
-    throw new Error("jev-inline-effort.json 必须是 JSON 对象。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。");
+    throw new Error(`${filename} 必须是 JSON 对象。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。`);
   const { model = "jev" } = raw as { model?: unknown };
   if (!isDecisionModel(model))
     throw new Error("思考分类模型配置无效，只支持 jev 或 d1-ultra。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。");
@@ -36,7 +45,7 @@ export function readEffortSettings(): { model: DecisionModel } {
 
 export function saveEffortSettings(model: DecisionModel): void {
   if (!isDecisionModel(model)) throw new Error("请选择 Jev 或 d1-ultra。");
-  const path = join(getAgentDir(), "jev-inline-effort.json");
+  const path = join(getAgentDir(), "inline-effort.json");
   const temporaryPath = `${path}.${randomUUID()}.tmp`;
   try {
     mkdirSync(getAgentDir(), { recursive: true });
@@ -55,6 +64,7 @@ type Decision = { timestamp: number; thinkingLevel: ModelThinkingLevel; classifi
 type InputItem = { type?: string; role?: string };
 type Payload = { model?: unknown; input?: InputItem[]; reasoning?: { effort?: unknown } };
 
+// 保留历史会话条目类型和状态栏键，确保旧分支决策仍可恢复。
 const EFFORT_ENTRY = "jev-inline-effort";
 const STATUS_KEY = "jev-inline-effort";
 const CODEX_API = "openai-codex-responses";

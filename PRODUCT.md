@@ -12,11 +12,11 @@ web
 
 ## Product Purpose
 
-`pi-personal-extensions` 是个人维护的 Pi 扩展合集。它通过一个入口文件加载七项功能，用 `/personal` 统一启停和设置。讲解页的目标是让同事读完或听完后，能说清每项功能的作用和关键机制，并能自己安装和配置。
+`pi-personal-extensions` 是个人维护的 Pi 扩展合集。它通过一个入口文件加载六项功能，用 `/personal` 统一启停和设置。讲解页的目标是让同事读完或听完后，能说清每项功能的作用和关键机制，并能自己安装和配置。
 
 ## Positioning
 
-一个入口管理七项功能：禁用的功能不注册命令和事件；各功能的快捷命令与 `/personal` 子菜单共用同一套处理逻辑和配置。
+一个入口管理六项功能：禁用的功能不注册命令和事件；各功能的内部处理器由 `/personal` 子菜单调用，并共用同一套配置。
 
 ## Operating Context
 
@@ -26,12 +26,13 @@ web
 
 ## Capabilities and Constraints
 
-七项功能：`session-title`、`auto-session-name`、`substatusline`、`clickable-paths`、`user-message-border`、`statusline-style-picker`、`jev-inline-effort`。事实以 `README.md` 和 `extensions/` 源码为准。
+六项功能：`session-title`、`auto-session-name`、`statusline`、`clickable-paths`、`user-message-border`、`inline-effort`。事实以 `README.md` 和 `extensions/` 源码为准。
 
 ## Evidence on Hand
 
 - `README.md`、`CHANGELOG.md`、`extensions/*.ts`、`tests/*.test.mjs`。
-- 没有用户数据、截图或使用统计；讲解页里的示意数据必须标注为示例。
+- 已有 Pi TUI 真实录屏和截图：`docs/extensions-usage/media/`，技术版 `docs/extensions-guide/media/` 是其中部分文件的副本。封面也引用这些素材。
+- 没有用户研究数据或使用统计；讲解页里的示意数据必须标注为示例。
 
 ## Product Principles
 

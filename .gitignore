@@ -2,5 +2,9 @@ node_modules/
 .DS_Store
 *.log
 .pi/
-docs/extensions-guide/.cache/
 .impeccable/hook.cache.json
+.oil-diff/
+docs/*/.cache/
+.capture-sandbox/
+.impeccable/config.local.json
+*.tgz

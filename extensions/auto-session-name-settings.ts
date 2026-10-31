@@ -98,7 +98,7 @@ export function resolveNamingModel(
   );
   if (!model)
     throw new Error(
-      `命名模型 ${settings.model} 不在已认证的 scoped-models 中，请用 /scoped-models 加入或 /auto-name model 重新选择。`,
+      `命名模型 ${settings.model} 不在已认证的 scoped-models 中，请用 /scoped-models 加入，或在 /personal → 自动会话命名 → 选择命名模型 中重新选择。`,
     );
   return model;
 }
@@ -111,7 +111,7 @@ export function namingThinkingLevel(
   if (thinking !== "inherit") {
     if (!getSupportedThinkingLevels(model).includes(thinking))
       throw new Error(
-        "命名模型不支持已配置的思考强度，请用 /auto-name thinking 重新选择。",
+        "命名模型不支持已配置的思考强度，请在 /personal → 自动会话命名 → 选择命名思考强度 中重新选择。",
       );
     return thinking;
   }

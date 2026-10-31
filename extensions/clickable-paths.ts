@@ -289,9 +289,7 @@ export default function (pi: ExtensionAPI) {
               `裸路径：${config.bareText ? "识别" : "不识别"}`,
               `工作目录：${workingDir}`,
               "",
-              "用法：/clickable-paths [on|off]",
-              "      /clickable-paths editor <vscode|vscode-insiders|cursor|windsurf|file>",
-              "      /clickable-paths bare <on|off>",
+              "设置：/personal → 文件路径可点击，可选择开关、打开方式和裸路径识别。",
             ].join("\n"),
             "info",
           );

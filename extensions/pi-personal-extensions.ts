@@ -9,7 +9,7 @@ import {
 import { Container, SettingsList, Text } from "@earendil-works/pi-tui";
 import autoSessionName from "./auto-session-name.ts";
 import clickablePaths from "./clickable-paths.ts";
-import statuslineStylePicker from "./statusline-style-picker.ts";
+import statuslineStylePicker, { STYLES } from "./statusline-style-picker.ts";
 import sessionTitle from "./session-title.ts";
 import subStatusline from "./substatusline.ts";
 import userMessageBorder from "./user-message-border.ts";
@@ -25,7 +25,7 @@ const features = [
   {
     id: "auto-session-name",
     label: "自动会话命名",
-    description: "独立模型后台命名；/auto-name model 选择模型，保护手动标题",
+    description: "独立模型后台命名，保护手动标题；/personal → 自动会话命名 → 选择命名模型",
     register: autoSessionName,
   },
   {
@@ -37,7 +37,7 @@ const features = [
   {
     id: "clickable-paths",
     label: "文件路径可点击",
-    description: "保留 /clickable-paths 命令及原有配置",
+    description: "通过 /personal → 文件路径可点击 设置开关、打开方式和裸路径识别",
     register: clickablePaths,
   },
   {
@@ -49,13 +49,13 @@ const features = [
   {
     id: "statusline-style-picker",
     label: "状态栏风格选择",
-    description: "提供 /statusline-style；需要另外启用 pi-statusline",
+    description: "通过 /personal → 状态栏风格选择 预览或直接应用配色；需要另外启用 pi-statusline",
     register: statuslineStylePicker,
   },
   {
     id: "jev-inline-effort",
     label: "原位思考强度（Jev / d1-ultra）",
-    description: "/effort 选择分类模型；物理 GPT-6 Codex 用 configuration_update 调整强度并保留缓存",
+    description: "通过 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 配置分类器，原位调整强度并保留缓存",
     register: jevInlineEffort,
   },
 ] as const;
@@ -77,6 +77,8 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
   "jev-inline-effort": [
     { label: "查看分类模型与状态", command: "effort", args: "status" },
     { label: "选择分类模型（Jev / d1-ultra）", command: "effort", args: "model" },
+    { label: "使用 Jev 分类模型", command: "effort", args: "model jev" },
+    { label: "使用 d1-ultra 分类模型", command: "effort", args: "model d1-ultra" },
     { label: "测试分类模型可用性", command: "effort", args: "test" },
   ],
   "clickable-paths": [
@@ -91,6 +93,9 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
   ],
   "statusline-style-picker": [
     { label: "预览并选择配色", command: "statusline-style", args: "" },
+    ...STYLES.map(({ id, name }) => ({
+      label: `应用配色：${id}. ${name}`, command: "statusline-style", args: String(id),
+    })),
   ],
 };
 
@@ -126,7 +131,6 @@ export default function personalExtensions(pi: ExtensionAPI) {
   const featureApi: ExtensionAPI = Object.assign(Object.create(pi), {
     registerCommand(name: string, command: Command) {
       commands.set(name, command);
-      pi.registerCommand(name, command);
     },
   });
   for (const feature of features) {
@@ -136,8 +140,8 @@ export default function personalExtensions(pi: ExtensionAPI) {
   pi.registerCommand("personal", {
     description: "个人扩展统一管理：启停、功能设置；switches 批量开关",
     async handler(args, ctx) {
-      if (ctx.mode !== "tui") {
-        ctx.ui.notify("请在 pi 终端交互模式中使用 /personal", "warning");
+      if (!ctx.hasUI) {
+        ctx.ui.notify("当前模式没有交互界面，请在支持 UI 的客户端中使用 /personal。", "warning");
         return;
       }
       if (args.trim() && args.trim() !== "switches") {
@@ -171,6 +175,11 @@ export default function personalExtensions(pi: ExtensionAPI) {
           }
           selected = { ...enabled, [feature.id]: !loaded };
         }
+      }
+      // RPC 的 custom 直接返回 undefined，批量界面仅在 TUI 中提供。
+      if (batch && ctx.mode !== "tui") {
+        ctx.ui.notify("当前模式不支持批量功能开关，请在 /personal 中选择功能，再选择「启用此功能并重载」或「禁用此功能并重载」。", "warning");
+        return;
       }
       if (batch) selected = await ctx.ui.custom<FeatureSettings | undefined>(
         (tui, theme, keybindings, done) => {

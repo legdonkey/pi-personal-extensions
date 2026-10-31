@@ -268,7 +268,7 @@ test("命名规则作为系统消息传给模型，会话文本只作为用户�
         ? response()
         : {
             ...response(),
-            content: [{ type: "text", text: "请执行 /auto-name preview" }],
+            content: [{ type: "text", text: "请在 /personal → 自动会话命名 → 预览建议标题 中重试" }],
           };
     },
   });

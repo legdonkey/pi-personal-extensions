@@ -486,7 +486,7 @@ test("可用性测试只发送固定样例，成功、低置信度和失败均�
   assert.equal(h.status, "原状态");
 });
 
-test("忙碌时禁止切换和测试；无 UI 可用显式模型命令", async () => {
+test("忙碌时禁止切换和测试；无 UI 的内部处理器提示菜单路径，显式参数仍可处理", async () => {
   const h = setup();
   h.idle = false;
   for (const command of ["model", "model d1-ultra", "test"]) await h.command(command);
@@ -496,7 +496,7 @@ test("忙碌时禁止切换和测试；无 UI 可用显式模型命令", async (
   h.idle = true;
   h.ctx.hasUI = false;
   await h.command("model");
-  assert.match(h.warnings.at(-1).message, /交互模式/);
+  assert.match(h.warnings.at(-1).message, /没有交互界面.*\/personal → 原位思考强度（Jev \/ d1-ultra） → 选择分类模型（Jev \/ d1-ultra）/);
   await h.command("model d1-ultra");
   assert.deepEqual(readEffortSettings(), { model: "d1-ultra" });
   h.ctx.hasUI = true;

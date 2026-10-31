@@ -8,7 +8,7 @@ interface Style {
 	colors: readonly (readonly [fg: string, bg: string])[];
 }
 
-const STYLES: readonly Style[] = [
+export const STYLES: readonly Style[] = [
 	{
 		id: 1,
 		name: "茶墨渐层",
@@ -257,7 +257,7 @@ export default function statuslineStylePicker(pi: ExtensionAPI) {
 			let style = args.trim() ? findStyle(args) : undefined;
 			if (!args.trim()) {
 				if (ctx.mode !== "tui") {
-					ctx.ui.notify("请在 pi 终端交互模式中预览状态栏风格", "warning");
+					ctx.ui.notify("预览需要 pi 终端交互模式；可在 /personal → 状态栏风格选择 中直接应用配色。", "warning");
 					return;
 				}
 				const { Key, matchesKey, truncateToWidth } = await import(

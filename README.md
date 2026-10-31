@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，用 `/personal` 管理七项功能。
+个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理七项功能。
 
 ## 安装与开发
 
@@ -19,15 +19,15 @@ pi install "$(pwd)"
 `/personal` 是所有功能的管理入口：选择功能后，可启停或进入其设置。上下选择、Enter 确认、Esc 取消。例如：
 
 ```text
-/personal → 原位思考强度 → 选择分类模型（Jev / d1-ultra）
+/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）
 /personal → 自动会话命名 → 选择命名模型
-/personal → 文件路径可点击 → 打开方式
+/personal → 文件路径可点击 → 打开方式：cursor
 /personal → 状态栏风格选择 → 预览并选择配色
 ```
 
-默认全部开启。禁用的功能只提供启用入口，不注册其快捷命令和事件。启停保存后自动重载；其他已打开的会话需各自 `/reload`。菜单显示的是功能是否已加载，各功能自身状态通过「查看状态」检查。
+默认全部开启。禁用的功能只提供启用入口，不注册其事件。启停保存后自动重载；其他已打开的会话需各自 `/reload`。菜单显示的是功能是否已加载，各功能自身状态在对应子菜单中查看。
 
-批量启停可选择「批量功能开关」，或执行 `/personal switches`：空格切换、Enter 保存、Esc 取消。
+支持交互界面的客户端均可使用 `/personal`，包括 RPC 客户端；没有 UI 时提示并返回。批量启停可选择「批量功能开关」，或执行 `/personal switches`：空格切换、Enter 保存、Esc 取消。批量界面需要 TUI；RPC 中会提示从各功能菜单逐项启停。
 
 | 功能 | 作用 |
 | --- | --- |
@@ -39,21 +39,13 @@ pi install "$(pwd)"
 | `statusline-style-picker` | 预览并应用 11 套状态栏配色 |
 | `jev-inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex 思考强度 |
 
-`pi config` 管理整个扩展包。下列斜杠命令保留为快捷入口，与 `/personal` 子菜单共用处理逻辑和配置；启停功能不会清除其独立配置。
+`pi config` 管理整个扩展包。各功能设置均从 `/personal` 进入；启停功能不会清除其独立配置。
 
 ## 自动会话命名
 
 TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话更新标题。Print / JSON 模式不自动调用。
 
-```text
-/auto-name          # 查看状态、模型和实际思考强度
-/auto-name model    # 从已认证的 scoped-models 中选择命名模型
-/auto-name thinking # 选择独立思考强度，或继承 Pi 逐模型默认值
-/auto-name preview  # 预览建议，不改名；工作结束后使用
-/auto-name off      # 暂停当前会话命名
-/auto-name on       # 恢复当前会话命名
-/name 自定义标题    # Pi 原生命令；手动命名后自动暂停
-```
+在 `/personal → 自动会话命名` 中查看状态、模型和实际思考强度，选择命名模型或独立思考强度，也可暂停或恢复当前会话命名。「选择命名模型」只列出已认证的 scoped-models。「预览建议标题」只预览、不改名，需等待工作结束。Pi 自带的 `/name 自定义标题` 会手动命名，并暂停自动命名。
 
 - 默认模型为 `gpt-5.6-luna`。不可用时保留原标题，不改用主模型或其他模型。
 - 默认继承 `/settings` 中该模型的默认思考强度，未配置时用 `low`；不是主会话的临时思考等级。更换命名模型后恢复继承。
@@ -70,13 +62,12 @@ TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话�
 pi --model openai-codex/gpt-6.1-sol --thinking medium
 ```
 
-```text
-/effort                # 查看分类模型和当前分支的最近决策
-/effort model          # 选择并保存；Esc 取消
-/effort model jev      # 使用 Jev（默认）
-/effort model d1-ultra # 使用 d1-ultra
-/effort test           # 用固定公开样例测试，不改强度或会话决策
-```
+在 `/personal → 原位思考强度（Jev / d1-ultra）` 中选择：
+
+- 「查看分类模型与状态」：查看分类模型和当前分支的最近决策。
+- 「选择分类模型（Jev / d1-ultra）」：选择并保存；取消不保存。
+- 「使用 Jev 分类模型」或「使用 d1-ultra 分类模型」：直接保存对应选择。
+- 「测试分类模型可用性」：用固定公开样例测试，不改强度或会话决策。
 
 | 选择 | OpenRouter 模型 ID |
 | --- | --- |
@@ -88,7 +79,7 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 - 切换从下一条尚未分类的用户消息生效，无需重载；其他会话和子代理的后续分类也读取全局选择。工作中不能切换或测试。
 - 每条新用户消息分类一次，包括 steer 和 follow-up；工具续调和重试不重复分类。决策跟随分支，恢复、fork、树导航和压缩后保持原结果。
 - 发送当前请求和近期对话文本，内容预算合计 16,000 字符；不发送系统规则、工具结果、思考或图片数据。文本可能包含业务信息，分类会增加等待时间并消耗服务额度。
-- 15 秒超时、服务不可用、结果无效或 `probabilities[choice] < 0.5` 时沿用当前强度，不切换分类模型。取消不记录决策，空白输入不调用。配置无效时提示，可用 `/effort model` 修复。
+- 15 秒超时、服务不可用、结果无效或 `probabilities[choice] < 0.5` 时沿用当前强度，不切换分类模型。取消不记录决策，空白输入不调用。配置无效时提示，可在 `/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）` 中重新保存。
 - 复用 Pi 原生 classifier、OpenRouter 认证及代理。d1-ultra 是付费模型，价格以 [OpenRouter 端点信息](https://openrouter.ai/api/v1/models/liquid/d1-ultra/endpoints)为准。
 - OpenRouter 白名单需放行实际服务商及模型。`Latest` 别名还需放行解析后的固定版本，否则可能被 Guardrail 拦截。
 - 子代理需加载本扩展，角色 thinking 作为基线；外部 CLI 代理不经过本扩展。
@@ -96,16 +87,9 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 ## 路径链接与状态栏
 
-```text
-/clickable-paths
-/clickable-paths on
-/clickable-paths off
-/clickable-paths editor <vscode|vscode-insiders|cursor|windsurf|file>
-/clickable-paths bare <on|off>
+在 `/personal → 文件路径可点击` 中查看设置、开启或暂停路径链接。通过「打开方式：vscode」等菜单项选择 `vscode`、`vscode-insiders`、`cursor`、`windsurf` 或 `file`。通过「识别裸路径」或「不识别裸路径」控制不带反引号的路径识别。
 
-/statusline-style     # 预览并选择配色，应用后自动重载
-/statusline-style 11  # 按编号选择
-```
+在 `/personal → 状态栏风格选择 → 预览并选择配色` 中预览全部 11 套配色。也可通过「应用配色：1. 茶墨渐层」等 11 个直达项直接应用，支持 RPC。应用后自动重载；配色预览需要 TUI。
 
 配色选择器需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含状态栏本体。额度显示支持 `openai-codex` 周额度，以及 `zai-coding-cn` 的 5 小时和周额度。
 

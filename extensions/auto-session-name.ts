@@ -185,7 +185,7 @@ export default function autoSessionName(pi: ExtensionAPI) {
     const sessionId = ctx.sessionManager.getSessionId();
     const timer = setTimeout(() => controller.abort(), 30_000);
     timer.unref();
-    let failure = "自动命名失败，已保留原名；/auto-name preview 可重试。";
+    let failure = "自动命名失败，已保留原名；可在 /personal → 自动会话命名 → 预览建议标题 中重试。";
     try {
       let settings: NamingSettings;
       let model;
@@ -383,7 +383,7 @@ export default function autoSessionName(pi: ExtensionAPI) {
           const model = resolveNamingModel(ctx, settings);
           const level = namingThinkingLevel(ctx, model, settings.thinking);
           ctx.ui.notify(
-            `自动命名：${state.enabled && ownsName() ? "开启" : "暂停（保护当前名称）"}；模型：${namingModelKey(model)}；思考：${settings.thinking === "inherit" ? "继承 → " : ""}${level}。选择：/auto-name model、/auto-name thinking；全局开关：/personal`,
+            `自动命名：${state.enabled && ownsName() ? "开启" : "暂停（保护当前名称）"}；模型：${namingModelKey(model)}；思考：${settings.thinking === "inherit" ? "继承 → " : ""}${level}。选择：/personal → 自动会话命名 → 选择命名模型 / 选择命名思考强度；全局开关：/personal → 自动会话命名 → 禁用此功能并重载`,
             "info",
           );
         } catch (error) {
@@ -394,7 +394,7 @@ export default function autoSessionName(pi: ExtensionAPI) {
         }
       } else {
         ctx.ui.notify(
-          "用法：/auto-name [model|thinking|status|on|off|preview]",
+          "请在 /personal → 自动会话命名 中选择操作。",
           "warning",
         );
       }

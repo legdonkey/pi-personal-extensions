@@ -24,13 +24,13 @@ export function readEffortSettings(): { model: DecisionModel } {
     raw = JSON.parse(readFileSync(join(getAgentDir(), "jev-inline-effort.json"), "utf8"));
   } catch (cause) {
     if (cause instanceof Error && "code" in cause && cause.code === "ENOENT") return { model: "jev" };
-    throw new Error("无法读取 jev-inline-effort.json，请检查格式和权限，或用 /effort model 重新保存。", { cause });
+    throw new Error("无法读取 jev-inline-effort.json，请检查格式和权限，或在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。", { cause });
   }
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
-    throw new Error("jev-inline-effort.json 必须是 JSON 对象。请用 /effort model 重新保存。");
+    throw new Error("jev-inline-effort.json 必须是 JSON 对象。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。");
   const { model = "jev" } = raw as { model?: unknown };
   if (!isDecisionModel(model))
-    throw new Error("思考分类模型配置无效，只支持 jev 或 d1-ultra。请用 /effort model 重新保存。");
+    throw new Error("思考分类模型配置无效，只支持 jev 或 d1-ultra。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。");
   return { model };
 }
 
@@ -215,7 +215,7 @@ export default function (pi: ExtensionAPI) {
     async handler(args, ctx) {
       const [action = "status", value, ...extra] = args.trim().split(/\s+/).filter(Boolean);
       if (extra.length || !["status", "model", "test"].includes(action) || (value && action !== "model")) {
-        ctx.ui.notify("用法：/effort [status|model [jev|d1-ultra]|test]", "warning");
+        ctx.ui.notify("请在 /personal → 原位思考强度（Jev / d1-ultra） 中选择操作。", "warning");
         return;
       }
       try {
@@ -223,7 +223,7 @@ export default function (pi: ExtensionAPI) {
           const selected = readEffortSettings().model;
           const last = decisions(ctx).at(-1);
           ctx.ui.notify(
-            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier)}` : "尚无"}。切换：/effort model；可用性：/effort test。`,
+            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier)}` : "尚无"}。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。`,
             "info",
           );
           return;
@@ -247,7 +247,7 @@ export default function (pi: ExtensionAPI) {
         let selected: unknown = value;
         if (value === undefined) {
           if (!ctx.hasUI) {
-            ctx.ui.notify("请在交互模式选择，或使用 /effort model jev、/effort model d1-ultra。", "warning");
+            ctx.ui.notify("当前模式没有交互界面，请在支持 UI 的客户端中打开 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）。", "warning");
             return;
           }
           picker?.abort();
@@ -277,7 +277,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         saveEffortSettings(selected);
-        ctx.ui.notify(`已保存分类模型：${modelKey(selected)}。下一条尚未分类的用户消息生效，历史决策不变；其他会话的后续分类也会读取此配置。选择不代表可用，请用 /effort test 验证。`, "info");
+        ctx.ui.notify(`已保存分类模型：${modelKey(selected)}。下一条尚未分类的用户消息生效，历史决策不变；其他会话的后续分类也会读取此配置。选择不代表可用，请在 /personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性 中验证。`, "info");
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") return;
         // 仅报告本地固定错误，不透出服务响应、文件内容或认证信息。
@@ -327,7 +327,7 @@ export default function (pi: ExtensionAPI) {
       } catch (error) {
         ctx.signal?.throwIfAborted();
         if (error instanceof Error && error.name === "AbortError") throw error;
-        ctx.ui.notify(`${classifier ? modelKey(classifier) : "分类模型配置"} 不可用，思考强度沿用 ${current}。不会切换分类模型；请用 /effort model 或 /effort test 检查。`, "warning");
+        ctx.ui.notify(`${classifier ? modelKey(classifier) : "分类模型配置"} 不可用，思考强度沿用 ${current}。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`, "warning");
       }
       ctx.signal?.throwIfAborted();
       if (generation !== started) return;

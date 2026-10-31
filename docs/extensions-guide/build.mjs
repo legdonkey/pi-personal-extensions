@@ -1,17 +1,21 @@
 // 组装讲解页：拼接 src/ 里的章节片段，按 .seg 合成朗读音频，注入时间轴，输出 index.html。
-// 用法：node docs/extensions-guide/build.mjs [--no-tts]
+// 用法：node docs/extensions-guide/build.mjs [指南目录] [--no-tts]
+//   指南目录：含 src/（章节片段与 _hero.html）和 media/ 的目录，默认是本脚本所在目录。
+//   外壳、样式、播放器脚本始终取本目录 src/ 下的共享文件。
 //   --no-tts  不调用 TTS，用估算时长生成页面（只用于排版预览）。
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const run = promisify(execFile);
-const ROOT = dirname(fileURLToPath(import.meta.url));
+const HERE = dirname(fileURLToPath(import.meta.url));
+const SHARED = join(HERE, "src");
+const ROOT = resolve(process.argv.slice(2).find((a) => !a.startsWith("--")) ?? HERE);
 const SRC = join(ROOT, "src");
-const CACHE = join(ROOT, ".cache");
+const CACHE = join(HERE, ".cache"); // 各指南共用语音缓存
 const TTS = "/Users/yangguandao/Projects/legdonkey-plugins/plugins/bailian-tts/skills/bailian-tts/scripts/run.py";
 const VOICE = "wenhuaizhi_v3.1";
 const INSTRUCT = "稳重成熟的女声，语速适中，像技术分享的讲解，吐字清晰";
@@ -152,9 +156,15 @@ for (const c of chapters) c.html = c.html.replace(/<table([\s>])/g, '<div class=
 const short = (t) => t.split("：")[0];
 const toc = chapters.map((c) => `      <li><a href="#ch-${c.slug}" title="${c.title}"><span>${short(c.title)}</span><span class="dur"></span><span class="bar"><i></i></span></a></li>`).join("\n");
 const narration = { src, duration, segs: segs.map(({ id, ch, start, end }) => ({ id, ch, start, end })) };
-const page = readFileSync(join(SRC, "_shell.html"), "utf8")
-  .replace("/*CSS*/", () => readFileSync(join(SRC, "guide.css"), "utf8"))
-  .replace("/*JS*/", () => readFileSync(join(SRC, "guide.js"), "utf8"))
+const hero = readFileSync(join(existsSync(join(SRC, "_hero.html")) ? SRC : SHARED, "_hero.html"), "utf8");
+const attr = (name) => hero.match(new RegExp(`data-${name}="([^"]*)"`))?.[1] ?? fail(`_hero.html 缺少 data-${name}`);
+const page = readFileSync(join(SHARED, "_shell.html"), "utf8")
+  .replace("{{TITLE}}", () => attr("title"))
+  .replace("{{BRAND}}", () => attr("brand"))
+  .replace("{{DESCRIPTION}}", () => attr("description"))
+  .replace("<!--HERO-->", () => hero.trimEnd())
+  .replace("/*CSS*/", () => readFileSync(join(SHARED, "guide.css"), "utf8"))
+  .replace("/*JS*/", () => readFileSync(join(SHARED, "guide.js"), "utf8"))
   .replace("/*NARRATION*/", () => JSON.stringify(narration))
   .replace("<!--TOC-->", () => toc)
   .replace("<!--MTOC-->", () => mtoc)

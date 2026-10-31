@@ -1,0 +1,290 @@
+<section class="chapter" id="ch-faq" data-chapter="faq" aria-labelledby="ch-faq-h">
+  <header class="chapter-head">
+    <h2 id="ch-faq-h">速查：命令、配置和常见问题</h2>
+    <p class="chapter-sum">所有快捷命令一张表；五个配置文件在哪；出问题时先查什么。</p>
+  </header>
+
+  <!-- 节拍 1：命令速查 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想查某个命令</h3>
+      <p>
+        <span class="seg" data-seg="faq-01" data-say="快捷命令和斜杠 personal 二级菜单里的设置项做同一件事，直接输入命令更快。表里按功能分组。">快捷命令和 <code>/personal</code> 二级菜单里的设置项做同一件事，直接输入命令更快。表里按功能分组。</span>
+      </p>
+      <p>不带参数时，<code>/auto-name</code> 和 <code>/effort</code> 显示当前状态。</p>
+    </div>
+    <figure class="beat-fig" id="fig-faq-1">
+      <table>
+        <caption>快捷命令速查</caption>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody data-cue="faq-01">
+          <tr><td><code>/personal</code></td><td>统一管理菜单：启停、进入设置</td></tr>
+          <tr><td><code>/personal switches</code></td><td>批量功能开关</td></tr>
+          <tr><td><code>/reload</code></td><td>Pi 自带：重载扩展</td></tr>
+        </tbody>
+        <tbody data-cue="faq-01">
+          <tr><td><code>/auto-name</code></td><td>查看自动会话命名的状态、命名模型、命名用的思考强度</td></tr>
+          <tr><td><code>/auto-name model</code> / <code>thinking</code></td><td>选命名模型 / 命名用的思考强度</td></tr>
+          <tr><td><code>/auto-name preview</code></td><td>预览建议的会话名，不改名</td></tr>
+          <tr><td><code>/auto-name off</code> / <code>on</code></td><td>在当前会话暂停 / 恢复自动起名</td></tr>
+          <tr><td><code>/name 新名字</code></td><td>Pi 自带：手动改会话名，之后这个会话暂停自动起名</td></tr>
+          <tr><td><code>/effort</code></td><td>查看是否适用、分类器、最近一条消息选到的档位</td></tr>
+          <tr><td><code>/effort model [jev|d1-ultra]</code></td><td>选分类器；带名字时直接切换。默认 Jev</td></tr>
+          <tr><td><code>/effort test</code></td><td>用固定样例测试分类器能不能用</td></tr>
+        </tbody>
+        <tbody data-cue="faq-01">
+          <tr><td><code>/clickable-paths [on|off]</code></td><td>查看设置 / 开启 / 暂停路径链接</td></tr>
+          <tr><td><code>/clickable-paths editor cursor</code></td><td>换打开方式（示例：cursor）。可选 vscode、vscode-insiders、cursor、windsurf、file</td></tr>
+          <tr><td><code>/clickable-paths bare on|off</code></td><td>识别 / 不识别裸路径</td></tr>
+          <tr><td><code>/statusline-style [编号]</code></td><td>预览并选配色；带编号时直接应用。应用后自动重载</td></tr>
+        </tbody>
+      </table>
+      <figcaption><code>/auto-name</code>、<code>/effort</code>、<code>/clickable-paths</code>、<code>/statusline-style</code> 只在对应功能开启时可用。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 2：配置文件 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想找配置文件</h3>
+      <p>
+        <span class="seg" data-seg="faq-02" data-say="五个配置文件都在 agent 目录，默认是主目录下的点 pi 斜杠 agent。">五个配置文件都在 agent 目录，默认是 <code>~/.pi/agent/</code>。</span>
+        设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，五个文件改用它指定的目录。
+        <span class="seg" data-seg="faq-03">平时不用手改这些文件。用菜单或快捷命令改全局设置，会自动保存到对应文件。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-faq-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 328" width="100%" role="img" aria-labelledby="fig-faq-2-title fig-faq-2-desc">
+          <title id="fig-faq-2-title">五个配置文件的位置</title>
+          <desc id="fig-faq-2-desc">agent 目录默认是 ~/.pi/agent/，设置 PI_CODING_AGENT_DIR 后改用该目录。目录下有功能开关、命名设置、分类器设置、路径链接设置和状态栏配色五个文件。</desc>
+          <defs>
+            <marker id="fig-faq-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+          <g data-cue="faq-02">
+            <path class="w" d="M40 72 V256"/>
+            <path class="w" d="M40 112 H64"/>
+            <path class="w" d="M40 148 H64"/>
+            <path class="w" d="M40 184 H64"/>
+            <path class="w" d="M40 220 H64"/>
+            <path class="w" d="M40 248 Q40 256 48 256 H64"/>
+            <rect class="n" x="16" y="24" width="248" height="48" rx="6"/>
+            <text class="t" x="32" y="45">agent 目录</text>
+            <text class="t-sub" x="32" y="63">默认 ~/.pi/agent/</text>
+            <text class="t-mono" x="72" y="116">personal-extensions.json</text>
+            <text class="t-cap" x="624" y="116" text-anchor="end">七项功能的开关</text>
+            <text class="t-mono" x="72" y="152">auto-session-name.json</text>
+            <text class="t-cap" x="624" y="152" text-anchor="end">命名模型和思考强度</text>
+            <text class="t-mono" x="72" y="188">jev-inline-effort.json</text>
+            <text class="t-cap" x="624" y="188" text-anchor="end">选用的分类器</text>
+            <text class="t-mono" x="72" y="224">clickable-paths.json</text>
+            <text class="t-cap" x="624" y="224" text-anchor="end">路径链接设置</text>
+            <text class="t-mono" x="72" y="260">pi-statusline.json</text>
+            <text class="t-cap" x="624" y="260" text-anchor="end">状态栏配色</text>
+          </g>
+          <g data-cue="faq-02">
+            <path class="w is-dash" d="M392 48 H264" style="marker-end:url(#fig-faq-2-arrow)"/>
+            <rect class="n is-focal" x="392" y="24" width="232" height="48" rx="6"/>
+            <text class="t-mono" x="408" y="45">PI_CODING_AGENT_DIR</text>
+            <text class="t-sub" x="408" y="63">设置后改用它指定的目录</text>
+          </g>
+          <g data-cue="faq-03">
+            <rect class="n is-ghost" x="16" y="280" width="608" height="36" rx="6"/>
+            <text class="t-cap" x="32" y="303" style="fill:var(--ink)">全局设置的修改自动保存到对应文件；当前会话的命名暂停状态保存在会话记录里</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>五个文件由同一个环境变量决定位置。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 3：什么时候要 /reload -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>改了设置没生效，要不要 /reload</h3>
+      <p>
+        <span class="seg" data-seg="faq-04" data-say="在别的会话改过设置、手改过配置文件，或刚装好、更新过扩展，已打开的会话要输入斜杠 reload。">在别的会话改过设置、手改过配置文件，或刚装好、更新过扩展，已打开的会话要输入 <code>/reload</code>。</span>
+        <span class="seg" data-seg="faq-05">在当前会话用菜单或快捷命令改，不用重载。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-faq-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 304" width="100%" role="img" aria-labelledby="fig-faq-3-title fig-faq-3-desc">
+          <title id="fig-faq-3-title">什么时候要输入 /reload</title>
+          <desc id="fig-faq-3-desc">左栏是需要输入 /reload 的五种情况，右栏是当前会话里自动生效、不用重载的五种操作。/reload 是 Pi 自带命令。</desc>
+          <g data-cue="faq-04">
+            <rect class="n is-focal" x="16" y="16" width="296" height="272" rx="6"/>
+            <text class="t-mono" x="32" y="44">要输入 /reload</text>
+            <text class="t-cap" x="32" y="80" style="fill:var(--ink)">别的会话开启或关闭过功能</text>
+            <text class="t-cap" x="32" y="112" style="fill:var(--ink)">别的会话改过路径链接设置</text>
+            <text class="t-cap" x="32" y="144" style="fill:var(--ink)">手改过 personal-extensions.json</text>
+            <text class="t-cap" x="32" y="168" style="fill:var(--ink)">或 clickable-paths.json</text>
+            <text class="t-cap" x="32" y="200" style="fill:var(--ink)">刚装好扩展，会话已经打开</text>
+            <text class="t-cap" x="32" y="232" style="fill:var(--ink)">更新或改过扩展代码</text>
+          </g>
+          <g data-cue="faq-05">
+            <rect class="n" x="328" y="16" width="296" height="272" rx="6"/>
+            <text class="t" x="344" y="44">不用重载</text>
+            <text class="t-mono" x="344" y="80">/personal</text>
+            <text class="t-cap" x="608" y="80" text-anchor="end">当前会话自动重载</text>
+            <text class="t-mono" x="344" y="112">/statusline-style</text>
+            <text class="t-cap" x="608" y="112" text-anchor="end">应用后自动重载</text>
+            <text class="t-mono" x="344" y="144">/clickable-paths …</text>
+            <text class="t-cap" x="608" y="144" text-anchor="end">之后的消息生效</text>
+            <text class="t-mono" x="344" y="176">/effort model</text>
+            <text class="t-cap" x="608" y="176" text-anchor="end">下一条新消息生效</text>
+            <text class="t-mono" x="344" y="208">/auto-name model</text>
+            <text class="t-cap" x="608" y="208" text-anchor="end">下次起名生效</text>
+            <text class="t-cap" x="344" y="264">都指在当前会话里操作</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption><code>/reload</code> 是 Pi 自带命令。右边的自动重载在 Pi 回复或压缩时会被拒绝，等结束后再操作，或手动输入 <code>/reload</code>。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 4：更新扩展 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想更新扩展</h3>
+      <p>
+        <span class="seg" data-seg="faq-06" data-say="在仓库根目录执行 git pull，再在 Pi 里输入斜杠 reload。依赖有变化时，先重新安装依赖。">在仓库根目录执行 <code>git pull</code>，再在 Pi 里输入 <code>/reload</code>。依赖有变化时，先重新安装依赖。</span>
+      </p>
+      <pre><code># 在仓库根目录
+git pull
+# 依赖有变化时
+npm install --ignore-scripts \
+  --registry=https://registry.npmmirror.com
+# 然后在 Pi 里输入 /reload</code></pre>
+    </div>
+    <figure class="beat-fig" id="fig-faq-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 96" width="100%" role="img" aria-labelledby="fig-faq-4-title fig-faq-4-desc">
+          <title id="fig-faq-4-title">更新扩展的步骤</title>
+          <desc id="fig-faq-4-desc">在仓库根目录 git pull；依赖有变化时重新 npm install；然后在 Pi 里输入 /reload。</desc>
+          <defs>
+            <marker id="fig-faq-4-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+          <g data-cue="faq-06">
+            <path class="w is-flow" d="M200 48 H224" style="marker-end:url(#fig-faq-4-arrow)"/>
+            <path class="w is-flow" d="M408 48 H432" style="marker-end:url(#fig-faq-4-arrow)"/>
+            <rect class="n" x="16" y="16" width="184" height="64" rx="6"/>
+            <text class="t-mono" x="32" y="44">git pull</text>
+            <text class="t-cap" x="32" y="64">在仓库根目录</text>
+            <rect class="n is-ghost" x="224" y="16" width="184" height="64" rx="6"/>
+            <text class="t-mono" x="240" y="44">npm install</text>
+            <text class="t-cap" x="240" y="64">依赖有变化时</text>
+            <rect class="n is-focal" x="432" y="16" width="192" height="64" rx="6"/>
+            <text class="t-mono" x="448" y="44">/reload</text>
+            <text class="t-cap" x="448" y="64">在 Pi 里输入</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>虚线框是可选步骤。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 5：常见问题 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>出问题怎么办</h3>
+      <p>
+        <span class="seg" data-seg="faq-07">各功能出问题时先查什么，汇总在排查表里。</span>
+      </p>
+      <p>打开方式选 <code>file</code> 时，系统用默认程序打开文件，不跳到具体行。换打开方式后，让 Pi 重新输出一个文件路径，再点新消息里的链接测试；旧消息里的链接不会更新。</p>
+    </div>
+    <figure class="beat-fig" id="fig-faq-5">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 540" width="100%" role="img" aria-labelledby="fig-faq-5-title fig-faq-5-desc">
+          <title id="fig-faq-5-title">常见问题排查表</title>
+          <desc id="fig-faq-5-desc">六种常见问题，每种从左到右是症状、先查什么、怎么做：会话名没变、状态栏没有额度、没看到 🧠 段、路径没变成链接、链接点了没反应、设置没生效。</desc>
+          <defs>
+            <marker id="fig-faq-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+          <g data-cue="faq-07">
+            <text class="t-sub" x="16" y="20">症状</text>
+            <text class="t-sub" x="180" y="20">先查</text>
+            <text class="t-sub" x="428" y="20">怎么做</text>
+            <path class="w" d="M156 64 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <path class="w" d="M404 64 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <rect class="n" x="16" y="32" width="140" height="64" rx="6"/>
+            <text class="t" x="28" y="69">会话名没自动变</text>
+            <rect class="n" x="180" y="32" width="224" height="64" rx="6"/>
+            <text class="t-cap" x="192" y="58">/auto-name 显示暂停？</text>
+            <text class="t-cap" x="192" y="78">或提示命名失败？</text>
+            <rect class="n" x="428" y="32" width="196" height="64" rx="6"/>
+            <text class="t-mono" x="440" y="58">/auto-name on</text>
+            <text class="t-mono" x="440" y="78">/auto-name preview</text>
+
+            <path class="w" d="M156 148 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <path class="w" d="M404 148 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <rect class="n" x="16" y="116" width="140" height="64" rx="6"/>
+            <text class="t" x="28" y="153">状态栏没有额度</text>
+            <rect class="n" x="180" y="116" width="224" height="64" rx="6"/>
+            <text class="t-cap" x="192" y="142">服务商是 openai-codex</text>
+            <text class="t-cap" x="192" y="162">或 zai-coding-cn 吗？</text>
+            <rect class="n" x="428" y="116" width="196" height="64" rx="6"/>
+            <text class="t-cap" x="440" y="142">其他服务商不显示额度</text>
+            <text class="t-cap" x="440" y="162">查询失败时保留上次结果</text>
+
+            <path class="w" d="M156 232 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <path class="w" d="M404 232 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <rect class="n" x="16" y="200" width="140" height="64" rx="6"/>
+            <text class="t" x="28" y="237">没看到 🧠 段</text>
+            <rect class="n" x="180" y="200" width="224" height="64" rx="6"/>
+            <text class="t-cap" x="192" y="226">GPT-6 系列、thinking 开启？</text>
+            <text class="t-cap" x="192" y="246">接口 openai-codex-responses？</text>
+            <rect class="n" x="428" y="200" width="196" height="64" rx="6"/>
+            <text class="t-cap" x="440" y="226">换模型或开启 thinking</text>
+            <text class="t-cap" x="440" y="246">发下一条消息后显示</text>
+
+            <path class="w" d="M156 316 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <path class="w" d="M404 316 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <rect class="n" x="16" y="284" width="140" height="64" rx="6"/>
+            <text class="t" x="28" y="321">路径没变成链接</text>
+            <rect class="n" x="180" y="284" width="224" height="64" rx="6"/>
+            <text class="t-cap" x="192" y="310">文件真实存在吗？</text>
+            <text class="t-cap" x="192" y="330">在代码块里吗？</text>
+            <rect class="n" x="428" y="284" width="196" height="64" rx="6"/>
+            <text class="t-mono" x="440" y="310">/clickable-paths</text>
+            <text class="t-cap" x="440" y="330">查看开关和打开方式</text>
+
+            <path class="w" d="M156 400 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <path class="w" d="M404 400 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <rect class="n" x="16" y="368" width="140" height="64" rx="6"/>
+            <text class="t" x="28" y="396">链接点了没反应</text>
+            <text class="t-cap" x="28" y="416">或打开的程序不对</text>
+            <rect class="n" x="180" y="368" width="224" height="64" rx="6"/>
+            <text class="t-cap" x="192" y="394">终端支持点击打开链接吗？</text>
+            <text class="t-cap" x="192" y="414">选的编辑器装了吗？</text>
+            <rect class="n" x="428" y="368" width="196" height="64" rx="6"/>
+            <text class="t-mono" x="440" y="394">/clickable-paths editor</text>
+            <text class="t-cap" x="440" y="414">后接编辑器名，或 file</text>
+
+            <path class="w" d="M156 484 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <path class="w" d="M404 484 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
+            <rect class="n" x="16" y="452" width="140" height="64" rx="6"/>
+            <text class="t" x="28" y="489">设置没生效</text>
+            <rect class="n" x="180" y="452" width="224" height="64" rx="6"/>
+            <text class="t-cap" x="192" y="478">在别的会话改的？</text>
+            <text class="t-cap" x="192" y="498">手改过配置文件？</text>
+            <rect class="n is-focal" x="428" y="452" width="196" height="64" rx="6"/>
+            <text class="t-mono" x="440" y="478">/reload</text>
+            <text class="t-cap" x="440" y="498">见「要不要 /reload」</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>从左往右查：先看症状，再查条件，最后照着做。</figcaption>
+    </figure>
+  </div>
+
+  <style>
+    #ch-faq #fig-faq-1 td:first-child code { white-space: nowrap; }
+  </style>
+</section>

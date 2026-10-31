@@ -1,0 +1,366 @@
+<section class="chapter" id="ch-message" data-chapter="message" aria-labelledby="ch-message-h">
+  <header class="chapter-head">
+    <h2 id="ch-message-h">消息区：线框和可点的路径</h2>
+    <p class="chapter-sum">自己的消息带橙色线框，回复里的文件路径点一下就在编辑器里打开。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>用户消息橙色线框；文件路径可点击</dd>
+      <dt>快捷命令</dt><dd><code>/clickable-paths</code></dd>
+      <dt>在哪设置</dt><dd><code>/personal</code> → 选对应功能</dd>
+    </dl>
+  </header>
+
+  <!-- ============ 用户消息橙色线框 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想在长对话里找到自己的消息</h3>
+      <p>
+        <span class="seg" data-seg="message-01">你发出的每条消息都带橙色圆角线框，左上角写着 user。在长对话里，你更容易找到自己的消息。</span>
+        <span class="seg" data-seg="message-02" data-say="不想要，就在斜杠 personal 里关闭这项功能。">不想要，就在 <code>/personal</code> 里关闭这项功能。</span>
+      </p>
+      <ul>
+        <li>「用户消息橙色线框」没有设置项，也不改消息内容。关闭步骤见第 1 章。</li>
+        <li>升级 Pi 后，线框可能不再显示。消息本身照常显示，等扩展更新即可。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 196" width="100%" role="img" aria-labelledby="fig-message-1-title fig-message-1-desc">
+          <title id="fig-message-1-title">用户消息橙色线框：开启与关闭的对比</title>
+          <desc id="fig-message-1-desc">左边是关闭时的用户消息，右边是默认开启时的样子：外面一圈橙色圆角线框，左上角写着 user。两边的消息内容一样。下方写着关闭方法：在 /personal 里关闭这项功能。</desc>
+
+          <g data-cue="message-01">
+            <text class="t-cap" x="336" y="24">开启时（默认）</text>
+            <rect x="336" y="36" width="288" height="64" rx="6" style="fill:var(--paper-2);stroke:var(--accent);stroke-width:1.5"/>
+            <rect class="mask" x="346" y="30" width="44" height="12"/>
+            <text class="t-sub" x="368" y="40" text-anchor="middle" style="fill:var(--accent)">user</text>
+            <text class="t-cap" x="352" y="74">帮我检查一下 README.md（示例）</text>
+          </g>
+
+          <g data-cue="message-02">
+            <text class="t-cap" x="16" y="24">关闭时</text>
+            <rect x="16" y="36" width="280" height="64" rx="2" style="fill:var(--paper-2);stroke:var(--rule)"/>
+            <text class="t-cap" x="32" y="74">帮我检查一下 README.md（示例）</text>
+            <text class="t-cap" x="16" y="124">两边的消息内容一样。</text>
+            <line x1="16" y1="140" x2="624" y2="140" style="stroke:var(--rule);stroke-width:1"/>
+            <rect class="n" x="16" y="152" width="92" height="32" rx="6"/>
+            <text class="t-mono" x="62" y="173" text-anchor="middle">/personal</text>
+            <text class="t-cap" x="124" y="173">里关闭「用户消息橙色线框」，步骤见第 1 章。</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>消息内容是示例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：点开文件 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想直接打开回复里提到的文件</h3>
+      <p>
+        <span class="seg" data-seg="message-03">回复里的本地文件路径会变成链接，点击后编辑器打开这个文件。</span>
+        <span class="seg" data-seg="message-04" data-say="多数终端要按住修饰键再点击：macOS 上常是 Command 键，其他系统常是 Control 键。">多数终端要按住修饰键再点击：macOS 上常是 Cmd 键，其他系统常是 Ctrl 键。</span>
+        <span class="seg" data-seg="message-05">路径带行号和列号时，编辑器直接跳到那个位置。</span>
+      </p>
+      <ul>
+        <li>具体按键以终端的设置为准；有的终端直接点击就能打开。</li>
+        <li>只有真实存在的文件才变成链接。相对路径按会话的工作目录查找。</li>
+        <li>例如 <code>src/app.ts:12:5</code> 跳到第 12 行第 5 列。</li>
+        <li>你发的消息里的路径，默认也会变成链接。这一项没有菜单入口。如果不想要：
+          <ol>
+            <li>打开 agent 目录下的 <code>clickable-paths.json</code>（默认 <code>~/.pi/agent/</code>）。</li>
+            <li>把 <code>userMessages</code> 设为 <code>false</code>，保存。</li>
+            <li>输入 <code>/reload</code>。</li>
+          </ol>
+        </li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 236" width="100%" role="img" aria-labelledby="fig-message-2-title fig-message-2-desc">
+          <title id="fig-message-2-title">点击回复里的路径，编辑器打开文件并跳到对应行列</title>
+          <desc id="fig-message-2-desc">示例：Pi 回复里写着 src/app.ts:12:5，显示成带下划线的链接。按住修饰键点击后，编辑器打开 app.ts，光标停在第 12 行第 5 列。</desc>
+          <defs>
+            <marker id="fig-message-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <g data-cue="message-03">
+            <rect class="n" x="16" y="24" width="272" height="120" rx="6"/>
+            <text class="t-cap" x="32" y="48">Pi 回复（示例）</text>
+            <text class="t-cap" x="32" y="84">改好了，见</text>
+            <text class="t-mono" x="100" y="84" style="fill:var(--link);text-decoration:underline">src/app.ts:12:5</text>
+            <line class="w" x1="288" y1="84" x2="334" y2="84" marker-end="url(#fig-message-2-arrow)"/>
+            <rect class="n" x="336" y="24" width="288" height="172" rx="6"/>
+            <text class="t-sub" x="348" y="44">app.ts（编辑器，示例）</text>
+            <line x1="336" y1="54" x2="624" y2="54" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-sub" x="364" y="80" text-anchor="end">10</text>
+            <text class="t-sub" x="364" y="100" text-anchor="end">11</text>
+            <text class="t-sub" x="364" y="140" text-anchor="end">13</text>
+            <text class="t-sub" x="364" y="160" text-anchor="end">14</text>
+            <rect x="380" y="72" width="160" height="8" rx="2" style="fill:var(--rule)"/>
+            <rect x="380" y="92" width="200" height="8" rx="2" style="fill:var(--rule)"/>
+            <rect x="380" y="132" width="180" height="8" rx="2" style="fill:var(--rule)"/>
+            <rect x="380" y="152" width="120" height="8" rx="2" style="fill:var(--rule)"/>
+          </g>
+
+          <g data-cue="message-04">
+            <rect class="n" x="56" y="98" width="72" height="28" rx="4"/>
+            <text class="t-mono" x="92" y="117" text-anchor="middle">Cmd</text>
+            <text class="t-cap" x="140" y="117">或</text>
+            <rect class="n" x="160" y="98" width="72" height="28" rx="4"/>
+            <text class="t-mono" x="196" y="117" text-anchor="middle">Ctrl</text>
+            <text class="t-cap" x="244" y="117">+ 点击</text>
+          </g>
+
+          <g data-cue="message-05">
+            <rect x="340" y="106" width="280" height="20" rx="2" style="fill:var(--accent-tint)"/>
+            <text class="t-sub" x="364" y="120" text-anchor="end">12</text>
+            <rect x="380" y="112" width="32" height="8" rx="2" style="fill:var(--rule)"/>
+            <rect x="414" y="108" width="2" height="16" style="fill:var(--accent)"/>
+            <text class="t-cap" x="612" y="121" text-anchor="end">第 12 行第 5 列</text>
+          </g>
+
+          <text class="t-cap" x="16" y="224">文件要真实存在；相对路径按会话的工作目录查找。</text>
+        </svg>
+      </div>
+      <figcaption>路径和文件内容都是示例。按键以你的终端为准。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：选编辑器 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想换一个编辑器打开</h3>
+      <p>
+        <span class="seg" data-seg="message-06" data-say="默认用 VS Code 打开。想换编辑器，在斜杠 personal 的「文件路径可点击」里选「打开方式」。">默认用 VS Code 打开。想换编辑器，在 <code>/personal</code> 的「文件路径可点击」里选「打开方式」。</span>
+        <span class="seg" data-seg="message-07">打开方式选 file 时，系统用默认程序打开文件，不跳到具体行。</span>
+      </p>
+      <pre><code># 也可以直接输入命令，例如换成 Cursor
+/clickable-paths editor cursor</code></pre>
+    </div>
+    <figure class="beat-fig" id="fig-message-3">
+      <div class="demo" data-cue="message-06">
+        <p class="demo-static">可选：<code>vscode</code>（默认）、<code>vscode-insiders</code>、<code>cursor</code>、<code>windsurf</code>、<code>file</code>。</p>
+        <div class="message-demo-ui" hidden>
+          <label for="message-demo-editor">打开方式</label>
+          <select id="message-demo-editor">
+            <option value="vscode" selected>vscode（默认）</option>
+            <option value="vscode-insiders">vscode-insiders</option>
+            <option value="cursor">cursor</option>
+            <option value="windsurf">windsurf</option>
+            <option value="file">file</option>
+          </select>
+          <output id="message-demo-out" for="message-demo-editor" aria-live="polite"></output>
+          <details>
+            <summary>链接地址</summary>
+            <code id="message-demo-url"></code>
+          </details>
+          <p class="fig-hint">示例：工作目录 <code>/Users/me/proj</code>，回复里的路径是 <code>src/app.ts:12:5</code>。</p>
+        </div>
+      </div>
+      <p class="message-file-note" data-cue="message-07">选 <code>file</code> 时，系统用默认程序打开文件，不跳到具体行。</p>
+      <figcaption>换个选项，看点击后会发生什么。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 文件路径可点击：哪些路径会变链接 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>哪些路径会变成链接</h3>
+      <p>
+        <span class="seg" data-seg="message-08" data-say="没用反引号包起来的路径叫裸路径。裸路径要带扩展名才会变成链接，比如 README 点 md。">没用反引号包起来的路径叫裸路径。裸路径要带扩展名才会变成链接，比如 <code>README.md</code>。</span>
+        <span class="seg" data-seg="message-09">代码块和思考内容里的路径不变成链接。回复输出完以后，路径才变成链接。</span>
+      </p>
+      <ul>
+        <li>代码块指用 <code>```</code> 或 <code>~~~</code> 包起来的部分。已经写成链接的文字保持原样。</li>
+        <li>不想识别裸路径：在「文件路径可点击」的二级菜单里选「不识别裸路径」，或输入 <code>/clickable-paths bare off</code>；恢复用 <code>/clickable-paths bare on</code>。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-message-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 300" width="100%" role="img" aria-labelledby="fig-message-4-title fig-message-4-desc">
+          <title id="fig-message-4-title">会变成链接和不变成链接的路径</title>
+          <desc id="fig-message-4-desc">左栏会变成链接：反引号里的路径、带扩展名的裸路径、主目录下的路径、带行号的路径。右栏不变成链接：没有扩展名的裸路径、文件夹、代码块里的路径、已经是链接的文字（保持原样）、思考内容、不存在的文件。回复输出完之前，路径先显示成文字。</desc>
+
+          <g data-cue="message-08">
+            <text class="t" x="16" y="28" style="fill:var(--ok)">会变成链接</text>
+            <line x1="16" y1="38" x2="304" y2="38" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <text class="t-mono" x="16" y="64" style="fill:var(--link);text-decoration:underline">`src/app.ts:12:5`</text>
+            <text class="t-cap" x="16" y="82">反引号里的路径</text>
+            <text class="t-mono" x="16" y="108" style="fill:var(--link);text-decoration:underline">README.md</text>
+            <text class="t-cap" x="16" y="126">裸路径，带扩展名</text>
+            <text class="t-mono" x="16" y="152" style="fill:var(--link);text-decoration:underline">~/notes/todo.md</text>
+            <text class="t-cap" x="16" y="170">主目录下的路径</text>
+            <text class="t-mono" x="16" y="196" style="fill:var(--link);text-decoration:underline">docs/guide.md:3</text>
+            <text class="t-cap" x="16" y="214">带行号，跳到第 3 行</text>
+            <text class="t-mono" x="336" y="64">Makefile</text>
+            <text class="t-cap" x="448" y="64">裸路径，没有扩展名</text>
+          </g>
+
+          <g data-cue="message-09">
+            <text class="t" x="336" y="28">不变成链接</text>
+            <line x1="336" y1="38" x2="624" y2="38" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <text class="t-mono" x="336" y="96">src/</text>
+            <text class="t-cap" x="448" y="96">文件夹</text>
+            <text class="t-mono" x="336" y="128">```</text>
+            <text class="t-cap" x="448" y="128">代码块里的路径</text>
+            <text class="t-mono" x="336" y="160">[说明](README.md)</text>
+            <text class="t-cap" x="488" y="160">已有链接，保持原样</text>
+            <text class="t-mono" x="336" y="192">思考内容</text>
+            <text class="t-cap" x="448" y="192">里面的路径都不变成链接</text>
+            <text class="t-mono" x="336" y="224">old/gone.md</text>
+            <text class="t-cap" x="448" y="224">文件不存在</text>
+            <line x1="16" y1="248" x2="624" y2="248" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="16" y="276">回复还在输出时，路径先显示成文字，输出完再变成链接。</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>左栏的文件都假定存在。所有例子都是示例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 排查：路径没变成链接 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>路径没变成链接怎么办</h3>
+      <ol>
+        <li><span class="seg" data-seg="message-10" data-say="输入斜杠 clickable paths，确认「状态」是「开启」。">输入 <code>/clickable-paths</code>，确认「状态」是「开启」。</span></li>
+        <li><span class="seg" data-seg="message-11">确认文件真实存在，并且路径不在代码块或思考内容里。</span></li>
+        <li><span class="seg" data-seg="message-12" data-say="如果路径后面跟着括号里的链接地址，说明终端超链接没有启用。这时检查 Pi 的超链接设置、PI HYPERLINKS 环境变量和终端本身。">如果路径后面跟着括号里的链接地址，说明终端超链接没有启用。这时检查 Pi 的超链接设置、<code>PI_HYPERLINKS</code> 环境变量和终端本身。</span></li>
+      </ol>
+      <p>Pi 按这个顺序决定是否启用终端超链接：</p>
+      <ol>
+        <li>Pi 设置 <code>terminal.hyperlinks</code>：<code>true</code> 启用，<code>false</code> 关闭。写在 agent 目录或项目 <code>.pi/</code> 下的 <code>settings.json</code>。</li>
+        <li>环境变量 <code>PI_HYPERLINKS</code>：<code>1</code> 启用，<code>0</code> 关闭，启动 Pi 前设置。</li>
+        <li>两者都没设置时自动检测：iTerm2、kitty、Ghostty、WezTerm、Warp、Windows Terminal、Alacritty，以及 VS Code 和 Zed 的内置终端会启用，其他终端不启用。在 tmux 里，要 tmux 转发超链接才启用。</li>
+      </ol>
+      <details>
+        <summary>路径变成了链接，但点了没反应</summary>
+        <ol>
+          <li>确认按住了修饰键，具体按键以终端设置为准。</li>
+          <li>输入 <code>/clickable-paths</code> 看「编辑器」，确认这个编辑器已经安装。</li>
+          <li>用 <code>/clickable-paths editor file</code> 换成系统默认程序打开。已显示的消息不会刷新，旧链接地址可能不变：让 Pi 重新输出一个文件路径，再点新消息里的链接测试。</li>
+        </ol>
+      </details>
+    </div>
+    <figure class="beat-fig" id="fig-message-6">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 300" width="100%" role="img" aria-labelledby="fig-message-6-title fig-message-6-desc">
+          <title id="fig-message-6-title">路径没变成链接时的检查步骤</title>
+          <desc id="fig-message-6-desc">依次检查：第 1 步，路径链接是否开启，没开启就输入 /clickable-paths on；第 2 步，文件是否真实存在、是否在代码块或思考内容里，是的话保持文字是正常的；第 3 步，路径后面是否跟着括号里的链接地址，是的话说明终端超链接没有启用，依次检查 Pi 的 terminal.hyperlinks 设置、PI_HYPERLINKS 环境变量和终端本身。</desc>
+          <defs>
+            <marker id="fig-message-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <rect class="n is-focal" x="16" y="12" width="264" height="36" rx="6"/>
+          <text class="t" x="148" y="35" text-anchor="middle">路径没变成链接</text>
+          <line class="w" x1="148" y1="48" x2="148" y2="62" marker-end="url(#fig-message-6-arrow)"/>
+
+          <g data-cue="message-10">
+            <line class="w" x1="280" y1="86" x2="358" y2="86" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="mask" x="308" y="66" width="24" height="12"/>
+            <text class="t-cap" x="320" y="76" text-anchor="middle">否</text>
+            <rect class="n" x="16" y="64" width="264" height="44" rx="6"/>
+            <text class="t" x="28" y="84">1 「状态」是「开启」？</text>
+            <text class="t-sub" x="28" y="100">/clickable-paths 查看</text>
+            <rect class="n" x="360" y="64" width="264" height="44" rx="6"/>
+            <text class="t-mono" x="372" y="91">/clickable-paths on</text>
+          </g>
+
+          <g data-cue="message-11">
+            <line class="w" x1="148" y1="108" x2="148" y2="122" marker-end="url(#fig-message-6-arrow)"/>
+            <text class="t-cap" x="156" y="120">是</text>
+            <line class="w" x1="280" y1="146" x2="358" y2="146" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="mask" x="308" y="126" width="24" height="12"/>
+            <text class="t-cap" x="320" y="136" text-anchor="middle">否</text>
+            <rect class="n" x="16" y="124" width="264" height="44" rx="6"/>
+            <text class="t" x="28" y="144">2 文件真实存在？</text>
+            <text class="t-sub" x="28" y="160">相对路径按工作目录找</text>
+            <rect class="n" x="360" y="124" width="264" height="44" rx="6"/>
+            <text class="t" x="372" y="151">保持文字是正常的</text>
+
+            <line class="w" x1="148" y1="168" x2="148" y2="182" marker-end="url(#fig-message-6-arrow)"/>
+            <text class="t-cap" x="156" y="180">是</text>
+            <line class="w" x1="280" y1="206" x2="358" y2="206" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="mask" x="308" y="186" width="24" height="12"/>
+            <text class="t-cap" x="320" y="196" text-anchor="middle">是</text>
+            <rect class="n" x="16" y="184" width="264" height="44" rx="6"/>
+            <text class="t" x="28" y="204">在代码块或思考内容里？</text>
+            <text class="t-sub" x="28" y="220">``` 或 ~~~ 包起来的部分</text>
+            <rect class="n" x="360" y="184" width="264" height="44" rx="6"/>
+            <text class="t" x="372" y="211">保持文字是正常的</text>
+          </g>
+
+          <g data-cue="message-12">
+            <line class="w" x1="148" y1="228" x2="148" y2="242" marker-end="url(#fig-message-6-arrow)"/>
+            <text class="t-cap" x="156" y="240">否</text>
+            <line class="w" x1="280" y1="266" x2="358" y2="266" marker-end="url(#fig-message-6-arrow)"/>
+            <rect class="mask" x="308" y="246" width="24" height="12"/>
+            <text class="t-cap" x="320" y="256" text-anchor="middle">是</text>
+            <rect class="n" x="16" y="244" width="264" height="44" rx="6"/>
+            <text class="t" x="28" y="264">3 后面跟着（链接地址）？</text>
+            <text class="t-sub" x="28" y="280">app.ts (vscode://file/…)</text>
+            <rect class="n" x="360" y="244" width="264" height="44" rx="6"/>
+            <text class="t" x="372" y="264">终端超链接没有启用</text>
+            <text class="t-cap" x="372" y="280">查 Pi 设置、PI_HYPERLINKS、终端</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>从上往下查，查到一条就停。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 录屏：第 1 步的实际画面 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>第 1 步的实际画面</h3>
+      <p>输入 <code>/clickable-paths</code> 后，Pi 列出「状态」「编辑器」「裸路径」「工作目录」四行，后面附三行用法。</p>
+      <ul>
+        <li>暂停路径链接：输入 <code>/clickable-paths off</code>，从下一条消息开始生效。恢复：输入 <code>/clickable-paths on</code>。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="clickable-paths-status" id="fig-message-5">
+      <div class="capture-frame"><video data-cue="message-10" src="media/clickable-paths-status.mp4" poster="media/clickable-paths-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /clickable-paths，显示「状态」「编辑器」「裸路径」「工作目录」和三行用法"></video></div>
+      <figcaption>录屏：输入 <code>/clickable-paths</code>，显示「状态」「编辑器」「裸路径」「工作目录」和用法。画面里的 ponytail 字样来自本机另一个扩展。</figcaption>
+    </figure>
+  </div>
+
+  <style>
+    #ch-message .message-demo-ui { display: grid; gap: 8px; }
+    #ch-message .message-demo-ui details { font-size: 13.5px; color: var(--muted); }
+    #ch-message .message-demo-ui details code { overflow-wrap: anywhere; }
+    #ch-message .message-file-note { margin: 10px 4px 0; font-size: 14.5px; color: var(--muted); }
+  </style>
+
+  <script type="module">
+    {
+      const demo = document.querySelector("#ch-message .demo");
+      const ui = demo?.querySelector(".message-demo-ui");
+      if (demo && ui) {
+        // 示例路径 src/app.ts:12:5，工作目录 /Users/me/proj；URL 格式对应 extensions/clickable-paths.ts 的 buildUrl。
+        const names = { vscode: "VS Code", "vscode-insiders": "VS Code Insiders", cursor: "Cursor", windsurf: "Windsurf" };
+        const select = ui.querySelector("#message-demo-editor");
+        const out = ui.querySelector("#message-demo-out");
+        const url = ui.querySelector("#message-demo-url");
+        const update = () => {
+          const editor = select.value;
+          const file = editor === "file";
+          out.textContent = file
+            ? "点击后：系统用默认程序打开 app.ts，不跳到具体行。"
+            : `点击后：用 ${names[editor]} 打开 app.ts，跳到第 12 行第 5 列。`;
+          url.textContent = file
+            ? "file:///Users/me/proj/src/app.ts"
+            : `${editor}://file/Users/me/proj/src/app.ts:12:5`;
+        };
+        select.addEventListener("change", update);
+        // 朗读到「选 file」那一句时，演示自动切到 file。
+        const note = document.querySelector("#ch-message .message-file-note");
+        new MutationObserver(() => {
+          if (note.classList.contains("is-active") && select.value !== "file") { select.value = "file"; update(); }
+        }).observe(note, { attributes: true, attributeFilter: ["class"] });
+        update();
+        demo.querySelector(".demo-static").hidden = true;
+        ui.hidden = false;
+      }
+    }
+  </script>
+</section>

@@ -1,0 +1,278 @@
+<section class="chapter" id="ch-start" data-chapter="start" aria-labelledby="ch-start-h">
+  <header class="chapter-head">
+    <h2 id="ch-start-h">上手：安装、设置、关闭功能</h2>
+    <p class="chapter-sum">七项功能能帮你什么，怎么安装，怎么用 <code>/personal</code> 开启、关闭和设置。</p>
+    <dl class="meta">
+      <dt>运行要求</dt><dd>Pi ≥ 1.0.1，Node.js ≥ 22.19</dd>
+      <dt>管理命令</dt><dd><code>/personal</code>、<code>/personal switches</code></dd>
+    </dl>
+  </header>
+
+  <!-- 节拍 1：能帮你什么 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>这套扩展能帮你什么</h3>
+      <p>
+        <span class="seg" data-seg="start-01">装上这套扩展后，Pi 界面里多出七项功能。七项默认全部开启。</span>
+      </p>
+      <ul>
+        <li><span class="seg" data-seg="start-02">消息区里，你发的消息带橙色线框；回复里的文件路径可以点击打开。</span></li>
+        <li><span class="seg" data-seg="start-03">状态栏显示会话 ID 和服务商的剩余额度。状态栏的配色也能换。</span></li>
+        <li><span class="seg" data-seg="start-04">输入框下方显示会话名。一轮指你发出一条消息，到 Pi 回复完。每轮正常结束后，「自动会话命名」在后台起会话名。</span></li>
+        <li><span class="seg" data-seg="start-05" data-say="用 GPT 六系列并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的大脑图标段。另有接口要求，见下方条件列表。">用 GPT-6 系列并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的 🧠 段。另有接口要求，见下方条件列表。</span></li>
+      </ul>
+      <p>原位思考强度的适用条件：接口是 <code>openai-codex-responses</code>；模型是 GPT-6 系列；thinking 不是 <code>off</code>。</p>
+    </div>
+    <figure class="beat-fig" id="fig-start-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 488" width="100%" role="img" aria-labelledby="fig-start-1-title fig-start-1-desc">
+          <title id="fig-start-1-title">Pi 屏幕上的七项功能</title>
+          <desc id="fig-start-1-desc">Pi 终端从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击；输入框下方有右下角会话标题和自动会话命名；状态栏有额度与会话 ID 和状态栏风格选择；状态栏的 🧠 段来自原位思考强度。界面外的 /personal 命令统一启停。</desc>
+          <defs>
+            <marker id="fig-start-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+
+          <g data-cue="start-01">
+            <rect class="n" x="16" y="96" width="440" height="336" rx="6"/>
+            <text class="t-sub" x="440" y="114" text-anchor="end">示例画面</text>
+            <line class="w" x1="24" y1="304" x2="448" y2="304" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <line class="w" x1="24" y1="336" x2="448" y2="336" style="stroke:var(--rule-solid);stroke-width:1"/>
+            <rect x="32" y="312" width="8" height="16" style="fill:var(--muted)"/>
+            <text class="t-cap" x="48" y="325">输入框</text>
+            <path class="w" d="M236 72 V96" style="marker-end:url(#fig-start-1-arrow)"/>
+            <rect class="n is-focal" x="16" y="24" width="440" height="48" rx="6"/>
+            <text class="t-mono" x="32" y="45">/personal</text>
+            <text class="t-sub" x="440" y="45" text-anchor="end">本章</text>
+            <text class="t-cap" x="32" y="63">开启、关闭、设置七项功能</text>
+            <rect class="n is-ghost" x="488" y="24" width="144" height="48" rx="6"/>
+            <text class="t" x="500" y="45">常见问题</text>
+            <text class="t-sub" x="620" y="45" text-anchor="end">第 6 章</text>
+            <text class="t-cap" x="500" y="63">命令速查、排错</text>
+          </g>
+
+          <g data-cue="start-02">
+            <rect x="32" y="128" width="408" height="56" rx="6" style="fill:none;stroke:var(--accent);stroke-width:1.5"/>
+            <rect class="mask" x="40" y="121" width="44" height="14" style="fill:var(--paper)"/>
+            <text class="t-sub" x="44" y="132" style="fill:var(--accent)">user</text>
+            <text class="t-cap" x="44" y="164" style="fill:var(--ink)">安装步骤写在哪里？</text>
+            <text class="t-cap" x="32" y="220" style="fill:var(--ink)">写在 <tspan class="t-mono" style="fill:var(--link);text-decoration:underline">README.md:9</tspan></text>
+            <path class="w" d="M440 156 H488"/>
+            <rect class="n" x="488" y="120" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="142">消息区</text>
+            <text class="t-sub" x="620" y="142" text-anchor="end">第 2 章</text>
+            <text class="t-cap" x="500" y="164">用户消息橙色线框</text>
+            <text class="t-cap" x="500" y="182">文件路径可点击</text>
+          </g>
+
+          <g data-cue="start-03">
+            <rect x="32" y="372" width="168" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
+            <text class="t-sub" x="40" y="386" style="fill:var(--ink)">gpt-6.1-sol ❯ medium</text>
+            <rect x="204" y="372" width="88" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
+            <text class="t-sub" x="212" y="386" style="fill:var(--ink)">repo</text>
+            <rect x="296" y="372" width="56" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
+            <text class="t-sub" x="304" y="386" style="fill:var(--ink)">main</text>
+            <text class="t-sub" x="32" y="414">7c41e0a2 · weekly 88% left</text>
+            <circle cx="360" cy="382" r="3" style="fill:var(--muted)"/>
+            <path class="w" d="M360 382 H468 Q476 382 476 374 V356 Q476 348 484 348 H488"/>
+            <rect class="n" x="488" y="312" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="334">状态栏</text>
+            <text class="t-sub" x="620" y="334" text-anchor="end">第 3 章</text>
+            <text class="t-cap" x="500" y="356">额度与会话 ID</text>
+            <text class="t-cap" x="500" y="374">状态栏风格选择</text>
+          </g>
+
+          <g data-cue="start-04">
+            <text class="t-cap" x="440" y="360" text-anchor="end">编写中文讲解文档</text>
+            <path class="w" d="M444 356 H456 Q464 356 464 348 V260 Q464 252 472 252 H488"/>
+            <rect class="n" x="488" y="216" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="238">输入框下方</text>
+            <text class="t-sub" x="620" y="238" text-anchor="end">第 4 章</text>
+            <text class="t-cap" x="500" y="260">右下角会话标题</text>
+            <text class="t-cap" x="500" y="278">自动会话命名</text>
+          </g>
+
+          <g data-cue="start-05">
+            <text class="t-sub" x="228" y="414" style="fill:var(--ink)">🧠 low · 基线 medium · d1-ultra</text>
+            <circle cx="462" cy="410" r="3" style="fill:var(--muted)"/>
+            <path class="w" d="M462 410 H488"/>
+            <rect class="n" x="488" y="392" width="144" height="72" rx="6"/>
+            <text class="t" x="500" y="414">🧠 段</text>
+            <text class="t-sub" x="620" y="414" text-anchor="end">第 5 章</text>
+            <text class="t-cap" x="500" y="436">原位思考强度</text>
+            <text class="t-cap" x="500" y="454">需满足适用条件</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>示例画面。右侧卡片写的是 <code>/personal</code> 菜单里的功能名和对应章节。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 2：安装 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>要安装</h3>
+      <p>
+        <span class="seg" data-seg="start-06" data-say="在仓库根目录依次执行三条命令：安装依赖，可选的检查，再用 Pi install 装进 Pi。">在仓库根目录依次执行三条命令：安装依赖，可选的检查，再用 <code>pi install</code> 装进 Pi。</span>
+        <span class="seg" data-seg="start-07" data-say="新开的 Pi 会话会自动加载；已经打开的会话，输入斜杠 reload。">新开的 Pi 会话会自动加载；已经打开的会话，输入 <code>/reload</code>。</span>
+      </p>
+      <pre><code># 0. 取得仓库（已有仓库可跳过）
+git clone https://github.com/legdonkey/pi-personal-extensions.git
+cd pi-personal-extensions
+# 1. 安装依赖（走 npmmirror 镜像）
+npm install --ignore-scripts \
+  --registry=https://registry.npmmirror.com
+# 2. 运行检查（可选：确认代码完整）
+npm run check
+# 3. 装进 Pi
+pi install "$(pwd)"
+
+# 卸载：在仓库根目录执行
+pi remove "$(pwd)"</code></pre>
+      <p>更新扩展的方法见第 6 章「想更新扩展」。</p>
+    </div>
+    <figure class="beat-fig" id="fig-start-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 216" width="100%" role="img" aria-labelledby="fig-start-2-title fig-start-2-desc">
+          <title id="fig-start-2-title">安装三步</title>
+          <desc id="fig-start-2-desc">先确认 Pi 和 Node.js 版本，再依次安装依赖、运行可选的检查、用 pi install 装进 Pi；新开的会话自动加载，已打开的会话输入 /reload。</desc>
+          <defs>
+            <marker id="fig-start-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+          <g data-cue="start-06">
+            <text class="t-cap" x="16" y="24">需要：Pi ≥ 1.0.1 · Node.js ≥ 22.19</text>
+            <path class="w is-flow" d="M208 72 H224" style="marker-end:url(#fig-start-2-arrow)"/>
+            <path class="w is-flow" d="M416 72 H432" style="marker-end:url(#fig-start-2-arrow)"/>
+            <rect class="n" x="16" y="40" width="192" height="64" rx="6"/>
+            <text class="t" x="32" y="66">① 安装依赖</text>
+            <text class="t-sub" x="32" y="88">npm install …</text>
+            <rect class="n" x="224" y="40" width="192" height="64" rx="6"/>
+            <text class="t" x="240" y="66">② 检查（可选）</text>
+            <text class="t-sub" x="240" y="88">npm run check</text>
+            <rect class="n" x="432" y="40" width="192" height="64" rx="6"/>
+            <text class="t" x="448" y="66">③ 装进 Pi</text>
+            <text class="t-sub" x="448" y="88">pi install "$(pwd)"</text>
+          </g>
+          <g data-cue="start-07">
+            <path class="w" d="M528 104 V144" style="marker-end:url(#fig-start-2-arrow)"/>
+            <rect class="n is-focal" x="16" y="144" width="608" height="48" rx="6"/>
+            <text class="t" x="32" y="166">开始使用</text>
+            <text class="t-sub" x="32" y="184">新会话自动加载 · 已打开的会话输入 /reload</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>三条命令都在仓库根目录执行。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 3：/personal 菜单 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想关闭某项功能，或改它的设置</h3>
+      <ol>
+        <li><span class="seg" data-seg="start-08" data-say="在 Pi 里输入斜杠 personal，打开统一管理菜单。菜单列出七项功能，并标出已加载或未加载。">在 Pi 里输入 <code>/personal</code>，打开统一管理菜单。菜单列出七项功能，并标出已加载或未加载。</span></li>
+        <li><span class="seg" data-seg="start-09">选中一项功能，进入它的二级菜单。</span></li>
+        <li><span class="seg" data-seg="start-10">如果要关闭这项功能，选二级菜单的最后一项「禁用此功能并重载」。Pi 会自动重载。</span></li>
+        <li><span class="seg" data-seg="start-11" data-say="如果什么都不改，按 Esc 键退出菜单。">如果什么都不改，按 <kbd>Esc</kbd> 键退出菜单。</span></li>
+      </ol>
+      <ul>
+        <li>Pi 正在回复或压缩时，重载会被拒绝。等它结束再操作，或结束后手动输入 <code>/reload</code>。</li>
+        <li>七项里有四项在二级菜单里有设置项。例如「自动会话命名」可以选命名模型。</li>
+        <li>「已加载」只表示功能已加载，不表示它正在工作。例如「自动会话命名」可能在当前会话里暂停。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="personal-menu" id="fig-start-3">
+      <div class="capture-frame"><video data-cue="start-08" src="media/personal-menu.mp4" poster="media/personal-menu.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal，进入自动会话命名的二级菜单，看到禁用此功能并重载但不执行，再按 Esc 键退出"></video></div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 96" width="100%" role="img" aria-labelledby="fig-start-3-title fig-start-3-desc">
+          <title id="fig-start-3-title">/personal 菜单的操作步骤</title>
+          <desc id="fig-start-3-desc">输入 /personal，选功能进入二级菜单，然后选「禁用此功能并重载」关闭功能，或按 Esc 键退出不改。</desc>
+          <defs>
+            <marker id="fig-start-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+          <g data-cue="start-08">
+            <rect class="n" x="16" y="24" width="136" height="48" rx="6"/>
+            <text class="t-mono" x="32" y="53">/personal</text>
+          </g>
+          <g data-cue="start-09">
+            <path class="w" d="M152 48 H176" style="marker-end:url(#fig-start-3-arrow)"/>
+            <rect class="n" x="176" y="24" width="136" height="48" rx="6"/>
+            <text class="t" x="192" y="53">选功能</text>
+          </g>
+          <g data-cue="start-10">
+            <path class="w" d="M312 40 H336" style="marker-end:url(#fig-start-3-arrow)"/>
+            <rect class="n is-focal" x="336" y="16" width="288" height="32" rx="6"/>
+            <text class="t-cap" x="348" y="37" style="fill:var(--ink)">禁用此功能并重载 → 自动重载</text>
+          </g>
+          <g data-cue="start-11">
+            <path class="w is-dash" d="M312 56 H336" style="marker-end:url(#fig-start-3-arrow)"/>
+            <rect class="n is-ghost" x="336" y="50" width="288" height="36" rx="6"/>
+            <rect class="n" x="344" y="54" width="44" height="28" rx="4"/><line x1="347" y1="81" x2="385" y2="81" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="366" y="73" text-anchor="middle">Esc</text><text class="t-cap" x="400" y="73" style="fill:var(--ink)">退出，什么都不改</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>录屏：进入「自动会话命名」的二级菜单，能看到「禁用此功能并重载」，但没有执行，按 Esc 键退出。状态栏里的 ponytail 来自本机另一个扩展。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 节拍 4：批量开关 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想一次开启或关闭好几项</h3>
+      <ol>
+        <li><span class="seg" data-seg="start-12" data-say="输入斜杠 personal switches，打开批量功能开关。">输入 <code>/personal switches</code>，打开「批量功能开关」。</span></li>
+        <li><span class="seg" data-seg="start-13" data-say="用上下键选一项功能。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选一项功能。</span></li>
+        <li><span class="seg" data-seg="start-14" data-say="按空格键，在开启和关闭之间切换。">按 <kbd>空格</kbd> 键，在开启和关闭之间切换。</span></li>
+        <li><span class="seg" data-seg="start-15" data-say="按 Enter 键保存，当前会话自动重载；按 Esc 键放弃。">按 <kbd>Enter</kbd> 键保存，当前会话自动重载；按 <kbd>Esc</kbd> 键放弃。</span></li>
+      </ol>
+      <ul>
+        <li>其他已打开的会话，要各自输入 <code>/reload</code>。</li>
+        <li>Pi 正在回复或压缩时，重载会被拒绝；结束后手动输入 <code>/reload</code>。</li>
+        <li><code>/personal</code> 只在 Pi 终端界面里打开菜单。</li>
+        <li>关闭一项功能时，这项功能的设置会保留。重新开启后，设置还在。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="personal-switches" id="fig-start-4">
+      <div class="capture-frame"><video data-cue="start-12" src="media/personal-switches.mp4" poster="media/personal-switches.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal switches，下移到额度与会话 ID，按空格切成关闭，再按 Esc 键放弃"></video></div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 72" width="100%" role="img" aria-labelledby="fig-start-4-title fig-start-4-desc">
+          <title id="fig-start-4-title">批量功能开关的按键</title>
+          <desc id="fig-start-4-desc">输入 /personal switches，用上下键选功能，按空格切换，按 Enter 键保存并重载或按 Esc 键放弃。</desc>
+          <defs>
+            <marker id="fig-start-4-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
+            </marker>
+          </defs>
+          <g data-cue="start-12">
+            <rect class="n" x="16" y="18" width="184" height="36" rx="6"/>
+            <text class="t-mono" x="28" y="41">/personal switches</text>
+          </g>
+          <g data-cue="start-13">
+            <path class="w" d="M200 36 H216" style="marker-end:url(#fig-start-4-arrow)"/>
+            <rect class="n" x="216" y="22" width="32" height="28" rx="4"/><line x1="219" y1="49" x2="245" y2="49" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="232" y="41" text-anchor="middle">↑</text>
+            <rect class="n" x="252" y="22" width="32" height="28" rx="4"/><line x1="255" y1="49" x2="281" y2="49" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="268" y="41" text-anchor="middle">↓</text>
+            <text class="t-cap" x="292" y="41">选择</text>
+          </g>
+          <g data-cue="start-14">
+            <path class="w" d="M324 36 H340" style="marker-end:url(#fig-start-4-arrow)"/>
+            <rect class="n" x="340" y="22" width="52" height="28" rx="4"/><line x1="343" y1="49" x2="389" y2="49" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="366" y="41" text-anchor="middle">空格</text>
+            <text class="t-cap" x="400" y="41">切换</text>
+          </g>
+          <g data-cue="start-15">
+            <path class="w" d="M432 36 H448" style="marker-end:url(#fig-start-4-arrow)"/>
+            <rect class="n" x="448" y="22" width="60" height="28" rx="4"/><line x1="451" y1="49" x2="505" y2="49" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="478" y="41" text-anchor="middle">Enter</text>
+            <text class="t-cap" x="514" y="41">保存</text>
+            <rect class="n" x="546" y="22" width="44" height="28" rx="4"/><line x1="549" y1="49" x2="587" y2="49" style="stroke:var(--rule-solid);stroke-width:2"/><text class="t-mono" x="568" y="41" text-anchor="middle">Esc</text>
+            <text class="t-cap" x="596" y="41">放弃</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>录屏：下移到「额度与会话 ID」，按空格切成关闭，再按 Esc 键放弃，没有按 Enter 键。列表自带的英文提示写「Enter/Space to change」，但在这里 Enter 键是保存并重载。</figcaption>
+    </figure>
+  </div>
+</section>

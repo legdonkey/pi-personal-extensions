@@ -1,0 +1,360 @@
+<section class="chapter" id="ch-effort" data-chapter="effort" aria-labelledby="ch-effort-h">
+  <header class="chapter-head">
+    <h2 id="ch-effort-h">原位思考强度：每条消息自动选档位</h2>
+    <p class="chapter-sum">用 GPT-6 系列时，按每条新消息的难度自动选档位，你不用手动切换。不用 GPT-6 系列可以跳过本章。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>原位思考强度</dd>
+      <dt>快捷命令</dt><dd><code>/effort</code>、<code>/effort model</code>、<code>/effort test</code></dd>
+      <dt>配置文件</dt><dd>agent 目录下的 <code>jev-inline-effort.json</code>（默认 <code>~/.pi/agent/</code>）</dd>
+    </dl>
+  </header>
+
+  <!-- 1. 能帮你什么 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>「原位思考强度」能帮你什么</h3>
+      <p>
+        <span class="seg" data-seg="effort-01">思考强度分五个档位。「原位思考强度」给每条新消息在 low 到 max 之间自动选一档，你不用手动切换。</span>
+        <span class="seg" data-seg="effort-02">它只调档位，不换主模型。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 600 196" role="img" aria-labelledby="fig-effort-1-title fig-effort-1-desc">
+          <title id="fig-effort-1-title">每条消息各选一个档位</title>
+          <desc id="fig-effort-1-desc">示例：三条难度不同的消息分别得到 low、medium、xhigh 三个档位，都交给同一个主模型回答。</desc>
+          <defs>
+            <marker id="fig-effort-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+          <g data-cue="effort-01">
+            <text class="t-cap" x="16" y="16">你的消息（示例）</text>
+            <text class="t-cap" x="304" y="16" text-anchor="middle">选到的档位</text>
+            <line class="w" x1="232" y1="44" x2="262" y2="44" marker-end="url(#fig-effort-1-arrow)"/>
+            <line class="w" x1="232" y1="100" x2="262" y2="100" marker-end="url(#fig-effort-1-arrow)"/>
+            <line class="w" x1="232" y1="156" x2="262" y2="156" marker-end="url(#fig-effort-1-arrow)"/>
+            <rect class="n" x="16" y="26" width="216" height="36" rx="6"/>
+            <text class="t-cap" x="28" y="49">把 hello 转成大写</text>
+            <rect class="n" x="16" y="82" width="216" height="36" rx="6"/>
+            <text class="t-cap" x="28" y="105">解释这段报错是什么意思</text>
+            <rect class="n" x="16" y="138" width="216" height="36" rx="6"/>
+            <text class="t-cap" x="28" y="161">排查跨模块的偶发问题</text>
+            <rect class="n" x="264" y="28" width="80" height="32" rx="4"/><text class="t-mono" x="304" y="49" text-anchor="middle">low</text>
+            <rect class="n" x="264" y="84" width="80" height="32" rx="4"/><text class="t-mono" x="304" y="105" text-anchor="middle">medium</text>
+            <rect class="n" x="264" y="140" width="80" height="32" rx="4"/><text class="t-mono" x="304" y="161" text-anchor="middle">xhigh</text>
+          </g>
+          <g data-cue="effort-02">
+            <path class="w" d="M344 44 H368 Q376 44 376 52 V76 Q376 84 384 84 H422" marker-end="url(#fig-effort-1-arrow)"/>
+            <line class="w" x1="344" y1="100" x2="422" y2="100" marker-end="url(#fig-effort-1-arrow)"/>
+            <path class="w" d="M344 156 H368 Q376 156 376 148 V124 Q376 116 384 116 H422" marker-end="url(#fig-effort-1-arrow)"/>
+            <rect class="n is-focal" x="424" y="64" width="160" height="72" rx="6"/>
+            <text class="t" x="504" y="94" text-anchor="middle">主模型不变</text>
+            <text class="t-cap" x="504" y="114" text-anchor="middle">回答你消息的模型</text>
+          </g>
+        </svg>
+      </div>
+      <ul class="fig-notes">
+        <li>五个档位从低到高：<code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。</li>
+        <li>连续几条消息一起进入同一次请求时，只分类一次，共用一个档位；空白消息不分类。</li>
+      </ul>
+      <figcaption>示例。实际档位由分类器按消息内容决定。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 2. 想让它生效 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想让它生效</h3>
+      <p>
+        <span class="seg" data-seg="effort-03" data-say="需要用 GPT 六系列、开启 thinking，你还要登录 openai codex、配好 OpenRouter 认证。主模型的接口也有要求，完整条件写在本节的「适用条件」列表里。">需要用 GPT-6 系列、开启 thinking，你还要登录 <code>openai-codex</code>、配好 OpenRouter 认证。主模型的接口也有要求，完整条件写在本节的「适用条件」列表里。</span>
+      </p>
+      <ol>
+        <li><span class="seg" data-seg="effort-04" data-say="用 GPT 六系列模型启动 Pi，thinking 设为 medium。">用 GPT-6 系列模型启动 Pi，thinking 设为 <code>medium</code>。</span></li>
+        <li><span class="seg" data-seg="effort-05" data-say="输入斜杠 effort，看到「适用」，说明主模型和 thinking 符合条件。">输入 <code>/effort</code>，看到「适用」，说明主模型和 thinking 符合条件。</span></li>
+        <li><span class="seg" data-seg="effort-06" data-say="输入斜杠 effort test，确认分类器能用。">输入 <code>/effort test</code>，确认分类器能用。</span></li>
+        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
+      </ol>
+    </div>
+    <figure class="beat-fig" id="fig-effort-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 600 316" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
+          <title id="fig-effort-2-title">生效条件和确认步骤</title>
+          <desc id="fig-effort-2-desc">四项条件：主模型是 openai-codex-responses 接口的 GPT-6 系列、thinking 不是 off、登录 openai-codex、配置 OpenRouter 认证。确认分四步：启动 Pi，/effort 显示「适用」，/effort test 确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；出现「未调整」表示这次没有调整档位、按基线发出。</desc>
+          <g data-cue="effort-03">
+            <text class="t-cap" x="16" y="16">条件</text>
+            <rect class="n" x="16" y="28" width="20" height="20" rx="4"/>
+            <path d="M21 38 L25 42 L32 33" style="fill:none;stroke:var(--ok);stroke-width:2"/>
+            <text class="t" x="48" y="43">主模型</text>
+            <text class="t-sub" x="132" y="43">GPT-6 系列 · 接口 openai-codex-responses</text>
+            <rect class="n" x="16" y="60" width="20" height="20" rx="4"/>
+            <path d="M21 70 L25 74 L32 65" style="fill:none;stroke:var(--ok);stroke-width:2"/>
+            <text class="t" x="48" y="75">thinking</text>
+            <text class="t-sub" x="132" y="75">不是 off</text>
+            <rect class="n" x="16" y="92" width="20" height="20" rx="4"/>
+            <path d="M21 102 L25 106 L32 97" style="fill:none;stroke:var(--ok);stroke-width:2"/>
+            <text class="t" x="48" y="107">登录</text>
+            <text class="t-sub" x="132" y="107">openai-codex</text>
+            <rect class="n" x="16" y="124" width="20" height="20" rx="4"/>
+            <path d="M21 134 L25 138 L32 129" style="fill:none;stroke:var(--ok);stroke-width:2"/>
+            <text class="t" x="48" y="139">认证</text>
+            <text class="t-sub" x="132" y="139">OpenRouter（分类器在这里）</text>
+          </g>
+          <line x1="16" y1="160" x2="584" y2="160" style="stroke:var(--rule);stroke-width:1"/>
+          <text class="t-cap" x="16" y="182">确认</text>
+          <g data-cue="effort-04">
+            <text class="t-mono" x="16" y="208">1</text>
+            <text class="t-mono" x="40" y="208">pi --model openai-codex/gpt-6.1-sol</text>
+          </g>
+          <g data-cue="effort-05">
+            <text class="t-mono" x="16" y="234">2</text>
+            <text class="t-mono" x="40" y="234">/effort</text>
+            <text class="t-cap" x="232" y="234">显示「适用」：模型和 thinking 符合</text>
+          </g>
+          <g data-cue="effort-06">
+            <text class="t-mono" x="16" y="260">3</text>
+            <text class="t-mono" x="40" y="260">/effort test</text>
+            <text class="t-cap" x="232" y="260">分类器能用</text>
+          </g>
+          <g data-cue="effort-07">
+            <text class="t-mono" x="16" y="286">4</text>
+            <text class="t-mono" x="40" y="286">发一条消息</text>
+            <text class="t-cap" x="232" y="286">看 🧠 段的档位</text>
+            <text class="t-cap" x="232" y="306">分类警告：沿用当前档位 · 「未调整」：按基线发出</text>
+          </g>
+        </svg>
+      </div>
+<pre><code>pi --model openai-codex/gpt-6.1-sol --thinking medium</code></pre>
+      <ul class="fig-notes">
+        <li>适用条件：主模型接口是 <code>openai-codex-responses</code>；模型 ID 以 <code>gpt-6</code> 开头；thinking 不是 <code>off</code>。</li>
+        <li>「适用」只检查主模型和 thinking，不检查登录和分类器能否连通。</li>
+        <li>这项功能默认开启，可以在 <code>/personal</code> 里关闭。</li>
+        <li>不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 一起用；Pi 自己的压缩不受影响。</li>
+      </ul>
+    </figure>
+  </div>
+
+  <!-- 3. 🧠 段 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>状态栏的 🧠 段怎么读</h3>
+      <p>
+        <span class="seg" data-seg="effort-08" data-say="大脑图标段从左到右是：实际档位、基线和分类器。基线是 Pi 当前的 thinking 设置。">🧠 段从左到右是：实际档位、基线和分类器。基线是 Pi 当前的 thinking 设置。</span>
+        <span class="seg" data-seg="effort-09" data-say="Pi 自带的 thinking 显示只是基线，实际档位看大脑图标段。">Pi 自带的 thinking 显示只是基线，实际档位看 🧠 段。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 600 284" role="img" aria-labelledby="fig-effort-3-title fig-effort-3-desc">
+          <title id="fig-effort-3-title">🧠 段的读法</title>
+          <desc id="fig-effort-3-desc">示例：🧠 xhigh · 基线 medium · Jev，三部分依次是实际档位、基线、分类器。Pi 自带的 thinking 显示 medium 只是基线，实际档位是 🧠 段里的 xhigh。另有三种情况：只显示一个档位表示等于基线；出现「未调整」表示这次按基线发出；没有 🧠 段时，恢复会话或切换模型后会清空，满足条件的下一次请求后显示。</desc>
+          <g data-cue="effort-08">
+            <text class="t-cap" x="16" y="18">示例</text>
+            <rect class="n" x="16" y="28" width="120" height="32" rx="4"/><text class="t-mono" x="76" y="49" text-anchor="middle">🧠 xhigh</text>
+            <text class="t-mono" x="146" y="49" text-anchor="middle">·</text>
+            <rect class="n" x="156" y="28" width="150" height="32" rx="4"/><text class="t-mono" x="231" y="49" text-anchor="middle">基线 medium</text>
+            <text class="t-mono" x="316" y="49" text-anchor="middle">·</text>
+            <rect class="n" x="326" y="28" width="72" height="32" rx="4"/><text class="t-mono" x="362" y="49" text-anchor="middle">Jev</text>
+            <line class="w" x1="76" y1="60" x2="76" y2="76"/>
+            <line class="w" x1="231" y1="60" x2="231" y2="76"/>
+            <line class="w" x1="362" y1="60" x2="362" y2="76"/>
+            <text class="t-cap" x="76" y="94" text-anchor="middle">实际档位</text>
+            <text class="t-cap" x="231" y="94" text-anchor="middle">基线（当前 thinking）</text>
+            <text class="t-cap" x="362" y="94" text-anchor="middle">分类器</text>
+          </g>
+          <g data-cue="effort-09">
+            <line x1="16" y1="112" x2="584" y2="112" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="16" y="138">Pi 自带显示</text>
+            <rect class="n" x="112" y="120" width="100" height="28" rx="4"/><text class="t-mono" x="162" y="139" text-anchor="middle">medium</text>
+            <text class="t-cap" x="224" y="138">只是基线</text>
+            <text class="t-cap" x="320" y="138">实际档位看</text>
+            <rect class="n is-focal" x="392" y="120" width="96" height="28" rx="4"/><text class="t-mono" x="440" y="139" text-anchor="middle">🧠 xhigh</text>
+          </g>
+          <line x1="16" y1="164" x2="584" y2="164" style="stroke:var(--rule);stroke-width:1"/>
+          <text class="t-mono" x="16" y="190">🧠 medium · Jev</text>
+          <text class="t-cap" x="232" y="190">实际档位等于基线</text>
+          <text class="t-mono" x="16" y="220">🧠 medium · 未调整 · Jev</text>
+          <text class="t-cap" x="232" y="220">这次没有调整档位，按基线发出</text>
+          <text class="t-mono" x="16" y="250">（没有 🧠 段）</text>
+          <text class="t-cap" x="232" y="250">恢复会话或切换模型后会清空；</text>
+          <text class="t-cap" x="232" y="270">满足条件的下一次请求后显示</text>
+        </svg>
+      </div>
+      <figcaption>示例。🧠 段的分类器部分显示最近一次选档位用的分类器；空白消息不分类，显示「未分类」。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 4. 想看现在的状态 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想看现在的状态</h3>
+      <p>
+        <span class="seg" data-seg="effort-10" data-say="输入斜杠 effort，看是否适用、之后用哪个分类器、上一条消息选到的档位。">输入 <code>/effort</code>，看是否适用、之后用哪个分类器、上一条消息选到的档位。</span>
+      </p>
+    </div>
+    <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-4">
+      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /effort，输出是否适用、之后用的分类器，以及最近一条消息选到的档位和分类器"></video></div>
+      <figcaption>录屏：输入 <code>/effort</code> 后输出「适用」「后续分类：openrouter/liquid/d1-ultra」「最近决策：low · d1-ultra」。录制环境选的是 d1-ultra，默认是 Jev。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 5. 想换分类器 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想换分类器</h3>
+      <ol>
+        <li><span class="seg" data-seg="effort-11" data-say="输入斜杠 effort model。">输入 <code>/effort model</code>。</span></li>
+        <li><span class="seg" data-seg="effort-12" data-say="用上下键选 Jev 或 D1 Ultra。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选 Jev 或 d1-ultra。</span></li>
+        <li><span class="seg" data-seg="effort-13" data-say="按 Enter 键保存；按 Esc 键放弃。">按 <kbd>Enter</kbd> 键保存；按 <kbd>Esc</kbd> 键放弃。</span></li>
+      </ol>
+      <p>
+        <span class="seg" data-seg="effort-14">新分类器对所有会话生效。如果 Pi 正在回复，先等它回复完，再切换。</span>
+      </p>
+    </div>
+    <figure class="beat-fig capture" data-capture="effort-model" id="fig-effort-5">
+      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：输入 /effort model，标题显示当前分类器 d1-ultra，列表里有 Jev 和 d1-ultra 两项，光标上下移动后按 Esc 键退出，不保存"></video></div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 600 104" role="img" aria-labelledby="fig-effort-5-title fig-effort-5-desc">
+          <title id="fig-effort-5-title">换分类器的按键步骤</title>
+          <desc id="fig-effort-5-desc">四步：输入 /effort model；用上下键选 Jev 或 d1-ultra；按 Enter 键保存或 Esc 键放弃；新分类器对所有会话生效。</desc>
+          <defs>
+            <marker id="fig-effort-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+          <line class="w" x1="152" y1="44" x2="166" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <line class="w" x1="304" y1="44" x2="318" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <line class="w" x1="456" y1="44" x2="470" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <g data-cue="effort-11">
+            <rect class="n" x="16" y="26" width="136" height="36" rx="4"/>
+            <text class="t-mono" x="84" y="49" text-anchor="middle">/effort model</text>
+            <text class="t-cap" x="84" y="88" text-anchor="middle">输入命令</text>
+          </g>
+          <g data-cue="effort-12">
+            <rect class="n" x="196" y="26" width="36" height="34" rx="4"/>
+            <line x1="198" y1="60" x2="230" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="214" y="48" text-anchor="middle">↑</text>
+            <rect class="n" x="240" y="26" width="36" height="34" rx="4"/>
+            <line x1="242" y1="60" x2="274" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="258" y="48" text-anchor="middle">↓</text>
+            <text class="t-cap" x="236" y="88" text-anchor="middle">选 Jev 或 d1-ultra</text>
+          </g>
+          <g data-cue="effort-13">
+            <rect class="n" x="322" y="26" width="64" height="34" rx="4"/>
+            <line x1="324" y1="60" x2="384" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="354" y="48" text-anchor="middle">Enter</text>
+            <rect class="n" x="398" y="26" width="52" height="34" rx="4"/>
+            <line x1="400" y1="60" x2="448" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="424" y="48" text-anchor="middle">Esc</text>
+            <text class="t-cap" x="386" y="88" text-anchor="middle">保存 · 放弃</text>
+          </g>
+          <g data-cue="effort-14">
+            <rect class="n is-focal" x="472" y="26" width="112" height="36" rx="4"/>
+            <text class="t" x="528" y="49" text-anchor="middle">全部会话</text>
+            <text class="t-cap" x="528" y="88" text-anchor="middle">新分类器生效</text>
+          </g>
+        </svg>
+      </div>
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>/effort model jev</code></td><td>直接换成 Jev（默认）</td></tr>
+          <tr><td><code>/effort model d1-ultra</code></td><td>直接换成 d1-ultra（付费）</td></tr>
+        </tbody>
+      </table>
+      <ul class="fig-notes">
+        <li>新分类器从下一条还没分类的消息开始用，已有消息的档位不变。</li>
+      </ul>
+      <figcaption>录屏：标题显示当前分类器 d1-ultra（录制环境的配置，默认是 Jev）。光标移到 d1-ultra 再回到 Jev，按 Esc 键退出，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。</figcaption>
+    </figure>
+  </div>
+
+  <!-- 6. 分类失败怎么办 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>分类失败怎么办</h3>
+      <p>
+        <span class="seg" data-seg="effort-15">如果分类器 15 秒内没有结果，或者服务出错，这条消息按当前档位照常发出，Pi 弹出警告。</span>
+        <span class="seg" data-seg="effort-16" data-say="看到警告，先用斜杠 effort test 检查；还不行，就用斜杠 effort model 换分类器。">看到警告，先用 <code>/effort test</code> 检查；还不行，就用 <code>/effort model</code> 换分类器。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-6">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-6-title fig-effort-6-desc">
+          <title id="fig-effort-6-title">分类失败时会怎样</title>
+          <desc id="fig-effort-6-desc">超时、服务出错或响应格式损坏时按当前档位发出并警告；分类器返回的档位无效或把握不足时按当前档位发出，不提示。当前档位是上一条消息的档位，没有上一条消息时用基线。看到警告先运行 /effort test，仍失败就用 /effort model 换分类器。</desc>
+          <defs>
+            <marker id="fig-effort-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+          <g data-cue="effort-15">
+            <line class="w" x1="264" y1="40" x2="294" y2="40" marker-end="url(#fig-effort-6-arrow)"/>
+            <rect class="n" x="16" y="20" width="248" height="40" rx="6"/>
+            <text class="t" x="140" y="45" text-anchor="middle">超时、服务出错、格式损坏</text>
+            <rect class="n" x="296" y="20" width="288" height="40" rx="6"/>
+            <text class="t" x="440" y="45" text-anchor="middle">按当前档位发出，弹出警告</text>
+          </g>
+          <line class="w" x1="264" y1="96" x2="294" y2="96" marker-end="url(#fig-effort-6-arrow)"/>
+          <rect class="n" x="16" y="76" width="248" height="40" rx="6"/>
+          <text class="t" x="140" y="101" text-anchor="middle">档位无效或把握不足</text>
+          <rect class="n" x="296" y="76" width="288" height="40" rx="6"/>
+          <text class="t" x="440" y="101" text-anchor="middle">按当前档位发出，不提示</text>
+          <text class="t-cap" x="16" y="140">当前档位：上一条消息的档位；没有上一条消息时，用基线。对话照常进行。</text>
+          <g data-cue="effort-16">
+            <line class="w" x1="264" y1="180" x2="294" y2="180" marker-end="url(#fig-effort-6-arrow)"/>
+            <rect class="n" x="16" y="160" width="248" height="40" rx="6"/>
+            <text class="t" x="140" y="185" text-anchor="middle">看到警告</text>
+            <rect class="n is-focal" x="296" y="160" width="288" height="40" rx="6"/>
+            <text class="t-mono" x="440" y="185" text-anchor="middle">/effort test → /effort model</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>「把握不足」指分类器给所选档位的概率低于 0.5。警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请用 /effort model 或 /effort test 检查。</code></figcaption>
+    </figure>
+  </div>
+
+  <!-- 7. 额度和隐私 -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>要注意什么：额度和隐私</h3>
+      <p>
+        <span class="seg" data-seg="effort-17" data-say="每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；D1 Ultra 是付费模型。">每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-18">「原位思考强度」把当前消息和之前最多 6 条对话消息的文本发给分类器，可能含业务信息。工具输出、思考内容和图片不发送。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-effort-7">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-7-title fig-effort-7-desc">
+          <title id="fig-effort-7-title">新消息多出的一步</title>
+          <desc id="fig-effort-7-desc">你的消息先经过 OpenRouter 上的分类器，最多 15 秒，再交给主模型。代价是等待和 OpenRouter 额度；发出的是当前消息和之前最多 6 条对话消息的文本，不发系统提示词、工具输出、思考内容和图片。</desc>
+          <defs>
+            <marker id="fig-effort-7-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+          <line class="w" x1="136" y1="48" x2="190" y2="48" marker-end="url(#fig-effort-7-arrow)"/>
+          <line class="w" x1="392" y1="48" x2="446" y2="48" marker-end="url(#fig-effort-7-arrow)"/>
+          <rect class="n" x="16" y="24" width="120" height="48" rx="6"/>
+          <text class="t" x="76" y="53" text-anchor="middle">你的消息</text>
+          <rect class="n is-ext" x="192" y="24" width="200" height="48" rx="6"/>
+          <text class="t" x="292" y="44" text-anchor="middle">分类器</text>
+          <text class="t-sub" x="292" y="62" text-anchor="middle">OpenRouter</text>
+          <rect class="n" x="448" y="24" width="136" height="48" rx="6"/>
+          <text class="t" x="516" y="53" text-anchor="middle">主模型</text>
+          <g data-cue="effort-17">
+            <path d="M192 84 V88 H392 V84" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
+            <text class="t-cap" x="292" y="108" text-anchor="middle">多等最多 15 秒</text>
+            <text class="t-cap" x="292" y="128" text-anchor="middle">消耗 OpenRouter 额度（d1-ultra 付费）</text>
+          </g>
+          <g data-cue="effort-18">
+            <line x1="16" y1="146" x2="584" y2="146" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="16" y="172">发送：当前消息和之前最多 6 条对话消息的文本</text>
+            <text class="t-cap" x="16" y="196">不发送：系统提示词、工具输出、思考内容、图片</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>虚线框是外部服务。d1-ultra 的价格以 OpenRouter 公布的为准。</figcaption>
+    </figure>
+  </div>
+
+  <style>
+    #ch-effort .fig-notes { margin: 12px 4px 0; padding-left: 1.2em; font-size: 14px; line-height: 1.65; color: var(--muted); }
+    #ch-effort .fig-notes li { margin: 3px 0; }
+    #ch-effort .beat-fig > pre { margin: 12px 0 0; }
+    #ch-effort .capture .fig-scroll { margin-top: 12px; }
+    #ch-effort .capture table { margin: 12px 0 0; }
+  </style>
+</section>

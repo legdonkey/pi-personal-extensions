@@ -1,0 +1,65 @@
+# effort（使用者版）事实清单
+
+路径缩写：`ext` = `extensions/jev-inline-effort.ts`，`entry` = `extensions/pi-personal-extensions.ts`，`test` = `tests/jev-inline-effort.test.mjs`。技术版出处见 `docs/extensions-guide/src/effort.facts.md`。
+
+## 它能帮你什么
+
+- 档位共五档：low、medium、high、xhigh、max —— ext:67, ext:134-140
+- 给每条新用户消息选一个档位；同一批进入请求的新消息共用一次分类结果，空白消息不分类 —— ext:308-334, ext:310, ext:321；test:549-554；README.md:89
+- 只调整思考强度，主模型不变 —— README.md:86；ext:372
+- 图 1 的三条消息和档位是示例；「把 hello 转成大写」是 /effort test 的固定样例 —— ext:239
+
+## 想让它生效
+
+- 适用条件：接口 `openai-codex-responses`、模型 ID 以 `gpt-6` 开头、thinking 不是 off（朗读只说 GPT-6 系列并开启 thinking，完整条件在不朗读的列表） —— ext:60, ext:70-72, ext:289-290；README.md:67
+- 需要 `openai-codex` 登录和 OpenRouter 认证；分类器走 OpenRouter —— README.md:67；ext:61
+- 示例启动命令 `pi --model openai-codex/gpt-6.1-sol --thinking medium` —— README.md:70
+- `/effort` 输出「适用」或「当前主模型或 thinking 不适用」；「适用」只检查主模型和 thinking，不检查登录、分类器连通 —— ext:226, ext:289-290
+- 确认步骤：`/effort test` 检查分类器；发消息后看 🧠 段的档位，弹出分类警告表示分类失败、沿用当前档位（仍按最近一次决策照常调整，不显示「未调整」）；出现「未调整」表示请求对齐失败、这次没有调整、按基线发出 —— ext:238-245, ext:316, ext:330, ext:334, ext:351-354, ext:371, ext:378
+- 不能和服务端自动压缩、自动截断或 `/responses/compact` 一起用；Pi 客户端压缩不受影响 —— README.md:95
+- 功能默认开启，可在 `/personal` 里关闭 —— entry:57, entry:99
+
+## 状态栏的 🧠 段
+
+- 格式：实际档位与基线不同时 `🧠 实际 · 基线 基线值 · 分类器`，相同时 `🧠 基线值 · 分类器` —— ext:378；test:135, test:156
+- 基线 = Pi 当前的 thinking 设置，会话中修改 thinking 后基线随之变化（每次请求读取） —— ext:316, ext:347
+- 「未调整」：这次请求没能调整，按基线发出 —— ext:351-354；test:244
+- Pi 自带的 thinking 显示只反映基线 —— README.md:86
+- 恢复会话或切换模型后 🧠 段被清空；满足适用条件的下一次请求后显示 —— ext:296-300, ext:345, ext:378
+- 分类器一栏取最近一次决策；空白消息的决策显示「未分类」 —— ext:64-66, ext:323-334, ext:350
+
+## 想看现在的状态
+
+- `/effort` 显示是否适用、后续分类器、当前分支最近决策（档位 · 分类器） —— ext:216, ext:222-229
+- `/effort test` 用固定样例测试，不写决策、不改强度 —— ext:238-245；README.md:78
+- 录屏 effort-status：输出适用、后续分类 openrouter/liquid/d1-ultra、最近决策 low · d1-ultra（录制环境配置） —— usage-captures.md；ext:226
+
+## 想换分类器
+
+- `/effort model` 打开选择器，选择 Jev 或 d1-ultra；Enter 保存（Pi 选择框通用按键），Esc 放弃 —— ext:247-269；README.md:75
+- `/effort model jev`、`/effort model d1-ultra` 直接保存；Jev 默认，d1-ultra 付费 —— ext:11-14, ext:26；README.md:76-77, README.md:92
+- 新选择对所有会话生效，从下一条未分类的消息开始，已有消息的档位不变 —— ext:280, ext:324；README.md:88
+- Pi 正在工作时不能切换或测试 —— ext:231-234, ext:275-278；README.md:88
+- 录屏 effort-model：标题「思考分类模型（全局）· 当前：openrouter/liquid/d1-ultra」，两项 Jev / d1-ultra，底部提示 enter select，Esc 退出不保存；默认是 Jev —— usage-captures.md；ext:26, ext:259-262
+
+## 分类失败怎么办
+
+- 15 秒超时或服务出错时沿用当前档位并警告 —— ext:62, ext:205-207, ext:327-331；README.md:91
+- 档位无效或把握不足（所选档位概率低于 0.5）时静默沿用；服务错误或响应格式损坏时警告 —— ext:150-157, ext:330；pi-ai/dist/api/system-one-shared.js:37-55, :174-180；test:279-302
+- 当前档位 = 当前分支上一次决策，没有就是基线 —— ext:316
+- 对话照常进行（沿用后照常发出请求） —— ext:325, ext:334
+- 警告原文 —— ext:330
+- 警告里建议用 `/effort model` 或 `/effort test` 检查 —— ext:330
+
+## 代价和隐私
+
+- 每次分类多等一会儿，最多 15 秒 —— ext:62, ext:144, ext:197；README.md:90
+- 消耗 OpenRouter 额度；d1-ultra 付费，价格以 OpenRouter 为准 —— README.md:90, README.md:92
+- 发送当前消息和之前最多 6 条用户或助手消息的文本，可能含业务信息 —— ext:84-98（slice(-6)）；README.md:90
+- 不发送系统提示词、工具输出、思考内容和图片数据 —— ext:74-81, ext:321；README.md:90；test:326-338
+
+## 本轮补充
+
+- 章节导语「不用 GPT-6 系列可以跳过本章」—— ext:289-290（不适用时不分类）
+- 图 3 对照行：Pi 自带 thinking 显示是基线，实际档位看 🧠 段 —— README.md:86；ext:378
+- 换分类器步骤条（↑↓ 选择、Enter 保存、Esc 放弃）—— usage-captures.md（录屏底部提示 enter select / escape cancel）；ext:261-262

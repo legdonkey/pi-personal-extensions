@@ -56,6 +56,17 @@
   });
   markScroll(); addEventListener("resize", markScroll);
   $$(".fig-scroll").forEach((f) => f.addEventListener("scroll", () => f.classList.toggle("at-end", f.scrollLeft + f.clientWidth >= f.scrollWidth - 4), { passive: true }));
+  // 封面录屏：点击画面播放或暂停
+  $$(".hero-capture .capture-frame").forEach((fr) => {
+    const v = fr.querySelector("video");
+    if (!v) return;
+    fr.setAttribute("role", "button"); fr.tabIndex = 0; fr.setAttribute("aria-label", "播放或暂停录屏");
+    const sync = () => fr.classList.toggle("is-playing", !v.paused);
+    v.addEventListener("play", sync); v.addEventListener("pause", sync); v.addEventListener("ended", sync);
+    const toggle = () => (v.paused ? v.play().catch(() => {}) : v.pause());
+    fr.addEventListener("click", toggle);
+    fr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+  });
   // 录屏点击放大到原尺寸，Esc 或再点一次关闭
   $$(".capture .capture-frame").forEach((fr) => {
     const fig = fr.closest(".capture");

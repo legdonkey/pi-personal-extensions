@@ -1,0 +1,355 @@
+<section class="chapter" id="ch-title" data-chapter="title" aria-labelledby="ch-title-h">
+  <header class="chapter-head">
+    <h2 id="ch-title-h">会话名：自动起名，手动改名优先</h2>
+    <p class="chapter-sum">会话名显示在哪，「自动会话命名」什么时候起名、起出来什么样，怎么暂停、预览、换命名模型，要注意什么。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>「右下角会话标题」显示会话名；「自动会话命名」起会话名</dd>
+      <dt>快捷命令</dt><dd><code>/auto-name</code>（也可以从 <code>/personal</code> → 「自动会话命名」进入）</dd>
+      <dt>适用场景</dt><dd>在 Pi 终端界面里自动起名。用 <code>pi -p</code> 等非交互方式运行时，不起名。</dd>
+    </dl>
+  </header>
+
+  <!-- ===== 会话名在哪 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>会话名在哪里</h3>
+      <p>
+        <span class="seg" data-seg="title-01">会话名显示在输入框正下方，是靠右的一行暗色小字。还没有会话名时，这里显示「未命名会话」。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-title-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 236" width="100%" role="img" aria-labelledby="fig-title-1-title fig-title-1-desc">
+          <title id="fig-title-1-title">会话名显示的位置</title>
+          <desc id="fig-title-1-desc">Pi 终端从上到下是消息区、输入框、会话名和状态栏；会话名在输入框正下方靠右显示，没有会话名时显示「未命名会话」，终端太窄时末尾显示成省略号。</desc>
+
+          <rect x="120" y="12" width="504" height="152" rx="6" class="n is-ghost"/>
+          <text x="16" y="38" class="t">消息区</text>
+          <rect x="136" y="24" width="300" height="6" rx="2" style="fill:var(--rule)"/>
+          <rect x="136" y="36" width="360" height="6" rx="2" style="fill:var(--rule)"/>
+          <rect x="136" y="48" width="240" height="6" rx="2" style="fill:var(--rule)"/>
+          <text x="16" y="85" class="t">输入框</text>
+          <rect x="136" y="64" width="472" height="32" rx="6" class="n"/>
+          <text x="148" y="85" class="t-mono">&gt;</text>
+          <text x="16" y="147" class="t">状态栏</text>
+          <rect x="136" y="132" width="472" height="20" rx="2" class="n"/>
+
+          <g data-cue="title-01">
+            <text x="16" y="119" class="t">会话名</text>
+            <rect x="136" y="104" width="472" height="20" rx="2" style="fill:var(--accent-tint)"/>
+            <text x="144" y="118" class="t-cap">示例</text>
+            <text x="600" y="118" class="t-sub" text-anchor="end">🧩 通知服务｜排查重复推送</text>
+            <text x="16" y="190" class="t-cap">还没有会话名</text>
+            <rect x="120" y="176" width="504" height="20" rx="2" class="n is-ghost"/>
+            <text x="600" y="190" class="t-sub" text-anchor="end">未命名会话</text>
+            <text x="16" y="222" class="t-cap">终端很窄</text>
+            <rect x="440" y="208" width="184" height="20" rx="2" class="n is-ghost"/>
+            <text x="600" y="222" class="t-sub" text-anchor="end">🧩 通知服务｜排…</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>示例会话名。终端太窄时，会话名末尾显示成省略号。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 自动起名 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>自动起名：什么时候起、起成什么样</h3>
+      <p>
+        <span class="seg" data-seg="title-02">每轮正常结束后，「自动会话命名」在后台起名。你不用等，可以直接输入下一条消息。</span>
+        <span class="seg" data-seg="title-03">会话名由一个类别图标、对象和目标组成。</span>
+      </p>
+      <ul>
+        <li>在两种情况下会话名不变：当前会话名已经准确；对话信息不够。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 240" width="100%" role="img" aria-labelledby="fig-title-2-title fig-title-2-desc">
+          <title id="fig-title-2-title">自动起名的时机和格式</title>
+          <desc id="fig-title-2-desc">每轮正常结束后，后台起名，你不用等。会话名由类别图标、对象和目标组成，类别共八种。</desc>
+          <defs>
+            <marker id="fig-title-2-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <g data-cue="title-02">
+            <line x1="184" y1="38" x2="230" y2="38" class="w" marker-end="url(#fig-title-2-ah)"/>
+            <line x1="404" y1="38" x2="450" y2="38" class="w is-flow" marker-end="url(#fig-title-2-ah)"/>
+            <rect x="16" y="16" width="168" height="44" rx="6" class="n"/>
+            <text x="100" y="43" class="t" text-anchor="middle">一轮正常结束</text>
+            <rect x="236" y="16" width="168" height="44" rx="6" class="n is-ext"/>
+            <text x="320" y="36" class="t" text-anchor="middle">后台起名</text>
+            <text x="320" y="53" class="t-cap" text-anchor="middle">你可以继续输入</text>
+            <rect x="456" y="16" width="168" height="44" rx="6" class="n"/>
+            <text x="540" y="43" class="t" text-anchor="middle">会话名更新</text>
+          </g>
+
+          <g data-cue="title-03">
+            <text x="16" y="84" class="t-cap">会话名的格式（示例）</text>
+            <rect x="16" y="92" width="56" height="48" rx="6" class="n"/>
+            <text x="44" y="124" text-anchor="middle" style="font-size:24px">🧩</text>
+            <rect x="76" y="92" width="16" height="48" rx="2" class="n is-ghost"/>
+            <text x="84" y="120" class="t-sub" text-anchor="middle">␣</text>
+            <rect x="96" y="92" width="200" height="48" rx="6" class="n"/>
+            <text x="196" y="122" class="t" text-anchor="middle" style="font-size:18px">通知服务</text>
+            <rect x="300" y="92" width="40" height="48" rx="6" class="n is-focal"/>
+            <text x="320" y="123" class="t" text-anchor="middle" style="font-size:20px">｜</text>
+            <rect x="344" y="92" width="280" height="48" rx="6" class="n"/>
+            <text x="484" y="122" class="t" text-anchor="middle" style="font-size:18px">排查重复推送</text>
+            <text x="44" y="162" class="t-cap" text-anchor="middle">类别</text>
+            <text x="196" y="162" class="t-cap" text-anchor="middle">对象</text>
+            <text x="484" y="162" class="t-cap" text-anchor="middle">目标</text>
+            <text x="16" y="204" class="t-cap">八种类别：🎬 内容制作　🧩 工具开发　🔎 对比调研　🎨 页面设计</text>
+            <text x="16" y="228" class="t-cap">　　　　　📝 方法整理　📅 日程安排　⚙️ 环境配置　💬 一般讨论</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>示例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 暂停与恢复 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>手动改了会话名，怎么恢复自动起名</h3>
+      <p>
+        <span class="seg" data-seg="title-04" data-say="用斜杠 name 手动改会话名后，这个会话暂停自动起名。">用 <code>/name</code> 手动改会话名后，这个会话暂停自动起名。</span>
+        <span class="seg" data-seg="title-05" data-say="用斜杠 auto name on 恢复，下一轮结束后生效；用斜杠 auto name off 主动暂停。">用 <code>/auto-name on</code> 恢复，下一轮结束后生效；用 <code>/auto-name off</code> 主动暂停。</span>
+      </p>
+      <ul>
+        <li>如果打开的会话已经有会话名，而且不是自动起的，「自动会话命名」在这个会话里也是暂停状态。</li>
+        <li>恢复后，「自动会话命名」会接着改当前的会话名。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-3">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 184" width="100%" role="img" aria-labelledby="fig-title-3-title fig-title-3-desc">
+          <title id="fig-title-3-title">自动起名的开启与暂停</title>
+          <desc id="fig-title-3-desc">手动改会话名或输入 /auto-name off 后进入暂停；输入 /auto-name on 后回到自动起名，下一轮结束后生效；打开已有其他会话名的会话时是暂停状态；只影响当前会话，重载后保持。</desc>
+          <defs>
+            <marker id="fig-title-3-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <line x1="536" y1="28" x2="536" y2="50" class="w is-dash" marker-end="url(#fig-title-3-ah)"/>
+          <text x="536" y="20" class="t-cap" text-anchor="middle">打开已有其他会话名的会话</text>
+          <g data-cue="title-04">
+            <line x1="192" y1="72" x2="442" y2="72" class="w" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="232" y="52" width="176" height="14" class="mask"/>
+            <text x="320" y="63" class="t-cap" text-anchor="middle">手动改名 · /auto-name off</text>
+          </g>
+          <g data-cue="title-05">
+            <line x1="448" y1="104" x2="198" y2="104" class="w" marker-end="url(#fig-title-3-ah)"/>
+            <rect x="228" y="110" width="184" height="14" class="mask"/>
+            <text x="320" y="121" class="t-cap" text-anchor="middle">/auto-name on（下一轮生效）</text>
+            <text x="320" y="168" class="t-cap" text-anchor="middle">只影响当前会话；重载后保持</text>
+          </g>
+          <rect x="16" y="56" width="176" height="64" rx="6" class="n is-focal"/>
+          <text x="104" y="84" class="t" text-anchor="middle">自动起名</text>
+          <text x="104" y="104" class="t-cap" text-anchor="middle">会话名由它维护</text>
+          <rect x="448" y="56" width="176" height="64" rx="6" class="n"/>
+          <text x="536" y="84" class="t" text-anchor="middle">暂停</text>
+          <text x="536" y="104" class="t-cap" text-anchor="middle">保留你起的会话名</text>
+        </svg>
+      </div>
+      <figcaption>两个状态只记在当前会话里。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 预览 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想先看看会起什么名</h3>
+      <p>
+        <span class="seg" data-seg="title-06" data-say="输入斜杠 auto name preview，可以看到建议的会话名。这个命令只弹出提示，不改会话名。">输入 <code>/auto-name preview</code>，可以看到建议的会话名。这个命令只弹出提示，不改会话名。</span>
+      </p>
+      <ul>
+        <li>等 Pi 回复完，再预览。暂停状态下也能预览。</li>
+        <li>预览同样消耗命名模型的额度。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-4">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 204" width="100%" role="img" aria-labelledby="fig-title-4-title fig-title-4-desc">
+          <title id="fig-title-4-title">预览建议的会话名</title>
+          <desc id="fig-title-4-desc">输入 /auto-name preview 后，Pi 弹出「标题预览」提示；如果当前会话名已合适或信息不足，提示「保持原标题」；会话名本身不变。</desc>
+          <defs>
+            <marker id="fig-title-4-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+          <rect x="16" y="16" width="608" height="40" rx="6" class="n"/>
+          <text x="32" y="41" class="t-mono">/auto-name preview</text>
+          <g data-cue="title-06">
+            <line x1="320" y1="56" x2="320" y2="78" class="w" marker-end="url(#fig-title-4-ah)"/>
+            <rect x="16" y="84" width="608" height="40" rx="6" class="n is-focal"/>
+            <text x="32" y="109" class="t-mono">标题预览：🧩 通知服务｜排查重复推送</text>
+            <text x="608" y="109" class="t-cap" text-anchor="end">有建议</text>
+            <text x="320" y="146" class="t-cap" text-anchor="middle">或</text>
+            <rect x="16" y="156" width="608" height="40" rx="6" class="n"/>
+            <text x="32" y="181" class="t-mono">保持原标题：未命名会话</text>
+            <text x="608" y="181" class="t-cap" text-anchor="end">当前会话名已合适，或信息不足</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>提示文字为示例；会话名本身不变。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 换命名模型 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想换命名模型</h3>
+      <p>
+        <span class="seg" data-seg="title-07" data-say="输入斜杠 auto name model，从列表里选命名模型。列表只列出斜杠 scoped models 里已认证的模型。">输入 <code>/auto-name model</code>，从列表里选命名模型。列表只列出 <code>/scoped-models</code> 里已认证的模型。</span>
+      </p>
+      <ul>
+        <li>默认命名模型是 <code>gpt-5.6-luna</code>。命名模型只用来起名，对所有会话生效，不影响主对话。</li>
+        <li>命名用的思考强度：输入 <code>/auto-name thinking</code> 选。默认跟随 Pi 对这个模型的设置；Pi 没设置时用 low。实际用的思考强度受命名模型支持的范围限制。命名模型不支持思考时，用 off。</li>
+        <li>换成另一个命名模型后，命名用的思考强度恢复成默认值。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="auto-name-model" id="fig-title-5">
+      <div class="capture-frame"><video data-cue="title-07" src="media/auto-name-model.mp4" poster="media/auto-name-model.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name model，弹出可选命名模型列表，上下移动，按 Esc 键不保存"></video></div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 64" width="100%" role="img" aria-labelledby="fig-title-5k-title fig-title-5k-desc">
+          <title id="fig-title-5k-title">命名模型列表的按键</title>
+          <desc id="fig-title-5k-desc">按上下方向键移动，按 Esc 键关闭列表，不保存。</desc>
+          <g data-cue="title-07">
+            <rect x="16" y="14" width="36" height="34" rx="4" style="fill:var(--paper);stroke:var(--rule-solid)"/>
+            <line x1="20" y1="48" x2="48" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text x="34" y="37" class="t" text-anchor="middle">↑</text>
+            <rect x="60" y="14" width="36" height="34" rx="4" style="fill:var(--paper);stroke:var(--rule-solid)"/>
+            <line x1="64" y1="48" x2="92" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text x="78" y="37" class="t" text-anchor="middle">↓</text>
+            <text x="108" y="36" class="t-cap">上下移动</text>
+            <rect x="344" y="14" width="52" height="34" rx="4" style="fill:var(--paper);stroke:var(--rule-solid)"/>
+            <line x1="348" y1="48" x2="392" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text x="370" y="36" class="t-sub" text-anchor="middle">Esc</text>
+            <text x="408" y="36" class="t-cap">关闭列表，不保存</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>录屏：弹出命名模型列表，上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 查看状态 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想看当前设置</h3>
+      <p>
+        <span class="seg" data-seg="title-08" data-say="输入斜杠 auto name，一条提示里能看到是否开启、命名模型和命名用的思考强度。">输入 <code>/auto-name</code>，一条提示里能看到是否开启、命名模型和命名用的思考强度。</span>
+      </p>
+    </div>
+    <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-6">
+      <div class="capture-frame"><video data-cue="title-08" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name，输出一条状态提示：开启状态、命名模型、命名用的思考强度和可用子命令"></video></div>
+      <figcaption>录屏：输出一条状态提示：开启状态、命名模型、命名用的思考强度和可用子命令。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 额度和隐私 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>要注意什么：额度和隐私</h3>
+      <p>
+        <span class="seg" data-seg="title-09">每次自动起名和预览，都额外消耗命名模型的额度，不计入 Pi 自带的用量统计。</span>
+        <span class="seg" data-seg="title-10">「自动会话命名」把当前会话名和最近最多 5 轮对话的文字发给命名模型，可能含业务信息；工具输出、思考内容和图片不发送。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-title-7">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 248" width="100%" role="img" aria-labelledby="fig-title-7-title fig-title-7-desc">
+          <title id="fig-title-7-title">自动起名会发送和不会发送的内容</title>
+          <desc id="fig-title-7-desc">自动起名额外消耗命名模型额度，不计入 Pi 自带用量统计；会发送当前会话名和最近最多 5 轮对话文字，你的消息每轮取前 2000 个字符，助手回复每轮取最后 1500 个字符；不发送工具输出、思考内容、图片、其他分支和出错或中断的回复。</desc>
+
+          <g data-cue="title-09">
+            <rect x="16" y="16" width="608" height="36" rx="6" style="fill:var(--accent-tint);stroke:var(--rule)"/>
+            <text x="32" y="39" class="t">额外消耗命名模型额度</text>
+            <text x="608" y="39" class="t-cap" text-anchor="end">不计入 Pi 自带的用量统计</text>
+          </g>
+          <g data-cue="title-10">
+            <text x="16" y="84" class="t">会发送</text>
+            <rect x="16" y="96" width="296" height="136" rx="6" class="n"/>
+            <text x="32" y="124" class="t-cap">· 当前会话名</text>
+            <text x="32" y="148" class="t-cap">· 最近最多 5 轮对话的文字</text>
+            <text x="32" y="172" class="t-cap">· 你的消息：每轮前 2000 个字符</text>
+            <text x="32" y="196" class="t-cap">· 助手回复：每轮最后 1500 个字符</text>
+            <text x="32" y="220" class="t-cap">· 文字里的业务信息</text>
+            <text x="328" y="84" class="t">不会发送</text>
+            <rect x="328" y="96" width="296" height="136" rx="6" class="n is-ghost"/>
+            <text x="344" y="124" class="t-cap">· 工具输出</text>
+            <text x="344" y="148" class="t-cap">· 思考内容</text>
+            <text x="344" y="172" class="t-cap">· 图片</text>
+            <text x="344" y="196" class="t-cap">· 当前分支以外的对话</text>
+            <text x="344" y="220" class="t-cap">· 出错或被中断的回复</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>用 <code>pi -p</code> 等非交互方式运行时，不自动起名，也就不发送。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ===== 排查 ===== -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>会话名一直没变怎么办</h3>
+      <ol>
+        <li><span class="seg" data-seg="title-11" data-say="在斜杠 personal 里确认「自动会话命名」已加载，再输入斜杠 auto name 看状态。">在 <code>/personal</code> 里确认「自动会话命名」已加载，再输入 <code>/auto-name</code> 看状态。</span></li>
+        <li><span class="seg" data-seg="title-12" data-say="如果显示暂停，输入斜杠 auto name on。">如果显示暂停，输入 <code>/auto-name on</code>。</span></li>
+        <li><span class="seg" data-seg="title-13" data-say="如果提示命名模型不可用，先用斜杠 login 完成服务商认证，再用斜杠 scoped models 选出明确的模型范围，按 Control S 保存。也可以用斜杠 auto name model 换一个命名模型。">如果提示命名模型不可用，先用 <code>/login</code> 完成服务商认证，再用 <code>/scoped-models</code> 选出明确的模型范围，按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 保存。也可以用 <code>/auto-name model</code> 换一个命名模型。</span></li>
+        <li><span class="seg" data-seg="title-14" data-say="如果以上都正常，输入斜杠 auto name preview 试一次。">如果以上都正常，输入 <code>/auto-name preview</code> 试一次。</span></li>
+      </ol>
+      <ul>
+        <li>在 <code>/scoped-models</code> 里全选所有模型时，「自动会话命名」会认为没有可用的命名模型。按 <kbd>Esc</kbd> 键只关闭列表，不保存。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-title-8">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 272" width="100%" role="img" aria-labelledby="fig-title-8-title fig-title-8-desc">
+          <title id="fig-title-8-title">会话名没变时的排查顺序</title>
+          <desc id="fig-title-8-desc">按 1 到 4 的顺序检查：功能是否加载，状态是否暂停，命名模型是否可用，最后用 preview 试一次；每一步右侧是对应的处理办法。</desc>
+          <defs>
+            <marker id="fig-title-8-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
+          </defs>
+
+          <line x1="140" y1="60" x2="140" y2="78" class="w" marker-end="url(#fig-title-8-ah)"/>
+          <line x1="140" y1="128" x2="140" y2="146" class="w" marker-end="url(#fig-title-8-ah)"/>
+          <line x1="140" y1="196" x2="140" y2="214" class="w" marker-end="url(#fig-title-8-ah)"/>
+          <text x="152" y="74" class="t-cap">正常</text>
+          <text x="152" y="142" class="t-cap">正常</text>
+          <text x="152" y="210" class="t-cap">正常</text>
+
+          <g data-cue="title-11">
+            <line x1="264" y1="36" x2="298" y2="36" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <rect x="16" y="12" width="248" height="48" rx="6" class="n"/>
+            <text x="140" y="41" class="t" text-anchor="middle">1 功能没加载？</text>
+            <rect x="304" y="12" width="320" height="48" rx="6" class="n"/>
+            <text x="320" y="41" class="t-cap">在 /personal 里开启「自动会话命名」</text>
+          </g>
+          <g data-cue="title-12">
+            <line x1="264" y1="104" x2="298" y2="104" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <rect x="16" y="80" width="248" height="48" rx="6" class="n"/>
+            <text x="140" y="109" class="t" text-anchor="middle">2 /auto-name 显示暂停？</text>
+            <rect x="304" y="80" width="320" height="48" rx="6" class="n"/>
+            <text x="320" y="109" class="t-cap">输入 /auto-name on，下一轮生效</text>
+          </g>
+          <g data-cue="title-13">
+            <line x1="264" y1="172" x2="298" y2="172" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <rect x="16" y="148" width="248" height="48" rx="6" class="n"/>
+            <text x="140" y="177" class="t" text-anchor="middle">3 提示命名模型不可用？</text>
+            <rect x="304" y="148" width="320" height="48" rx="6" class="n"/>
+            <text x="320" y="168" class="t-cap">先 /login，再 /scoped-models 选范围并保存</text>
+            <text x="320" y="186" class="t-cap">或用 /auto-name model 换一个</text>
+          </g>
+          <g data-cue="title-14">
+            <line x1="264" y1="240" x2="298" y2="240" class="w" marker-end="url(#fig-title-8-ah)"/>
+            <rect x="16" y="216" width="248" height="48" rx="6" class="n is-focal"/>
+            <text x="140" y="245" class="t" text-anchor="middle">4 都正常</text>
+            <rect x="304" y="216" width="320" height="48" rx="6" class="n"/>
+            <text x="320" y="245" class="t-cap">输入 /auto-name preview 试一次</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>另外三种情况也不起名：上一轮回复出错或被中断；命名模型 30 秒内没给出合格的会话名（保留原会话名，并提示一次）；用 <code>pi -p</code> 等非交互方式运行。</figcaption>
+    </figure>
+  </div>
+</section>

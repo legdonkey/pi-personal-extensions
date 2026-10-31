@@ -1,0 +1,190 @@
+<section class="chapter" id="ch-statusbar" data-chapter="statusbar" aria-labelledby="ch-statusbar-h">
+  <header class="chapter-head">
+    <h2 id="ch-statusbar-h">状态栏：看额度，换配色</h2>
+    <p class="chapter-sum">「额度与会话 ID」在状态栏显示剩余额度和会话 ID。「状态栏风格选择」给状态栏换配色。</p>
+    <dl class="meta">
+      <dt>功能</dt><dd>额度与会话 ID · 状态栏风格选择</dd>
+      <dt>快捷命令</dt><dd><code>/statusline-style</code></dd>
+      <dt>前提</dt><dd>换配色需要先装 <code>npm:@narumitw/pi-statusline</code></dd>
+      <dt>配置文件</dt><dd>agent 目录下的 <code>pi-statusline.json</code>（默认 <code>~/.pi/agent/</code>）</dd>
+    </dl>
+  </header>
+
+  <!-- ============ 看懂额度 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想看懂状态栏上的额度和会话 ID</h3>
+      <p>
+        <span class="seg" data-seg="statusbar-01">「额度与会话 ID」在状态栏显示两样东西：当前会话 ID 的末尾 8 位，和当前服务商还剩多少额度。</span>
+        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。</span>
+      </p>
+    </div>
+    <figure class="beat-fig" id="fig-statusbar-1">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 228" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
+          <title id="fig-statusbar-1-title">状态栏上的额度和会话 ID（示例）</title>
+          <desc id="fig-statusbar-1-desc">两段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。left 表示还剩。</desc>
+
+          <text class="t-cap" x="12" y="24">openai-codex（示例）</text>
+          <rect class="n" x="12" y="36" width="328" height="32" rx="4"/>
+          <text class="t-mono" x="24" y="57">a1b2c3d4</text>
+          <text class="t-mono" x="96" y="57">•</text>
+          <text class="t-mono" x="112" y="57">weekly 63% left</text>
+          <text class="t-cap" x="364" y="57">left 表示「还剩」</text>
+
+          <g data-cue="statusbar-01">
+            <path class="w is-accent" d="M24 76 V80 H84 V76"/>
+            <text class="t-cap" x="24" y="98">会话 ID 末尾 8 位</text>
+          </g>
+          <g data-cue="statusbar-02">
+            <path class="w" d="M112 76 V80 H224 V76"/>
+            <text class="t-cap" x="168" y="98">周额度还剩 63%</text>
+          </g>
+
+          <text class="t-cap" x="12" y="128">zai-coding-cn（示例）</text>
+          <rect class="n" x="12" y="140" width="328" height="32" rx="4"/>
+          <text class="t-mono" x="24" y="161">a1b2c3d4</text>
+          <text class="t-mono" x="96" y="161">•</text>
+          <text class="t-mono" x="112" y="161">5h 82% left</text>
+          <text class="t-mono" x="200" y="161">·</text>
+          <text class="t-mono" x="216" y="161">weekly 47% left</text>
+          <text class="t-cap" x="364" y="161">5h = 5 小时，weekly = 一周</text>
+
+          <g data-cue="statusbar-02">
+            <path class="w" d="M112 180 V184 H194 V180"/>
+            <text class="t-cap" x="112" y="202">5 小时额度还剩 82%</text>
+            <path class="w" d="M216 180 V184 H328 V180"/>
+            <text class="t-cap" x="252" y="220">周额度还剩 47%</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>数值是示例。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 额度为空 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>额度一项是空的怎么办</h3>
+      <ol>
+        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex 和 zai coding cn 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code> 和 <code>zai-coding-cn</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
+        <li><span class="seg" data-seg="statusbar-04">如果服务商是这两个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。</span></li>
+        <li><span class="seg" data-seg="statusbar-05">等下一次查询，大约每 5 分钟一次；切换模型时会立即发起查询。数字一直不变，可能是查询失败，显示的是上次的值。</span></li>
+      </ol>
+      <ul>
+        <li>更新时机：会话开始、在会话树里跳转、切换模型时立即发起查询；之后每 5 分钟查询一次；Pi 每回复完一轮也会查询，但距上次查询开始不足 30 秒就跳过（失败的查询也算）。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig" id="fig-statusbar-2">
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 316" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
+          <title id="fig-statusbar-2-title">额度为空时先查什么</title>
+          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex 或 zai-coding-cn。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通，再等下一次查询（约 5 分钟内）。另外，数字一直不变时，可能是查询失败，显示的是上次的值。</desc>
+          <defs>
+            <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+
+          <rect class="n is-focal" x="28" y="16" width="264" height="40" rx="6"/>
+          <text class="t" x="160" y="41" text-anchor="middle">额度一项是空的</text>
+
+          <g data-cue="statusbar-03">
+            <path class="w" d="M160 56 V84" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <path class="w" d="M292 116 H340" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <rect class="mask" x="304" y="94" width="24" height="14"/>
+            <text class="t-cap" x="316" y="105" text-anchor="middle">否</text>
+            <rect class="n" x="28" y="84" width="264" height="64" rx="6"/>
+            <text class="t" x="40" y="108">当前模型的服务商是</text>
+            <text class="t-sub" x="40" y="130">openai-codex 或 zai-coding-cn？</text>
+            <rect class="n is-ghost" x="340" y="84" width="288" height="64" rx="6"/>
+            <text class="t" x="352" y="108">不显示额度</text>
+            <text class="t-cap" x="352" y="130">其他服务商不支持，属正常</text>
+          </g>
+
+          <g data-cue="statusbar-04">
+            <path class="w" d="M160 148 V184" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <rect class="mask" x="168" y="158" width="24" height="14"/>
+            <text class="t-cap" x="180" y="169" text-anchor="middle">是</text>
+            <path class="w" d="M292 212 H340" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <rect class="n" x="28" y="184" width="264" height="56" rx="6"/>
+            <text class="t" x="40" y="207">还没查到过额度</text>
+            <text class="t-cap" x="40" y="228">首次查询没完成或失败</text>
+            <rect class="n is-ghost" x="340" y="160" width="288" height="108" rx="6"/>
+            <text class="t" x="352" y="180">按顺序检查</text>
+            <rect class="n" x="352" y="190" width="264" height="22" rx="4"/>
+            <text class="t-cap" x="362" y="205">1. 确认已登录这个服务商</text>
+            <rect class="n" x="352" y="216" width="264" height="22" rx="4"/>
+            <text class="t-cap" x="362" y="231">2. 确认网络能连通</text>
+          </g>
+
+          <g data-cue="statusbar-05">
+            <rect class="n" x="352" y="242" width="264" height="22" rx="4"/>
+            <text class="t-cap" x="362" y="257">3. 等下一次查询（约 5 分钟内）</text>
+            <line x1="12" y1="284" x2="628" y2="284" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="12" y="306">数字一直不变：可能是查询失败，显示的是上次的值</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>先排除服务商，再查登录和网络。</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ 换配色 ============ -->
+  <div class="beat">
+    <div class="beat-text">
+      <h3>想换状态栏配色</h3>
+      <p><span class="seg" data-seg="statusbar-06" data-say="「状态栏风格选择」只负责换配色。状态栏本身来自 pi statusline 包，需要先安装并启用。">「状态栏风格选择」只负责换配色。状态栏本身来自 <code>pi-statusline</code> 包，需要先安装并启用。</span></p>
+      <pre><code>pi install npm:@narumitw/pi-statusline</code></pre>
+      <ol>
+        <li><span class="seg" data-seg="statusbar-07" data-say="输入斜杠 statusline style，打开配色列表。">输入 <code>/statusline-style</code>，打开配色列表。</span></li>
+        <li><span class="seg" data-seg="statusbar-08" data-say="用上下键选一套配色，列表下方的预览条实时换色。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选一套配色，列表下方的预览条实时换色。</span></li>
+        <li><span class="seg" data-seg="statusbar-09" data-say="按 Enter 键应用，按 Esc 键放弃。">按 <kbd>Enter</kbd> 键应用，按 <kbd>Esc</kbd> 键放弃。</span></li>
+      </ol>
+      <p><span class="seg" data-seg="statusbar-10">应用后 Pi 自动重载。密度和分隔符也会一起换成 compact 和 round。</span></p>
+      <ul>
+        <li>Pi 正在回复或压缩上下文时，自动重载会被拒绝。等结束后再应用，或结束后手动输入 <code>/reload</code>。</li>
+        <li>知道编号或名称时可以直接选，例如 <code>/statusline-style 11</code> 或 <code>/statusline-style 茶墨渐层</code>。如果名称写错，Pi 提示「未知风格」，不改任何设置。</li>
+        <li>配色列表只能在 Pi 终端界面里打开。</li>
+        <li>设置写在 agent 目录的 <code>pi-statusline.json</code>，其他设置不变。如果写入失败，Pi 提示「应用失败」，不重载。</li>
+      </ul>
+    </div>
+    <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
+      <div class="capture-frame"><video data-cue="statusbar-06" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /statusline-style，出现 01 到 11 的配色列表，上下移动时列表下方的预览条换色，按 Esc 键退出，不应用"></video></div>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 640 72" role="img" aria-labelledby="fig-statusbar-3-title fig-statusbar-3-desc">
+          <title id="fig-statusbar-3-title">换配色的按键</title>
+          <desc id="fig-statusbar-3-desc">输入 /statusline-style，用上下键预览，按 Enter 键应用或 Esc 键放弃，应用后 Pi 自动重载。</desc>
+          <defs>
+            <marker id="fig-statusbar-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
+          </defs>
+          <g data-cue="statusbar-07">
+            <rect class="n" x="12" y="16" width="156" height="40" rx="6"/>
+            <text class="t-mono" x="24" y="41">/statusline-style</text>
+          </g>
+          <g data-cue="statusbar-08">
+            <path class="w" d="M168 36 H188" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="188" y="20" width="28" height="28" rx="4"/><line x1="192" y1="48" x2="212" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="202" y="39" text-anchor="middle">↑</text>
+            <rect class="n" x="220" y="20" width="28" height="28" rx="4"/><line x1="224" y1="48" x2="244" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="234" y="39" text-anchor="middle">↓</text>
+            <text class="t-cap" x="256" y="39">预览</text>
+          </g>
+          <g data-cue="statusbar-09">
+            <path class="w" d="M288 36 H308" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="308" y="20" width="52" height="28" rx="4"/><line x1="312" y1="48" x2="356" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="334" y="39" text-anchor="middle">Enter</text>
+            <text class="t-cap" x="366" y="39">应用</text>
+            <rect class="n" x="404" y="20" width="40" height="28" rx="4"/><line x1="408" y1="48" x2="440" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="424" y="39" text-anchor="middle">Esc</text>
+            <text class="t-cap" x="450" y="39">放弃</text>
+          </g>
+          <g data-cue="statusbar-10">
+            <path class="w" d="M484 36 H508" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n is-focal" x="508" y="16" width="120" height="40" rx="6"/>
+            <text class="t" x="520" y="41">Pi 自动重载</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>录屏：上下移动时，列表下方的预览条实时换色，底部状态栏在应用前不变；按 Esc 键退出，配色不变。</figcaption>
+    </figure>
+  </div>
+</section>

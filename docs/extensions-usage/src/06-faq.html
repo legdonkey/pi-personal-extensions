@@ -9,9 +9,9 @@
     <div class="beat-text">
       <h3>想找某项设置在哪</h3>
       <p>
-        <span class="seg" data-seg="faq-01" data-say="所有设置都从斜杠 personal 进入：先选功能，再选二级菜单里的设置项。表里按想做什么列出菜单路径。">所有设置都从 <code>/personal</code> 进入：先选功能，再选二级菜单里的设置项。表里按「想做什么」列出菜单路径。</span>
+        <span class="seg" data-seg="faq-01" data-say="常用设置都从斜杠 personal 进入：先选功能，再选二级菜单里的设置项。表里按想做什么列出菜单路径。">常用设置都从 <code>/personal</code> 进入：先选功能，再选二级菜单里的设置项。表里按「想做什么」列出菜单路径。</span>
       </p>
-      <p>Pi 自带的 <code>/reload</code>、<code>/name</code> 照常直接输入。</p>
+      <p>Pi 自带的 <code>/reload</code>、<code>/name</code> 照常直接输入。例外：你发的消息里的路径是否变成链接（<code>userMessages</code>）没有菜单项，要手改 <code>clickable-paths.json</code>。</p>
     </div>
     <figure class="beat-fig" id="fig-faq-1">
       <table>
@@ -31,7 +31,7 @@
           <tr><td>开启 / 暂停路径链接</td><td>文件路径可点击 → 开启路径链接 / 暂停路径链接</td></tr>
           <tr><td>换打开方式</td><td>文件路径可点击 → 打开方式：vscode、vscode-insiders、cursor、windsurf 或 file</td></tr>
           <tr><td>识别 / 不识别裸路径</td><td>文件路径可点击 → 识别裸路径 / 不识别裸路径</td></tr>
-          <tr><td>换状态栏配色</td><td>状态栏风格选择 → 预览并选择配色，或「应用配色：编号. 名称」</td></tr>
+          <tr><td>换状态栏配色</td><td>状态栏：额度、会话 ID 与配色 → 预览并选择配色，或「应用配色：编号. 名称」</td></tr>
           <tr><td>手动改会话名</td><td>Pi 自带：<code>/name 新名字</code>，之后这个会话暂停自动起名</td></tr>
         </tbody>
       </table>
@@ -70,10 +70,10 @@
             <text class="t" x="32" y="45">agent 目录</text>
             <text class="t-sub" x="32" y="63">默认 ~/.pi/agent/</text>
             <text class="t-mono" x="72" y="116">personal-extensions.json</text>
-            <text class="t-cap" x="624" y="116" text-anchor="end">七项功能的开关</text>
+            <text class="t-cap" x="624" y="116" text-anchor="end">六项功能的开关</text>
             <text class="t-mono" x="72" y="152">auto-session-name.json</text>
             <text class="t-cap" x="624" y="152" text-anchor="end">命名模型和思考强度</text>
-            <text class="t-mono" x="72" y="188">jev-inline-effort.json</text>
+            <text class="t-mono" x="72" y="188">inline-effort.json</text>
             <text class="t-cap" x="624" y="188" text-anchor="end">选用的分类器</text>
             <text class="t-mono" x="72" y="224">clickable-paths.json</text>
             <text class="t-cap" x="624" y="224" text-anchor="end">路径链接设置</text>
@@ -154,6 +154,7 @@ git pull
 npm install --ignore-scripts \
   --registry=https://registry.npmmirror.com
 # 然后在 Pi 里输入 /reload</code></pre>
+      <p>从旧版本升级后，设置会自动迁移：旧的「额度与会话 ID」「状态栏风格选择」两个开关合成一个，只有两者都关闭时才保持关闭；其他设置原样保留。</p>
     </div>
     <figure class="beat-fig" id="fig-faq-4">
       <div class="fig-scroll">

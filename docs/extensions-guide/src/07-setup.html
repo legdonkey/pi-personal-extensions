@@ -95,6 +95,7 @@ npm view &lt;包名&gt; version \
       </p>
       <ul>
         <li>五个文件的路径都由 Pi 的 <code>getAgentDir()</code> 决定。</li>
+        <li>分类器设置从旧名 <code>jev-inline-effort.json</code> 改为 <code>inline-effort.json</code>。新文件不存在时才读旧文件；旧文件不删除、不改写，保存只写新文件。</li>
         <li><code>clickable-paths.json</code> 直接覆盖写入、失败不报错；其余四个先写临时文件再 rename。命名和分类器设置不改 Pi 的 <code>settings.json</code>。</li>
       </ul>
     </div>
@@ -117,7 +118,7 @@ npm view &lt;包名&gt; version \
             <text class="t-mono" x="348" y="109">auto-session-name.json</text>
             <text class="t-cap" x="604" y="109" text-anchor="end">命名设置</text>
             <rect class="n" x="336" y="148" width="280" height="40" rx="6"/>
-            <text class="t-mono" x="348" y="173">jev-inline-effort.json</text>
+            <text class="t-mono" x="348" y="173">inline-effort.json</text>
             <text class="t-cap" x="604" y="173" text-anchor="end">分类器设置</text>
             <rect class="n" x="336" y="212" width="280" height="40" rx="6"/>
             <text class="t-mono" x="348" y="237">clickable-paths.json</text>

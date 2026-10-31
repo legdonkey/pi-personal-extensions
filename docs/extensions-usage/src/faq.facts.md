@@ -1,37 +1,40 @@
 # faq 事实清单
 
-- 只注册 /personal 一个斜杠命令；各功能设置都在 /personal → 功能 → 二级菜单 —— extensions/pi-personal-extensions.ts:131-140；tests/personal.test.mjs:50、92；README.md（单一入口说明）
-- 菜单路径与设置项 label（自动会话命名 6 项、原位思考强度 5 项含「使用 Jev / d1-ultra 分类模型」、文件路径可点击 10 项、状态栏风格选择「预览并选择配色」加 11 项「应用配色：编号. 名称」）—— extensions/pi-personal-extensions.ts:68-101
-- 设置项只在功能已加载时出现；未加载只有「启用此功能并重载」—— extensions/pi-personal-extensions.ts:163-168
-- /personal switches 或一级菜单「批量功能开关」—— extensions/pi-personal-extensions.ts:152-158、184
-- /reload、/name 是 Pi 自带命令，不受影响 —— scratchpad/SYNC.md 第 5 条；README.md:15、48
-- 排查表「怎么做」列改为菜单项：恢复当前会话命名、预览建议标题、查看路径链接设置、打开方式：编辑器名 / file —— extensions/pi-personal-extensions.ts:68-95
-- /name 手动改名后自动命名暂停 —— extensions/auto-session-name.ts:155-160；README.md:48
-- /reload、/name 为 Pi 自带命令 —— README.md:15、48
-- 五个配置文件都在 getAgentDir()：默认 ~/.pi/agent/，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:128；extensions/auto-session-name-settings.ts:64-65；extensions/jev-inline-effort.ts:39；extensions/clickable-paths.ts:235；extensions/statusline-style-picker.ts:219；README.md:98-108
-- 五个文件的内容 —— README.md:102-106
-- 用 /personal 菜单修改全局设置后自动保存 —— extensions/pi-personal-extensions.ts:230-236；extensions/auto-session-name-settings.ts:63-78；extensions/jev-inline-effort.ts:38-49；extensions/clickable-paths.ts:48-55；extensions/statusline-style-picker.ts:234-239
-- 会话名没变：「查看状态」显示「暂停（保护当前名称）」时，选「恢复当前会话命名」 —— extensions/auto-session-name.ts:363-373、386
-- 打开的会话已有别的名字时自动命名暂停 —— extensions/auto-session-name.ts:128-129、147
-- 命名失败或超时（30 秒）保留原名，连续失败只提示一次，preview 可重试 —— extensions/auto-session-name.ts:186、229-230、260-265；README.md:55
-- Print / JSON 模式不自动命名 —— extensions/auto-session-name.ts:163；README.md:46
-- 额度只支持 openai-codex 和 zai-coding-cn；其他服务商不显示 —— extensions/substatusline.ts:11-13、60-65、75-76
-- （本章已不写刷新节奏，见 statusbar 章）额度每 5 分钟刷新，每轮结束后也刷新（30 秒冷却）—— extensions/substatusline.ts:8-9、77-83、117-123、125-130、149-152
-- 查询失败保留上次结果 —— extensions/substatusline.ts:106-111
-- 🧠 段条件（正文、排查表都写全）：openai-codex-responses 接口、GPT-6 系列、thinking 不为 off —— extensions/jev-inline-effort.ts:60、70-72、289-290
-- 🧠 段在会话开始、切换模型时清除，下一次请求时显示 —— extensions/jev-inline-effort.ts:296-300、342-378
-- 分类器不可用时提示，这条消息沿用当前强度；需要 OpenRouter 认证 —— extensions/jev-inline-effort.ts:328-331；README.md:59、82
+- 只注册 /personal 一个斜杠命令；各功能设置都在 /personal → 功能 → 二级菜单 —— extensions/pi-personal-extensions.ts:135-144；tests/personal.test.mjs:49、91；README.md（单一入口说明）
+- 菜单路径与设置项 label（自动会话命名 6 项、原位思考强度 5 项含「使用 Jev / d1-ultra 分类模型」、文件路径可点击 10 项、状态栏：额度、会话 ID 与配色「预览并选择配色」加 11 项「应用配色：编号. 名称」）—— extensions/pi-personal-extensions.ts:61-94
+- 设置项只在功能已加载时出现；未加载只有「启用此功能并重载」—— extensions/pi-personal-extensions.ts:167-172
+- /personal switches 或一级菜单「批量功能开关」—— extensions/pi-personal-extensions.ts:156-162、188
+- /reload、/name 是 Pi 自带命令，不受影响 —— README.md:15；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25、49
+- 排查表「怎么做」列改为菜单项：恢复当前会话命名、预览建议标题、查看路径链接设置、打开方式：编辑器名 / file —— extensions/pi-personal-extensions.ts:61-88
+- /name 手动改名后自动命名暂停 —— extensions/auto-session-name.ts:261-266；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25
+- /reload、/name 为 Pi 自带命令 —— README.md:15；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25、49
+- 五个配置文件都在 getAgentDir()：默认 ~/.pi/agent/，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:132；extensions/auto-session-name.ts:61-62；extensions/inline-effort.ts:48；extensions/clickable-paths.ts:235；extensions/statusline.ts:630；README.md:98-108
+- 五个文件的内容 —— README.md:101-105
+- 用 /personal 菜单修改全局设置后自动保存 —— extensions/pi-personal-extensions.ts:234-240；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/clickable-paths.ts:48-55；extensions/statusline.ts:645-650
+- 会话名没变：「查看状态」显示「暂停（保护当前名称）」时，选「恢复当前会话命名」 —— extensions/auto-session-name.ts:469-479、492
+- 打开的会话已有别的名字时自动命名暂停 —— extensions/auto-session-name.ts:234-235、253
+- 命名失败或超时（30 秒）保留原名，连续失败只提示一次，preview 可重试 —— extensions/auto-session-name.ts:292、335-336、366-371；README.md:54
+- Print / JSON 模式不自动命名 —— extensions/auto-session-name.ts:269；README.md:45
+- 额度只支持 openai-codex 和 zai-coding-cn；其他服务商不显示 —— extensions/statusline.ts:14-16、63-68、78-79
+- （本章已不写刷新节奏，见 statusbar 章）额度每 5 分钟刷新，每轮结束后也刷新（30 秒冷却）—— extensions/statusline.ts:11-12、80-86、120-126、128-133、152-155
+- 查询失败保留上次结果 —— extensions/statusline.ts:109-114
+- 🧠 段条件（正文、排查表都写全）：openai-codex-responses 接口、GPT-6 系列、thinking 不为 off —— extensions/inline-effort.ts:70、80-82、299-300
+- 🧠 段在会话开始、切换模型时清除，下一次请求时显示 —— extensions/inline-effort.ts:306-310、352-388
+- 分类器不可用时提示，这条消息沿用当前强度；需要 OpenRouter 认证 —— extensions/inline-effort.ts:338-341；README.md:58、82
 - 只有真实存在的文件变成链接 —— extensions/clickable-paths.ts:85-105
 - 多行代码块（``` 或 ~~~ 围栏）里的路径不转换 —— extensions/clickable-paths.ts:205-226
 - 回复还在输出时不转换，输出完才转换 —— extensions/clickable-paths.ts:245
 - 在别的会话启停功能后，本会话需 /reload —— README.md:28
 - 当前会话通过 /personal 菜单修改路径链接设置：更新当前实例的配置并尝试保存到 clickable-paths.json，之后渲染的消息生效；其他会话修改或手改 clickable-paths.json，本会话要 /reload（配置只在加载时读一次）—— extensions/clickable-paths.ts:235-236、243-249、258-280
-- 需要 /reload 的情况：别的会话启停功能（README.md:28）；别的会话改路径链接设置或手改 clickable-paths.json（clickable-paths.ts:235-236）；手改 personal-extensions.json（pi-personal-extensions.ts:128-129，加载时读取）；刚装好扩展时已打开的会话、改过扩展代码（README.md:15）
-- 不用重载：启停功能后当前会话自动重载（pi-personal-extensions.ts:244）；应用配色后自动重载（statusline-style-picker.ts:311-313）；换分类器后下一条未分类消息生效（jev-inline-effort.ts:280、324）；换命名模型后每次起名都重新读配置（auto-session-name.ts:194）
+- 需要 /reload 的情况：别的会话启停功能（README.md:28）；别的会话改路径链接设置或手改 clickable-paths.json（clickable-paths.ts:235-236）；手改 personal-extensions.json（pi-personal-extensions.ts:132-133，加载时读取）；刚装好扩展时已打开的会话、改过扩展代码（README.md:15）
+- 不用重载：启停功能后当前会话自动重载（pi-personal-extensions.ts:248）；应用配色后自动重载（statusline.ts:234-237）；换分类器后下一条未分类消息生效（inline-effort.ts:290、334）；换命名模型后每次起名都重新读配置（auto-session-name.ts:300）
 - /reload 是 Pi 自带命令，重新加载扩展 —— README.md:15
-- 自动重载（/personal 启停、应用配色）在 Pi 回复或压缩时会被拒绝，结束后再操作或手动 /reload —— Pi/dist/core/agent-session.js:1488；Pi/dist/modes/interactive/interactive-mode.js:1521、5300（usage-codex-2）
-- 「手改过配置文件要 /reload」朗读句为概括；严格说需要重载的是 personal-extensions.json、clickable-paths.json（加载时读取），auto-session-name.json、jev-inline-effort.json 每次使用时重新读取（auto-session-name.ts:194；jev-inline-effort.ts:324）。排查图左栏列的是精确文件名
+- 自动重载（/personal 启停、应用配色）在 Pi 回复或压缩时会被拒绝，结束后再操作或手动 /reload —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:5300-5307（回复或压缩中拒绝 /reload）
+- 「手改过配置文件要 /reload」朗读句为概括；严格说需要重载的是 personal-extensions.json、clickable-paths.json（加载时读取），auto-session-name.json、inline-effort.json 每次使用时重新读取（auto-session-name.ts:300；inline-effort.ts:334）。排查图左栏列的是精确文件名
 - 更新扩展：仓库根目录 git pull，然后 /reload —— README.md:15（修改代码后在 Pi 中执行 /reload）；依赖有变化时先 npm install —— README.md:9-10（推断：依赖变化需要重新安装，未实测）
 - 链接点了没反应：用 /personal → 文件路径可点击 → 打开方式：<vscode|vscode-insiders|cursor|windsurf|file> 换打开方式；file 交给系统默认程序、不跳到行 —— extensions/clickable-paths.ts:61-69、232、266-275；终端需支持点击打开链接 —— extensions/clickable-paths.ts:2-6（输出终端超链接）；换 editor 后要让 Pi 重新输出一个文件路径，在新消息里测试，旧消息里的链接不会更新（Codex 终审）
 - 排查表六行；「路径没变成链接」查文件存在和代码块 —— clickable-paths.ts:85-105、205-226
-- 图中「全局设置的修改自动保存到对应文件；当前会话的命名暂停状态保存在会话记录里」：暂停 / 恢复当前会话命名用 pi.appendEntry 写进会话记录，不写配置文件 —— extensions/auto-session-name.ts:127、363-372；其余全局设置的保存见「自动保存」条
+- 图中「全局设置的修改自动保存到对应文件；当前会话的命名暂停状态保存在会话记录里」：暂停 / 恢复当前会话命名用 pi.appendEntry 写进会话记录，不写配置文件 —— extensions/auto-session-name.ts:233、469-478；其余全局设置的保存见「自动保存」条
+- 配置树里分类器设置文件为 inline-effort.json（旧 jev-inline-effort.json 仍可读）—— extensions/inline-effort.ts:21-35、48
+- 「升级后设置自动迁移」：两个旧状态栏开关合成 statusline，只有两者都为 false 才关闭（一开一关时合并为开启）；jev-inline-effort 映射到 inline-effort；旧分类器配置文件仍可读 —— extensions/pi-personal-extensions.ts:110-127；extensions/inline-effort.ts:21-35
+- 常用设置从 /personal 进入；userMessages 没有菜单项，只能改 clickable-paths.json —— extensions/clickable-paths.ts:30、247；extensions/pi-personal-extensions.ts:77-86

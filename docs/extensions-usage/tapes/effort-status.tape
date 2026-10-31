@@ -1,6 +1,6 @@
 # /personal → 原位思考强度（Jev / d1-ultra） → 查看分类模型与状态。只查看、预览或取消，不保存、不重载、不发送模型消息。
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/effort-status.mp4"
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/effort-status.txt"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/effort-status.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/effort-status.txt"
 Set Width 960
 Set Height 640
 Source "docs/extensions-usage/tapes/_settings.tape"
@@ -17,7 +17,7 @@ Sleep 300ms
 Enter
 Wait+Screen /个人扩展 · 统一管理/
 Sleep 900ms
-Down@130ms 6
+Down@130ms 5
 Sleep 400ms
 Enter
 Sleep 1.1s

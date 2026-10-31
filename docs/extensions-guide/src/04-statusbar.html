@@ -1,27 +1,28 @@
 <section class="chapter" id="ch-statusbar" data-chapter="statusbar" aria-labelledby="ch-statusbar-h">
   <header class="chapter-head">
     <h2 id="ch-statusbar-h">状态栏：额度与配色</h2>
-    <p class="chapter-sum">额度与会话 ID 往状态栏写数据，状态栏风格选择给状态栏换配色。</p>
+    <p class="chapter-sum">「状态栏：额度、会话 ID 与配色」是一项功能、一个开关：往状态栏写额度和会话 ID，也给状态栏换配色。</p>
     <dl class="meta">
-      <dt>功能</dt><dd>额度与会话 ID（<code>substatusline</code>）· 状态栏风格选择（<code>statusline-style-picker</code>）</dd>
-      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏风格选择</dd>
+      <dt>功能</dt><dd>状态栏：额度、会话 ID 与配色（<code>statusline</code>，源码 <code>extensions/statusline.ts</code>）</dd>
+      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏：额度、会话 ID 与配色</dd>
       <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
       <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包</dd>
     </dl>
   </header>
 
-  <!-- ============ 额度与会话 ID：什么时候刷新 ============ -->
+  <!-- ============ 额度：什么时候刷新 ============ -->
   <div class="beat">
     <div class="beat-text">
-      <h3>额度与会话 ID：什么时候刷新</h3>
+      <h3>额度：什么时候刷新</h3>
       <p>
-        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以用额度与会话 ID。它在状态栏写两样东西：会话 ID 的末尾 8 位，和服务商剩余额度。</span>
+        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以开启「状态栏：额度、会话 ID 与配色」。它在状态栏写会话 ID 的末尾 8 位和服务商剩余额度，也提供 11 套配色。</span>
         <span class="seg" data-seg="statusbar-02">会话开始、树导航、切换模型时，扩展立即刷新额度。会话开始或树导航后，定时器每 5 分钟再刷新一次。</span>
         <span class="seg" data-seg="statusbar-03">agent 一轮运行结束时，扩展也刷新额度。如果距上次刷新开始少于 30 秒，扩展跳过这次刷新。</span>
       </p>
       <ul>
         <li>会话 ID 只显示末尾 8 位。Pi 默认用 UUIDv7 生成会话 ID，开头是时间戳，相近时间新建的会话开头相同，所以扩展取末尾。</li>
         <li>切换模型时，扩展取消还没完成的请求。会话关闭时，扩展停止定时器、取消请求，并清空两项状态。</li>
+        <li>这一项由旧版的 <code>substatusline</code> 和 <code>statusline-style-picker</code> 合并而来，只有一个开关 <code>statusline</code>。配置里没有新开关时，由两个旧开关推出：两个都明确为 <code>false</code> 才关闭，否则开启。下次保存开关时只写新键。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
@@ -112,7 +113,7 @@
     </figure>
   </div>
 
-  <!-- ============ 额度与会话 ID：一次刷新 ============ -->
+  <!-- ============ 额度：一次刷新 ============ -->
   <div class="beat">
     <div class="beat-text">
       <h3>一次刷新做什么</h3>
@@ -207,12 +208,12 @@
     </figure>
   </div>
 
-  <!-- ============ 状态栏风格选择：选择器 ============ -->
+  <!-- ============ 配色：选择器 ============ -->
   <div class="beat">
     <div class="beat-text">
-      <h3>状态栏风格选择</h3>
+      <h3>换配色</h3>
       <p>
-        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> → 状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
+        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的「状态栏：额度、会话 ID 与配色」里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> →「状态栏：额度、会话 ID 与配色」里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
         <span class="seg" data-seg="statusbar-09" data-say="选「预览并选择配色」时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">选「预览并选择配色」时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
       </p>
       <ul>
@@ -221,12 +222,12 @@
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏风格选择，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
-      <figcaption>录屏：/personal → 状态栏风格选择 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
     </figure>
   </div>
 
-  <!-- ============ 状态栏风格选择：配色结构 ============ -->
+  <!-- ============ 配色：配色结构 ============ -->
   <div class="beat">
     <div class="beat-text">
       <h3>11 套配色怎么分组</h3>
@@ -305,7 +306,7 @@
     </figure>
   </div>
 
-  <!-- ============ 状态栏风格选择：写入 ============ -->
+  <!-- ============ 配色：写入 ============ -->
   <div class="beat">
     <div class="beat-text">
       <h3>应用配色时写什么</h3>

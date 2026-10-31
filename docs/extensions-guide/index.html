@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pi 个人扩展讲解</title>
-<meta name="description" content="pi-personal-extensions 七项功能的图解与朗读讲解">
+<meta name="description" content="pi-personal-extensions 六项功能的图解与朗读讲解">
 <script>try{var m=localStorage.getItem("guide-theme");if(m==="light"||m==="dark")document.documentElement.dataset.theme=m}catch(e){}</script>
 <style>
 /* 讲解页样式：Stripe Docs 式的双栏阅读（左文右图），全宽，跟随系统深浅色并可手动切换。 */
@@ -413,7 +413,7 @@ svg text { font-family: var(--font-sans); }
   </a>
   <span class="spacer"></span>
   <details class="mtoc"><summary>章节</summary><ol>
-    <li><a href="#ch-overview">总览：Pi 屏幕上的七项功能</a></li>
+    <li><a href="#ch-overview">总览：Pi 屏幕上的六项功能</a></li>
     <li><a href="#ch-entry">统一入口：按开关加载，一个菜单管理</a></li>
     <li><a href="#ch-message">消息区：路径链接和橙色线框</a></li>
     <li><a href="#ch-statusbar">状态栏：额度与配色</a></li>
@@ -432,7 +432,7 @@ svg text { font-family: var(--font-sans); }
   <nav class="sidebar" aria-label="章节">
     <h2>章节</h2>
     <ol class="toc">
-      <li><a href="#ch-overview" title="总览：Pi 屏幕上的七项功能"><span>总览</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
+      <li><a href="#ch-overview" title="总览：Pi 屏幕上的六项功能"><span>总览</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-entry" title="统一入口：按开关加载，一个菜单管理"><span>统一入口</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-message" title="消息区：路径链接和橙色线框"><span>消息区</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-statusbar" title="状态栏：额度与配色"><span>状态栏</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
@@ -444,9 +444,9 @@ svg text { font-family: var(--font-sans); }
   </nav>
 
   <main>
-    <section class="hero" aria-labelledby="hero-h" data-brand="扩展讲解" data-title="Pi 个人扩展讲解" data-description="pi-personal-extensions 七项功能的图解与朗读讲解">
+    <section class="hero" aria-labelledby="hero-h" data-brand="扩展讲解" data-title="Pi 个人扩展讲解" data-description="pi-personal-extensions 六项功能的图解与朗读讲解">
       <div>
-        <h1 id="hero-h">一个入口，七项功能</h1>
+        <h1 id="hero-h">一个入口，六项功能</h1>
         <p>这页用图和朗读讲清 <code>pi-personal-extensions</code> 的每项功能：它做什么、怎么触发、靠什么机制、有哪些边界和代价。朗读时，正在读的句子会高亮，图表跟着逐步点亮。</p>
         <div class="actions">
           <button class="btn is-primary" type="button" id="hero-play"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5l9 5.5-9 5.5z" fill="currentColor"/></svg><span>从头朗读全文</span></button>
@@ -461,8 +461,8 @@ svg text { font-family: var(--font-sans); }
     </section>
 <section class="chapter" id="ch-overview" data-chapter="overview" aria-labelledby="ch-overview-h">
   <header class="chapter-head">
-    <h2 id="ch-overview-h"><span class="seg" data-seg="overview-00">总览：Pi&nbsp;屏幕上的七项功能</span></h2>
-    <p class="chapter-sum">七项功能各改 Pi 屏幕的哪一块，由哪一章讲。</p>
+    <h2 id="ch-overview-h"><span class="seg" data-seg="overview-00">总览：Pi&nbsp;屏幕上的六项功能</span></h2>
+    <p class="chapter-sum">六项功能各改 Pi 屏幕的哪一块，由哪一章讲。</p>
     <dl class="meta">
       <dt>入口文件</dt><dd><code>extensions/pi-personal-extensions.ts</code></dd>
       <dt>管理命令</dt><dd><code>/personal</code></dd>
@@ -473,24 +473,24 @@ svg text { font-family: var(--font-sans); }
   <div class="beat">
     <div class="beat-text">
       <p>
-        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共七项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共七项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
-        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载七项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载七项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
+        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共六项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共六项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
+        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载六项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载六项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
       </p>
       <ul>
         <li><span class="seg" data-seg="overview-03" data-say="看图。消息区有两项：用户消息橙色线框，和文件路径可点击。">消息区有两项：用户消息橙色线框，和文件路径可点击。</span></li>
-        <li><span class="seg" data-seg="overview-04" data-say="状态栏有两项：额度与会话 ID 写进扩展状态行，状态栏风格选择给 pi statusline 那一行换配色。">状态栏有两项：额度与会话 ID 写进扩展状态行，状态栏风格选择给 pi-statusline 那一行换配色。</span></li>
+        <li><span class="seg" data-seg="overview-04" data-say="状态栏由一项功能负责：它把额度和会话 ID 写进扩展状态行，还给 pi statusline 那一行换配色。">状态栏由一项功能负责：它把额度和会话 ID 写进扩展状态行，还给 pi-statusline 那一行换配色。</span></li>
         <li><span class="seg" data-seg="overview-05">输入框下方的会话名由右下角会话标题显示；自动会话命名在一轮正常结束后，用命名模型在后台起名。</span></li>
         <li><span class="seg" data-seg="overview-06" data-say="状态栏里带大脑图标的那一段来自原位思考强度。它只在 GPT 六系列模型上，为新用户消息选择思考强度。">状态栏里的 🧠 段来自原位思考强度。它只在 GPT-6 系列模型上，为新用户消息选择思考强度。</span></li>
       </ul>
       <p>
-        <span class="seg" data-seg="overview-07">七项功能默认全部开启，每一项都能单独关闭。</span>
+        <span class="seg" data-seg="overview-07">六项功能默认全部开启，每一项都能单独关闭。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-overview-1">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 488" width="100%" role="img" aria-labelledby="fig-overview-1-title fig-overview-1-desc">
-          <title id="fig-overview-1-title">Pi 屏幕地图：七项功能的位置</title>
-          <desc id="fig-overview-1-desc">Pi 终端界面从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击（第 3 章）；输入框下方有右下角会话标题和自动会话命名（第 5 章）；状态栏有额度与会话 ID 和状态栏风格选择（第 4 章）；状态栏的 🧠 段来自原位思考强度（第 6 章）；界面外的 /personal 命令统一启停（第 2 章）。</desc>
+          <title id="fig-overview-1-title">Pi 屏幕地图：六项功能的位置</title>
+          <desc id="fig-overview-1-desc">Pi 终端界面从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击（第 3 章）；输入框下方有右下角会话标题和自动会话命名（第 5 章）；状态栏的额度、会话 ID 和配色由「状态栏：额度、会话 ID 与配色」负责（第 4 章）；状态栏的 🧠 段来自原位思考强度（第 6 章）；界面外的 /personal 命令统一启停（第 2 章）。</desc>
           <defs>
             <marker id="fig-overview-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -517,7 +517,7 @@ svg text { font-family: var(--font-sans); }
             <rect class="n is-focal" x="16" y="24" width="440" height="48" rx="6"/>
             <text class="t-mono" x="32" y="45">/personal</text>
             <text class="t-sub" x="440" y="45" text-anchor="end">第 2 章</text>
-            <text class="t-cap" x="32" y="63">按开关加载七项功能，统一启停和设置</text>
+            <text class="t-cap" x="32" y="63">按开关加载六项功能，统一启停和设置</text>
           </g>
 
           <!-- 消息区 -->
@@ -535,7 +535,7 @@ svg text { font-family: var(--font-sans); }
             <text class="t-cap" x="500" y="182">文件路径可点击</text>
           </g>
 
-          <!-- 状态栏：第一行配色、第二行额度与会话 ID -->
+          <!-- 状态栏：一项功能，第一行配色、第二行额度与会话 ID -->
           <g data-cue="overview-04">
             <rect x="32" y="372" width="168" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
             <text class="t-sub" x="40" y="386" style="fill:var(--ink)">gpt-6.1-sol ❯ medium</text>
@@ -549,8 +549,8 @@ svg text { font-family: var(--font-sans); }
             <rect class="n" x="488" y="312" width="144" height="72" rx="6"/>
             <text class="t" x="500" y="334">状态栏</text>
             <text class="t-sub" x="620" y="334" text-anchor="end">第 4 章</text>
-            <text class="t-cap" x="500" y="356">额度与会话 ID</text>
-            <text class="t-cap" x="500" y="374">状态栏风格选择</text>
+            <text class="t-cap" x="500" y="356">额度、会话 ID</text>
+            <text class="t-cap" x="500" y="374">与配色（一项功能）</text>
           </g>
 
           <!-- 输入框下方：会话名 -->
@@ -600,12 +600,13 @@ svg text { font-family: var(--font-sans); }
       <h3>加载：只注册开启的功能</h3>
       <p>
         <span class="seg" data-seg="entry-01" data-say="看图左上角。Pi 加载入口时，入口先读 agent 目录下的 personal extensions 点 json。agent 目录默认是主目录下的点 pi 斜杠 agent。">Pi 加载入口时，入口先读 agent 目录下的 <code>personal-extensions.json</code>。agent 目录默认是 <code>~/.pi/agent/</code>。</span>
-        <span class="seg" data-seg="entry-02">如果文件不存在，七项全开。如果文件不是 JSON 对象，或某个开关不是布尔值，入口抛出错误。</span>
+        <span class="seg" data-seg="entry-02">如果文件不存在，六项全开。如果文件不是 JSON 对象，或某个开关不是布尔值，入口抛出错误。</span>
         <span class="seg" data-seg="entry-03">接着入口遍历 features，只对开启的功能调用 register。</span>
       </p>
       <ul>
         <li>设置 <code>PI_CODING_AGENT_DIR</code> 后，agent 目录改用该变量指定的目录。</li>
         <li>多出的键（例如已移除的 <code>terminal-title</code>）被忽略；加载时不改写文件。</li>
+        <li>旧开关自动映射：<code>substatusline</code> 和 <code>statusline-style-picker</code> 合成 <code>statusline</code>，两个都为 <code>false</code> 才关闭；<code>jev-inline-effort</code> 映射到 <code>inline-effort</code>。新键存在时以新键为准；下次保存只写六个新键。</li>
         <li>文件无法读取或 JSON 解析失败，同样抛错。抛错发生在注册之前，这次加载什么都不注册，包括 <code>/personal</code>。</li>
       </ul>
     </div>
@@ -613,7 +614,7 @@ svg text { font-family: var(--font-sans); }
       <div class="fig-scroll">
         <svg viewBox="0 0 640 448" width="100%" role="img" aria-labelledby="fig-entry-1-title fig-entry-1-desc">
           <title id="fig-entry-1-title">入口加载流程</title>
-          <desc id="fig-entry-1-desc">入口读取开关文件，格式错误时抛出错误；合成七个开关后遍历功能，关闭的跳过，开启的调用 register 并传入 featureApi；最后注册 /personal。</desc>
+          <desc id="fig-entry-1-desc">入口读取开关文件，格式错误时抛出错误；合成六个开关后遍历功能，关闭的跳过，开启的调用 register 并传入 featureApi；最后注册 /personal。</desc>
           <defs>
             <marker id="fig-entry-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -639,8 +640,8 @@ svg text { font-family: var(--font-sans); }
             <text class="t-sub" x="376" y="62">非 JSON 对象 / 非布尔值</text>
             <path class="w is-flow" d="M152 160 V200" style="marker-end:url(#fig-entry-1-arrow)"/>
             <rect class="n" x="24" y="112" width="256" height="48" rx="6"/>
-            <text class="t" x="40" y="132">合成七个开关</text>
-            <text class="t-sub" x="40" y="150">文件或键缺失时为 true</text>
+            <text class="t" x="40" y="132">合成六个开关</text>
+            <text class="t-sub" x="40" y="150">先继承旧键，无可继承才为 true</text>
           </g>
 
           <g data-cue="entry-03">
@@ -778,12 +779,12 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>菜单：一级选功能，二级选操作</h3>
       <p>
-        <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出七项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出七项功能和加载状态，最后一行是「批量功能开关」。</span>
+        <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出六项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出六项功能和加载状态，最后一行是「批量功能开关」。</span>
         <span class="seg" data-seg="entry-09">如果选中已加载的功能，二级菜单列出 actions 表里的设置项，最后一项是「禁用此功能并重载」。</span>
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。</span>
       </p>
       <ul>
-        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 5 项、文件路径可点击 10 项、状态栏风格选择 12 项（预览选择，加 11 套配色直接应用）。其余三项的二级菜单只有启停。</li>
+        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 5 项、文件路径可点击 10 项、状态栏 12 项（预览选择，加 11 套配色直接应用）。其余两项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -800,10 +801,9 @@ const featureApi = Object.assign(Object.create(pi), {
           <ol data-role="l1">
             <li>右下角会话标题 · 已加载</li>
             <li>自动会话命名 · 已加载</li>
-            <li>额度与会话 ID · 已加载</li>
+            <li>状态栏：额度、会话 ID 与配色 · 已加载</li>
             <li>文件路径可点击 · 已加载</li>
             <li>用户消息橙色线框 · 已加载</li>
-            <li>状态栏风格选择 · 已加载</li>
             <li>原位思考强度（Jev / d1-ultra） · 已加载</li>
             <li>批量功能开关</li>
           </ol>
@@ -931,8 +931,8 @@ const featureApi = Object.assign(Object.create(pi), {
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="personal-switches" id="fig-entry-5">
-      <div class="capture-frame"><video data-cue="entry-16" src="media/personal-switches.mp4" poster="media/personal-switches.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal switches，把额度与会话 ID 切换为关闭，再按 Esc 放弃"></video></div>
-      <figcaption>真实 Pi 录屏：把「额度与会话 ID」切到关闭，再按 Esc 放弃。</figcaption>
+      <div class="capture-frame"><video data-cue="entry-16" src="media/personal-switches.mp4" poster="media/personal-switches.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /personal switches，下移到状态栏：额度、会话 ID 与配色，按空格切成关闭，再按 Esc 放弃"></video></div>
+      <figcaption>真实 Pi 录屏：把「状态栏：额度、会话 ID 与配色」切到关闭，再按 Esc 放弃。</figcaption>
     </figure>
   </div>
 
@@ -957,10 +957,9 @@ const featureApi = Object.assign(Object.create(pi), {
       const features = [
         { label: "右下角会话标题", command: null, actions: [] },
         { label: "自动会话命名", command: "auto-name", actions: ac("auto-name", [["查看状态", "status"], ["选择命名模型", "model"], ["选择命名思考强度", "thinking"], ["预览建议标题", "preview"], ["暂停当前会话命名", "off"], ["恢复当前会话命名", "on"]]) },
-        { label: "额度与会话 ID", command: null, actions: [] },
+        { label: "状态栏：额度、会话 ID 与配色", command: "statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""], ...STYLE_NAMES.map((n, i) => [`应用配色：${i + 1}. ${n}`, String(i + 1)])]) },
         { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
-        { label: "状态栏风格选择", command: "statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""], ...STYLE_NAMES.map((n, i) => [`应用配色：${i + 1}. ${n}`, String(i + 1)])]) },
         { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["使用 Jev 分类模型", "model jev"], ["使用 d1-ultra 分类模型", "model d1-ultra"], ["测试分类模型可用性", "test"]]) },
       ];
       const on = features.map(() => true);
@@ -1569,27 +1568,28 @@ const featureApi = Object.assign(Object.create(pi), {
 <section class="chapter" id="ch-statusbar" data-chapter="statusbar" aria-labelledby="ch-statusbar-h">
   <header class="chapter-head">
     <h2 id="ch-statusbar-h"><span class="seg" data-seg="statusbar-00">状态栏：额度与配色</span></h2>
-    <p class="chapter-sum">额度与会话 ID 往状态栏写数据，状态栏风格选择给状态栏换配色。</p>
+    <p class="chapter-sum">「状态栏：额度、会话 ID 与配色」是一项功能、一个开关：往状态栏写额度和会话 ID，也给状态栏换配色。</p>
     <dl class="meta">
-      <dt>功能</dt><dd>额度与会话 ID（<code>substatusline</code>）· 状态栏风格选择（<code>statusline-style-picker</code>）</dd>
-      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏风格选择</dd>
+      <dt>功能</dt><dd>状态栏：额度、会话 ID 与配色（<code>statusline</code>，源码 <code>extensions/statusline.ts</code>）</dd>
+      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏：额度、会话 ID 与配色</dd>
       <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
       <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包</dd>
     </dl>
   </header>
 
-  <!-- ============ 额度与会话 ID：什么时候刷新 ============ -->
+  <!-- ============ 额度：什么时候刷新 ============ -->
   <div class="beat">
     <div class="beat-text">
-      <h3>额度与会话 ID：什么时候刷新</h3>
+      <h3>额度：什么时候刷新</h3>
       <p>
-        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以用额度与会话 ID。它在状态栏写两样东西：会话 ID 的末尾 8 位，和服务商剩余额度。</span>
+        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以开启「状态栏：额度、会话 ID 与配色」。它在状态栏写会话 ID 的末尾 8 位和服务商剩余额度，也提供 11 套配色。</span>
         <span class="seg" data-seg="statusbar-02">会话开始、树导航、切换模型时，扩展立即刷新额度。会话开始或树导航后，定时器每 5 分钟再刷新一次。</span>
         <span class="seg" data-seg="statusbar-03">agent 一轮运行结束时，扩展也刷新额度。如果距上次刷新开始少于 30 秒，扩展跳过这次刷新。</span>
       </p>
       <ul>
         <li>会话 ID 只显示末尾 8 位。Pi 默认用 UUIDv7 生成会话 ID，开头是时间戳，相近时间新建的会话开头相同，所以扩展取末尾。</li>
         <li>切换模型时，扩展取消还没完成的请求。会话关闭时，扩展停止定时器、取消请求，并清空两项状态。</li>
+        <li>这一项由旧版的 <code>substatusline</code> 和 <code>statusline-style-picker</code> 合并而来，只有一个开关 <code>statusline</code>。配置里没有新开关时，由两个旧开关推出：两个都明确为 <code>false</code> 才关闭，否则开启。下次保存开关时只写新键。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
@@ -1680,7 +1680,7 @@ const featureApi = Object.assign(Object.create(pi), {
     </figure>
   </div>
 
-  <!-- ============ 额度与会话 ID：一次刷新 ============ -->
+  <!-- ============ 额度：一次刷新 ============ -->
   <div class="beat">
     <div class="beat-text">
       <h3>一次刷新做什么</h3>
@@ -1775,12 +1775,12 @@ const featureApi = Object.assign(Object.create(pi), {
     </figure>
   </div>
 
-  <!-- ============ 状态栏风格选择：选择器 ============ -->
+  <!-- ============ 配色：选择器 ============ -->
   <div class="beat">
     <div class="beat-text">
-      <h3>状态栏风格选择</h3>
+      <h3>换配色</h3>
       <p>
-        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> → 状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
+        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的「状态栏：额度、会话 ID 与配色」里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> →「状态栏：额度、会话 ID 与配色」里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
         <span class="seg" data-seg="statusbar-09" data-say="选「预览并选择配色」时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">选「预览并选择配色」时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
       </p>
       <ul>
@@ -1789,12 +1789,12 @@ const featureApi = Object.assign(Object.create(pi), {
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏风格选择，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
-      <figcaption>录屏：/personal → 状态栏风格选择 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：/personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
     </figure>
   </div>
 
-  <!-- ============ 状态栏风格选择：配色结构 ============ -->
+  <!-- ============ 配色：配色结构 ============ -->
   <div class="beat">
     <div class="beat-text">
       <h3>11 套配色怎么分组</h3>
@@ -1873,7 +1873,7 @@ const featureApi = Object.assign(Object.create(pi), {
     </figure>
   </div>
 
-  <!-- ============ 状态栏风格选择：写入 ============ -->
+  <!-- ============ 配色：写入 ============ -->
   <div class="beat">
     <div class="beat-text">
       <h3>应用配色时写什么</h3>
@@ -2769,9 +2769,9 @@ const featureApi = Object.assign(Object.create(pi), {
     <h2 id="ch-effort-h"><span class="seg" data-seg="effort-00">原位思考强度：按消息选档位</span></h2>
     <p class="chapter-sum">按每条新用户消息调整 GPT-6 系列的思考档位。顶层参数保持基线，档位写进 input 里这条消息的位置。</p>
     <dl class="meta">
-      <dt>功能 ID</dt><dd><code>jev-inline-effort</code></dd>
+      <dt>功能 ID</dt><dd><code>inline-effort</code></dd>
       <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
-      <dt>配置</dt><dd>默认 <code>~/.pi/agent/jev-inline-effort.json</code>，目录跟随 <code>PI_CODING_AGENT_DIR</code></dd>
+      <dt>配置</dt><dd>默认 <code>~/.pi/agent/inline-effort.json</code>，目录跟随 <code>PI_CODING_AGENT_DIR</code>；兼容读取旧的 <code>jev-inline-effort.json</code></dd>
       <dt>分类器</dt><dd>Jev（默认）· d1-ultra</dd>
     </dl>
   </header>
@@ -3123,7 +3123,7 @@ const featureApi = Object.assign(Object.create(pi), {
         </svg>
       </div>
       <ul class="fig-notes">
-        <li>决策条目类型是 <code>jev-inline-effort</code>，内容是 <code>{ timestamp, thinkingLevel, classifier }</code>。</li>
+        <li>决策条目类型沿用旧名 <code>jev-inline-effort</code>，旧会话可以直接恢复；内容是 <code>{ timestamp, thinkingLevel, classifier }</code>。</li>
         <li>会话开始、退出和切换模型时，扩展清掉状态栏里的 🧠 段，并取消进行中的分类。</li>
       </ul>
       <figcaption>示例。分支 b 读不到 U2 的决策。</figcaption>
@@ -3192,6 +3192,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="effort-20" data-say="在斜杠 personal 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">在 <code>/personal</code> 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
         <span class="seg" data-seg="effort-21" data-say="「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 D1 Ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。">「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 d1-ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。</span>
         <span class="seg" data-seg="effort-22">「测试分类模型可用性」用固定样例测试分类器，不写决策。Pi 运行 agent 时，选择和测试都不可用。</span>
+        <span class="seg" data-seg="effort-23" data-say="功能 ID 从 jev inline effort 改为 inline effort。旧的开关和配置文件仍能读取，保存时只写新文件；会话里的决策条目沿用旧类型名，旧会话可以直接恢复。">功能 ID 从 <code>jev-inline-effort</code> 改为 <code>inline-effort</code>。旧的开关和配置文件仍能读取，保存时只写新文件；会话里的决策条目沿用旧类型名，旧会话可以直接恢复。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-7">
@@ -3209,6 +3210,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <li>菜单路径：<code>/personal</code> → 原位思考强度（Jev / d1-ultra）→ 菜单项。<code>/personal</code> 有 UI 就能用（TUI、RPC）。</li>
         <li>这些菜单项调用功能自己的处理函数。处理函数只存在 <code>/personal</code> 的 commands 表里，不再注册成斜杠命令，所以没有 <code>/effort</code>。</li>
         <li>配置文件格式错误时，扩展报错，不退回 Jev；在「选择分类模型」里重新保存即可修复。</li>
+        <li>兼容规则：<code>inline-effort.json</code> 不存在时才读 <code>jev-inline-effort.json</code>；新文件格式错误时报错，不回退旧文件；旧文件保留不改写。开关新键 <code>inline-effort</code> 存在时以新键为准，否则读旧键 <code>jev-inline-effort</code>。</li>
         <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
       </ul>
       <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
@@ -3220,8 +3222,8 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>子代理与代价</h3>
       <p>
-        <span class="seg" data-seg="effort-23">子代理要加载本扩展才会分类，基线取子代理自己的 thinking 设置。外部 CLI 代理不经过本扩展。</span>
-        <span class="seg" data-seg="effort-24" data-say="代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。D1 Ultra 是付费模型。">代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-24">子代理要加载本扩展才会分类，基线取子代理自己的 thinking 设置。外部 CLI 代理不经过本扩展。</span>
+        <span class="seg" data-seg="effort-25" data-say="代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。D1 Ultra 是付费模型。">代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。d1-ultra 是付费模型。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-8">
@@ -3242,7 +3244,7 @@ const featureApi = Object.assign(Object.create(pi), {
           <rect class="n" x="464" y="36" width="160" height="48" rx="6"/>
           <text class="t" x="544" y="56" text-anchor="middle">主请求</text>
           <text class="t-sub" x="544" y="73" text-anchor="middle">GPT-6 系列</text>
-          <g data-cue="effort-24">
+          <g data-cue="effort-25">
             <path d="M200 96 V100 H400 V96" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
             <text class="t-cap" x="300" y="122" text-anchor="middle">等待：用户要等分类，最多 15 秒</text>
             <text class="t-cap" x="300" y="142" text-anchor="middle">额度：消耗 OpenRouter 额度，d1-ultra 付费</text>
@@ -3283,7 +3285,7 @@ const featureApi = Object.assign(Object.create(pi), {
         const out = (key) => form.querySelector(`[data-out="${key}"]`);
         const LEVELS = ["low", "medium", "high", "xhigh", "max"];
         const IDS = { "Jev": "~typesafe/jev-latest", "d1-ultra": "liquid/d1-ultra" };
-        // 与 extensions/jev-inline-effort.ts 一致：第一条消息时当前强度等于基线（:316），警告见 :330，状态栏见 :352、:378。
+        // 与 extensions/inline-effort.ts 一致：第一条消息时当前强度等于基线（:326），警告见 :340，状态栏见 :362、:388。
         const render = () => {
           const base = form.base.value;
           const name = form.model.value;
@@ -3413,6 +3415,7 @@ npm view &lt;包名&gt; version \
       </p>
       <ul>
         <li>五个文件的路径都由 Pi 的 <code>getAgentDir()</code> 决定。</li>
+        <li>分类器设置从旧名 <code>jev-inline-effort.json</code> 改为 <code>inline-effort.json</code>。新文件不存在时才读旧文件；旧文件不删除、不改写，保存只写新文件。</li>
         <li><code>clickable-paths.json</code> 直接覆盖写入、失败不报错；其余四个先写临时文件再 rename。命名和分类器设置不改 Pi 的 <code>settings.json</code>。</li>
       </ul>
     </div>
@@ -3435,7 +3438,7 @@ npm view &lt;包名&gt; version \
             <text class="t-mono" x="348" y="109">auto-session-name.json</text>
             <text class="t-cap" x="604" y="109" text-anchor="end">命名设置</text>
             <rect class="n" x="336" y="148" width="280" height="40" rx="6"/>
-            <text class="t-mono" x="348" y="173">jev-inline-effort.json</text>
+            <text class="t-mono" x="348" y="173">inline-effort.json</text>
             <text class="t-cap" x="604" y="173" text-anchor="end">分类器设置</text>
             <rect class="n" x="336" y="212" width="280" height="40" rx="6"/>
             <text class="t-mono" x="348" y="237">clickable-paths.json</text>
@@ -3541,7 +3544,7 @@ npm view &lt;包名&gt; version \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=7dffbfe3","duration":1123.16,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.44},{"id":"overview-01","ch":"overview","start":3.76,"end":12.48},{"id":"overview-02","ch":"overview","start":12.8,"end":23.44},{"id":"overview-03","ch":"overview","start":23.76,"end":30.56},{"id":"overview-04","ch":"overview","start":30.88,"end":40.08},{"id":"overview-05","ch":"overview","start":40.4,"end":50.48},{"id":"overview-06","ch":"overview","start":50.8,"end":60.64},{"id":"overview-07","ch":"overview","start":60.96,"end":66},{"id":"entry-00","ch":"entry","start":66.9,"end":70.18},{"id":"entry-01","ch":"entry","start":70.5,"end":83.06},{"id":"entry-02","ch":"entry","start":83.38,"end":92.5},{"id":"entry-03","ch":"entry","start":92.82,"end":97.62},{"id":"entry-04","ch":"entry","start":97.94,"end":102.5},{"id":"entry-05","ch":"entry","start":102.82,"end":108.82},{"id":"entry-06","ch":"entry","start":109.14,"end":115.14},{"id":"entry-07","ch":"entry","start":115.46,"end":123.3},{"id":"entry-08","ch":"entry","start":123.62,"end":131.06},{"id":"entry-09","ch":"entry","start":131.38,"end":140.34},{"id":"entry-10","ch":"entry","start":140.66,"end":147.06},{"id":"entry-11","ch":"entry","start":147.38,"end":153.86},{"id":"entry-12","ch":"entry","start":154.18,"end":158.5},{"id":"entry-13","ch":"entry","start":158.82,"end":166.02},{"id":"entry-14","ch":"entry","start":166.34,"end":172.74},{"id":"entry-15","ch":"entry","start":173.06,"end":180.98},{"id":"entry-16","ch":"entry","start":181.3,"end":190.26},{"id":"entry-17","ch":"entry","start":190.58,"end":202.02},{"id":"message-00","ch":"message","start":202.92,"end":205.96},{"id":"message-01","ch":"message","start":206.28,"end":217.56},{"id":"message-02","ch":"message","start":217.88,"end":226.36},{"id":"message-03","ch":"message","start":226.68,"end":234.28},{"id":"message-04","ch":"message","start":234.6,"end":246.44},{"id":"message-05","ch":"message","start":246.76,"end":254.6},{"id":"message-06","ch":"message","start":254.92,"end":263.4},{"id":"message-07","ch":"message","start":263.72,"end":272.52},{"id":"message-08","ch":"message","start":272.84,"end":287.16},{"id":"message-09","ch":"message","start":287.48,"end":297.96},{"id":"message-10","ch":"message","start":298.28,"end":306.44},{"id":"message-11","ch":"message","start":306.76,"end":315.56},{"id":"message-12","ch":"message","start":315.88,"end":330.52},{"id":"message-13","ch":"message","start":330.84,"end":338.84},{"id":"message-14","ch":"message","start":339.16,"end":349.96},{"id":"message-15","ch":"message","start":350.28,"end":356.84},{"id":"message-16","ch":"message","start":357.16,"end":365.32},{"id":"message-17","ch":"message","start":365.64,"end":372.04},{"id":"message-18","ch":"message","start":372.36,"end":375.96},{"id":"message-19","ch":"message","start":376.28,"end":383.64},{"id":"message-20","ch":"message","start":383.96,"end":389.88},{"id":"statusbar-00","ch":"statusbar","start":390.78,"end":393.26},{"id":"statusbar-01","ch":"statusbar","start":393.58,"end":405.9},{"id":"statusbar-02","ch":"statusbar","start":406.22,"end":416.78},{"id":"statusbar-03","ch":"statusbar","start":417.1,"end":425.58},{"id":"statusbar-04","ch":"statusbar","start":425.9,"end":433.98},{"id":"statusbar-05","ch":"statusbar","start":434.3,"end":442.78},{"id":"statusbar-06","ch":"statusbar","start":443.1,"end":458.78},{"id":"statusbar-07","ch":"statusbar","start":459.1,"end":466.86},{"id":"statusbar-08","ch":"statusbar","start":467.18,"end":482.22},{"id":"statusbar-09","ch":"statusbar","start":482.54,"end":493.34},{"id":"statusbar-10","ch":"statusbar","start":493.66,"end":501.82},{"id":"statusbar-11","ch":"statusbar","start":502.14,"end":508.46},{"id":"statusbar-12","ch":"statusbar","start":508.78,"end":515.26},{"id":"statusbar-13","ch":"statusbar","start":515.58,"end":520.78},{"id":"statusbar-14","ch":"statusbar","start":521.1,"end":528.94},{"id":"statusbar-15","ch":"statusbar","start":529.26,"end":537.34},{"id":"title-00","ch":"title","start":538.24,"end":541.68},{"id":"title-01","ch":"title","start":542,"end":551.36},{"id":"title-02","ch":"title","start":551.68,"end":566.96},{"id":"title-03","ch":"title","start":567.28,"end":575.2},{"id":"title-04","ch":"title","start":575.52,"end":585.52},{"id":"title-05","ch":"title","start":585.84,"end":594},{"id":"title-06","ch":"title","start":594.32,"end":603.92},{"id":"title-07","ch":"title","start":604.24,"end":614.64},{"id":"title-08","ch":"title","start":614.96,"end":626.64},{"id":"title-09","ch":"title","start":626.96,"end":637.84},{"id":"title-10","ch":"title","start":638.16,"end":643.28},{"id":"title-11","ch":"title","start":643.6,"end":651.28},{"id":"title-12","ch":"title","start":651.6,"end":659.44},{"id":"title-13","ch":"title","start":659.76,"end":667.2},{"id":"title-14","ch":"title","start":667.52,"end":677.84},{"id":"title-15","ch":"title","start":678.16,"end":687.76},{"id":"title-16","ch":"title","start":688.08,"end":700.32},{"id":"title-17","ch":"title","start":700.64,"end":705.52},{"id":"title-18","ch":"title","start":705.84,"end":711.36},{"id":"title-19","ch":"title","start":711.68,"end":718.32},{"id":"title-20","ch":"title","start":718.64,"end":728},{"id":"title-21","ch":"title","start":728.32,"end":734.08},{"id":"title-22","ch":"title","start":734.4,"end":745.92},{"id":"title-23","ch":"title","start":746.24,"end":754.48},{"id":"title-24","ch":"title","start":754.8,"end":762.8},{"id":"title-25","ch":"title","start":763.12,"end":775.44},{"id":"title-26","ch":"title","start":775.76,"end":784.08},{"id":"title-27","ch":"title","start":784.4,"end":792.72},{"id":"effort-00","ch":"effort","start":793.62,"end":797.22},{"id":"effort-01","ch":"effort","start":797.54,"end":815.06},{"id":"effort-02","ch":"effort","start":815.38,"end":828.42},{"id":"effort-03","ch":"effort","start":828.74,"end":841.06},{"id":"effort-04","ch":"effort","start":841.38,"end":844.58},{"id":"effort-05","ch":"effort","start":844.9,"end":854.9},{"id":"effort-06","ch":"effort","start":855.22,"end":864.18},{"id":"effort-07","ch":"effort","start":864.5,"end":868.58},{"id":"effort-08","ch":"effort","start":868.9,"end":872.9},{"id":"effort-09","ch":"effort","start":873.22,"end":883.06},{"id":"effort-10","ch":"effort","start":883.38,"end":897.7},{"id":"effort-11","ch":"effort","start":898.02,"end":912.66},{"id":"effort-12","ch":"effort","start":912.98,"end":925.62},{"id":"effort-13","ch":"effort","start":925.94,"end":938.26},{"id":"effort-14","ch":"effort","start":938.58,"end":947.78},{"id":"effort-15","ch":"effort","start":948.1,"end":962.1},{"id":"effort-16","ch":"effort","start":962.42,"end":976.5},{"id":"effort-17","ch":"effort","start":976.82,"end":984.58},{"id":"effort-18","ch":"effort","start":984.9,"end":998.58},{"id":"effort-19","ch":"effort","start":998.9,"end":1009.54},{"id":"effort-20","ch":"effort","start":1009.86,"end":1023.46},{"id":"effort-21","ch":"effort","start":1023.78,"end":1036.98},{"id":"effort-22","ch":"effort","start":1037.3,"end":1046.9},{"id":"effort-23","ch":"effort","start":1047.22,"end":1056.82},{"id":"effort-24","ch":"effort","start":1057.14,"end":1069.06},{"id":"setup-00","ch":"setup","start":1069.96,"end":1072.04},{"id":"setup-01","ch":"setup","start":1072.36,"end":1081.8},{"id":"setup-02","ch":"setup","start":1082.12,"end":1088.84},{"id":"setup-03","ch":"setup","start":1089.16,"end":1095.32},{"id":"setup-04","ch":"setup","start":1095.64,"end":1102.6},{"id":"setup-05","ch":"setup","start":1102.92,"end":1107.32},{"id":"setup-06","ch":"setup","start":1107.64,"end":1117.96},{"id":"setup-07","ch":"setup","start":1118.28,"end":1123.16}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=e6206cd6","duration":1141.64,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.28},{"id":"overview-01","ch":"overview","start":3.6,"end":12.4},{"id":"overview-02","ch":"overview","start":12.72,"end":24.48},{"id":"overview-03","ch":"overview","start":24.8,"end":31.6},{"id":"overview-04","ch":"overview","start":31.92,"end":41.2},{"id":"overview-05","ch":"overview","start":41.52,"end":51.6},{"id":"overview-06","ch":"overview","start":51.92,"end":61.76},{"id":"overview-07","ch":"overview","start":62.08,"end":66.96},{"id":"entry-00","ch":"entry","start":67.86,"end":71.14},{"id":"entry-01","ch":"entry","start":71.46,"end":84.02},{"id":"entry-02","ch":"entry","start":84.34,"end":92.98},{"id":"entry-03","ch":"entry","start":93.3,"end":98.1},{"id":"entry-04","ch":"entry","start":98.42,"end":102.98},{"id":"entry-05","ch":"entry","start":103.3,"end":109.3},{"id":"entry-06","ch":"entry","start":109.62,"end":115.62},{"id":"entry-07","ch":"entry","start":115.94,"end":123.78},{"id":"entry-08","ch":"entry","start":124.1,"end":131.3},{"id":"entry-09","ch":"entry","start":131.62,"end":140.58},{"id":"entry-10","ch":"entry","start":140.9,"end":147.3},{"id":"entry-11","ch":"entry","start":147.62,"end":154.1},{"id":"entry-12","ch":"entry","start":154.42,"end":158.74},{"id":"entry-13","ch":"entry","start":159.06,"end":166.26},{"id":"entry-14","ch":"entry","start":166.58,"end":172.98},{"id":"entry-15","ch":"entry","start":173.3,"end":181.22},{"id":"entry-16","ch":"entry","start":181.54,"end":190.5},{"id":"entry-17","ch":"entry","start":190.82,"end":202.26},{"id":"message-00","ch":"message","start":203.16,"end":206.2},{"id":"message-01","ch":"message","start":206.52,"end":217.8},{"id":"message-02","ch":"message","start":218.12,"end":226.6},{"id":"message-03","ch":"message","start":226.92,"end":234.52},{"id":"message-04","ch":"message","start":234.84,"end":246.68},{"id":"message-05","ch":"message","start":247,"end":254.84},{"id":"message-06","ch":"message","start":255.16,"end":263.64},{"id":"message-07","ch":"message","start":263.96,"end":272.76},{"id":"message-08","ch":"message","start":273.08,"end":287.4},{"id":"message-09","ch":"message","start":287.72,"end":298.2},{"id":"message-10","ch":"message","start":298.52,"end":306.68},{"id":"message-11","ch":"message","start":307,"end":315.8},{"id":"message-12","ch":"message","start":316.12,"end":330.76},{"id":"message-13","ch":"message","start":331.08,"end":339.08},{"id":"message-14","ch":"message","start":339.4,"end":350.2},{"id":"message-15","ch":"message","start":350.52,"end":357.08},{"id":"message-16","ch":"message","start":357.4,"end":365.56},{"id":"message-17","ch":"message","start":365.88,"end":372.28},{"id":"message-18","ch":"message","start":372.6,"end":376.2},{"id":"message-19","ch":"message","start":376.52,"end":383.88},{"id":"message-20","ch":"message","start":384.2,"end":390.12},{"id":"statusbar-00","ch":"statusbar","start":391.02,"end":393.5},{"id":"statusbar-01","ch":"statusbar","start":393.82,"end":407.98},{"id":"statusbar-02","ch":"statusbar","start":408.3,"end":418.86},{"id":"statusbar-03","ch":"statusbar","start":419.18,"end":427.66},{"id":"statusbar-04","ch":"statusbar","start":427.98,"end":436.06},{"id":"statusbar-05","ch":"statusbar","start":436.38,"end":444.86},{"id":"statusbar-06","ch":"statusbar","start":445.18,"end":460.86},{"id":"statusbar-07","ch":"statusbar","start":461.18,"end":468.94},{"id":"statusbar-08","ch":"statusbar","start":469.26,"end":484.94},{"id":"statusbar-09","ch":"statusbar","start":485.26,"end":496.06},{"id":"statusbar-10","ch":"statusbar","start":496.38,"end":504.54},{"id":"statusbar-11","ch":"statusbar","start":504.86,"end":511.18},{"id":"statusbar-12","ch":"statusbar","start":511.5,"end":517.98},{"id":"statusbar-13","ch":"statusbar","start":518.3,"end":523.5},{"id":"statusbar-14","ch":"statusbar","start":523.82,"end":531.66},{"id":"statusbar-15","ch":"statusbar","start":531.98,"end":540.06},{"id":"title-00","ch":"title","start":540.96,"end":544.4},{"id":"title-01","ch":"title","start":544.72,"end":554.08},{"id":"title-02","ch":"title","start":554.4,"end":569.68},{"id":"title-03","ch":"title","start":570,"end":577.92},{"id":"title-04","ch":"title","start":578.24,"end":588.24},{"id":"title-05","ch":"title","start":588.56,"end":596.72},{"id":"title-06","ch":"title","start":597.04,"end":606.64},{"id":"title-07","ch":"title","start":606.96,"end":617.36},{"id":"title-08","ch":"title","start":617.68,"end":629.36},{"id":"title-09","ch":"title","start":629.68,"end":640.56},{"id":"title-10","ch":"title","start":640.88,"end":646},{"id":"title-11","ch":"title","start":646.32,"end":654},{"id":"title-12","ch":"title","start":654.32,"end":662.16},{"id":"title-13","ch":"title","start":662.48,"end":669.92},{"id":"title-14","ch":"title","start":670.24,"end":680.56},{"id":"title-15","ch":"title","start":680.88,"end":690.48},{"id":"title-16","ch":"title","start":690.8,"end":703.04},{"id":"title-17","ch":"title","start":703.36,"end":708.24},{"id":"title-18","ch":"title","start":708.56,"end":714.08},{"id":"title-19","ch":"title","start":714.4,"end":721.04},{"id":"title-20","ch":"title","start":721.36,"end":730.72},{"id":"title-21","ch":"title","start":731.04,"end":736.8},{"id":"title-22","ch":"title","start":737.12,"end":748.64},{"id":"title-23","ch":"title","start":748.96,"end":757.2},{"id":"title-24","ch":"title","start":757.52,"end":765.52},{"id":"title-25","ch":"title","start":765.84,"end":778.16},{"id":"title-26","ch":"title","start":778.48,"end":786.8},{"id":"title-27","ch":"title","start":787.12,"end":795.44},{"id":"effort-00","ch":"effort","start":796.34,"end":799.94},{"id":"effort-01","ch":"effort","start":800.26,"end":817.78},{"id":"effort-02","ch":"effort","start":818.1,"end":831.14},{"id":"effort-03","ch":"effort","start":831.46,"end":843.78},{"id":"effort-04","ch":"effort","start":844.1,"end":847.3},{"id":"effort-05","ch":"effort","start":847.62,"end":857.62},{"id":"effort-06","ch":"effort","start":857.94,"end":866.9},{"id":"effort-07","ch":"effort","start":867.22,"end":871.3},{"id":"effort-08","ch":"effort","start":871.62,"end":875.62},{"id":"effort-09","ch":"effort","start":875.94,"end":885.78},{"id":"effort-10","ch":"effort","start":886.1,"end":900.42},{"id":"effort-11","ch":"effort","start":900.74,"end":915.38},{"id":"effort-12","ch":"effort","start":915.7,"end":928.34},{"id":"effort-13","ch":"effort","start":928.66,"end":940.98},{"id":"effort-14","ch":"effort","start":941.3,"end":950.5},{"id":"effort-15","ch":"effort","start":950.82,"end":964.82},{"id":"effort-16","ch":"effort","start":965.14,"end":979.22},{"id":"effort-17","ch":"effort","start":979.54,"end":987.3},{"id":"effort-18","ch":"effort","start":987.62,"end":1001.3},{"id":"effort-19","ch":"effort","start":1001.62,"end":1012.26},{"id":"effort-20","ch":"effort","start":1012.58,"end":1026.18},{"id":"effort-21","ch":"effort","start":1026.5,"end":1039.7},{"id":"effort-22","ch":"effort","start":1040.02,"end":1049.62},{"id":"effort-23","ch":"effort","start":1049.94,"end":1065.38},{"id":"effort-24","ch":"effort","start":1065.7,"end":1075.3},{"id":"effort-25","ch":"effort","start":1075.62,"end":1087.54},{"id":"setup-00","ch":"setup","start":1088.44,"end":1090.52},{"id":"setup-01","ch":"setup","start":1090.84,"end":1100.28},{"id":"setup-02","ch":"setup","start":1100.6,"end":1107.32},{"id":"setup-03","ch":"setup","start":1107.64,"end":1113.8},{"id":"setup-04","ch":"setup","start":1114.12,"end":1121.08},{"id":"setup-05","ch":"setup","start":1121.4,"end":1125.8},{"id":"setup-06","ch":"setup","start":1126.12,"end":1136.44},{"id":"setup-07","ch":"setup","start":1136.76,"end":1141.64}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

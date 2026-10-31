@@ -9,12 +9,13 @@
 #   ffmpeg -ss <起> -to <止> -i raw.mp4 -vf crop=960:<高>:0:<y>,fps=30；poster 取下表时间点，end 表示成片最后一帧。
 #   id                      y   高   起   止   poster
 #   personal-menu           88  434  0.2  5.7  3.0
-#   statusline-style        132 576  0.2  8.5  5.5
+#   personal-switches       78  436  0.2  6.7  4.6   （再 pad=960:448:0:12:0x1e1e2e，顶部补 12px 底色，避开 Ponytail 行）
+#   statusline-style        132 576  0.2  8.2  5.2
 #   auto-name-model         88  434  0.2  8.4  6.5
-#   effort-model            156 432  0.2  8.2  6.2
+#   effort-model            156 432  0.2  7.9  5.8
 #   clickable-paths-status  14  574  0.2  7.0  end
 #   auto-name-status        36  552  0.2  6.8  end
-#   effort-status           34  596  0.2  7.4  end
+#   effort-status           34  596  0.2  7.6  end
 Set Shell "bash"
 Set FontSize 18
 Set FontFamily "Maple Mono NF CN"
@@ -22,4 +23,4 @@ Set Padding 24
 Set TypingSpeed 60ms
 Set Theme "Catppuccin Mocha"
 Set WaitTimeout 60s
-Env PI_CODING_AGENT_DIR "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/pi-agent-sandbox3"
+Env PI_CODING_AGENT_DIR "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/pi-agent-sandbox4"

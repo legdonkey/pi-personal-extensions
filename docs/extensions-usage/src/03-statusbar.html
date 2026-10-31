@@ -1,10 +1,10 @@
 <section class="chapter" id="ch-statusbar" data-chapter="statusbar" aria-labelledby="ch-statusbar-h">
   <header class="chapter-head">
     <h2 id="ch-statusbar-h">状态栏：看额度，换配色</h2>
-    <p class="chapter-sum">「额度与会话 ID」在状态栏显示剩余额度和会话 ID。「状态栏风格选择」给状态栏换配色。</p>
+    <p class="chapter-sum">「状态栏：额度、会话 ID 与配色」在状态栏显示剩余额度和会话 ID，也能给状态栏换配色。</p>
     <dl class="meta">
-      <dt>功能</dt><dd>额度与会话 ID · 状态栏风格选择</dd>
-      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏风格选择</dd>
+      <dt>功能</dt><dd>状态栏：额度、会话 ID 与配色（一个开关）</dd>
+      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏：额度、会话 ID 与配色</dd>
       <dt>前提</dt><dd>换配色需要先装 <code>npm:@narumitw/pi-statusline</code></dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>pi-statusline.json</code>（默认 <code>~/.pi/agent/</code>）</dd>
     </dl>
@@ -15,9 +15,12 @@
     <div class="beat-text">
       <h3>想看懂状态栏上的额度和会话 ID</h3>
       <p>
-        <span class="seg" data-seg="statusbar-01">「额度与会话 ID」在状态栏显示两样东西：当前会话 ID 的末尾 8 位，和当前服务商还剩多少额度。</span>
+        <span class="seg" data-seg="statusbar-01">「状态栏：额度、会话 ID 与配色」在状态栏显示两样东西：当前会话 ID 的末尾 8 位，和当前服务商还剩多少额度。</span>
         <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。</span>
       </p>
+      <ul>
+        <li>额度、会话 ID 和配色是同一项功能，共用一个开关。升级时，旧版的两个开关合成这一个：只有两个旧开关都关闭，才保持关闭；否则开启。</li>
+      </ul>
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
       <div class="fig-scroll">
@@ -132,10 +135,10 @@
   <div class="beat">
     <div class="beat-text">
       <h3>想换状态栏配色</h3>
-      <p><span class="seg" data-seg="statusbar-06" data-say="「状态栏风格选择」只负责换配色。状态栏本身来自 pi statusline 包，需要先安装并启用。">「状态栏风格选择」只负责换配色。状态栏本身来自 <code>pi-statusline</code> 包，需要先安装并启用。</span></p>
+      <p><span class="seg" data-seg="statusbar-06" data-say="配色选择改的是 pi statusline 包的配色。状态栏本身来自这个包，需要先安装并启用。">配色选择改的是 <code>pi-statusline</code> 包的配色。状态栏本身来自这个包，需要先安装并启用。</span></p>
       <pre><code>pi install npm:@narumitw/pi-statusline</code></pre>
       <ol>
-        <li><span class="seg" data-seg="statusbar-07" data-say="输入斜杠 personal，选「状态栏风格选择」。">输入 <code>/personal</code>，选「状态栏风格选择」。</span></li>
+        <li><span class="seg" data-seg="statusbar-07" data-say="输入斜杠 personal，选「状态栏：额度、会话 ID 与配色」。">输入 <code>/personal</code>，选「状态栏：额度、会话 ID 与配色」。</span></li>
         <li><span class="seg" data-seg="statusbar-08">选「预览并选择配色」，打开配色列表。</span></li>
         <li><span class="seg" data-seg="statusbar-09" data-say="用上下键选一套配色，列表下方的预览条实时换色。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选一套配色，列表下方的预览条实时换色。</span></li>
         <li><span class="seg" data-seg="statusbar-10" data-say="按 Enter 键应用，按 Esc 键放弃。">按 <kbd>Enter</kbd> 键应用，按 <kbd>Esc</kbd> 键放弃。</span></li>
@@ -149,45 +152,46 @@
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-06" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏风格选择，选预览并选择配色；出现 01 到 11 的配色列表，上下移动时列表下方的预览条换色，按 Esc 键退出，不应用"></video></div>
+      <div class="capture-frame"><video data-cue="statusbar-06" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，选预览并选择配色；出现 01 到 11 的配色列表，上下移动时列表下方的预览条换色，按 Esc 键退出，不应用"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 72" role="img" aria-labelledby="fig-statusbar-3-title fig-statusbar-3-desc">
           <title id="fig-statusbar-3-title">换配色的菜单路径和按键</title>
-          <desc id="fig-statusbar-3-desc">输入 /personal，选状态栏风格选择，再选预览并选择配色；用上下键预览，按 Enter 键应用或 Esc 键放弃；应用后 Pi 自动重载。</desc>
+          <desc id="fig-statusbar-3-desc">输入 /personal，选状态栏：额度、会话 ID 与配色，再选预览并选择配色；用上下键预览，按 Enter 键应用或 Esc 键放弃；应用后 Pi 自动重载。</desc>
           <defs>
             <marker id="fig-statusbar-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
           <g data-cue="statusbar-07">
-            <rect class="n" x="12" y="16" width="96" height="40" rx="6"/>
-            <text class="t-mono" x="24" y="41">/personal</text>
+            <rect class="n" x="12" y="16" width="88" height="40" rx="6"/>
+            <text class="t-mono" x="22" y="41">/personal</text>
           </g>
           <g data-cue="statusbar-08">
-            <path class="w" d="M108 36 H124" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n" x="124" y="12" width="120" height="48" rx="6"/>
-            <text class="t-cap" x="134" y="32">状态栏风格选择</text>
-            <text class="t-cap" x="134" y="50">› 预览并选择配色</text>
+            <path class="w" d="M100 36 H112" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="112" y="8" width="168" height="56" rx="6"/>
+            <text class="t-cap" x="122" y="25">状态栏：额度、会话 ID</text>
+            <text class="t-cap" x="122" y="41">与配色</text>
+            <text class="t-cap" x="122" y="57">› 预览并选择配色</text>
           </g>
           <g data-cue="statusbar-09">
-            <path class="w" d="M244 36 H258" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n" x="258" y="20" width="28" height="28" rx="4"/><line x1="262" y1="48" x2="282" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="272" y="39" text-anchor="middle">↑</text>
-            <rect class="n" x="290" y="20" width="28" height="28" rx="4"/><line x1="294" y1="48" x2="314" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="304" y="39" text-anchor="middle">↓</text>
-            <text class="t-cap" x="324" y="39">预览</text>
+            <path class="w" d="M280 36 H292" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="292" y="20" width="26" height="28" rx="4"/><line x1="296" y1="48" x2="314" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="305" y="39" text-anchor="middle">↑</text>
+            <rect class="n" x="322" y="20" width="26" height="28" rx="4"/><line x1="326" y1="48" x2="344" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="335" y="39" text-anchor="middle">↓</text>
+            <text class="t-cap" x="353" y="39">预览</text>
           </g>
           <g data-cue="statusbar-10">
-            <path class="w" d="M352 36 H366" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n" x="366" y="20" width="52" height="28" rx="4"/><line x1="370" y1="48" x2="414" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="392" y="39" text-anchor="middle">Enter</text>
-            <text class="t-cap" x="424" y="39">应用</text>
-            <rect class="n" x="456" y="20" width="40" height="28" rx="4"/><line x1="460" y1="48" x2="492" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="476" y="39" text-anchor="middle">Esc</text>
-            <text class="t-cap" x="502" y="39">放弃</text>
+            <path class="w" d="M382 36 H394" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="394" y="20" width="50" height="28" rx="4"/><line x1="398" y1="48" x2="440" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="419" y="39" text-anchor="middle">Enter</text>
+            <text class="t-cap" x="448" y="39">应用</text>
+            <rect class="n" x="480" y="20" width="36" height="28" rx="4"/><line x1="484" y1="48" x2="512" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="498" y="39" text-anchor="middle">Esc</text>
+            <text class="t-cap" x="520" y="39">放弃</text>
           </g>
           <g data-cue="statusbar-11">
-            <path class="w" d="M532 36 H548" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n is-focal" x="548" y="16" width="80" height="40" rx="6"/>
-            <text class="t" x="560" y="41">自动重载</text>
+            <path class="w" d="M548 36 H558" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n is-focal" x="558" y="16" width="70" height="40" rx="6"/>
+            <text class="t" x="565" y="41">自动重载</text>
           </g>
         </svg>
       </div>

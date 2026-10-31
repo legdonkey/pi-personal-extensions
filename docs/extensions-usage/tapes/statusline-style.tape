@@ -1,6 +1,6 @@
-# /personal → 状态栏风格选择 → 预览并选择配色 → ↓↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/statusline-style.mp4"
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/statusline-style.txt"
+# /personal → 状态栏：额度、会话 ID 与配色 → 预览并选择配色 → ↓↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/statusline-style.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/statusline-style.txt"
 Set Width 960
 Set Height 720
 Source "docs/extensions-usage/tapes/_settings.tape"
@@ -17,7 +17,7 @@ Sleep 300ms
 Enter
 Wait+Screen /个人扩展 · 统一管理/
 Sleep 900ms
-Down@130ms 5
+Down@130ms 2
 Sleep 400ms
 Enter
 Sleep 1.1s

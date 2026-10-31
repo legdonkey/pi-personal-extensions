@@ -1,31 +1,31 @@
-# /personal switches：上下移动，空格切换一项，Esc 放弃（不保存）
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw/personal-switches.mp4"
-# 终端窗口缩小到内容区域，让文字在约 640px 宽的显示框里仍可读
+# /personal switches → ↓×2 到「状态栏：额度、会话 ID 与配色」→ 空格切成关闭 → Esc 放弃。只查看、预览或取消，不保存、不重载、不发送模型消息。
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/personal-switches.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/personal-switches.txt"
 Set Width 960
 Set Height 540
 Source "docs/extensions-usage/tapes/_settings.tape"
 
 Hide
-Type "cd /Users/yangguandao/Projects/pi-personal-extensions && clear && pi "
+Type@1ms "cd /Users/yangguandao/Projects/pi-personal-extensions && clear && PATH=$HOME/.local/share/pi-node/current/bin:$PATH $HOME/.pi/agent/install/releases/$(cat $HOME/.pi/agent/install/current-version)/node_modules/.bin/pi --no-session --no-skills --no-prompt-templates --model openai-codex/gpt-6.1-sol --thinking medium"
 Enter
-Wait+Screen /未命名会话|｜/
-Sleep 5s
+Wait+Screen /未命名会话|gpt-6.1-sol/
+Sleep 2s
 Show
 
-Sleep 1s
 Type "/personal switches"
-Sleep 800ms
+Sleep 300ms
 Enter
-Sleep 2s
+Wait+Screen /个人扩展 · 功能开关/
+Sleep 1.2s
 Down
 Sleep 700ms
 Down
 Sleep 1s
 Space
-Sleep 2.5s
+Sleep 2s
 Escape
-Sleep 1.5s
+Sleep 900ms
 
 Hide
 Ctrl+D
-Sleep 1s
+Sleep 700ms

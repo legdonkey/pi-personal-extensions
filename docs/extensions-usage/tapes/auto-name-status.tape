@@ -1,6 +1,6 @@
 # /personal → 自动会话命名 → 查看状态。只查看、预览或取消，不保存、不重载、不发送模型消息。
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/auto-name-status.mp4"
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/auto-name-status.txt"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/auto-name-status.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/auto-name-status.txt"
 Set Width 960
 Set Height 600
 Source "docs/extensions-usage/tapes/_settings.tape"

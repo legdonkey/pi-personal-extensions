@@ -1,6 +1,6 @@
 {
   "name": "pi-personal-extensions",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "个人维护的 Pi 扩展合集",
   "type": "module",
   "private": true,

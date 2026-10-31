@@ -585,7 +585,7 @@ svg text { font-family: var(--font-sans); }
 <section class="chapter" id="ch-entry" data-chapter="entry" aria-labelledby="ch-entry-h">
   <header class="chapter-head">
     <h2 id="ch-entry-h"><span class="seg" data-seg="entry-00">统一入口：按开关加载，一个菜单管理</span></h2>
-    <p class="chapter-sum">入口怎样按开关加载功能，二级菜单怎样复用快捷命令，启停怎样保存并重载。</p>
+    <p class="chapter-sum">入口怎样按开关加载功能，二级菜单怎样调用各功能的命令处理器，启停怎样保存并重载。</p>
     <dl class="meta">
       <dt>源码</dt><dd><code>extensions/pi-personal-extensions.ts</code></dd>
       <dt>命令</dt><dd><code>/personal</code>、<code>/personal switches</code></dd>
@@ -673,20 +673,19 @@ svg text { font-family: var(--font-sans); }
   <!-- 节拍 2：原型链截获 -->
   <div class="beat">
     <div class="beat-text">
-      <h3>featureApi：只截获命令注册</h3>
+      <h3>featureApi：把命令收进内部表</h3>
       <p>
         <span class="seg" data-seg="entry-04" data-say="register 收到的是 feature API，它的原型是 pi。"><code>register</code> 收到的是 <code>featureApi</code>，它的原型是 <code>pi</code>。</span>
         <span class="seg" data-seg="entry-05" data-say="看图。调用 on 方法时，feature API 自身没有，就落到 pi 上。">调用 <code>on</code> 方法时，<code>featureApi</code> 自身没有，就落到 <code>pi</code> 上。</span>
-        <span class="seg" data-seg="entry-06" data-say="register Command 被截住：先存进 commands 表，再交给 pi。"><code>registerCommand</code> 被截住：先存进 <code>commands</code> 表，再交给 <code>pi</code>。</span>
-        <span class="seg" data-seg="entry-07">所以二级菜单能直接复用这些处理器。</span>
+        <span class="seg" data-seg="entry-06" data-say="register Command 被截住：处理器只存进 commands 表，不交给 pi 注册。"><code>registerCommand</code> 被截住：处理器只存进 <code>commands</code> 表，不交给 <code>pi</code> 注册。</span>
+        <span class="seg" data-seg="entry-07" data-say="所以 Pi 里只有斜杠 personal 一个命令，各功能的处理器只能从它的二级菜单调用。">所以 Pi 里只有 <code>/personal</code> 一个命令，各功能的处理器只能从它的二级菜单调用。</span>
       </p>
       <details>
         <summary>源码：featureApi 的定义</summary>
         <pre><code>// Object.create(pi)：新对象的原型是 pi
 const featureApi = Object.assign(Object.create(pi), {
   registerCommand(name, command) {
-    commands.set(name, command); // 存一份
-    pi.registerCommand(name, command);
+    commands.set(name, command); // 只进内部表，不向 Pi 注册
   },
 });</code></pre>
       </details>
@@ -695,7 +694,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <div class="fig-scroll">
         <svg viewBox="0 0 640 368" width="100%" role="img" aria-labelledby="fig-entry-2-title fig-entry-2-desc">
           <title id="fig-entry-2-title">featureApi 的原型链截获</title>
-          <desc id="fig-entry-2-desc">功能调用 on 时，featureApi 自身没有 on，查找沿原型落到 pi.on；功能调用 registerCommand 时，featureApi 自己的 registerCommand 先把处理器存进 commands 表，再交给 pi.registerCommand；/personal 二级菜单从 commands 表取处理器。</desc>
+          <desc id="fig-entry-2-desc">功能调用 on 时，featureApi 自身没有 on，查找沿原型落到 pi.on；功能调用 registerCommand 时，featureApi 自己的 registerCommand 只把处理器存进 commands 表，不向 Pi 注册；/personal 二级菜单从 commands 表取处理器。</desc>
           <defs>
             <marker id="fig-entry-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -735,19 +734,20 @@ const featureApi = Object.assign(Object.create(pi), {
             </circle>
           </g>
 
-          <!-- registerCommand：截住，先存一份，再交给 pi -->
+          <!-- registerCommand：截住，只存进 commands 表 -->
           <g data-cue="entry-06">
             <path class="w" d="M336 68 V124" style="marker-end:url(#fig-entry-2-arrow)"/>
             <path class="w is-flow" d="M408 148 H480" style="marker-end:url(#fig-entry-2-arrow)"/>
             <rect class="mask" x="412" y="126" width="64" height="16" rx="2"/>
-            <text class="t-sub" x="444" y="138" text-anchor="middle">① 存一份</text>
-            <path class="w is-flow" d="M336 172 V280" style="marker-end:url(#fig-entry-2-arrow)"/>
-            <rect class="mask" x="344" y="204" width="76" height="16" rx="2"/>
-            <text class="t-sub" x="348" y="216">② 交给 pi</text>
+            <text class="t-sub" x="444" y="138" text-anchor="middle">存进表</text>
+            <path class="w is-dash" d="M336 172 V280" style="stroke:var(--danger)"/>
+            <rect class="mask" x="344" y="204" width="88" height="16" rx="2"/>
+            <text class="t-sub" x="348" y="216" style="fill:var(--danger)">不再交给 pi</text>
             <rect class="n" x="240" y="24" width="184" height="44" rx="6"/>
             <text class="t-mono" x="332" y="51" text-anchor="middle">registerCommand(…)</text>
             <rect class="n" x="264" y="280" width="144" height="40" rx="6"/>
-            <text class="t-mono" x="336" y="305" text-anchor="middle">registerCommand</text>
+            <text class="t-mono" x="336" y="298" text-anchor="middle">registerCommand</text>
+            <text class="t-sub" x="336" y="314" text-anchor="middle">只注册 personal</text>
             <rect class="n" x="480" y="124" width="136" height="48" rx="6"/>
             <text class="t" x="496" y="145">commands 表</text>
             <text class="t-sub" x="496" y="163">命令名 → 处理器</text>
@@ -755,9 +755,6 @@ const featureApi = Object.assign(Object.create(pi), {
           <g data-cue="entry-06" data-cue-mode="active">
             <circle class="dot" cx="336" cy="68" r="4">
               <animateMotion dur="1.2s" begin="indefinite" fill="freeze" path="M0 0 V80 H144"/>
-            </circle>
-            <circle class="dot" cx="336" cy="68" r="4">
-              <animateMotion dur="1.8s" begin="indefinite" fill="freeze" path="M0 0 V212"/>
             </circle>
           </g>
 
@@ -786,7 +783,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。</span>
       </p>
       <ul>
-        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏风格选择 1 项。其余三项的二级菜单只有启停。</li>
+        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 5 项、文件路径可点击 10 项、状态栏风格选择 12 项（预览选择，加 11 套配色直接应用）。其余三项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -796,7 +793,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <details class="demo-try">
         <summary>试一试：模拟菜单</summary>
       <div class="demo" id="ch-entry-demo">
-        <p class="demo-static">示例：按源码里的 <code>features</code> 和 <code>actions</code> 模拟菜单。<span data-role="hint" hidden>取消勾选模拟关闭一项功能；点功能名查看它的二级菜单。不写文件。</span></p>
+        <p class="demo-static">示例：按源码里的 <code>features</code> 和 <code>actions</code> 模拟菜单。箭头右边是二级菜单调用的处理器和参数，不是斜杠命令。<span data-role="hint" hidden>取消勾选模拟关闭一项功能；点功能名查看它的二级菜单。不写文件。</span></p>
         <div class="menus">
         <div>
           <p><strong>一级菜单</strong>　个人扩展 · 统一管理</p>
@@ -814,18 +811,18 @@ const featureApi = Object.assign(Object.create(pi), {
         <div>
           <p><strong>二级菜单</strong>　<span data-role="l2-title">自动会话命名（已加载）</span></p>
           <ol data-role="l2">
-            <li>查看状态 → <code>/auto-name status</code></li>
-            <li>选择命名模型 → <code>/auto-name model</code></li>
-            <li>选择命名思考强度 → <code>/auto-name thinking</code></li>
-            <li>预览建议标题 → <code>/auto-name preview</code></li>
-            <li>暂停当前会话命名 → <code>/auto-name off</code></li>
-            <li>恢复当前会话命名 → <code>/auto-name on</code></li>
+            <li>查看状态 → <code>auto-name status</code></li>
+            <li>选择命名模型 → <code>auto-name model</code></li>
+            <li>选择命名思考强度 → <code>auto-name thinking</code></li>
+            <li>预览建议标题 → <code>auto-name preview</code></li>
+            <li>暂停当前会话命名 → <code>auto-name off</code></li>
+            <li>恢复当前会话命名 → <code>auto-name on</code></li>
             <li>禁用此功能并重载</li>
           </ol>
         </div>
         </div>
         <p><strong>未加载的功能</strong>　二级菜单只有「启用此功能并重载」。</p>
-        <p>已注册的快捷命令：<span data-role="commands"><code>/auto-name</code>、<code>/clickable-paths</code>、<code>/statusline-style</code>、<code>/effort</code>、<code>/personal</code></span></p>
+        <p>commands 表里的处理器：<span data-role="commands"><code>auto-name</code>、<code>clickable-paths</code>、<code>statusline-style</code>、<code>effort</code></span>。Pi 里注册的命令只有 <code>/personal</code>。</p>
       </div>
       </details>
     </figure>
@@ -924,11 +921,11 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>使用限制与批量开关</h3>
       <p>
-        <span class="seg" data-seg="entry-16" data-say="斜杠 personal 只在 TUI 模式下打开菜单。在其他模式下，入口只发一条警告，不打开菜单。"><code>/personal</code> 只在 TUI 模式下打开菜单。在其他模式下，入口只发一条警告，不打开菜单。</span>
-        <span class="seg" data-seg="entry-17" data-say="斜杠 personal switches 打开批量功能开关。按空格切换一项，按 Enter 保存并重载，按 Esc 键放弃。"><code>/personal switches</code> 打开「批量功能开关」。按空格切换一项，按 Enter 保存并重载，按 Esc 放弃。</span>
+        <span class="seg" data-seg="entry-16" data-say="斜杠 personal 只要有交互界面就能用：TUI 和 RPC 客户端都行。没有界面时，入口只发一条提示。"><code>/personal</code> 只要有交互界面就能用：TUI 和 RPC 客户端都行。没有界面时，入口只发一条提示。</span>
+        <span class="seg" data-seg="entry-17" data-say="批量功能开关只在 TUI 里可用：斜杠 personal switches 打开它，按空格切换一项，按 Enter 键保存并重载，按 Esc 键放弃。">「批量功能开关」只在 TUI 里可用：<code>/personal switches</code> 打开它，按空格切换一项，按 Enter 键保存并重载，按 Esc 键放弃。</span>
       </p>
       <ul>
-        <li>这条警告在 RPC 模式下会发给客户端；Print 和 JSON 模式不显示通知。</li>
+        <li>没有界面指 Print 和 JSON 模式。RPC 客户端里选「批量功能开关」时，入口提示改用各功能二级菜单里的「启用此功能并重载」或「禁用此功能并重载」。</li>
         <li><code>/personal</code> 只接受两种用法：不带参数，或带 <code>switches</code>。带其他参数时，提示「用法：/personal 或 /personal switches」。</li>
         <li>一级菜单的「批量功能开关」效果相同，保存走同一段写入代码。按键是 README 写的默认键位，确认键跟随 Pi 的 <code>tui.select.confirm</code>。</li>
       </ul>
@@ -955,15 +952,16 @@ const featureApi = Object.assign(Object.create(pi), {
     const root = document.getElementById("ch-entry-demo");
     if (root) {
       // 数据照抄 extensions/pi-personal-extensions.ts 的 features 与 actions
-      const ac = (command, list) => list.map(([label, args]) => ({ label, cmd: `/${command}${args ? ` ${args}` : ""}` }));
+      const ac = (command, list) => list.map(([label, args]) => ({ label, cmd: `${command}${args ? ` ${args}` : ""}` }));
+      const STYLE_NAMES = ["茶墨渐层", "冰川蓝阶", "靛夜层云", "琥珀余温", "紫藤暮色", "松林雾径", "陶火晚照", "玫瑰尘光", "石墨银阶", "潮汐青绿", "Claude 暖纸"];
       const features = [
         { label: "右下角会话标题", command: null, actions: [] },
-        { label: "自动会话命名", command: "/auto-name", actions: ac("auto-name", [["查看状态", "status"], ["选择命名模型", "model"], ["选择命名思考强度", "thinking"], ["预览建议标题", "preview"], ["暂停当前会话命名", "off"], ["恢复当前会话命名", "on"]]) },
+        { label: "自动会话命名", command: "auto-name", actions: ac("auto-name", [["查看状态", "status"], ["选择命名模型", "model"], ["选择命名思考强度", "thinking"], ["预览建议标题", "preview"], ["暂停当前会话命名", "off"], ["恢复当前会话命名", "on"]]) },
         { label: "额度与会话 ID", command: null, actions: [] },
-        { label: "文件路径可点击", command: "/clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
+        { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
-        { label: "状态栏风格选择", command: "/statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""]]) },
-        { label: "原位思考强度（Jev / d1-ultra）", command: "/effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["测试分类模型可用性", "test"]]) },
+        { label: "状态栏风格选择", command: "statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""], ...STYLE_NAMES.map((n, i) => [`应用配色：${i + 1}. ${n}`, String(i + 1)])]) },
+        { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["使用 Jev 分类模型", "model jev"], ["使用 d1-ultra 分类模型", "model d1-ultra"], ["测试分类模型可用性", "test"]]) },
       ];
       const on = features.map(() => true);
       let picked = 1;
@@ -986,8 +984,8 @@ const featureApi = Object.assign(Object.create(pi), {
           ? [...f.actions.map((a) => el("li", {}, `${a.label} → `, el("code", { textContent: a.cmd }))), el("li", { textContent: "禁用此功能并重载" })]
           : [el("li", { textContent: "启用此功能并重载" })];
         $('[data-role="l2"]').replaceChildren(...rows);
-        const names = [...features.filter((x, i) => on[i] && x.command).map((x) => x.command), "/personal"];
-        $('[data-role="commands"]').replaceChildren(...names.flatMap((n, i) => [...(i ? ["、"] : []), el("code", { textContent: n })]));
+        const names = features.filter((x, i) => on[i] && x.command).map((x) => x.command);
+        $('[data-role="commands"]').replaceChildren(...(names.length ? names.flatMap((n, i) => [...(i ? ["、"] : []), el("code", { textContent: n })]) : ["（空）"]));
       };
       render();
       $('[data-role="hint"]').hidden = false;
@@ -1001,7 +999,7 @@ const featureApi = Object.assign(Object.create(pi), {
     <p class="chapter-sum">两项功能都改消息的显示：一项在渲染前把文件路径改写成链接，一项在渲染后给用户消息加边框。</p>
     <dl class="meta">
       <dt>功能</dt><dd>文件路径可点击 <code>clickable-paths</code>；用户消息橙色线框 <code>user-message-border</code></dd>
-      <dt>快捷命令</dt><dd><code>/clickable-paths</code>（用户消息橙色线框没有快捷命令）</dd>
+      <dt>设置入口</dt><dd><code>/personal</code> → 文件路径可点击（用户消息橙色线框只有启用 / 禁用）</dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>clickable-paths.json</code>（默认 <code>~/.pi/agent/</code>，跟随 <code>PI_CODING_AGENT_DIR</code>）</dd>
     </dl>
   </header>
@@ -1073,7 +1071,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="message-05" data-say="文件真实存在时，路径才变成链接。示例里的 node 点 js 不是文件，保持原样。">文件真实存在时，路径才变成链接。示例里的 <code>node.js</code> 不是文件，保持原样。</span>
       </p>
       <ul>
-        <li>裸路径的识别可以关闭：<code>/clickable-paths bare off</code>。</li>
+        <li>裸路径的识别可以关闭：<code>/personal</code> → 文件路径可点击 →「不识别裸路径」。</li>
         <li>扩展缓存「文件是否存在」的结果，有效期 5 秒。缓存最多 4000 条；达到上限后，下次写入前清空整个缓存。有效期内删掉的文件，链接可能暂时还在。</li>
       </ul>
     </div>
@@ -1274,12 +1272,12 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>设置和打开方式</h3>
       <p>
-        <span class="seg" data-seg="message-12" data-say="设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项用斜杠 clickable paths 修改，第四项只能改配置文件。">设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项用 <code>/clickable-paths</code> 修改，第四项只能改配置文件。</span>
+        <span class="seg" data-seg="message-12" data-say="设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项在斜杠 personal 的「文件路径可点击」二级菜单里改，第四项只能改配置文件。">设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项在 <code>/personal</code> 的「文件路径可点击」二级菜单里改，第四项只能改配置文件。</span>
         <span class="seg" data-seg="message-13">编辑器选 file 时，扩展生成 file 协议的 URL，交给系统默认程序打开，不带行号。</span>
       </p>
       <ul>
         <li>字段与默认值：<code>enabled: true</code>、<code>editor: "vscode"</code>、<code>bareText: true</code>、<code>userMessages: true</code>。</li>
-        <li><code>/personal</code> 的「文件路径可点击」二级菜单提供同样的设置项。</li>
+        <li>菜单项调用功能内部的 <code>clickable-paths</code> 处理函数。这个函数只登记在 <code>/personal</code> 的命令表里，不注册成斜杠命令。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-message-5">
@@ -1323,14 +1321,15 @@ const featureApi = Object.assign(Object.create(pi), {
           </tbody>
         </table></div>
       </details>
-      <pre><code># 查看状态、编辑器、裸路径、工作目录
-/clickable-paths
-# 总开关，下一条消息生效
-/clickable-paths on | off
-# 选编辑器
-/clickable-paths editor &lt;vscode|vscode-insiders|cursor|windsurf|file&gt;
-# 是否识别裸路径
-/clickable-paths bare on | off</code></pre>
+      <div class="table-scroll"><table>
+        <thead><tr><th><code>/personal</code> → 文件路径可点击</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>查看路径链接设置</td><td>列出「状态」「编辑器」「裸路径」「工作目录」</td></tr>
+          <tr><td>开启路径链接 / 暂停路径链接</td><td>总开关，下一条消息生效</td></tr>
+          <tr><td>打开方式：vscode … file</td><td>选编辑器，共 5 项</td></tr>
+          <tr><td>识别裸路径 / 不识别裸路径</td><td>是否识别没加反引号的路径</td></tr>
+        </tbody>
+      </table></div>
       <figcaption>换编辑器或改路径文本，URL 跟着变。</figcaption>
     </figure>
   </div>
@@ -1573,7 +1572,7 @@ const featureApi = Object.assign(Object.create(pi), {
     <p class="chapter-sum">额度与会话 ID 往状态栏写数据，状态栏风格选择给状态栏换配色。</p>
     <dl class="meta">
       <dt>功能</dt><dd>额度与会话 ID（<code>substatusline</code>）· 状态栏风格选择（<code>statusline-style-picker</code>）</dd>
-      <dt>快捷命令</dt><dd><code>/statusline-style</code></dd>
+      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏风格选择</dd>
       <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
       <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包</dd>
     </dl>
@@ -1781,17 +1780,17 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>状态栏风格选择</h3>
       <p>
-        <span class="seg" data-seg="statusbar-08" data-say="状态栏风格选择提供斜杠 statusline style 命令，预览并应用 11 套配色。状态栏本体来自 pi statusline 包，需要另外启用。">状态栏风格选择提供 <code>/statusline-style</code> 命令，预览并应用 11 套配色。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
-        <span class="seg" data-seg="statusbar-09" data-say="命令不带参数时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">命令不带参数时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
+        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> → 状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
+        <span class="seg" data-seg="statusbar-09" data-say="选「预览并选择配色」时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">选「预览并选择配色」时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
       </p>
       <ul>
-        <li>带编号或名称时直接应用，例如 <code>/statusline-style 11</code>。名称不区分大小写，必须完整匹配；找不到时提示「未知风格」，不写文件、不重载。</li>
-        <li>不带参数且不在 TUI 模式时，命令只提示一条警告。</li>
+        <li>二级菜单里的 11 项「应用配色：编号. 名称」直接应用对应配色，不打开选择器。<code>/personal</code> 有 UI 就能用，所以 RPC 客户端也能直接应用。</li>
+        <li>在 TUI 以外选「预览并选择配色」时，只提示一条警告，建议改用直接应用的菜单项。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /statusline-style，出现带色点的 11 套配色列表，上下移动时示例状态栏实时换色，按 Esc 退出不应用"></video></div>
-      <figcaption>录屏：上下移动时，示例状态栏实时换色；按 Esc 退出，不应用。录屏录于改动之前，底部状态栏显示的是会话 ID 前 7 位；ponytail 是本机另一个扩展，不属于本包。</figcaption>
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏风格选择，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：/personal → 状态栏风格选择 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
     </figure>
   </div>
 
@@ -1950,7 +1949,7 @@ const featureApi = Object.assign(Object.create(pi), {
     <p class="chapter-sum">会话名怎么显示在输入框下方；自动会话命名怎么在后台起名、校验结果，并保护手动起的名字。</p>
     <dl class="meta">
       <dt>功能</dt><dd>右下角会话标题 <code>session-title</code>（显示）；自动会话命名 <code>auto-session-name</code>（起名）</dd>
-      <dt>快捷命令</dt><dd><code>/auto-name</code>；右下角会话标题没有快捷命令</dd>
+      <dt>入口</dt><dd><code>/personal</code> → 自动会话命名（二级菜单）；本包只注册 <code>/personal</code> 一个斜杠命令</dd>
       <dt>全局配置</dt><dd>agent 目录下的 <code>auto-session-name.json</code>（agent 目录默认 <code>~/.pi/agent</code>，可用 <code>PI_CODING_AGENT_DIR</code> 改）</dd>
       <dt>会话里的状态</dt><dd>自定义条目 <code>personal-auto-session-name</code></dd>
     </dl>
@@ -2073,7 +2072,7 @@ const featureApi = Object.assign(Object.create(pi), {
       </p>
       <ul>
         <li>「正常结束」指 <code>stopReason</code> 为 <code>stop</code>；还要求 Pi 空闲、on/off 状态为开启、会话名归本扩展。</li>
-        <li>Print / JSON 模式没有 UI，扩展直接返回，<code>/auto-name preview</code> 也不调用模型。</li>
+        <li>Print / JSON 模式没有 UI，扩展直接返回；<code>/personal</code> 在没有 UI 时也只提示并返回。</li>
         <li>连续失败只提醒一次；配置、模型或档位出错时显示具体错误。</li>
       </ul>
     </div>
@@ -2173,7 +2172,7 @@ const featureApi = Object.assign(Object.create(pi), {
       </p>
       <ul>
         <li>「字符」按 UTF-16 代码单元算。助手消息逐条拼接，每拼一条就去首尾空白、保留最后 1500 个字符。</li>
-        <li>自动命名遇到进行中的请求会跳过；<code>/auto-name preview</code> 会取消旧请求并重新请求。</li>
+        <li>自动命名遇到进行中的请求会跳过；菜单里的「预览建议标题」会取消旧请求并重新请求。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-title-4">
@@ -2393,14 +2392,14 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="title-17">扩展只改两种会话名：空的，或者等于它上次起的。</span>
         <span class="seg" data-seg="title-18" data-say="用户用斜杠 name 改名后，扩展暂停这个会话的自动命名。">用户用 <code>/name</code> 改名后，扩展暂停这个会话的自动命名。</span>
         <span class="seg" data-seg="title-19" data-say="会话开始时，扩展先恢复保存的 on off 状态；会话名不是它起的，也暂停。">会话开始时，扩展先恢复保存的 on/off 状态；会话名不是它起的，也暂停。</span>
-        <span class="seg" data-seg="title-20" data-say="斜杠 auto name on 让扩展接管当前会话名，下一轮结束后生效。"><code>/auto-name on</code> 让扩展接管当前会话名，下一轮结束后生效。</span>
+        <span class="seg" data-seg="title-20" data-say="在斜杠 personal 的自动会话命名菜单里选恢复当前会话命名，扩展接管当前会话名，下一轮结束后生效。">在 <code>/personal</code> → 自动会话命名 里选「恢复当前会话命名」，扩展接管当前会话名，下一轮结束后生效。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-title-7">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 340" width="100%" role="img" aria-labelledby="fig-title-7-title fig-title-7-desc">
           <title id="fig-title-7-title">自动命名的开启与暂停</title>
-          <desc id="fig-title-7-desc">会话开始时先恢复保存的 on/off 状态，再检查会话名归属，归属检查只能把状态改成暂停；开启时遇到本扩展以外的改名或 off 进入暂停，执行 on 回到开启；状态写进会话的自定义条目。</desc>
+          <desc id="fig-title-7-desc">会话开始时先恢复保存的 on/off 状态，再检查会话名归属，归属检查只能把状态改成暂停；开启时遇到本扩展以外的改名或选「暂停当前会话命名」进入暂停，选「恢复当前会话命名」回到开启；状态写进会话的自定义条目。</desc>
           <defs>
             <marker id="fig-title-7-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -2417,12 +2416,12 @@ const featureApi = Object.assign(Object.create(pi), {
           <g data-cue="title-18">
             <line x1="240" y1="184" x2="394" y2="184" class="w" marker-end="url(#fig-title-7-ah)"/>
             <rect x="252" y="164" width="136" height="14" class="mask"/>
-            <text x="320" y="175" class="t-cap" text-anchor="middle">本扩展以外改名 · off</text>
+            <text x="320" y="175" class="t-cap" text-anchor="middle">本扩展以外改名 · 暂停</text>
           </g>
           <g data-cue="title-20">
             <line x1="400" y1="216" x2="246" y2="216" class="w" marker-end="url(#fig-title-7-ah)"/>
-            <rect x="268" y="222" width="104" height="14" class="mask"/>
-            <text x="320" y="233" class="t-sub" text-anchor="middle">/auto-name on</text>
+            <rect x="260" y="222" width="120" height="14" class="mask"/>
+            <text x="320" y="233" class="t-cap" text-anchor="middle">恢复当前会话命名</text>
           </g>
           <g data-cue="title-21">
             <path d="M140 232 V282 Q140 290 148 290 H196" class="w is-dash" marker-end="url(#fig-title-7-ah)"/>
@@ -2573,28 +2572,30 @@ const featureApi = Object.assign(Object.create(pi), {
   <!-- ===== 命令（录屏） ===== -->
   <div class="beat">
     <div class="beat-text">
-      <h3>命令：/auto-name</h3>
+      <h3>菜单：/personal → 自动会话命名</h3>
       <p>
-        <span class="seg" data-seg="title-27" data-say="输入斜杠 auto name，查看状态、模型和思考强度。">输入 <code>/auto-name</code>，查看状态、模型和思考强度。</span>
+        <span class="seg" data-seg="title-27" data-say="在斜杠 personal 的自动会话命名菜单里选查看状态，可以看到状态、模型和思考强度。">在 <code>/personal</code> → 自动会话命名 里选「查看状态」，可以看到状态、模型和思考强度。</span>
       </p>
       <ul>
-        <li><code>/auto-name model</code>、<code>/auto-name thinking</code> 会先取消进行中的命名请求。</li>
+        <li>「选择命名模型」「选择命名思考强度」会先取消进行中的命名请求。</li>
+        <li>菜单项调用功能内部注册的 <code>auto-name</code> 处理函数，参数见下表。这个处理函数只存在入口的 commands 表里，不是斜杠命令。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-9">
-      <div class="capture-frame"><video data-cue="title-27" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name，输出一行：自动命名开启、模型、思考强度和可用子命令"></video></div>
+      <div class="capture-frame"><video data-cue="title-27" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「查看状态」，输出一条状态提示：开启状态、模型、思考强度和菜单路径说明"></video></div>
       <div class="table-scroll"><table>
-        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <thead><tr><th>菜单项（内部参数）</th><th>作用</th></tr></thead>
         <tbody>
-          <tr><td><code>/auto-name</code>、<code>/auto-name status</code></td><td>显示 on/off 状态、命名模型和实际思考强度</td></tr>
-          <tr><td><code>/auto-name model</code></td><td>从已认证的 scoped-models 中选命名模型（全局）；换成另一个模型时，思考强度恢复继承</td></tr>
-          <tr><td><code>/auto-name thinking</code></td><td>选独立档位，或恢复继承（全局）；只列出模型支持的档位</td></tr>
-          <tr><td><code>/auto-name preview</code></td><td>Pi 空闲时预览建议标题，不改名；不受 on/off 状态和「相同输入跳过」限制，失败时每次都提醒</td></tr>
-          <tr><td><code>/auto-name off</code></td><td>暂停当前会话的自动命名</td></tr>
-          <tr><td><code>/auto-name on</code></td><td>开启当前会话的自动命名，接管当前会话名，下一轮结束后生效</td></tr>
+          <tr><td>查看状态（<code>status</code>）</td><td>显示 on/off 状态、命名模型和实际思考强度</td></tr>
+          <tr><td>选择命名模型（<code>model</code>）</td><td>从已认证的 scoped-models 中选命名模型（全局）；换成另一个模型时，思考强度恢复继承</td></tr>
+          <tr><td>选择命名思考强度（<code>thinking</code>）</td><td>选独立档位，或恢复继承（全局）；只列出模型支持的档位</td></tr>
+          <tr><td>预览建议标题（<code>preview</code>）</td><td>Pi 空闲时预览建议标题，不改名；不受 on/off 状态和「相同输入跳过」限制，失败时每次都提醒</td></tr>
+          <tr><td>暂停当前会话命名（<code>off</code>）</td><td>暂停当前会话的自动命名</td></tr>
+          <tr><td>恢复当前会话命名（<code>on</code>）</td><td>开启当前会话的自动命名，接管当前会话名，下一轮结束后生效</td></tr>
+          <tr><td>禁用此功能并重载</td><td>关闭整个「自动会话命名」功能（入口统一提供）</td></tr>
         </tbody>
       </table></div>
-      <figcaption>录屏只保留命令输出那一段。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 查看状态。画面里的模型 gpt-6-luna 和思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
     </figure>
   </div>
 
@@ -2769,7 +2770,7 @@ const featureApi = Object.assign(Object.create(pi), {
     <p class="chapter-sum">按每条新用户消息调整 GPT-6 系列的思考档位。顶层参数保持基线，档位写进 input 里这条消息的位置。</p>
     <dl class="meta">
       <dt>功能 ID</dt><dd><code>jev-inline-effort</code></dd>
-      <dt>命令</dt><dd><code>/effort</code></dd>
+      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
       <dt>配置</dt><dd>默认 <code>~/.pi/agent/jev-inline-effort.json</code>，目录跟随 <code>PI_CODING_AGENT_DIR</code></dd>
       <dt>分类器</dt><dd>Jev（默认）· d1-ultra</dd>
     </dl>
@@ -2918,7 +2919,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <ul class="fig-notes">
         <li>「合格」：分类正常完成，档位在五档之内，所选档位的概率是 0.5 到 1 之间的有限数。</li>
         <li>多条新消息时，扩展按最后一条用户消息分类。</li>
-        <li>警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请用 /effort model 或 /effort test 检查。</code></li>
+        <li>警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。</code></li>
         <li>分类进行中如果切换了会话或模型，迟到的结果不写入。</li>
       </ul>
     </figure>
@@ -3183,32 +3184,34 @@ const featureApi = Object.assign(Object.create(pi), {
     </figure>
   </div>
 
-  <!-- 7. /effort 命令 -->
+  <!-- 7. 在 /personal 里管理 -->
   <div class="beat">
     <div class="beat-text">
-      <h3><code>/effort</code> 命令</h3>
+      <h3>在 <code>/personal</code> 里管理</h3>
       <p>
-        <span class="seg" data-seg="effort-20" data-say="不带参数时，斜杠 effort 等于斜杠 effort status。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">不带参数时，<code>/effort</code> 等于 <code>/effort status</code>。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
-        <span class="seg" data-seg="effort-21" data-say="斜杠 effort model 切换分类器。选择存进全局配置，从下一条未分类的消息生效。"><code>/effort model</code> 切换分类器。选择存进全局配置，从下一条未分类的消息生效。</span>
-        <span class="seg" data-seg="effort-22" data-say="斜杠 effort test 用固定样例测试分类器，不写决策。Pi 运行 agent 时，这两个子命令都不可用。"><code>/effort test</code> 用固定样例测试分类器，不写决策。Pi 运行 agent 时，这两个子命令都不可用。</span>
+        <span class="seg" data-seg="effort-20" data-say="在斜杠 personal 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">在 <code>/personal</code> 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
+        <span class="seg" data-seg="effort-21" data-say="「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 D1 Ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。">「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 d1-ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。</span>
+        <span class="seg" data-seg="effort-22">「测试分类模型可用性」用固定样例测试分类器，不写决策。Pi 运行 agent 时，选择和测试都不可用。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-7">
-      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /effort，输出适用状态、后续分类器 openrouter/liquid/d1-ultra 和最近决策 low · d1-ultra"></video></div>
+      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、最近决策尚无，以及切换和测试的菜单路径"></video></div>
       <div class="table-scroll"><table>
-        <thead><tr><th>命令</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
+        <thead><tr><th>菜单项</th><th>处理函数参数</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
         <tbody>
-          <tr><td><code>/effort</code>、<code>/effort status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
-          <tr data-cue="effort-21"><td><code>/effort model</code></td><td>选择器，<kbd>Esc</kbd> 取消不保存；没有 UI 时（<code>ctx.hasUI</code> 为 false）必须带上模型名</td><td>不可用</td></tr>
-          <tr data-cue="effort-21"><td><code>/effort model jev</code><br><code>/effort model d1-ultra</code></td><td>直接保存所选分类器；其他会话和子代理的后续分类也读这份配置</td><td>不可用</td></tr>
-          <tr data-cue="effort-22"><td><code>/effort test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
+          <tr><td>查看分类模型与状态</td><td><code>status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
+          <tr data-cue="effort-21"><td>选择分类模型（Jev / d1-ultra）</td><td><code>model</code></td><td>选择器，<kbd>Esc</kbd> 键取消不保存</td><td>不可用</td></tr>
+          <tr data-cue="effort-21"><td>使用 Jev 分类模型<br>使用 d1-ultra 分类模型</td><td><code>model jev</code><br><code>model d1-ultra</code></td><td>直接保存；其他会话和子代理的后续分类也读这份配置</td><td>不可用</td></tr>
+          <tr data-cue="effort-22"><td>测试分类模型可用性</td><td><code>test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
         </tbody>
       </table></div>
       <ul class="fig-notes">
-        <li>配置文件格式错误时，扩展报错，不退回 Jev；用 <code>/effort model</code> 重新保存即可修复。</li>
+        <li>菜单路径：<code>/personal</code> → 原位思考强度（Jev / d1-ultra）→ 菜单项。<code>/personal</code> 有 UI 就能用（TUI、RPC）。</li>
+        <li>这些菜单项调用功能自己的处理函数。处理函数只存在 <code>/personal</code> 的 commands 表里，不再注册成斜杠命令，所以没有 <code>/effort</code>。</li>
+        <li>配置文件格式错误时，扩展报错，不退回 Jev；在「选择分类模型」里重新保存即可修复。</li>
         <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
       </ul>
-      <figcaption>录屏：<code>/effort</code> 输出「适用」、后续分类器 <code>openrouter/liquid/d1-ultra</code> 和最近决策 <code>low · d1-ultra</code>。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -3292,7 +3295,7 @@ const featureApi = Object.assign(Object.create(pi), {
           let label = name;
           let warn = "无";
           if (result === "empty") label = "未分类";
-          else if (result === "error") warn = `openrouter/${IDS[name]} 不可用，思考强度沿用 ${base}。不会切换分类模型；请用 /effort model 或 /effort test 检查。`;
+          else if (result === "error") warn = `openrouter/${IDS[name]} 不可用，思考强度沿用 ${base}。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`;
           else if (LEVELS.includes(result) && p >= 0.5 && p <= 1) level = result;
           if (form.misaligned.checked) {
             out("level").textContent = `${level}（本次请求未生效）`;
@@ -3538,7 +3541,7 @@ npm view &lt;包名&gt; version \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=08e750b1","duration":1094.36,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.44},{"id":"overview-01","ch":"overview","start":3.76,"end":12.48},{"id":"overview-02","ch":"overview","start":12.8,"end":23.44},{"id":"overview-03","ch":"overview","start":23.76,"end":30.56},{"id":"overview-04","ch":"overview","start":30.88,"end":40.08},{"id":"overview-05","ch":"overview","start":40.4,"end":50.48},{"id":"overview-06","ch":"overview","start":50.8,"end":60.64},{"id":"overview-07","ch":"overview","start":60.96,"end":66},{"id":"entry-00","ch":"entry","start":66.9,"end":70.18},{"id":"entry-01","ch":"entry","start":70.5,"end":83.06},{"id":"entry-02","ch":"entry","start":83.38,"end":92.5},{"id":"entry-03","ch":"entry","start":92.82,"end":97.62},{"id":"entry-04","ch":"entry","start":97.94,"end":102.5},{"id":"entry-05","ch":"entry","start":102.82,"end":108.82},{"id":"entry-06","ch":"entry","start":109.14,"end":114.26},{"id":"entry-07","ch":"entry","start":114.58,"end":117.86},{"id":"entry-08","ch":"entry","start":118.18,"end":125.62},{"id":"entry-09","ch":"entry","start":125.94,"end":134.9},{"id":"entry-10","ch":"entry","start":135.22,"end":141.62},{"id":"entry-11","ch":"entry","start":141.94,"end":148.42},{"id":"entry-12","ch":"entry","start":148.74,"end":153.06},{"id":"entry-13","ch":"entry","start":153.38,"end":160.58},{"id":"entry-14","ch":"entry","start":160.9,"end":167.3},{"id":"entry-15","ch":"entry","start":167.62,"end":175.54},{"id":"entry-16","ch":"entry","start":175.86,"end":183.7},{"id":"entry-17","ch":"entry","start":184.02,"end":193.46},{"id":"message-00","ch":"message","start":194.36,"end":197.4},{"id":"message-01","ch":"message","start":197.72,"end":209},{"id":"message-02","ch":"message","start":209.32,"end":217.8},{"id":"message-03","ch":"message","start":218.12,"end":225.72},{"id":"message-04","ch":"message","start":226.04,"end":237.88},{"id":"message-05","ch":"message","start":238.2,"end":246.04},{"id":"message-06","ch":"message","start":246.36,"end":254.84},{"id":"message-07","ch":"message","start":255.16,"end":263.96},{"id":"message-08","ch":"message","start":264.28,"end":278.6},{"id":"message-09","ch":"message","start":278.92,"end":289.4},{"id":"message-10","ch":"message","start":289.72,"end":297.88},{"id":"message-11","ch":"message","start":298.2,"end":307},{"id":"message-12","ch":"message","start":307.32,"end":319.72},{"id":"message-13","ch":"message","start":320.04,"end":328.04},{"id":"message-14","ch":"message","start":328.36,"end":339.16},{"id":"message-15","ch":"message","start":339.48,"end":346.04},{"id":"message-16","ch":"message","start":346.36,"end":354.52},{"id":"message-17","ch":"message","start":354.84,"end":361.24},{"id":"message-18","ch":"message","start":361.56,"end":365.16},{"id":"message-19","ch":"message","start":365.48,"end":372.84},{"id":"message-20","ch":"message","start":373.16,"end":379.08},{"id":"statusbar-00","ch":"statusbar","start":379.98,"end":382.46},{"id":"statusbar-01","ch":"statusbar","start":382.78,"end":395.1},{"id":"statusbar-02","ch":"statusbar","start":395.42,"end":405.98},{"id":"statusbar-03","ch":"statusbar","start":406.3,"end":414.78},{"id":"statusbar-04","ch":"statusbar","start":415.1,"end":423.18},{"id":"statusbar-05","ch":"statusbar","start":423.5,"end":431.98},{"id":"statusbar-06","ch":"statusbar","start":432.3,"end":447.98},{"id":"statusbar-07","ch":"statusbar","start":448.3,"end":456.06},{"id":"statusbar-08","ch":"statusbar","start":456.38,"end":468.06},{"id":"statusbar-09","ch":"statusbar","start":468.38,"end":479.26},{"id":"statusbar-10","ch":"statusbar","start":479.58,"end":487.74},{"id":"statusbar-11","ch":"statusbar","start":488.06,"end":494.38},{"id":"statusbar-12","ch":"statusbar","start":494.7,"end":501.18},{"id":"statusbar-13","ch":"statusbar","start":501.5,"end":506.7},{"id":"statusbar-14","ch":"statusbar","start":507.02,"end":514.86},{"id":"statusbar-15","ch":"statusbar","start":515.18,"end":523.26},{"id":"title-00","ch":"title","start":524.16,"end":527.6},{"id":"title-01","ch":"title","start":527.92,"end":537.28},{"id":"title-02","ch":"title","start":537.6,"end":552.88},{"id":"title-03","ch":"title","start":553.2,"end":561.12},{"id":"title-04","ch":"title","start":561.44,"end":571.44},{"id":"title-05","ch":"title","start":571.76,"end":579.92},{"id":"title-06","ch":"title","start":580.24,"end":589.84},{"id":"title-07","ch":"title","start":590.16,"end":600.56},{"id":"title-08","ch":"title","start":600.88,"end":612.56},{"id":"title-09","ch":"title","start":612.88,"end":623.76},{"id":"title-10","ch":"title","start":624.08,"end":629.2},{"id":"title-11","ch":"title","start":629.52,"end":637.2},{"id":"title-12","ch":"title","start":637.52,"end":645.36},{"id":"title-13","ch":"title","start":645.68,"end":653.12},{"id":"title-14","ch":"title","start":653.44,"end":663.76},{"id":"title-15","ch":"title","start":664.08,"end":673.68},{"id":"title-16","ch":"title","start":674,"end":686.24},{"id":"title-17","ch":"title","start":686.56,"end":691.44},{"id":"title-18","ch":"title","start":691.76,"end":697.28},{"id":"title-19","ch":"title","start":697.6,"end":704.24},{"id":"title-20","ch":"title","start":704.56,"end":710.08},{"id":"title-21","ch":"title","start":710.4,"end":716.16},{"id":"title-22","ch":"title","start":716.48,"end":728},{"id":"title-23","ch":"title","start":728.32,"end":736.56},{"id":"title-24","ch":"title","start":736.88,"end":744.88},{"id":"title-25","ch":"title","start":745.2,"end":757.52},{"id":"title-26","ch":"title","start":757.84,"end":766.16},{"id":"title-27","ch":"title","start":766.48,"end":772},{"id":"effort-00","ch":"effort","start":772.9,"end":776.5},{"id":"effort-01","ch":"effort","start":776.82,"end":794.34},{"id":"effort-02","ch":"effort","start":794.66,"end":807.7},{"id":"effort-03","ch":"effort","start":808.02,"end":820.34},{"id":"effort-04","ch":"effort","start":820.66,"end":823.86},{"id":"effort-05","ch":"effort","start":824.18,"end":834.18},{"id":"effort-06","ch":"effort","start":834.5,"end":843.46},{"id":"effort-07","ch":"effort","start":843.78,"end":847.86},{"id":"effort-08","ch":"effort","start":848.18,"end":852.18},{"id":"effort-09","ch":"effort","start":852.5,"end":862.34},{"id":"effort-10","ch":"effort","start":862.66,"end":876.98},{"id":"effort-11","ch":"effort","start":877.3,"end":891.94},{"id":"effort-12","ch":"effort","start":892.26,"end":904.9},{"id":"effort-13","ch":"effort","start":905.22,"end":917.54},{"id":"effort-14","ch":"effort","start":917.86,"end":927.06},{"id":"effort-15","ch":"effort","start":927.38,"end":941.38},{"id":"effort-16","ch":"effort","start":941.7,"end":955.78},{"id":"effort-17","ch":"effort","start":956.1,"end":963.86},{"id":"effort-18","ch":"effort","start":964.18,"end":977.86},{"id":"effort-19","ch":"effort","start":978.18,"end":988.82},{"id":"effort-20","ch":"effort","start":989.14,"end":1002.1},{"id":"effort-21","ch":"effort","start":1002.42,"end":1009.7},{"id":"effort-22","ch":"effort","start":1010.02,"end":1018.1},{"id":"effort-23","ch":"effort","start":1018.42,"end":1028.02},{"id":"effort-24","ch":"effort","start":1028.34,"end":1040.26},{"id":"setup-00","ch":"setup","start":1041.16,"end":1043.24},{"id":"setup-01","ch":"setup","start":1043.56,"end":1053},{"id":"setup-02","ch":"setup","start":1053.32,"end":1060.04},{"id":"setup-03","ch":"setup","start":1060.36,"end":1066.52},{"id":"setup-04","ch":"setup","start":1066.84,"end":1073.8},{"id":"setup-05","ch":"setup","start":1074.12,"end":1078.52},{"id":"setup-06","ch":"setup","start":1078.84,"end":1089.16},{"id":"setup-07","ch":"setup","start":1089.48,"end":1094.36}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=7dffbfe3","duration":1123.16,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.44},{"id":"overview-01","ch":"overview","start":3.76,"end":12.48},{"id":"overview-02","ch":"overview","start":12.8,"end":23.44},{"id":"overview-03","ch":"overview","start":23.76,"end":30.56},{"id":"overview-04","ch":"overview","start":30.88,"end":40.08},{"id":"overview-05","ch":"overview","start":40.4,"end":50.48},{"id":"overview-06","ch":"overview","start":50.8,"end":60.64},{"id":"overview-07","ch":"overview","start":60.96,"end":66},{"id":"entry-00","ch":"entry","start":66.9,"end":70.18},{"id":"entry-01","ch":"entry","start":70.5,"end":83.06},{"id":"entry-02","ch":"entry","start":83.38,"end":92.5},{"id":"entry-03","ch":"entry","start":92.82,"end":97.62},{"id":"entry-04","ch":"entry","start":97.94,"end":102.5},{"id":"entry-05","ch":"entry","start":102.82,"end":108.82},{"id":"entry-06","ch":"entry","start":109.14,"end":115.14},{"id":"entry-07","ch":"entry","start":115.46,"end":123.3},{"id":"entry-08","ch":"entry","start":123.62,"end":131.06},{"id":"entry-09","ch":"entry","start":131.38,"end":140.34},{"id":"entry-10","ch":"entry","start":140.66,"end":147.06},{"id":"entry-11","ch":"entry","start":147.38,"end":153.86},{"id":"entry-12","ch":"entry","start":154.18,"end":158.5},{"id":"entry-13","ch":"entry","start":158.82,"end":166.02},{"id":"entry-14","ch":"entry","start":166.34,"end":172.74},{"id":"entry-15","ch":"entry","start":173.06,"end":180.98},{"id":"entry-16","ch":"entry","start":181.3,"end":190.26},{"id":"entry-17","ch":"entry","start":190.58,"end":202.02},{"id":"message-00","ch":"message","start":202.92,"end":205.96},{"id":"message-01","ch":"message","start":206.28,"end":217.56},{"id":"message-02","ch":"message","start":217.88,"end":226.36},{"id":"message-03","ch":"message","start":226.68,"end":234.28},{"id":"message-04","ch":"message","start":234.6,"end":246.44},{"id":"message-05","ch":"message","start":246.76,"end":254.6},{"id":"message-06","ch":"message","start":254.92,"end":263.4},{"id":"message-07","ch":"message","start":263.72,"end":272.52},{"id":"message-08","ch":"message","start":272.84,"end":287.16},{"id":"message-09","ch":"message","start":287.48,"end":297.96},{"id":"message-10","ch":"message","start":298.28,"end":306.44},{"id":"message-11","ch":"message","start":306.76,"end":315.56},{"id":"message-12","ch":"message","start":315.88,"end":330.52},{"id":"message-13","ch":"message","start":330.84,"end":338.84},{"id":"message-14","ch":"message","start":339.16,"end":349.96},{"id":"message-15","ch":"message","start":350.28,"end":356.84},{"id":"message-16","ch":"message","start":357.16,"end":365.32},{"id":"message-17","ch":"message","start":365.64,"end":372.04},{"id":"message-18","ch":"message","start":372.36,"end":375.96},{"id":"message-19","ch":"message","start":376.28,"end":383.64},{"id":"message-20","ch":"message","start":383.96,"end":389.88},{"id":"statusbar-00","ch":"statusbar","start":390.78,"end":393.26},{"id":"statusbar-01","ch":"statusbar","start":393.58,"end":405.9},{"id":"statusbar-02","ch":"statusbar","start":406.22,"end":416.78},{"id":"statusbar-03","ch":"statusbar","start":417.1,"end":425.58},{"id":"statusbar-04","ch":"statusbar","start":425.9,"end":433.98},{"id":"statusbar-05","ch":"statusbar","start":434.3,"end":442.78},{"id":"statusbar-06","ch":"statusbar","start":443.1,"end":458.78},{"id":"statusbar-07","ch":"statusbar","start":459.1,"end":466.86},{"id":"statusbar-08","ch":"statusbar","start":467.18,"end":482.22},{"id":"statusbar-09","ch":"statusbar","start":482.54,"end":493.34},{"id":"statusbar-10","ch":"statusbar","start":493.66,"end":501.82},{"id":"statusbar-11","ch":"statusbar","start":502.14,"end":508.46},{"id":"statusbar-12","ch":"statusbar","start":508.78,"end":515.26},{"id":"statusbar-13","ch":"statusbar","start":515.58,"end":520.78},{"id":"statusbar-14","ch":"statusbar","start":521.1,"end":528.94},{"id":"statusbar-15","ch":"statusbar","start":529.26,"end":537.34},{"id":"title-00","ch":"title","start":538.24,"end":541.68},{"id":"title-01","ch":"title","start":542,"end":551.36},{"id":"title-02","ch":"title","start":551.68,"end":566.96},{"id":"title-03","ch":"title","start":567.28,"end":575.2},{"id":"title-04","ch":"title","start":575.52,"end":585.52},{"id":"title-05","ch":"title","start":585.84,"end":594},{"id":"title-06","ch":"title","start":594.32,"end":603.92},{"id":"title-07","ch":"title","start":604.24,"end":614.64},{"id":"title-08","ch":"title","start":614.96,"end":626.64},{"id":"title-09","ch":"title","start":626.96,"end":637.84},{"id":"title-10","ch":"title","start":638.16,"end":643.28},{"id":"title-11","ch":"title","start":643.6,"end":651.28},{"id":"title-12","ch":"title","start":651.6,"end":659.44},{"id":"title-13","ch":"title","start":659.76,"end":667.2},{"id":"title-14","ch":"title","start":667.52,"end":677.84},{"id":"title-15","ch":"title","start":678.16,"end":687.76},{"id":"title-16","ch":"title","start":688.08,"end":700.32},{"id":"title-17","ch":"title","start":700.64,"end":705.52},{"id":"title-18","ch":"title","start":705.84,"end":711.36},{"id":"title-19","ch":"title","start":711.68,"end":718.32},{"id":"title-20","ch":"title","start":718.64,"end":728},{"id":"title-21","ch":"title","start":728.32,"end":734.08},{"id":"title-22","ch":"title","start":734.4,"end":745.92},{"id":"title-23","ch":"title","start":746.24,"end":754.48},{"id":"title-24","ch":"title","start":754.8,"end":762.8},{"id":"title-25","ch":"title","start":763.12,"end":775.44},{"id":"title-26","ch":"title","start":775.76,"end":784.08},{"id":"title-27","ch":"title","start":784.4,"end":792.72},{"id":"effort-00","ch":"effort","start":793.62,"end":797.22},{"id":"effort-01","ch":"effort","start":797.54,"end":815.06},{"id":"effort-02","ch":"effort","start":815.38,"end":828.42},{"id":"effort-03","ch":"effort","start":828.74,"end":841.06},{"id":"effort-04","ch":"effort","start":841.38,"end":844.58},{"id":"effort-05","ch":"effort","start":844.9,"end":854.9},{"id":"effort-06","ch":"effort","start":855.22,"end":864.18},{"id":"effort-07","ch":"effort","start":864.5,"end":868.58},{"id":"effort-08","ch":"effort","start":868.9,"end":872.9},{"id":"effort-09","ch":"effort","start":873.22,"end":883.06},{"id":"effort-10","ch":"effort","start":883.38,"end":897.7},{"id":"effort-11","ch":"effort","start":898.02,"end":912.66},{"id":"effort-12","ch":"effort","start":912.98,"end":925.62},{"id":"effort-13","ch":"effort","start":925.94,"end":938.26},{"id":"effort-14","ch":"effort","start":938.58,"end":947.78},{"id":"effort-15","ch":"effort","start":948.1,"end":962.1},{"id":"effort-16","ch":"effort","start":962.42,"end":976.5},{"id":"effort-17","ch":"effort","start":976.82,"end":984.58},{"id":"effort-18","ch":"effort","start":984.9,"end":998.58},{"id":"effort-19","ch":"effort","start":998.9,"end":1009.54},{"id":"effort-20","ch":"effort","start":1009.86,"end":1023.46},{"id":"effort-21","ch":"effort","start":1023.78,"end":1036.98},{"id":"effort-22","ch":"effort","start":1037.3,"end":1046.9},{"id":"effort-23","ch":"effort","start":1047.22,"end":1056.82},{"id":"effort-24","ch":"effort","start":1057.14,"end":1069.06},{"id":"setup-00","ch":"setup","start":1069.96,"end":1072.04},{"id":"setup-01","ch":"setup","start":1072.36,"end":1081.8},{"id":"setup-02","ch":"setup","start":1082.12,"end":1088.84},{"id":"setup-03","ch":"setup","start":1089.16,"end":1095.32},{"id":"setup-04","ch":"setup","start":1095.64,"end":1102.6},{"id":"setup-05","ch":"setup","start":1102.92,"end":1107.32},{"id":"setup-06","ch":"setup","start":1107.64,"end":1117.96},{"id":"setup-07","ch":"setup","start":1118.28,"end":1123.16}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

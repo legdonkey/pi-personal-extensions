@@ -1,31 +1,40 @@
-# /auto-name model：可选命名模型列表，上下移动，Esc 不保存
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw/auto-name-model.mp4"
-# 终端窗口缩小到内容区域，让文字在约 640px 宽的显示框里仍可读
+# /personal → 自动会话命名 → 选择命名模型 → ↓↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/auto-name-model.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw3/auto-name-model.txt"
 Set Width 960
 Set Height 540
 Source "docs/extensions-usage/tapes/_settings.tape"
 
 Hide
-Type "cd /Users/yangguandao/Projects/pi-personal-extensions && clear && pi "
+Type@1ms "cd /Users/yangguandao/Projects/pi-personal-extensions && clear && PATH=$HOME/.local/share/pi-node/current/bin:$PATH $HOME/.pi/agent/install/releases/$(cat $HOME/.pi/agent/install/current-version)/node_modules/.bin/pi --no-session --no-skills --no-prompt-templates --model openai-codex/gpt-6.1-sol --thinking medium"
 Enter
-Wait+Screen /未命名会话|｜/
-Sleep 5s
+Wait+Screen /未命名会话|gpt-6.1-sol/
+Sleep 2s
 Show
 
-Sleep 1s
-Type "/auto-name model"
-Sleep 800ms
+Type "/personal"
+Sleep 300ms
 Enter
-Sleep 2s
-Down
+Wait+Screen /个人扩展 · 统一管理/
+Sleep 900ms
+Down@130ms 1
+Sleep 400ms
+Enter
+Sleep 1.1s
+Down@130ms 1
+Sleep 300ms
+Enter
+Wait+Screen /命名模型（全局）/
 Sleep 1.2s
 Down
-Sleep 1.2s
+Sleep 900ms
+Down
+Sleep 900ms
 Up
-Sleep 1.5s
+Sleep 1.1s
 Escape
-Sleep 1.5s
+Sleep 900ms
 
 Hide
 Ctrl+D
-Sleep 1s
+Sleep 700ms

@@ -4,7 +4,7 @@
     <p class="chapter-sum">按每条新用户消息调整 GPT-6 系列的思考档位。顶层参数保持基线，档位写进 input 里这条消息的位置。</p>
     <dl class="meta">
       <dt>功能 ID</dt><dd><code>jev-inline-effort</code></dd>
-      <dt>命令</dt><dd><code>/effort</code></dd>
+      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
       <dt>配置</dt><dd>默认 <code>~/.pi/agent/jev-inline-effort.json</code>，目录跟随 <code>PI_CODING_AGENT_DIR</code></dd>
       <dt>分类器</dt><dd>Jev（默认）· d1-ultra</dd>
     </dl>
@@ -153,7 +153,7 @@
       <ul class="fig-notes">
         <li>「合格」：分类正常完成，档位在五档之内，所选档位的概率是 0.5 到 1 之间的有限数。</li>
         <li>多条新消息时，扩展按最后一条用户消息分类。</li>
-        <li>警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请用 /effort model 或 /effort test 检查。</code></li>
+        <li>警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。</code></li>
         <li>分类进行中如果切换了会话或模型，迟到的结果不写入。</li>
       </ul>
     </figure>
@@ -418,32 +418,34 @@
     </figure>
   </div>
 
-  <!-- 7. /effort 命令 -->
+  <!-- 7. 在 /personal 里管理 -->
   <div class="beat">
     <div class="beat-text">
-      <h3><code>/effort</code> 命令</h3>
+      <h3>在 <code>/personal</code> 里管理</h3>
       <p>
-        <span class="seg" data-seg="effort-20" data-say="不带参数时，斜杠 effort 等于斜杠 effort status。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">不带参数时，<code>/effort</code> 等于 <code>/effort status</code>。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
-        <span class="seg" data-seg="effort-21" data-say="斜杠 effort model 切换分类器。选择存进全局配置，从下一条未分类的消息生效。"><code>/effort model</code> 切换分类器。选择存进全局配置，从下一条未分类的消息生效。</span>
-        <span class="seg" data-seg="effort-22" data-say="斜杠 effort test 用固定样例测试分类器，不写决策。Pi 运行 agent 时，这两个子命令都不可用。"><code>/effort test</code> 用固定样例测试分类器，不写决策。Pi 运行 agent 时，这两个子命令都不可用。</span>
+        <span class="seg" data-seg="effort-20" data-say="在斜杠 personal 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">在 <code>/personal</code> 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
+        <span class="seg" data-seg="effort-21" data-say="「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 D1 Ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。">「选择分类模型」打开选择器；「使用 Jev 分类模型」和「使用 d1-ultra 分类模型」直接保存。选择存进全局配置，从下一条未分类的消息生效。</span>
+        <span class="seg" data-seg="effort-22">「测试分类模型可用性」用固定样例测试分类器，不写决策。Pi 运行 agent 时，选择和测试都不可用。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-7">
-      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 Pi 中输入 /effort，输出适用状态、后续分类器 openrouter/liquid/d1-ultra 和最近决策 low · d1-ultra"></video></div>
+      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、最近决策尚无，以及切换和测试的菜单路径"></video></div>
       <table>
-        <thead><tr><th>命令</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
+        <thead><tr><th>菜单项</th><th>处理函数参数</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
         <tbody>
-          <tr><td><code>/effort</code>、<code>/effort status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
-          <tr data-cue="effort-21"><td><code>/effort model</code></td><td>选择器，<kbd>Esc</kbd> 取消不保存；没有 UI 时（<code>ctx.hasUI</code> 为 false）必须带上模型名</td><td>不可用</td></tr>
-          <tr data-cue="effort-21"><td><code>/effort model jev</code><br><code>/effort model d1-ultra</code></td><td>直接保存所选分类器；其他会话和子代理的后续分类也读这份配置</td><td>不可用</td></tr>
-          <tr data-cue="effort-22"><td><code>/effort test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
+          <tr><td>查看分类模型与状态</td><td><code>status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
+          <tr data-cue="effort-21"><td>选择分类模型（Jev / d1-ultra）</td><td><code>model</code></td><td>选择器，<kbd>Esc</kbd> 键取消不保存</td><td>不可用</td></tr>
+          <tr data-cue="effort-21"><td>使用 Jev 分类模型<br>使用 d1-ultra 分类模型</td><td><code>model jev</code><br><code>model d1-ultra</code></td><td>直接保存；其他会话和子代理的后续分类也读这份配置</td><td>不可用</td></tr>
+          <tr data-cue="effort-22"><td>测试分类模型可用性</td><td><code>test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
         </tbody>
       </table>
       <ul class="fig-notes">
-        <li>配置文件格式错误时，扩展报错，不退回 Jev；用 <code>/effort model</code> 重新保存即可修复。</li>
+        <li>菜单路径：<code>/personal</code> → 原位思考强度（Jev / d1-ultra）→ 菜单项。<code>/personal</code> 有 UI 就能用（TUI、RPC）。</li>
+        <li>这些菜单项调用功能自己的处理函数。处理函数只存在 <code>/personal</code> 的 commands 表里，不再注册成斜杠命令，所以没有 <code>/effort</code>。</li>
+        <li>配置文件格式错误时，扩展报错，不退回 Jev；在「选择分类模型」里重新保存即可修复。</li>
         <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
       </ul>
-      <figcaption>录屏：<code>/effort</code> 输出「适用」、后续分类器 <code>openrouter/liquid/d1-ultra</code> 和最近决策 <code>low · d1-ultra</code>。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -527,7 +529,7 @@
           let label = name;
           let warn = "无";
           if (result === "empty") label = "未分类";
-          else if (result === "error") warn = `openrouter/${IDS[name]} 不可用，思考强度沿用 ${base}。不会切换分类模型；请用 /effort model 或 /effort test 检查。`;
+          else if (result === "error") warn = `openrouter/${IDS[name]} 不可用，思考强度沿用 ${base}。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`;
           else if (LEVELS.includes(result) && p >= 0.5 && p <= 1) level = result;
           if (form.misaligned.checked) {
             out("level").textContent = `${level}（本次请求未生效）`;

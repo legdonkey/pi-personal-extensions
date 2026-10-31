@@ -4,7 +4,7 @@
     <p class="chapter-sum">会话名怎么显示在输入框下方；自动会话命名怎么在后台起名、校验结果，并保护手动起的名字。</p>
     <dl class="meta">
       <dt>功能</dt><dd>右下角会话标题 <code>session-title</code>（显示）；自动会话命名 <code>auto-session-name</code>（起名）</dd>
-      <dt>快捷命令</dt><dd><code>/auto-name</code>；右下角会话标题没有快捷命令</dd>
+      <dt>入口</dt><dd><code>/personal</code> → 自动会话命名（二级菜单）；本包只注册 <code>/personal</code> 一个斜杠命令</dd>
       <dt>全局配置</dt><dd>agent 目录下的 <code>auto-session-name.json</code>（agent 目录默认 <code>~/.pi/agent</code>，可用 <code>PI_CODING_AGENT_DIR</code> 改）</dd>
       <dt>会话里的状态</dt><dd>自定义条目 <code>personal-auto-session-name</code></dd>
     </dl>
@@ -127,7 +127,7 @@
       </p>
       <ul>
         <li>「正常结束」指 <code>stopReason</code> 为 <code>stop</code>；还要求 Pi 空闲、on/off 状态为开启、会话名归本扩展。</li>
-        <li>Print / JSON 模式没有 UI，扩展直接返回，<code>/auto-name preview</code> 也不调用模型。</li>
+        <li>Print / JSON 模式没有 UI，扩展直接返回；<code>/personal</code> 在没有 UI 时也只提示并返回。</li>
         <li>连续失败只提醒一次；配置、模型或档位出错时显示具体错误。</li>
       </ul>
     </div>
@@ -227,7 +227,7 @@
       </p>
       <ul>
         <li>「字符」按 UTF-16 代码单元算。助手消息逐条拼接，每拼一条就去首尾空白、保留最后 1500 个字符。</li>
-        <li>自动命名遇到进行中的请求会跳过；<code>/auto-name preview</code> 会取消旧请求并重新请求。</li>
+        <li>自动命名遇到进行中的请求会跳过；菜单里的「预览建议标题」会取消旧请求并重新请求。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-title-4">
@@ -447,14 +447,14 @@
         <span class="seg" data-seg="title-17">扩展只改两种会话名：空的，或者等于它上次起的。</span>
         <span class="seg" data-seg="title-18" data-say="用户用斜杠 name 改名后，扩展暂停这个会话的自动命名。">用户用 <code>/name</code> 改名后，扩展暂停这个会话的自动命名。</span>
         <span class="seg" data-seg="title-19" data-say="会话开始时，扩展先恢复保存的 on off 状态；会话名不是它起的，也暂停。">会话开始时，扩展先恢复保存的 on/off 状态；会话名不是它起的，也暂停。</span>
-        <span class="seg" data-seg="title-20" data-say="斜杠 auto name on 让扩展接管当前会话名，下一轮结束后生效。"><code>/auto-name on</code> 让扩展接管当前会话名，下一轮结束后生效。</span>
+        <span class="seg" data-seg="title-20" data-say="在斜杠 personal 的自动会话命名菜单里选恢复当前会话命名，扩展接管当前会话名，下一轮结束后生效。">在 <code>/personal</code> → 自动会话命名 里选「恢复当前会话命名」，扩展接管当前会话名，下一轮结束后生效。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-title-7">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 340" width="100%" role="img" aria-labelledby="fig-title-7-title fig-title-7-desc">
           <title id="fig-title-7-title">自动命名的开启与暂停</title>
-          <desc id="fig-title-7-desc">会话开始时先恢复保存的 on/off 状态，再检查会话名归属，归属检查只能把状态改成暂停；开启时遇到本扩展以外的改名或 off 进入暂停，执行 on 回到开启；状态写进会话的自定义条目。</desc>
+          <desc id="fig-title-7-desc">会话开始时先恢复保存的 on/off 状态，再检查会话名归属，归属检查只能把状态改成暂停；开启时遇到本扩展以外的改名或选「暂停当前会话命名」进入暂停，选「恢复当前会话命名」回到开启；状态写进会话的自定义条目。</desc>
           <defs>
             <marker id="fig-title-7-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -471,12 +471,12 @@
           <g data-cue="title-18">
             <line x1="240" y1="184" x2="394" y2="184" class="w" marker-end="url(#fig-title-7-ah)"/>
             <rect x="252" y="164" width="136" height="14" class="mask"/>
-            <text x="320" y="175" class="t-cap" text-anchor="middle">本扩展以外改名 · off</text>
+            <text x="320" y="175" class="t-cap" text-anchor="middle">本扩展以外改名 · 暂停</text>
           </g>
           <g data-cue="title-20">
             <line x1="400" y1="216" x2="246" y2="216" class="w" marker-end="url(#fig-title-7-ah)"/>
-            <rect x="268" y="222" width="104" height="14" class="mask"/>
-            <text x="320" y="233" class="t-sub" text-anchor="middle">/auto-name on</text>
+            <rect x="260" y="222" width="120" height="14" class="mask"/>
+            <text x="320" y="233" class="t-cap" text-anchor="middle">恢复当前会话命名</text>
           </g>
           <g data-cue="title-21">
             <path d="M140 232 V282 Q140 290 148 290 H196" class="w is-dash" marker-end="url(#fig-title-7-ah)"/>
@@ -627,28 +627,30 @@
   <!-- ===== 命令（录屏） ===== -->
   <div class="beat">
     <div class="beat-text">
-      <h3>命令：/auto-name</h3>
+      <h3>菜单：/personal → 自动会话命名</h3>
       <p>
-        <span class="seg" data-seg="title-27" data-say="输入斜杠 auto name，查看状态、模型和思考强度。">输入 <code>/auto-name</code>，查看状态、模型和思考强度。</span>
+        <span class="seg" data-seg="title-27" data-say="在斜杠 personal 的自动会话命名菜单里选查看状态，可以看到状态、模型和思考强度。">在 <code>/personal</code> → 自动会话命名 里选「查看状态」，可以看到状态、模型和思考强度。</span>
       </p>
       <ul>
-        <li><code>/auto-name model</code>、<code>/auto-name thinking</code> 会先取消进行中的命名请求。</li>
+        <li>「选择命名模型」「选择命名思考强度」会先取消进行中的命名请求。</li>
+        <li>菜单项调用功能内部注册的 <code>auto-name</code> 处理函数，参数见下表。这个处理函数只存在入口的 commands 表里，不是斜杠命令。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-9">
-      <div class="capture-frame"><video data-cue="title-27" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name，输出一行：自动命名开启、模型、思考强度和可用子命令"></video></div>
+      <div class="capture-frame"><video data-cue="title-27" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「查看状态」，输出一条状态提示：开启状态、模型、思考强度和菜单路径说明"></video></div>
       <table>
-        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <thead><tr><th>菜单项（内部参数）</th><th>作用</th></tr></thead>
         <tbody>
-          <tr><td><code>/auto-name</code>、<code>/auto-name status</code></td><td>显示 on/off 状态、命名模型和实际思考强度</td></tr>
-          <tr><td><code>/auto-name model</code></td><td>从已认证的 scoped-models 中选命名模型（全局）；换成另一个模型时，思考强度恢复继承</td></tr>
-          <tr><td><code>/auto-name thinking</code></td><td>选独立档位，或恢复继承（全局）；只列出模型支持的档位</td></tr>
-          <tr><td><code>/auto-name preview</code></td><td>Pi 空闲时预览建议标题，不改名；不受 on/off 状态和「相同输入跳过」限制，失败时每次都提醒</td></tr>
-          <tr><td><code>/auto-name off</code></td><td>暂停当前会话的自动命名</td></tr>
-          <tr><td><code>/auto-name on</code></td><td>开启当前会话的自动命名，接管当前会话名，下一轮结束后生效</td></tr>
+          <tr><td>查看状态（<code>status</code>）</td><td>显示 on/off 状态、命名模型和实际思考强度</td></tr>
+          <tr><td>选择命名模型（<code>model</code>）</td><td>从已认证的 scoped-models 中选命名模型（全局）；换成另一个模型时，思考强度恢复继承</td></tr>
+          <tr><td>选择命名思考强度（<code>thinking</code>）</td><td>选独立档位，或恢复继承（全局）；只列出模型支持的档位</td></tr>
+          <tr><td>预览建议标题（<code>preview</code>）</td><td>Pi 空闲时预览建议标题，不改名；不受 on/off 状态和「相同输入跳过」限制，失败时每次都提醒</td></tr>
+          <tr><td>暂停当前会话命名（<code>off</code>）</td><td>暂停当前会话的自动命名</td></tr>
+          <tr><td>恢复当前会话命名（<code>on</code>）</td><td>开启当前会话的自动命名，接管当前会话名，下一轮结束后生效</td></tr>
+          <tr><td>禁用此功能并重载</td><td>关闭整个「自动会话命名」功能（入口统一提供）</td></tr>
         </tbody>
       </table>
-      <figcaption>录屏只保留命令输出那一段。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 查看状态。画面里的模型 gpt-6-luna 和思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
     </figure>
   </div>
 

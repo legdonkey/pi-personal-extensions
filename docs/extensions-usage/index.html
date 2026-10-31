@@ -692,7 +692,7 @@ pi remove "$(pwd)"</code></pre>
       <ul>
         <li>其他已打开的会话，要各自输入 <code>/reload</code>。</li>
         <li>Pi 正在回复或压缩时，重载会被拒绝；结束后手动输入 <code>/reload</code>。</li>
-        <li><code>/personal</code> 只在 Pi 终端界面里打开菜单。</li>
+        <li><code>/personal</code> 有交互界面就能用（Pi 终端界面、RPC 客户端）；「批量功能开关」只在 Pi 终端界面里可用。</li>
         <li>关闭一项功能时，这项功能的设置会保留。重新开启后，设置还在。</li>
       </ul>
     </div>
@@ -742,7 +742,6 @@ pi remove "$(pwd)"</code></pre>
     <p class="chapter-sum">自己的消息带橙色线框，回复里的文件路径点一下就在编辑器里打开。</p>
     <dl class="meta">
       <dt>功能</dt><dd>用户消息橙色线框；文件路径可点击</dd>
-      <dt>快捷命令</dt><dd><code>/clickable-paths</code></dd>
       <dt>在哪设置</dt><dd><code>/personal</code> → 选对应功能</dd>
     </dl>
   </header>
@@ -872,8 +871,11 @@ pi remove "$(pwd)"</code></pre>
         <span class="seg" data-seg="message-06" data-say="默认用 VS Code 打开。想换编辑器，在斜杠 personal 的「文件路径可点击」里选「打开方式」。">默认用 VS Code 打开。想换编辑器，在 <code>/personal</code> 的「文件路径可点击」里选「打开方式」。</span>
         <span class="seg" data-seg="message-07">打开方式选 file 时，系统用默认程序打开文件，不跳到具体行。</span>
       </p>
-      <pre><code># 也可以直接输入命令，例如换成 Cursor
-/clickable-paths editor cursor</code></pre>
+      <ol>
+        <li>输入 <code>/personal</code>，按 <kbd>Enter</kbd> 键。</li>
+        <li>用 <kbd>↑</kbd> <kbd>↓</kbd> 键选「文件路径可点击」，按 <kbd>Enter</kbd> 键。</li>
+        <li>选「打开方式：cursor」这类菜单项，按 <kbd>Enter</kbd> 键。</li>
+      </ol>
     </div>
     <figure class="beat-fig" id="fig-message-3">
       <div class="demo" data-cue="message-06">
@@ -910,7 +912,7 @@ pi remove "$(pwd)"</code></pre>
       </p>
       <ul>
         <li>代码块指用 <code>```</code> 或 <code>~~~</code> 包起来的部分。已经写成链接的文字保持原样。</li>
-        <li>不想识别裸路径：在「文件路径可点击」的二级菜单里选「不识别裸路径」，或输入 <code>/clickable-paths bare off</code>；恢复用 <code>/clickable-paths bare on</code>。</li>
+        <li>不想识别裸路径：在「文件路径可点击」的二级菜单里选「不识别裸路径」；恢复选「识别裸路径」。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-message-4">
@@ -961,7 +963,7 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>路径没变成链接怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="message-10" data-say="输入斜杠 clickable paths，确认「状态」是「开启」。">输入 <code>/clickable-paths</code>，确认「状态」是「开启」。</span></li>
+        <li><span class="seg" data-seg="message-10" data-say="在斜杠 personal 的「文件路径可点击」里选「查看路径链接设置」，确认「状态」是「开启」。">在 <code>/personal</code> 的「文件路径可点击」里选「查看路径链接设置」，确认「状态」是「开启」。</span></li>
         <li><span class="seg" data-seg="message-11">确认文件真实存在，并且路径不在代码块或思考内容里。</span></li>
         <li><span class="seg" data-seg="message-12" data-say="如果路径后面跟着括号里的链接地址，说明终端超链接没有启用。这时检查 Pi 的超链接设置、PI HYPERLINKS 环境变量和终端本身。">如果路径后面跟着括号里的链接地址，说明终端超链接没有启用。这时检查 Pi 的超链接设置、<code>PI_HYPERLINKS</code> 环境变量和终端本身。</span></li>
       </ol>
@@ -975,8 +977,8 @@ pi remove "$(pwd)"</code></pre>
         <summary>路径变成了链接，但点了没反应</summary>
         <ol>
           <li>确认按住了修饰键，具体按键以终端设置为准。</li>
-          <li>输入 <code>/clickable-paths</code> 看「编辑器」，确认这个编辑器已经安装。</li>
-          <li>用 <code>/clickable-paths editor file</code> 换成系统默认程序打开。已显示的消息不会刷新，旧链接地址可能不变：让 Pi 重新输出一个文件路径，再点新消息里的链接测试。</li>
+          <li>选「查看路径链接设置」看「编辑器」，确认这个编辑器已经安装。</li>
+          <li>选「打开方式：file」，换成系统默认程序打开。已显示的消息不会刷新，旧链接地址可能不变：让 Pi 重新输出一个文件路径，再点新消息里的链接测试。</li>
         </ol>
       </details>
     </div>
@@ -984,7 +986,7 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 300" width="100%" role="img" aria-labelledby="fig-message-6-title fig-message-6-desc">
           <title id="fig-message-6-title">路径没变成链接时的检查步骤</title>
-          <desc id="fig-message-6-desc">依次检查：第 1 步，路径链接是否开启，没开启就输入 /clickable-paths on；第 2 步，文件是否真实存在、是否在代码块或思考内容里，是的话保持文字是正常的；第 3 步，路径后面是否跟着括号里的链接地址，是的话说明终端超链接没有启用，依次检查 Pi 的 terminal.hyperlinks 设置、PI_HYPERLINKS 环境变量和终端本身。</desc>
+          <desc id="fig-message-6-desc">依次检查：第 1 步，在查看路径链接设置里看路径链接是否开启，没开启就选开启路径链接；第 2 步，文件是否真实存在、是否在代码块或思考内容里，是的话保持文字是正常的；第 3 步，路径后面是否跟着括号里的链接地址，是的话说明终端超链接没有启用，依次检查 Pi 的 terminal.hyperlinks 设置、PI_HYPERLINKS 环境变量和终端本身。</desc>
           <defs>
             <marker id="fig-message-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -999,9 +1001,9 @@ pi remove "$(pwd)"</code></pre>
             <text class="t-cap" x="320" y="76" text-anchor="middle">否</text>
             <rect class="n" x="16" y="64" width="264" height="44" rx="6"/>
             <text class="t" x="28" y="84">1 「状态」是「开启」？</text>
-            <text class="t-sub" x="28" y="100">/clickable-paths 查看</text>
+            <text class="t-cap" x="28" y="100">「查看路径链接设置」</text>
             <rect class="n" x="360" y="64" width="264" height="44" rx="6"/>
-            <text class="t-mono" x="372" y="91">/clickable-paths on</text>
+            <text class="t" x="372" y="91">选「开启路径链接」</text>
           </g>
 
           <g data-cue="message-11">
@@ -1051,14 +1053,14 @@ pi remove "$(pwd)"</code></pre>
   <div class="beat">
     <div class="beat-text">
       <h3>第 1 步的实际画面</h3>
-      <p>输入 <code>/clickable-paths</code> 后，Pi 列出「状态」「编辑器」「裸路径」「工作目录」四行，后面附三行用法。</p>
+      <p>选「查看路径链接设置」后，Pi 列出「状态」「编辑器」「裸路径」「工作目录」四行，最后一行提示在 <code>/personal</code> → 文件路径可点击 里设置。</p>
       <ul>
-        <li>暂停路径链接：输入 <code>/clickable-paths off</code>，从下一条消息开始生效。恢复：输入 <code>/clickable-paths on</code>。</li>
+        <li>暂停路径链接：选「暂停路径链接」，从下一条消息开始生效。恢复：选「开启路径链接」。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="clickable-paths-status" id="fig-message-5">
-      <div class="capture-frame"><video data-cue="message-10" src="media/clickable-paths-status.mp4" poster="media/clickable-paths-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /clickable-paths，显示「状态」「编辑器」「裸路径」「工作目录」和三行用法"></video></div>
-      <figcaption>录屏：输入 <code>/clickable-paths</code>，显示「状态」「编辑器」「裸路径」「工作目录」和用法。画面里的 ponytail 字样来自本机另一个扩展。</figcaption>
+      <div class="capture-frame"><video data-cue="message-10" src="media/clickable-paths-status.mp4" poster="media/clickable-paths-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 的文件路径可点击里选查看路径链接设置，显示「状态」「编辑器」「裸路径」「工作目录」"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 文件路径可点击 →「查看路径链接设置」，显示「状态」「编辑器」「裸路径」「工作目录」。画面里的 ponytail 字样来自本机另一个扩展。</figcaption>
     </figure>
   </div>
 
@@ -1109,7 +1111,7 @@ pi remove "$(pwd)"</code></pre>
     <p class="chapter-sum">「额度与会话 ID」在状态栏显示剩余额度和会话 ID。「状态栏风格选择」给状态栏换配色。</p>
     <dl class="meta">
       <dt>功能</dt><dd>额度与会话 ID · 状态栏风格选择</dd>
-      <dt>快捷命令</dt><dd><code>/statusline-style</code></dd>
+      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏风格选择</dd>
       <dt>前提</dt><dd>换配色需要先装 <code>npm:@narumitw/pi-statusline</code></dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>pi-statusline.json</code>（默认 <code>~/.pi/agent/</code>）</dd>
     </dl>
@@ -1240,52 +1242,59 @@ pi remove "$(pwd)"</code></pre>
       <p><span class="seg" data-seg="statusbar-06" data-say="「状态栏风格选择」只负责换配色。状态栏本身来自 pi statusline 包，需要先安装并启用。">「状态栏风格选择」只负责换配色。状态栏本身来自 <code>pi-statusline</code> 包，需要先安装并启用。</span></p>
       <pre><code>pi install npm:@narumitw/pi-statusline</code></pre>
       <ol>
-        <li><span class="seg" data-seg="statusbar-07" data-say="输入斜杠 statusline style，打开配色列表。">输入 <code>/statusline-style</code>，打开配色列表。</span></li>
-        <li><span class="seg" data-seg="statusbar-08" data-say="用上下键选一套配色，列表下方的预览条实时换色。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选一套配色，列表下方的预览条实时换色。</span></li>
-        <li><span class="seg" data-seg="statusbar-09" data-say="按 Enter 键应用，按 Esc 键放弃。">按 <kbd>Enter</kbd> 键应用，按 <kbd>Esc</kbd> 键放弃。</span></li>
+        <li><span class="seg" data-seg="statusbar-07" data-say="输入斜杠 personal，选「状态栏风格选择」。">输入 <code>/personal</code>，选「状态栏风格选择」。</span></li>
+        <li><span class="seg" data-seg="statusbar-08">选「预览并选择配色」，打开配色列表。</span></li>
+        <li><span class="seg" data-seg="statusbar-09" data-say="用上下键选一套配色，列表下方的预览条实时换色。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选一套配色，列表下方的预览条实时换色。</span></li>
+        <li><span class="seg" data-seg="statusbar-10" data-say="按 Enter 键应用，按 Esc 键放弃。">按 <kbd>Enter</kbd> 键应用，按 <kbd>Esc</kbd> 键放弃。</span></li>
       </ol>
-      <p><span class="seg" data-seg="statusbar-10">应用后 Pi 自动重载。密度和分隔符也会一起换成 compact 和 round。</span></p>
+      <p><span class="seg" data-seg="statusbar-11">应用后 Pi 自动重载。密度和分隔符也会一起换成 compact 和 round。</span></p>
       <ul>
         <li>Pi 正在回复或压缩上下文时，自动重载会被拒绝。等结束后再应用，或结束后手动输入 <code>/reload</code>。</li>
-        <li>知道编号或名称时可以直接选，例如 <code>/statusline-style 11</code> 或 <code>/statusline-style 茶墨渐层</code>。如果名称写错，Pi 提示「未知风格」，不改任何设置。</li>
-        <li>配色列表只能在 Pi 终端界面里打开。</li>
+        <li>想直接应用某一套：第 2 步改选「应用配色：编号. 名称」，例如「应用配色：11. Claude 暖纸」。这样不打开配色列表，选完立即应用。</li>
+        <li>配色列表只能在 Pi 终端界面里打开；直接应用的菜单项在其他带界面的客户端里也能用。</li>
         <li>设置写在 agent 目录的 <code>pi-statusline.json</code>，其他设置不变。如果写入失败，Pi 提示「应用失败」，不重载。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-06" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /statusline-style，出现 01 到 11 的配色列表，上下移动时列表下方的预览条换色，按 Esc 键退出，不应用"></video></div>
+      <div class="capture-frame"><video data-cue="statusbar-06" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏风格选择，选预览并选择配色；出现 01 到 11 的配色列表，上下移动时列表下方的预览条换色，按 Esc 键退出，不应用"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 72" role="img" aria-labelledby="fig-statusbar-3-title fig-statusbar-3-desc">
-          <title id="fig-statusbar-3-title">换配色的按键</title>
-          <desc id="fig-statusbar-3-desc">输入 /statusline-style，用上下键预览，按 Enter 键应用或 Esc 键放弃，应用后 Pi 自动重载。</desc>
+          <title id="fig-statusbar-3-title">换配色的菜单路径和按键</title>
+          <desc id="fig-statusbar-3-desc">输入 /personal，选状态栏风格选择，再选预览并选择配色；用上下键预览，按 Enter 键应用或 Esc 键放弃；应用后 Pi 自动重载。</desc>
           <defs>
             <marker id="fig-statusbar-3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
           <g data-cue="statusbar-07">
-            <rect class="n" x="12" y="16" width="156" height="40" rx="6"/>
-            <text class="t-mono" x="24" y="41">/statusline-style</text>
+            <rect class="n" x="12" y="16" width="96" height="40" rx="6"/>
+            <text class="t-mono" x="24" y="41">/personal</text>
           </g>
           <g data-cue="statusbar-08">
-            <path class="w" d="M168 36 H188" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n" x="188" y="20" width="28" height="28" rx="4"/><line x1="192" y1="48" x2="212" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="202" y="39" text-anchor="middle">↑</text>
-            <rect class="n" x="220" y="20" width="28" height="28" rx="4"/><line x1="224" y1="48" x2="244" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="234" y="39" text-anchor="middle">↓</text>
-            <text class="t-cap" x="256" y="39">预览</text>
+            <path class="w" d="M108 36 H124" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="124" y="12" width="120" height="48" rx="6"/>
+            <text class="t-cap" x="134" y="32">状态栏风格选择</text>
+            <text class="t-cap" x="134" y="50">› 预览并选择配色</text>
           </g>
           <g data-cue="statusbar-09">
-            <path class="w" d="M288 36 H308" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n" x="308" y="20" width="52" height="28" rx="4"/><line x1="312" y1="48" x2="356" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="334" y="39" text-anchor="middle">Enter</text>
-            <text class="t-cap" x="366" y="39">应用</text>
-            <rect class="n" x="404" y="20" width="40" height="28" rx="4"/><line x1="408" y1="48" x2="440" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="424" y="39" text-anchor="middle">Esc</text>
-            <text class="t-cap" x="450" y="39">放弃</text>
+            <path class="w" d="M244 36 H258" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="258" y="20" width="28" height="28" rx="4"/><line x1="262" y1="48" x2="282" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="272" y="39" text-anchor="middle">↑</text>
+            <rect class="n" x="290" y="20" width="28" height="28" rx="4"/><line x1="294" y1="48" x2="314" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="304" y="39" text-anchor="middle">↓</text>
+            <text class="t-cap" x="324" y="39">预览</text>
           </g>
           <g data-cue="statusbar-10">
-            <path class="w" d="M484 36 H508" marker-end="url(#fig-statusbar-3-arrow)"/>
-            <rect class="n is-focal" x="508" y="16" width="120" height="40" rx="6"/>
-            <text class="t" x="520" y="41">Pi 自动重载</text>
+            <path class="w" d="M352 36 H366" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n" x="366" y="20" width="52" height="28" rx="4"/><line x1="370" y1="48" x2="414" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="392" y="39" text-anchor="middle">Enter</text>
+            <text class="t-cap" x="424" y="39">应用</text>
+            <rect class="n" x="456" y="20" width="40" height="28" rx="4"/><line x1="460" y1="48" x2="492" y2="48" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="476" y="39" text-anchor="middle">Esc</text>
+            <text class="t-cap" x="502" y="39">放弃</text>
+          </g>
+          <g data-cue="statusbar-11">
+            <path class="w" d="M532 36 H548" marker-end="url(#fig-statusbar-3-arrow)"/>
+            <rect class="n is-focal" x="548" y="16" width="80" height="40" rx="6"/>
+            <text class="t" x="560" y="41">自动重载</text>
           </g>
         </svg>
       </div>
@@ -1300,7 +1309,7 @@ pi remove "$(pwd)"</code></pre>
     <p class="chapter-sum">会话名显示在哪，「自动会话命名」什么时候起名、起出来什么样，怎么暂停、预览、换命名模型，要注意什么。</p>
     <dl class="meta">
       <dt>功能</dt><dd>「右下角会话标题」显示会话名；「自动会话命名」起会话名</dd>
-      <dt>快捷命令</dt><dd><code>/auto-name</code>（也可以从 <code>/personal</code> → 「自动会话命名」进入）</dd>
+      <dt>入口</dt><dd><code>/personal</code> → 自动会话命名：查看状态、选择命名模型、选择命名思考强度、预览建议标题、暂停当前会话命名、恢复当前会话命名</dd>
       <dt>适用场景</dt><dd>在 Pi 终端界面里自动起名。用 <code>pi -p</code> 等非交互方式运行时，不起名。</dd>
     </dl>
   </header>
@@ -1411,7 +1420,7 @@ pi remove "$(pwd)"</code></pre>
       <h3>手动改了会话名，怎么恢复自动起名</h3>
       <p>
         <span class="seg" data-seg="title-04" data-say="用斜杠 name 手动改会话名后，这个会话暂停自动起名。">用 <code>/name</code> 手动改会话名后，这个会话暂停自动起名。</span>
-        <span class="seg" data-seg="title-05" data-say="用斜杠 auto name on 恢复，下一轮结束后生效；用斜杠 auto name off 主动暂停。">用 <code>/auto-name on</code> 恢复，下一轮结束后生效；用 <code>/auto-name off</code> 主动暂停。</span>
+        <span class="seg" data-seg="title-05" data-say="想恢复，在斜杠 personal 的自动会话命名菜单里选恢复当前会话命名，下一轮结束后生效；选暂停当前会话命名，可以主动暂停。">想恢复，在 <code>/personal</code> → 自动会话命名 里选「恢复当前会话命名」，下一轮结束后生效；选「暂停当前会话命名」，可以主动暂停。</span>
       </p>
       <ul>
         <li>如果打开的会话已经有会话名，而且不是自动起的，「自动会话命名」在这个会话里也是暂停状态。</li>
@@ -1422,7 +1431,7 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 184" width="100%" role="img" aria-labelledby="fig-title-3-title fig-title-3-desc">
           <title id="fig-title-3-title">自动起名的开启与暂停</title>
-          <desc id="fig-title-3-desc">手动改会话名或输入 /auto-name off 后进入暂停；输入 /auto-name on 后回到自动起名，下一轮结束后生效；打开已有其他会话名的会话时是暂停状态；只影响当前会话，重载后保持。</desc>
+          <desc id="fig-title-3-desc">手动改会话名或选「暂停当前会话命名」后进入暂停；选「恢复当前会话命名」后回到自动起名，下一轮结束后生效；打开已有其他会话名的会话时是暂停状态；只影响当前会话，重载后保持。</desc>
           <defs>
             <marker id="fig-title-3-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -1432,12 +1441,12 @@ pi remove "$(pwd)"</code></pre>
           <g data-cue="title-04">
             <line x1="192" y1="72" x2="442" y2="72" class="w" marker-end="url(#fig-title-3-ah)"/>
             <rect x="232" y="52" width="176" height="14" class="mask"/>
-            <text x="320" y="63" class="t-cap" text-anchor="middle">手动改名 · /auto-name off</text>
+            <text x="320" y="63" class="t-cap" text-anchor="middle">手动改名 · 暂停当前会话命名</text>
           </g>
           <g data-cue="title-05">
             <line x1="448" y1="104" x2="198" y2="104" class="w" marker-end="url(#fig-title-3-ah)"/>
-            <rect x="228" y="110" width="184" height="14" class="mask"/>
-            <text x="320" y="121" class="t-cap" text-anchor="middle">/auto-name on（下一轮生效）</text>
+            <rect x="216" y="110" width="208" height="14" class="mask"/>
+            <text x="320" y="121" class="t-cap" text-anchor="middle">恢复当前会话命名（下一轮生效）</text>
             <text x="320" y="168" class="t-cap" text-anchor="middle">只影响当前会话；重载后保持</text>
           </g>
           <rect x="16" y="56" width="176" height="64" rx="6" class="n is-focal"/>
@@ -1457,7 +1466,7 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想先看看会起什么名</h3>
       <p>
-        <span class="seg" data-seg="title-06" data-say="输入斜杠 auto name preview，可以看到建议的会话名。这个命令只弹出提示，不改会话名。">输入 <code>/auto-name preview</code>，可以看到建议的会话名。这个命令只弹出提示，不改会话名。</span>
+        <span class="seg" data-seg="title-06" data-say="在斜杠 personal 的自动会话命名菜单里选预览建议标题，可以看到建议的会话名。它只弹出提示，不改会话名。">在 <code>/personal</code> → 自动会话命名 里选「预览建议标题」，可以看到建议的会话名。它只弹出提示，不改会话名。</span>
       </p>
       <ul>
         <li>等 Pi 回复完，再预览。暂停状态下也能预览。</li>
@@ -1468,12 +1477,12 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 204" width="100%" role="img" aria-labelledby="fig-title-4-title fig-title-4-desc">
           <title id="fig-title-4-title">预览建议的会话名</title>
-          <desc id="fig-title-4-desc">输入 /auto-name preview 后，Pi 弹出「标题预览」提示；如果当前会话名已合适或信息不足，提示「保持原标题」；会话名本身不变。</desc>
+          <desc id="fig-title-4-desc">选「预览建议标题」后，Pi 弹出「标题预览」提示；如果当前会话名已合适或信息不足，提示「保持原标题」；会话名本身不变。</desc>
           <defs>
             <marker id="fig-title-4-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
           <rect x="16" y="16" width="608" height="40" rx="6" class="n"/>
-          <text x="32" y="41" class="t-mono">/auto-name preview</text>
+          <text x="32" y="41" class="t-mono">/personal → 自动会话命名 → 预览建议标题</text>
           <g data-cue="title-06">
             <line x1="320" y1="56" x2="320" y2="78" class="w" marker-end="url(#fig-title-4-ah)"/>
             <rect x="16" y="84" width="608" height="40" rx="6" class="n is-focal"/>
@@ -1495,16 +1504,16 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想换命名模型</h3>
       <p>
-        <span class="seg" data-seg="title-07" data-say="输入斜杠 auto name model，从列表里选命名模型。列表只列出斜杠 scoped models 里已认证的模型。">输入 <code>/auto-name model</code>，从列表里选命名模型。列表只列出 <code>/scoped-models</code> 里已认证的模型。</span>
+        <span class="seg" data-seg="title-07" data-say="在斜杠 personal 的自动会话命名菜单里选选择命名模型，再从列表里选一个。列表只列出斜杠 scoped models 里已认证的模型。">在 <code>/personal</code> → 自动会话命名 里选「选择命名模型」，再从列表里选一个。列表只列出 <code>/scoped-models</code> 里已认证的模型。</span>
       </p>
       <ul>
         <li>默认命名模型是 <code>gpt-5.6-luna</code>。命名模型只用来起名，对所有会话生效，不影响主对话。</li>
-        <li>命名用的思考强度：输入 <code>/auto-name thinking</code> 选。默认跟随 Pi 对这个模型的设置；Pi 没设置时用 low。实际用的思考强度受命名模型支持的范围限制。命名模型不支持思考时，用 off。</li>
+        <li>命名用的思考强度：在同一个二级菜单里选「选择命名思考强度」。默认跟随 Pi 对这个模型的设置；Pi 没设置时用 low。实际用的思考强度受命名模型支持的范围限制。命名模型不支持思考时，用 off。</li>
         <li>换成另一个命名模型后，命名用的思考强度恢复成默认值。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-model" id="fig-title-5">
-      <div class="capture-frame"><video data-cue="title-07" src="media/auto-name-model.mp4" poster="media/auto-name-model.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name model，弹出可选命名模型列表，上下移动，按 Esc 键不保存"></video></div>
+      <div class="capture-frame"><video data-cue="title-07" src="media/auto-name-model.mp4" poster="media/auto-name-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「选择命名模型」，在列表里上下移动，按 Esc 键不保存"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 64" width="100%" role="img" aria-labelledby="fig-title-5k-title fig-title-5k-desc">
           <title id="fig-title-5k-title">命名模型列表的按键</title>
@@ -1524,7 +1533,7 @@ pi remove "$(pwd)"</code></pre>
           </g>
         </svg>
       </div>
-      <figcaption>录屏：弹出命名模型列表，上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 选择命名模型，在列表里上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
     </figure>
   </div>
 
@@ -1533,12 +1542,12 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想看当前设置</h3>
       <p>
-        <span class="seg" data-seg="title-08" data-say="输入斜杠 auto name，一条提示里能看到是否开启、命名模型和命名用的思考强度。">输入 <code>/auto-name</code>，一条提示里能看到是否开启、命名模型和命名用的思考强度。</span>
+        <span class="seg" data-seg="title-08" data-say="在斜杠 personal 的自动会话命名菜单里选查看状态，一条提示里能看到是否开启、命名模型和命名用的思考强度。">在 <code>/personal</code> → 自动会话命名 里选「查看状态」，一条提示里能看到是否开启、命名模型和命名用的思考强度。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-6">
-      <div class="capture-frame"><video data-cue="title-08" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name，输出一条状态提示：开启状态、命名模型、命名用的思考强度和可用子命令"></video></div>
-      <figcaption>录屏：输出一条状态提示：开启状态、命名模型、命名用的思考强度和可用子命令。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
+      <div class="capture-frame"><video data-cue="title-08" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「查看状态」，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 查看状态，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
     </figure>
   </div>
 
@@ -1589,10 +1598,10 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>会话名一直没变怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="title-11" data-say="在斜杠 personal 里确认「自动会话命名」已加载，再输入斜杠 auto name 看状态。">在 <code>/personal</code> 里确认「自动会话命名」已加载，再输入 <code>/auto-name</code> 看状态。</span></li>
-        <li><span class="seg" data-seg="title-12" data-say="如果显示暂停，输入斜杠 auto name on。">如果显示暂停，输入 <code>/auto-name on</code>。</span></li>
-        <li><span class="seg" data-seg="title-13" data-say="如果提示命名模型不可用，先用斜杠 login 完成服务商认证，再用斜杠 scoped models 选出明确的模型范围，按 Control S 保存。也可以用斜杠 auto name model 换一个命名模型。">如果提示命名模型不可用，先用 <code>/login</code> 完成服务商认证，再用 <code>/scoped-models</code> 选出明确的模型范围，按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 保存。也可以用 <code>/auto-name model</code> 换一个命名模型。</span></li>
-        <li><span class="seg" data-seg="title-14" data-say="如果以上都正常，输入斜杠 auto name preview 试一次。">如果以上都正常，输入 <code>/auto-name preview</code> 试一次。</span></li>
+        <li><span class="seg" data-seg="title-11" data-say="在斜杠 personal 里确认「自动会话命名」已加载，再进入它的菜单选查看状态。">在 <code>/personal</code> 里确认「自动会话命名」已加载，再进入它的菜单选「查看状态」。</span></li>
+        <li><span class="seg" data-seg="title-12" data-say="如果显示暂停，选恢复当前会话命名。">如果显示暂停，选「恢复当前会话命名」。</span></li>
+        <li><span class="seg" data-seg="title-13" data-say="如果提示命名模型不可用，先用斜杠 login 完成服务商认证，再用斜杠 scoped models 选出明确的模型范围，按 Control S 保存。也可以在菜单里选选择命名模型，换一个命名模型。">如果提示命名模型不可用，先用 <code>/login</code> 完成服务商认证，再用 <code>/scoped-models</code> 选出明确的模型范围，按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 保存。也可以在菜单里选「选择命名模型」，换一个命名模型。</span></li>
+        <li><span class="seg" data-seg="title-14" data-say="如果以上都正常，选预览建议标题试一次。">如果以上都正常，选「预览建议标题」试一次。</span></li>
       </ol>
       <ul>
         <li>在 <code>/scoped-models</code> 里全选所有模型时，「自动会话命名」会认为没有可用的命名模型。按 <kbd>Esc</kbd> 键只关闭列表，不保存。</li>
@@ -1624,9 +1633,9 @@ pi remove "$(pwd)"</code></pre>
           <g data-cue="title-12">
             <line x1="264" y1="104" x2="298" y2="104" class="w" marker-end="url(#fig-title-8-ah)"/>
             <rect x="16" y="80" width="248" height="48" rx="6" class="n"/>
-            <text x="140" y="109" class="t" text-anchor="middle">2 /auto-name 显示暂停？</text>
+            <text x="140" y="109" class="t" text-anchor="middle">2 状态显示暂停？</text>
             <rect x="304" y="80" width="320" height="48" rx="6" class="n"/>
-            <text x="320" y="109" class="t-cap">输入 /auto-name on，下一轮生效</text>
+            <text x="320" y="109" class="t-cap">选「恢复当前会话命名」，下一轮生效</text>
           </g>
           <g data-cue="title-13">
             <line x1="264" y1="172" x2="298" y2="172" class="w" marker-end="url(#fig-title-8-ah)"/>
@@ -1634,14 +1643,14 @@ pi remove "$(pwd)"</code></pre>
             <text x="140" y="177" class="t" text-anchor="middle">3 提示命名模型不可用？</text>
             <rect x="304" y="148" width="320" height="48" rx="6" class="n"/>
             <text x="320" y="168" class="t-cap">先 /login，再 /scoped-models 选范围并保存</text>
-            <text x="320" y="186" class="t-cap">或用 /auto-name model 换一个</text>
+            <text x="320" y="186" class="t-cap">或选「选择命名模型」换一个</text>
           </g>
           <g data-cue="title-14">
             <line x1="264" y1="240" x2="298" y2="240" class="w" marker-end="url(#fig-title-8-ah)"/>
             <rect x="16" y="216" width="248" height="48" rx="6" class="n is-focal"/>
             <text x="140" y="245" class="t" text-anchor="middle">4 都正常</text>
             <rect x="304" y="216" width="320" height="48" rx="6" class="n"/>
-            <text x="320" y="245" class="t-cap">输入 /auto-name preview 试一次</text>
+            <text x="320" y="245" class="t-cap">选「预览建议标题」试一次</text>
           </g>
         </svg>
       </div>
@@ -1656,7 +1665,7 @@ pi remove "$(pwd)"</code></pre>
     <p class="chapter-sum">用 GPT-6 系列时，按每条新消息的难度自动选档位，你不用手动切换。不用 GPT-6 系列可以跳过本章。</p>
     <dl class="meta">
       <dt>功能</dt><dd>原位思考强度</dd>
-      <dt>快捷命令</dt><dd><code>/effort</code>、<code>/effort model</code>、<code>/effort test</code></dd>
+      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>jev-inline-effort.json</code>（默认 <code>~/.pi/agent/</code>）</dd>
     </dl>
   </header>
@@ -1721,8 +1730,8 @@ pi remove "$(pwd)"</code></pre>
       </p>
       <ol>
         <li><span class="seg" data-seg="effort-04" data-say="用 GPT 六系列模型启动 Pi，thinking 设为 medium。">用 GPT-6 系列模型启动 Pi，thinking 设为 <code>medium</code>。</span></li>
-        <li><span class="seg" data-seg="effort-05" data-say="输入斜杠 effort，看到「适用」，说明主模型和 thinking 符合条件。">输入 <code>/effort</code>，看到「适用」，说明主模型和 thinking 符合条件。</span></li>
-        <li><span class="seg" data-seg="effort-06" data-say="输入斜杠 effort test，确认分类器能用。">输入 <code>/effort test</code>，确认分类器能用。</span></li>
+        <li><span class="seg" data-seg="effort-05" data-say="输入斜杠 personal，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。">输入 <code>/personal</code>，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。</span></li>
+        <li><span class="seg" data-seg="effort-06">在同一个菜单里选「测试分类模型可用性」，确认分类器能用。</span></li>
         <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
       </ol>
     </div>
@@ -1730,7 +1739,7 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 600 316" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">生效条件和确认步骤</title>
-          <desc id="fig-effort-2-desc">四项条件：主模型是 openai-codex-responses 接口的 GPT-6 系列、thinking 不是 off、登录 openai-codex、配置 OpenRouter 认证。确认分四步：启动 Pi，/effort 显示「适用」，/effort test 确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；出现「未调整」表示这次没有调整档位、按基线发出。</desc>
+          <desc id="fig-effort-2-desc">四项条件：主模型是 openai-codex-responses 接口的 GPT-6 系列、thinking 不是 off、登录 openai-codex、配置 OpenRouter 认证。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；出现「未调整」表示这次没有调整档位、按基线发出。</desc>
           <g data-cue="effort-03">
             <text class="t-cap" x="16" y="16">条件</text>
             <rect class="n" x="16" y="28" width="20" height="20" rx="4"/>
@@ -1751,19 +1760,19 @@ pi remove "$(pwd)"</code></pre>
             <text class="t-sub" x="132" y="139">OpenRouter（分类器在这里）</text>
           </g>
           <line x1="16" y1="160" x2="584" y2="160" style="stroke:var(--rule);stroke-width:1"/>
-          <text class="t-cap" x="16" y="182">确认</text>
+          <text class="t-cap" x="16" y="182">确认（2、3 在 /personal → 原位思考强度 菜单里）</text>
           <g data-cue="effort-04">
             <text class="t-mono" x="16" y="208">1</text>
             <text class="t-mono" x="40" y="208">pi --model openai-codex/gpt-6.1-sol</text>
           </g>
           <g data-cue="effort-05">
             <text class="t-mono" x="16" y="234">2</text>
-            <text class="t-mono" x="40" y="234">/effort</text>
+            <text class="t-cap" x="40" y="234">查看分类模型与状态</text>
             <text class="t-cap" x="232" y="234">显示「适用」：模型和 thinking 符合</text>
           </g>
           <g data-cue="effort-06">
             <text class="t-mono" x="16" y="260">3</text>
-            <text class="t-mono" x="40" y="260">/effort test</text>
+            <text class="t-cap" x="40" y="260">测试分类模型可用性</text>
             <text class="t-cap" x="232" y="260">分类器能用</text>
           </g>
           <g data-cue="effort-07">
@@ -1839,12 +1848,12 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想看现在的状态</h3>
       <p>
-        <span class="seg" data-seg="effort-10" data-say="输入斜杠 effort，看是否适用、之后用哪个分类器、上一条消息选到的档位。">输入 <code>/effort</code>，看是否适用、之后用哪个分类器、上一条消息选到的档位。</span>
+        <span class="seg" data-seg="effort-10" data-say="在斜杠 personal 的原位思考强度菜单里选「查看分类模型与状态」，看是否适用、之后用哪个分类器、上一条消息选到的档位。">在 <code>/personal</code> 的原位思考强度菜单里选「查看分类模型与状态」，看是否适用、之后用哪个分类器、上一条消息选到的档位。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-4">
-      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /effort，输出是否适用、之后用的分类器，以及最近一条消息选到的档位和分类器"></video></div>
-      <figcaption>录屏：输入 <code>/effort</code> 后输出「适用」「后续分类：openrouter/liquid/d1-ultra」「最近决策：low · d1-ultra」。录制环境选的是 d1-ultra，默认是 Jev。</figcaption>
+      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、最近决策尚无，以及切换和测试的菜单路径"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -1853,67 +1862,74 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想换分类器</h3>
       <ol>
-        <li><span class="seg" data-seg="effort-11" data-say="输入斜杠 effort model。">输入 <code>/effort model</code>。</span></li>
-        <li><span class="seg" data-seg="effort-12" data-say="用上下键选 Jev 或 D1 Ultra。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选 Jev 或 d1-ultra。</span></li>
-        <li><span class="seg" data-seg="effort-13" data-say="按 Enter 键保存；按 Esc 键放弃。">按 <kbd>Enter</kbd> 键保存；按 <kbd>Esc</kbd> 键放弃。</span></li>
+        <li><span class="seg" data-seg="effort-11" data-say="输入斜杠 personal，选原位思考强度。">输入 <code>/personal</code>，选原位思考强度。</span></li>
+        <li><span class="seg" data-seg="effort-12">选「选择分类模型」。</span></li>
+        <li><span class="seg" data-seg="effort-13" data-say="用上下键选 Jev 或 D1 Ultra。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选 Jev 或 d1-ultra。</span></li>
+        <li><span class="seg" data-seg="effort-14" data-say="按 Enter 键保存；按 Esc 键放弃。">按 <kbd>Enter</kbd> 键保存；按 <kbd>Esc</kbd> 键放弃。</span></li>
       </ol>
       <p>
-        <span class="seg" data-seg="effort-14">新分类器对所有会话生效。如果 Pi 正在回复，先等它回复完，再切换。</span>
+        <span class="seg" data-seg="effort-15">新分类器对所有会话生效。如果 Pi 正在回复，先等它回复完，再切换。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-model" id="fig-effort-5">
-      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：输入 /effort model，标题显示当前分类器 d1-ultra，列表里有 Jev 和 d1-ultra 两项，光标上下移动后按 Esc 键退出，不保存"></video></div>
+      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度的二级菜单，选「选择分类模型」，选择器标题显示当前 d1-ultra，光标在 Jev 和 d1-ultra 之间移动后按 Esc 键退出，不保存"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 600 104" role="img" aria-labelledby="fig-effort-5-title fig-effort-5-desc">
           <title id="fig-effort-5-title">换分类器的按键步骤</title>
-          <desc id="fig-effort-5-desc">四步：输入 /effort model；用上下键选 Jev 或 d1-ultra；按 Enter 键保存或 Esc 键放弃；新分类器对所有会话生效。</desc>
+          <desc id="fig-effort-5-desc">五步：输入 /personal 并选原位思考强度；选「选择分类模型」；用上下键选 Jev 或 d1-ultra；按 Enter 键保存或 Esc 键放弃；新分类器对所有会话生效。</desc>
           <defs>
             <marker id="fig-effort-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
-          <line class="w" x1="152" y1="44" x2="166" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
-          <line class="w" x1="304" y1="44" x2="318" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
-          <line class="w" x1="456" y1="44" x2="470" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <line class="w" x1="112" y1="44" x2="122" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <line class="w" x1="250" y1="44" x2="262" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <line class="w" x1="340" y1="44" x2="352" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
+          <line class="w" x1="476" y1="44" x2="486" y2="44" marker-end="url(#fig-effort-5-arrow)"/>
           <g data-cue="effort-11">
-            <rect class="n" x="16" y="26" width="136" height="36" rx="4"/>
-            <text class="t-mono" x="84" y="49" text-anchor="middle">/effort model</text>
-            <text class="t-cap" x="84" y="88" text-anchor="middle">输入命令</text>
+            <rect class="n" x="16" y="26" width="96" height="36" rx="4"/>
+            <text class="t-mono" x="64" y="49" text-anchor="middle">/personal</text>
+            <text class="t-cap" x="64" y="88" text-anchor="middle">选原位思考强度</text>
           </g>
           <g data-cue="effort-12">
-            <rect class="n" x="196" y="26" width="36" height="34" rx="4"/>
-            <line x1="198" y1="60" x2="230" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="214" y="48" text-anchor="middle">↑</text>
-            <rect class="n" x="240" y="26" width="36" height="34" rx="4"/>
-            <line x1="242" y1="60" x2="274" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="258" y="48" text-anchor="middle">↓</text>
-            <text class="t-cap" x="236" y="88" text-anchor="middle">选 Jev 或 d1-ultra</text>
+            <rect class="n" x="124" y="26" width="126" height="36" rx="4"/>
+            <text class="t-cap" x="187" y="49" text-anchor="middle">选择分类模型</text>
+            <text class="t-cap" x="187" y="88" text-anchor="middle">菜单项</text>
           </g>
           <g data-cue="effort-13">
-            <rect class="n" x="322" y="26" width="64" height="34" rx="4"/>
-            <line x1="324" y1="60" x2="384" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="354" y="48" text-anchor="middle">Enter</text>
-            <rect class="n" x="398" y="26" width="52" height="34" rx="4"/>
-            <line x1="400" y1="60" x2="448" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
-            <text class="t-mono" x="424" y="48" text-anchor="middle">Esc</text>
-            <text class="t-cap" x="386" y="88" text-anchor="middle">保存 · 放弃</text>
+            <rect class="n" x="266" y="26" width="32" height="34" rx="4"/>
+            <line x1="268" y1="60" x2="296" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="282" y="48" text-anchor="middle">↑</text>
+            <rect class="n" x="304" y="26" width="32" height="34" rx="4"/>
+            <line x1="306" y1="60" x2="334" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="320" y="48" text-anchor="middle">↓</text>
+            <text class="t-cap" x="301" y="88" text-anchor="middle">选 Jev 或 d1-ultra</text>
           </g>
           <g data-cue="effort-14">
-            <rect class="n is-focal" x="472" y="26" width="112" height="36" rx="4"/>
-            <text class="t" x="528" y="49" text-anchor="middle">全部会话</text>
-            <text class="t-cap" x="528" y="88" text-anchor="middle">新分类器生效</text>
+            <rect class="n" x="356" y="26" width="60" height="34" rx="4"/>
+            <line x1="358" y1="60" x2="414" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="386" y="48" text-anchor="middle">Enter</text>
+            <rect class="n" x="424" y="26" width="48" height="34" rx="4"/>
+            <line x1="426" y1="60" x2="470" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
+            <text class="t-mono" x="448" y="48" text-anchor="middle">Esc</text>
+            <text class="t-cap" x="414" y="88" text-anchor="middle">保存 · 放弃</text>
+          </g>
+          <g data-cue="effort-15">
+            <rect class="n is-focal" x="490" y="26" width="94" height="36" rx="4"/>
+            <text class="t" x="537" y="49" text-anchor="middle">全部会话</text>
+            <text class="t-cap" x="537" y="88" text-anchor="middle">新分类器生效</text>
           </g>
         </svg>
       </div>
       <div class="table-scroll"><table>
-        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <thead><tr><th>想做什么</th><th>菜单项（在原位思考强度里）</th></tr></thead>
         <tbody>
-          <tr><td><code>/effort model jev</code></td><td>直接换成 Jev（默认）</td></tr>
-          <tr><td><code>/effort model d1-ultra</code></td><td>直接换成 d1-ultra（付费）</td></tr>
+          <tr><td>直接换成 Jev（默认）</td><td>使用 Jev 分类模型</td></tr>
+          <tr><td>直接换成 d1-ultra（付费）</td><td>使用 d1-ultra 分类模型</td></tr>
         </tbody>
       </table></div>
       <ul class="fig-notes">
         <li>新分类器从下一条还没分类的消息开始用，已有消息的档位不变。</li>
       </ul>
-      <figcaption>录屏：标题显示当前分类器 d1-ultra（录制环境的配置，默认是 Jev）。光标移到 d1-ultra 再回到 Jev，按 Esc 键退出，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 选择分类模型。选择器标题显示当前 d1-ultra（录制环境的配置，默认是 Jev）；光标从 Jev 移到 d1-ultra 再回到 Jev，按 Esc 键退出，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。二级菜单里也能看到「使用 Jev 分类模型」「使用 d1-ultra 分类模型」「测试分类模型可用性」。</figcaption>
     </figure>
   </div>
 
@@ -1922,19 +1938,19 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>分类失败怎么办</h3>
       <p>
-        <span class="seg" data-seg="effort-15">如果分类器 15 秒内没有结果，或者服务出错，这条消息按当前档位照常发出，Pi 弹出警告。</span>
-        <span class="seg" data-seg="effort-16" data-say="看到警告，先用斜杠 effort test 检查；还不行，就用斜杠 effort model 换分类器。">看到警告，先用 <code>/effort test</code> 检查；还不行，就用 <code>/effort model</code> 换分类器。</span>
+        <span class="seg" data-seg="effort-16">如果分类器 15 秒内没有结果，或者服务出错，这条消息按当前档位照常发出，Pi 弹出警告。</span>
+        <span class="seg" data-seg="effort-17" data-say="看到警告，先在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」；还不行，就选「选择分类模型」换一个。">看到警告，先在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」；还不行，就选「选择分类模型」换一个。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="fig-scroll">
         <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-6-title fig-effort-6-desc">
           <title id="fig-effort-6-title">分类失败时会怎样</title>
-          <desc id="fig-effort-6-desc">超时、服务出错或响应格式损坏时按当前档位发出并警告；分类器返回的档位无效或把握不足时按当前档位发出，不提示。当前档位是上一条消息的档位，没有上一条消息时用基线。看到警告先运行 /effort test，仍失败就用 /effort model 换分类器。</desc>
+          <desc id="fig-effort-6-desc">超时、服务出错或响应格式损坏时按当前档位发出并警告；分类器返回的档位无效或把握不足时按当前档位发出，不提示。当前档位是上一条消息的档位，没有上一条消息时用基线。看到警告先在 /personal 的原位思考强度菜单里选「测试分类模型可用性」，仍失败就选「选择分类模型」换分类器。</desc>
           <defs>
             <marker id="fig-effort-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
-          <g data-cue="effort-15">
+          <g data-cue="effort-16">
             <line class="w" x1="264" y1="40" x2="294" y2="40" marker-end="url(#fig-effort-6-arrow)"/>
             <rect class="n" x="16" y="20" width="248" height="40" rx="6"/>
             <text class="t" x="140" y="45" text-anchor="middle">超时、服务出错、格式损坏</text>
@@ -1947,16 +1963,16 @@ pi remove "$(pwd)"</code></pre>
           <rect class="n" x="296" y="76" width="288" height="40" rx="6"/>
           <text class="t" x="440" y="101" text-anchor="middle">按当前档位发出，不提示</text>
           <text class="t-cap" x="16" y="140">当前档位：上一条消息的档位；没有上一条消息时，用基线。对话照常进行。</text>
-          <g data-cue="effort-16">
+          <g data-cue="effort-17">
             <line class="w" x1="264" y1="180" x2="294" y2="180" marker-end="url(#fig-effort-6-arrow)"/>
             <rect class="n" x="16" y="160" width="248" height="40" rx="6"/>
             <text class="t" x="140" y="185" text-anchor="middle">看到警告</text>
             <rect class="n is-focal" x="296" y="160" width="288" height="40" rx="6"/>
-            <text class="t-mono" x="440" y="185" text-anchor="middle">/effort test → /effort model</text>
+            <text class="t-cap" x="440" y="185" text-anchor="middle">测试分类模型可用性 → 选择分类模型</text>
           </g>
         </svg>
       </div>
-      <figcaption>「把握不足」指分类器给所选档位的概率低于 0.5。警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请用 /effort model 或 /effort test 检查。</code></figcaption>
+      <figcaption>「把握不足」指分类器给所选档位的概率低于 0.5。警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。</code></figcaption>
     </figure>
   </div>
 
@@ -1965,8 +1981,8 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>要注意什么：额度和隐私</h3>
       <p>
-        <span class="seg" data-seg="effort-17" data-say="每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；D1 Ultra 是付费模型。">每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；d1-ultra 是付费模型。</span>
-        <span class="seg" data-seg="effort-18">「原位思考强度」把当前消息和之前最多 6 条对话消息的文本发给分类器，可能含业务信息。工具输出、思考内容和图片不发送。</span>
+        <span class="seg" data-seg="effort-18" data-say="每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；D1 Ultra 是付费模型。">每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-19">「原位思考强度」把当前消息和之前最多 6 条对话消息的文本发给分类器，可能含业务信息。工具输出、思考内容和图片不发送。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-7">
@@ -1986,12 +2002,12 @@ pi remove "$(pwd)"</code></pre>
           <text class="t-sub" x="292" y="62" text-anchor="middle">OpenRouter</text>
           <rect class="n" x="448" y="24" width="136" height="48" rx="6"/>
           <text class="t" x="516" y="53" text-anchor="middle">主模型</text>
-          <g data-cue="effort-17">
+          <g data-cue="effort-18">
             <path d="M192 84 V88 H392 V84" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
             <text class="t-cap" x="292" y="108" text-anchor="middle">多等最多 15 秒</text>
             <text class="t-cap" x="292" y="128" text-anchor="middle">消耗 OpenRouter 额度（d1-ultra 付费）</text>
           </g>
-          <g data-cue="effort-18">
+          <g data-cue="effort-19">
             <line x1="16" y1="146" x2="584" y2="146" style="stroke:var(--rule);stroke-width:1"/>
             <text class="t-cap" x="16" y="172">发送：当前消息和之前最多 6 条对话消息的文本</text>
             <text class="t-cap" x="16" y="196">不发送：系统提示词、工具输出、思考内容、图片</text>
@@ -2014,45 +2030,41 @@ pi remove "$(pwd)"</code></pre>
 <section class="chapter" id="ch-faq" data-chapter="faq" aria-labelledby="ch-faq-h">
   <header class="chapter-head">
     <h2 id="ch-faq-h"><span class="seg" data-seg="faq-00">速查：命令、配置和常见问题</span></h2>
-    <p class="chapter-sum">所有快捷命令一张表；五个配置文件在哪；出问题时先查什么。</p>
+    <p class="chapter-sum">想做什么对应哪个菜单项；五个配置文件在哪；出问题时先查什么。</p>
   </header>
 
-  <!-- 节拍 1：命令速查 -->
+  <!-- 节拍 1：菜单路径速查 -->
   <div class="beat">
     <div class="beat-text">
-      <h3>想查某个命令</h3>
+      <h3>想找某项设置在哪</h3>
       <p>
-        <span class="seg" data-seg="faq-01" data-say="快捷命令和斜杠 personal 二级菜单里的设置项做同一件事，直接输入命令更快。表里按功能分组。">快捷命令和 <code>/personal</code> 二级菜单里的设置项做同一件事，直接输入命令更快。表里按功能分组。</span>
+        <span class="seg" data-seg="faq-01" data-say="所有设置都从斜杠 personal 进入：先选功能，再选二级菜单里的设置项。表里按想做什么列出菜单路径。">所有设置都从 <code>/personal</code> 进入：先选功能，再选二级菜单里的设置项。表里按「想做什么」列出菜单路径。</span>
       </p>
-      <p>不带参数时，<code>/auto-name</code> 和 <code>/effort</code> 显示当前状态。</p>
+      <p>Pi 自带的 <code>/reload</code>、<code>/name</code> 照常直接输入。</p>
     </div>
     <figure class="beat-fig" id="fig-faq-1">
       <div class="table-scroll"><table>
-        <caption>快捷命令速查</caption>
-        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <caption>想做什么 → 菜单路径（都从 /personal 开始）</caption>
+        <thead><tr><th>想做什么</th><th>菜单路径</th></tr></thead>
         <tbody data-cue="faq-01">
-          <tr><td><code>/personal</code></td><td>统一管理菜单：启停、进入设置</td></tr>
-          <tr><td><code>/personal switches</code></td><td>批量功能开关</td></tr>
-          <tr><td><code>/reload</code></td><td>Pi 自带：重载扩展</td></tr>
-        </tbody>
-        <tbody data-cue="faq-01">
-          <tr><td><code>/auto-name</code></td><td>查看自动会话命名的状态、命名模型、命名用的思考强度</td></tr>
-          <tr><td><code>/auto-name model</code> / <code>thinking</code></td><td>选命名模型 / 命名用的思考强度</td></tr>
-          <tr><td><code>/auto-name preview</code></td><td>预览建议的会话名，不改名</td></tr>
-          <tr><td><code>/auto-name off</code> / <code>on</code></td><td>在当前会话暂停 / 恢复自动起名</td></tr>
-          <tr><td><code>/name 新名字</code></td><td>Pi 自带：手动改会话名，之后这个会话暂停自动起名</td></tr>
-          <tr><td><code>/effort</code></td><td>查看是否适用、分类器、最近一条消息选到的档位</td></tr>
-          <tr><td><code>/effort model [jev|d1-ultra]</code></td><td>选分类器；带名字时直接切换。默认 Jev</td></tr>
-          <tr><td><code>/effort test</code></td><td>用固定样例测试分类器能不能用</td></tr>
-        </tbody>
-        <tbody data-cue="faq-01">
-          <tr><td><code>/clickable-paths [on|off]</code></td><td>查看设置 / 开启 / 暂停路径链接</td></tr>
-          <tr><td><code>/clickable-paths editor cursor</code></td><td>换打开方式（示例：cursor）。可选 vscode、vscode-insiders、cursor、windsurf、file</td></tr>
-          <tr><td><code>/clickable-paths bare on|off</code></td><td>识别 / 不识别裸路径</td></tr>
-          <tr><td><code>/statusline-style [编号]</code></td><td>预览并选配色；带编号时直接应用。应用后自动重载</td></tr>
+          <tr><td>开启或关闭一项功能</td><td>功能 → 启用 / 禁用此功能并重载</td></tr>
+          <tr><td>一次开关好几项</td><td><code>/personal switches</code>，或一级菜单最后一行「批量功能开关」</td></tr>
+          <tr><td>查看自动起名的状态</td><td>自动会话命名 → 查看状态</td></tr>
+          <tr><td>换命名模型 / 命名用的思考强度</td><td>自动会话命名 → 选择命名模型 / 选择命名思考强度</td></tr>
+          <tr><td>先看建议的会话名，不改名</td><td>自动会话命名 → 预览建议标题</td></tr>
+          <tr><td>在当前会话暂停 / 恢复自动起名</td><td>自动会话命名 → 暂停当前会话命名 / 恢复当前会话命名</td></tr>
+          <tr><td>查看思考强度是否适用、最近的档位</td><td>原位思考强度 → 查看分类模型与状态</td></tr>
+          <tr><td>换分类器</td><td>原位思考强度 → 选择分类模型，或「使用 Jev 分类模型」「使用 d1-ultra 分类模型」</td></tr>
+          <tr><td>测试分类器能不能用</td><td>原位思考强度 → 测试分类模型可用性</td></tr>
+          <tr><td>查看路径链接设置</td><td>文件路径可点击 → 查看路径链接设置</td></tr>
+          <tr><td>开启 / 暂停路径链接</td><td>文件路径可点击 → 开启路径链接 / 暂停路径链接</td></tr>
+          <tr><td>换打开方式</td><td>文件路径可点击 → 打开方式：vscode、vscode-insiders、cursor、windsurf 或 file</td></tr>
+          <tr><td>识别 / 不识别裸路径</td><td>文件路径可点击 → 识别裸路径 / 不识别裸路径</td></tr>
+          <tr><td>换状态栏配色</td><td>状态栏风格选择 → 预览并选择配色，或「应用配色：编号. 名称」</td></tr>
+          <tr><td>手动改会话名</td><td>Pi 自带：<code>/name 新名字</code>，之后这个会话暂停自动起名</td></tr>
         </tbody>
       </table></div>
-      <figcaption><code>/auto-name</code>、<code>/effort</code>、<code>/clickable-paths</code>、<code>/statusline-style</code> 只在对应功能开启时可用。</figcaption>
+      <figcaption>设置项只在功能已加载时出现；未加载的功能只有「启用此功能并重载」。</figcaption>
     </figure>
   </div>
 
@@ -2063,7 +2075,7 @@ pi remove "$(pwd)"</code></pre>
       <p>
         <span class="seg" data-seg="faq-02" data-say="五个配置文件都在 agent 目录，默认是主目录下的点 pi 斜杠 agent。">五个配置文件都在 agent 目录，默认是 <code>~/.pi/agent/</code>。</span>
         设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，五个文件改用它指定的目录。
-        <span class="seg" data-seg="faq-03">平时不用手改这些文件。用菜单或快捷命令改全局设置，会自动保存到对应文件。</span>
+        <span class="seg" data-seg="faq-03">平时不用手改这些文件。用 /personal 菜单改全局设置，会自动保存到对应文件。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-faq-2">
@@ -2119,7 +2131,7 @@ pi remove "$(pwd)"</code></pre>
       <h3>改了设置没生效，要不要 /reload</h3>
       <p>
         <span class="seg" data-seg="faq-04" data-say="在别的会话改过设置、手改过配置文件，或刚装好、更新过扩展，已打开的会话要输入斜杠 reload。">在别的会话改过设置、手改过配置文件，或刚装好、更新过扩展，已打开的会话要输入 <code>/reload</code>。</span>
-        <span class="seg" data-seg="faq-05">在当前会话用菜单或快捷命令改，不用重载。</span>
+        <span class="seg" data-seg="faq-05" data-say="在当前会话用斜杠 personal 菜单改，不用重载。">在当前会话用 <code>/personal</code> 菜单改，不用重载。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-faq-3">
@@ -2140,17 +2152,17 @@ pi remove "$(pwd)"</code></pre>
           <g data-cue="faq-05">
             <rect class="n" x="328" y="16" width="296" height="272" rx="6"/>
             <text class="t" x="344" y="44">不用重载</text>
-            <text class="t-mono" x="344" y="80">/personal</text>
+            <text class="t-cap" x="344" y="80" style="fill:var(--ink)">启用 / 禁用功能</text>
             <text class="t-cap" x="608" y="80" text-anchor="end">当前会话自动重载</text>
-            <text class="t-mono" x="344" y="112">/statusline-style</text>
+            <text class="t-cap" x="344" y="112" style="fill:var(--ink)">应用配色</text>
             <text class="t-cap" x="608" y="112" text-anchor="end">应用后自动重载</text>
-            <text class="t-mono" x="344" y="144">/clickable-paths …</text>
+            <text class="t-cap" x="344" y="144" style="fill:var(--ink)">路径链接设置</text>
             <text class="t-cap" x="608" y="144" text-anchor="end">之后的消息生效</text>
-            <text class="t-mono" x="344" y="176">/effort model</text>
+            <text class="t-cap" x="344" y="176" style="fill:var(--ink)">换分类器</text>
             <text class="t-cap" x="608" y="176" text-anchor="end">下一条新消息生效</text>
-            <text class="t-mono" x="344" y="208">/auto-name model</text>
+            <text class="t-cap" x="344" y="208" style="fill:var(--ink)">换命名模型</text>
             <text class="t-cap" x="608" y="208" text-anchor="end">下次起名生效</text>
-            <text class="t-cap" x="344" y="264">都指在当前会话里操作</text>
+            <text class="t-cap" x="344" y="264">都指在当前会话里用 /personal 操作</text>
           </g>
         </svg>
       </div>
@@ -2229,11 +2241,11 @@ npm install --ignore-scripts \
             <rect class="n" x="16" y="32" width="140" height="64" rx="6"/>
             <text class="t" x="28" y="69">会话名没自动变</text>
             <rect class="n" x="180" y="32" width="224" height="64" rx="6"/>
-            <text class="t-cap" x="192" y="58">/auto-name 显示暂停？</text>
+            <text class="t-cap" x="192" y="58">「查看状态」显示暂停？</text>
             <text class="t-cap" x="192" y="78">或提示命名失败？</text>
             <rect class="n" x="428" y="32" width="196" height="64" rx="6"/>
-            <text class="t-mono" x="440" y="58">/auto-name on</text>
-            <text class="t-mono" x="440" y="78">/auto-name preview</text>
+            <text class="t-cap" x="440" y="58" style="fill:var(--ink)">恢复当前会话命名</text>
+            <text class="t-cap" x="440" y="78" style="fill:var(--ink)">失败时：预览建议标题</text>
 
             <path class="w" d="M156 148 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
             <path class="w" d="M404 148 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
@@ -2265,8 +2277,8 @@ npm install --ignore-scripts \
             <text class="t-cap" x="192" y="310">文件真实存在吗？</text>
             <text class="t-cap" x="192" y="330">在代码块里吗？</text>
             <rect class="n" x="428" y="284" width="196" height="64" rx="6"/>
-            <text class="t-mono" x="440" y="310">/clickable-paths</text>
-            <text class="t-cap" x="440" y="330">查看开关和打开方式</text>
+            <text class="t-cap" x="440" y="310" style="fill:var(--ink)">查看路径链接设置</text>
+            <text class="t-cap" x="440" y="330">看开关和打开方式</text>
 
             <path class="w" d="M156 400 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
             <path class="w" d="M404 400 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
@@ -2277,8 +2289,8 @@ npm install --ignore-scripts \
             <text class="t-cap" x="192" y="394">终端支持点击打开链接吗？</text>
             <text class="t-cap" x="192" y="414">选的编辑器装了吗？</text>
             <rect class="n" x="428" y="368" width="196" height="64" rx="6"/>
-            <text class="t-mono" x="440" y="394">/clickable-paths editor</text>
-            <text class="t-cap" x="440" y="414">后接编辑器名，或 file</text>
+            <text class="t-cap" x="440" y="394" style="fill:var(--ink)">打开方式：编辑器名</text>
+            <text class="t-cap" x="440" y="414">或 打开方式：file</text>
 
             <path class="w" d="M156 484 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
             <path class="w" d="M404 484 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
@@ -2322,7 +2334,7 @@ npm install --ignore-scripts \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=83d06063","duration":608.58,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":9.68},{"id":"start-02","ch":"start","start":10,"end":17.04},{"id":"start-03","ch":"start","start":17.36,"end":23.76},{"id":"start-04","ch":"start","start":24.08,"end":36.32},{"id":"start-05","ch":"start","start":36.64,"end":50.96},{"id":"start-06","ch":"start","start":51.28,"end":59.2},{"id":"start-07","ch":"start","start":59.52,"end":65.04},{"id":"start-08","ch":"start","start":65.36,"end":74.24},{"id":"start-09","ch":"start","start":74.56,"end":78.08},{"id":"start-10","ch":"start","start":78.4,"end":86.48},{"id":"start-11","ch":"start","start":86.8,"end":90.8},{"id":"start-12","ch":"start","start":91.12,"end":96.08},{"id":"start-13","ch":"start","start":96.4,"end":99.2},{"id":"start-14","ch":"start","start":99.52,"end":103.12},{"id":"start-15","ch":"start","start":103.44,"end":109.28},{"id":"message-00","ch":"message","start":110.18,"end":113.06},{"id":"message-01","ch":"message","start":113.38,"end":121.86},{"id":"message-02","ch":"message","start":122.18,"end":126.02},{"id":"message-03","ch":"message","start":126.34,"end":132.26},{"id":"message-04","ch":"message","start":132.58,"end":140.34},{"id":"message-05","ch":"message","start":140.66,"end":145.3},{"id":"message-06","ch":"message","start":145.62,"end":154.02},{"id":"message-07","ch":"message","start":154.34,"end":160.26},{"id":"message-08","ch":"message","start":160.58,"end":169.86},{"id":"message-09","ch":"message","start":170.18,"end":177.22},{"id":"message-10","ch":"message","start":177.54,"end":182.02},{"id":"message-11","ch":"message","start":182.34,"end":187.46},{"id":"message-12","ch":"message","start":187.78,"end":199.7},{"id":"statusbar-00","ch":"statusbar","start":200.6,"end":203.48},{"id":"statusbar-01","ch":"statusbar","start":203.8,"end":213.24},{"id":"statusbar-02","ch":"statusbar","start":213.56,"end":224.92},{"id":"statusbar-03","ch":"statusbar","start":225.24,"end":237.48},{"id":"statusbar-04","ch":"statusbar","start":237.8,"end":245.88},{"id":"statusbar-05","ch":"statusbar","start":246.2,"end":257.24},{"id":"statusbar-06","ch":"statusbar","start":257.56,"end":265.48},{"id":"statusbar-07","ch":"statusbar","start":265.8,"end":270.12},{"id":"statusbar-08","ch":"statusbar","start":270.44,"end":275.72},{"id":"statusbar-09","ch":"statusbar","start":276.04,"end":279.48},{"id":"statusbar-10","ch":"statusbar","start":279.8,"end":286.44},{"id":"title-00","ch":"title","start":287.34,"end":291.42},{"id":"title-01","ch":"title","start":291.74,"end":300.86},{"id":"title-02","ch":"title","start":301.18,"end":309.1},{"id":"title-03","ch":"title","start":309.42,"end":314.46},{"id":"title-04","ch":"title","start":314.78,"end":320.54},{"id":"title-05","ch":"title","start":320.86,"end":328.86},{"id":"title-06","ch":"title","start":329.18,"end":337.9},{"id":"title-07","ch":"title","start":338.22,"end":347.02},{"id":"title-08","ch":"title","start":347.34,"end":354.86},{"id":"title-09","ch":"title","start":355.18,"end":361.98},{"id":"title-10","ch":"title","start":362.3,"end":374.38},{"id":"title-11","ch":"title","start":374.7,"end":381.82},{"id":"title-12","ch":"title","start":382.14,"end":385.74},{"id":"title-13","ch":"title","start":386.06,"end":403.98},{"id":"title-14","ch":"title","start":404.3,"end":409.26},{"id":"effort-00","ch":"effort","start":410.16,"end":414.24},{"id":"effort-01","ch":"effort","start":414.56,"end":424.24},{"id":"effort-02","ch":"effort","start":424.56,"end":427.04},{"id":"effort-03","ch":"effort","start":427.36,"end":440.8},{"id":"effort-04","ch":"effort","start":441.12,"end":445.84},{"id":"effort-05","ch":"effort","start":446.16,"end":452.96},{"id":"effort-06","ch":"effort","start":453.28,"end":457.36},{"id":"effort-07","ch":"effort","start":457.68,"end":472.72},{"id":"effort-08","ch":"effort","start":473.04,"end":481.12},{"id":"effort-09","ch":"effort","start":481.44,"end":486.8},{"id":"effort-10","ch":"effort","start":487.12,"end":494.72},{"id":"effort-11","ch":"effort","start":495.04,"end":497.68},{"id":"effort-12","ch":"effort","start":498,"end":501.84},{"id":"effort-13","ch":"effort","start":502.16,"end":506.32},{"id":"effort-14","ch":"effort","start":506.64,"end":513.76},{"id":"effort-15","ch":"effort","start":514.08,"end":522.56},{"id":"effort-16","ch":"effort","start":522.88,"end":530.64},{"id":"effort-17","ch":"effort","start":530.96,"end":539.04},{"id":"effort-18","ch":"effort","start":539.36,"end":552.48},{"id":"faq-00","ch":"faq","start":553.38,"end":556.98},{"id":"faq-01","ch":"faq","start":557.3,"end":565.94},{"id":"faq-02","ch":"faq","start":566.26,"end":572.34},{"id":"faq-03","ch":"faq","start":572.66,"end":580.34},{"id":"faq-04","ch":"faq","start":580.66,"end":590.02},{"id":"faq-05","ch":"faq","start":590.34,"end":594.82},{"id":"faq-06","ch":"faq","start":595.14,"end":604.18},{"id":"faq-07","ch":"faq","start":604.5,"end":608.58}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=b3e84049","duration":641.54,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":9.68},{"id":"start-02","ch":"start","start":10,"end":17.04},{"id":"start-03","ch":"start","start":17.36,"end":23.76},{"id":"start-04","ch":"start","start":24.08,"end":36.32},{"id":"start-05","ch":"start","start":36.64,"end":50.96},{"id":"start-06","ch":"start","start":51.28,"end":59.2},{"id":"start-07","ch":"start","start":59.52,"end":65.04},{"id":"start-08","ch":"start","start":65.36,"end":74.24},{"id":"start-09","ch":"start","start":74.56,"end":78.08},{"id":"start-10","ch":"start","start":78.4,"end":86.48},{"id":"start-11","ch":"start","start":86.8,"end":90.8},{"id":"start-12","ch":"start","start":91.12,"end":96.08},{"id":"start-13","ch":"start","start":96.4,"end":99.2},{"id":"start-14","ch":"start","start":99.52,"end":103.12},{"id":"start-15","ch":"start","start":103.44,"end":109.28},{"id":"message-00","ch":"message","start":110.18,"end":113.06},{"id":"message-01","ch":"message","start":113.38,"end":121.86},{"id":"message-02","ch":"message","start":122.18,"end":126.02},{"id":"message-03","ch":"message","start":126.34,"end":132.26},{"id":"message-04","ch":"message","start":132.58,"end":140.34},{"id":"message-05","ch":"message","start":140.66,"end":145.3},{"id":"message-06","ch":"message","start":145.62,"end":154.02},{"id":"message-07","ch":"message","start":154.34,"end":160.26},{"id":"message-08","ch":"message","start":160.58,"end":169.86},{"id":"message-09","ch":"message","start":170.18,"end":177.22},{"id":"message-10","ch":"message","start":177.54,"end":185.3},{"id":"message-11","ch":"message","start":185.62,"end":190.74},{"id":"message-12","ch":"message","start":191.06,"end":202.98},{"id":"statusbar-00","ch":"statusbar","start":203.88,"end":206.76},{"id":"statusbar-01","ch":"statusbar","start":207.08,"end":216.52},{"id":"statusbar-02","ch":"statusbar","start":216.84,"end":228.2},{"id":"statusbar-03","ch":"statusbar","start":228.52,"end":240.76},{"id":"statusbar-04","ch":"statusbar","start":241.08,"end":249.16},{"id":"statusbar-05","ch":"statusbar","start":249.48,"end":260.52},{"id":"statusbar-06","ch":"statusbar","start":260.84,"end":268.76},{"id":"statusbar-07","ch":"statusbar","start":269.08,"end":272.6},{"id":"statusbar-08","ch":"statusbar","start":272.92,"end":275.88},{"id":"statusbar-09","ch":"statusbar","start":276.2,"end":281.48},{"id":"statusbar-10","ch":"statusbar","start":281.8,"end":285.24},{"id":"statusbar-11","ch":"statusbar","start":285.56,"end":292.2},{"id":"title-00","ch":"title","start":293.1,"end":297.18},{"id":"title-01","ch":"title","start":297.5,"end":306.62},{"id":"title-02","ch":"title","start":306.94,"end":314.86},{"id":"title-03","ch":"title","start":315.18,"end":320.22},{"id":"title-04","ch":"title","start":320.54,"end":326.3},{"id":"title-05","ch":"title","start":326.62,"end":339.34},{"id":"title-06","ch":"title","start":339.66,"end":349.82},{"id":"title-07","ch":"title","start":350.14,"end":361.82},{"id":"title-08","ch":"title","start":362.14,"end":372.7},{"id":"title-09","ch":"title","start":373.02,"end":379.82},{"id":"title-10","ch":"title","start":380.14,"end":392.22},{"id":"title-11","ch":"title","start":392.54,"end":399.18},{"id":"title-12","ch":"title","start":399.5,"end":402.94},{"id":"title-13","ch":"title","start":403.26,"end":419.98},{"id":"title-14","ch":"title","start":420.3,"end":424.06},{"id":"effort-00","ch":"effort","start":424.96,"end":429.04},{"id":"effort-01","ch":"effort","start":429.36,"end":439.04},{"id":"effort-02","ch":"effort","start":439.36,"end":441.84},{"id":"effort-03","ch":"effort","start":442.16,"end":455.6},{"id":"effort-04","ch":"effort","start":455.92,"end":460.64},{"id":"effort-05","ch":"effort","start":460.96,"end":472.8},{"id":"effort-06","ch":"effort","start":473.12,"end":478.8},{"id":"effort-07","ch":"effort","start":479.12,"end":494.16},{"id":"effort-08","ch":"effort","start":494.48,"end":502.56},{"id":"effort-09","ch":"effort","start":502.88,"end":508.24},{"id":"effort-10","ch":"effort","start":508.56,"end":520.48},{"id":"effort-11","ch":"effort","start":520.8,"end":524.32},{"id":"effort-12","ch":"effort","start":524.64,"end":526.48},{"id":"effort-13","ch":"effort","start":526.8,"end":530.64},{"id":"effort-14","ch":"effort","start":530.96,"end":535.12},{"id":"effort-15","ch":"effort","start":535.44,"end":542.56},{"id":"effort-16","ch":"effort","start":542.88,"end":551.36},{"id":"effort-17","ch":"effort","start":551.68,"end":561.76},{"id":"effort-18","ch":"effort","start":562.08,"end":570.16},{"id":"effort-19","ch":"effort","start":570.48,"end":583.6},{"id":"faq-00","ch":"faq","start":584.5,"end":588.1},{"id":"faq-01","ch":"faq","start":588.42,"end":598.9},{"id":"faq-02","ch":"faq","start":599.22,"end":605.3},{"id":"faq-03","ch":"faq","start":605.62,"end":613.62},{"id":"faq-04","ch":"faq","start":613.94,"end":623.3},{"id":"faq-05","ch":"faq","start":623.62,"end":627.78},{"id":"faq-06","ch":"faq","start":628.1,"end":637.14},{"id":"faq-07","ch":"faq","start":637.46,"end":641.54}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

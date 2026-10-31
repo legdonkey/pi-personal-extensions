@@ -5,7 +5,7 @@
 ## 功能名
 
 - 功能 label：「额度与会话 ID」（substatusline）、「状态栏风格选择」（statusline-style-picker） —— pi-personal-extensions.ts:32-33, 50-51
-- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:110；pi-personal-extensions.ts:52
+- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:94；pi-personal-extensions.ts:52
 
 ## 额度与会话 ID：什么时候刷新（fig-statusbar-1）
 
@@ -27,7 +27,7 @@
 ## 一次刷新（fig-statusbar-2）
 
 - 额度窗口 = 按时间段统计的限额（5 小时、周） —— substatusline.ts:218-219, 276-280
-- 缺少所需窗口时抛错，与请求失败走同一分支（保留上次成功值） —— substatusline.ts:193, 220, 106-111
+- 缺少所需窗口时抛错，与请求失败走同一分支（保留上次成功值） —— substatusline.ts:192, 220, 106-111
 
 - 只支持 `openai-codex` 和 `zai-coding-cn` —— substatusline.ts:11-13
 - 当前服务商不在支持列表里时，额度状态为空 —— substatusline.ts:62-65
@@ -43,13 +43,13 @@
 
 ## 状态栏风格选择：选择器（fig-statusbar-3 录屏）
 
-- 提供 `/statusline-style`，11 套配色 —— statusline-style-picker.ts:11-144, 243-244；tests/statusline-style-picker.test.mjs:20
+- 功能注册的 `statusline-style` 处理函数只进 `/personal` 的 commands 表，不再注册成斜杠命令；入口是 `/personal` → 状态栏风格选择 —— pi-personal-extensions.ts:130-135, 51-52；statusline-style-picker.ts:243-244
+- 二级菜单：「预览并选择配色」（不带参数）和 11 项「应用配色：编号. 名称」（参数为编号） —— pi-personal-extensions.ts:94-98；statusline-style-picker.ts:11-144
 - 不带参数时打开选择器：上下键切换（循环）并实时预览，Enter 应用，Esc 取消 —— statusline-style-picker.ts:257-300
-- 选择器只在 TUI 模式下打开；不带参数且不在 TUI 模式时只给警告 —— statusline-style-picker.ts:258-262；tests/statusline-style-picker.test.mjs:66-67
-- 带编号或名称时直接应用；名称不区分大小写、完整匹配 —— statusline-style-picker.ts:171-176, 257
-- 未知风格提示「未知风格」，不写文件、不重载 —— statusline-style-picker.ts:304-307；tests/statusline-style-picker.test.mjs:63-65
-- 录屏录于 shortSessionId 改动之前，底部状态栏显示前 7 位（图注已说明）；其中 ponytail 是本机另一个扩展，extensions/ 下没有相关代码 —— media/statusline-style.png
-- 录屏画面（video 的 data-cue 挂在 beat 第一句 statusbar-08）：输入 `/statusline-style`，上下移动预览，Esc 退出 —— docs/extensions-guide/tapes/statusline-style.tape:13-27；statusline-style-picker.ts:289-294, 300
+- 选择器只在 TUI 模式下打开；不在 TUI 时选「预览并选择配色」只给警告，提示改用直接应用 —— statusline-style-picker.ts:258-262
+- 「应用配色」项带编号参数，直接应用，不检查 TUI；`/personal` 只要求有 UI（含 RPC） —— statusline-style-picker.ts:171-176, 257, 303-312；pi-personal-extensions.ts:143-146
+- 新录屏底部状态栏显示会话 ID 末尾 8 位；其中 ponytail 是本机另一个扩展，extensions/ 下没有相关代码 —— media/statusline-style.png
+- 录屏画面（video 的 data-cue 挂在 beat 第一句 statusbar-08）：打开配色选择器，上下移动预览，Esc 退出（新录屏：/personal → 状态栏风格选择 → 预览并选择配色） —— docs/extensions-guide/tapes/statusline-style.tape:13-27；statusline-style-picker.ts:289-294, 300
 
 ## 11 套配色怎么分组（fig-statusbar-4）
 

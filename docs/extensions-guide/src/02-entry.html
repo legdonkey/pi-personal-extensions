@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-entry" data-chapter="entry" aria-labelledby="ch-entry-h">
   <header class="chapter-head">
     <h2 id="ch-entry-h">统一入口：按开关加载，一个菜单管理</h2>
-    <p class="chapter-sum">入口怎样按开关加载功能，二级菜单怎样复用快捷命令，启停怎样保存并重载。</p>
+    <p class="chapter-sum">入口怎样按开关加载功能，二级菜单怎样调用各功能的命令处理器，启停怎样保存并重载。</p>
     <dl class="meta">
       <dt>源码</dt><dd><code>extensions/pi-personal-extensions.ts</code></dd>
       <dt>命令</dt><dd><code>/personal</code>、<code>/personal switches</code></dd>
@@ -89,20 +89,19 @@
   <!-- 节拍 2：原型链截获 -->
   <div class="beat">
     <div class="beat-text">
-      <h3>featureApi：只截获命令注册</h3>
+      <h3>featureApi：把命令收进内部表</h3>
       <p>
         <span class="seg" data-seg="entry-04" data-say="register 收到的是 feature API，它的原型是 pi。"><code>register</code> 收到的是 <code>featureApi</code>，它的原型是 <code>pi</code>。</span>
         <span class="seg" data-seg="entry-05" data-say="看图。调用 on 方法时，feature API 自身没有，就落到 pi 上。">调用 <code>on</code> 方法时，<code>featureApi</code> 自身没有，就落到 <code>pi</code> 上。</span>
-        <span class="seg" data-seg="entry-06" data-say="register Command 被截住：先存进 commands 表，再交给 pi。"><code>registerCommand</code> 被截住：先存进 <code>commands</code> 表，再交给 <code>pi</code>。</span>
-        <span class="seg" data-seg="entry-07">所以二级菜单能直接复用这些处理器。</span>
+        <span class="seg" data-seg="entry-06" data-say="register Command 被截住：处理器只存进 commands 表，不交给 pi 注册。"><code>registerCommand</code> 被截住：处理器只存进 <code>commands</code> 表，不交给 <code>pi</code> 注册。</span>
+        <span class="seg" data-seg="entry-07" data-say="所以 Pi 里只有斜杠 personal 一个命令，各功能的处理器只能从它的二级菜单调用。">所以 Pi 里只有 <code>/personal</code> 一个命令，各功能的处理器只能从它的二级菜单调用。</span>
       </p>
       <details>
         <summary>源码：featureApi 的定义</summary>
         <pre><code>// Object.create(pi)：新对象的原型是 pi
 const featureApi = Object.assign(Object.create(pi), {
   registerCommand(name, command) {
-    commands.set(name, command); // 存一份
-    pi.registerCommand(name, command);
+    commands.set(name, command); // 只进内部表，不向 Pi 注册
   },
 });</code></pre>
       </details>
@@ -111,7 +110,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <div class="fig-scroll">
         <svg viewBox="0 0 640 368" width="100%" role="img" aria-labelledby="fig-entry-2-title fig-entry-2-desc">
           <title id="fig-entry-2-title">featureApi 的原型链截获</title>
-          <desc id="fig-entry-2-desc">功能调用 on 时，featureApi 自身没有 on，查找沿原型落到 pi.on；功能调用 registerCommand 时，featureApi 自己的 registerCommand 先把处理器存进 commands 表，再交给 pi.registerCommand；/personal 二级菜单从 commands 表取处理器。</desc>
+          <desc id="fig-entry-2-desc">功能调用 on 时，featureApi 自身没有 on，查找沿原型落到 pi.on；功能调用 registerCommand 时，featureApi 自己的 registerCommand 只把处理器存进 commands 表，不向 Pi 注册；/personal 二级菜单从 commands 表取处理器。</desc>
           <defs>
             <marker id="fig-entry-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -151,19 +150,20 @@ const featureApi = Object.assign(Object.create(pi), {
             </circle>
           </g>
 
-          <!-- registerCommand：截住，先存一份，再交给 pi -->
+          <!-- registerCommand：截住，只存进 commands 表 -->
           <g data-cue="entry-06">
             <path class="w" d="M336 68 V124" style="marker-end:url(#fig-entry-2-arrow)"/>
             <path class="w is-flow" d="M408 148 H480" style="marker-end:url(#fig-entry-2-arrow)"/>
             <rect class="mask" x="412" y="126" width="64" height="16" rx="2"/>
-            <text class="t-sub" x="444" y="138" text-anchor="middle">① 存一份</text>
-            <path class="w is-flow" d="M336 172 V280" style="marker-end:url(#fig-entry-2-arrow)"/>
-            <rect class="mask" x="344" y="204" width="76" height="16" rx="2"/>
-            <text class="t-sub" x="348" y="216">② 交给 pi</text>
+            <text class="t-sub" x="444" y="138" text-anchor="middle">存进表</text>
+            <path class="w is-dash" d="M336 172 V280" style="stroke:var(--danger)"/>
+            <rect class="mask" x="344" y="204" width="88" height="16" rx="2"/>
+            <text class="t-sub" x="348" y="216" style="fill:var(--danger)">不再交给 pi</text>
             <rect class="n" x="240" y="24" width="184" height="44" rx="6"/>
             <text class="t-mono" x="332" y="51" text-anchor="middle">registerCommand(…)</text>
             <rect class="n" x="264" y="280" width="144" height="40" rx="6"/>
-            <text class="t-mono" x="336" y="305" text-anchor="middle">registerCommand</text>
+            <text class="t-mono" x="336" y="298" text-anchor="middle">registerCommand</text>
+            <text class="t-sub" x="336" y="314" text-anchor="middle">只注册 personal</text>
             <rect class="n" x="480" y="124" width="136" height="48" rx="6"/>
             <text class="t" x="496" y="145">commands 表</text>
             <text class="t-sub" x="496" y="163">命令名 → 处理器</text>
@@ -171,9 +171,6 @@ const featureApi = Object.assign(Object.create(pi), {
           <g data-cue="entry-06" data-cue-mode="active">
             <circle class="dot" cx="336" cy="68" r="4">
               <animateMotion dur="1.2s" begin="indefinite" fill="freeze" path="M0 0 V80 H144"/>
-            </circle>
-            <circle class="dot" cx="336" cy="68" r="4">
-              <animateMotion dur="1.8s" begin="indefinite" fill="freeze" path="M0 0 V212"/>
             </circle>
           </g>
 
@@ -202,7 +199,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。</span>
       </p>
       <ul>
-        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏风格选择 1 项。其余三项的二级菜单只有启停。</li>
+        <li>只有四项功能有设置项：自动会话命名 6 项、原位思考强度 5 项、文件路径可点击 10 项、状态栏风格选择 12 项（预览选择，加 11 套配色直接应用）。其余三项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -212,7 +209,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <details class="demo-try">
         <summary>试一试：模拟菜单</summary>
       <div class="demo" id="ch-entry-demo">
-        <p class="demo-static">示例：按源码里的 <code>features</code> 和 <code>actions</code> 模拟菜单。<span data-role="hint" hidden>取消勾选模拟关闭一项功能；点功能名查看它的二级菜单。不写文件。</span></p>
+        <p class="demo-static">示例：按源码里的 <code>features</code> 和 <code>actions</code> 模拟菜单。箭头右边是二级菜单调用的处理器和参数，不是斜杠命令。<span data-role="hint" hidden>取消勾选模拟关闭一项功能；点功能名查看它的二级菜单。不写文件。</span></p>
         <div class="menus">
         <div>
           <p><strong>一级菜单</strong>　个人扩展 · 统一管理</p>
@@ -230,18 +227,18 @@ const featureApi = Object.assign(Object.create(pi), {
         <div>
           <p><strong>二级菜单</strong>　<span data-role="l2-title">自动会话命名（已加载）</span></p>
           <ol data-role="l2">
-            <li>查看状态 → <code>/auto-name status</code></li>
-            <li>选择命名模型 → <code>/auto-name model</code></li>
-            <li>选择命名思考强度 → <code>/auto-name thinking</code></li>
-            <li>预览建议标题 → <code>/auto-name preview</code></li>
-            <li>暂停当前会话命名 → <code>/auto-name off</code></li>
-            <li>恢复当前会话命名 → <code>/auto-name on</code></li>
+            <li>查看状态 → <code>auto-name status</code></li>
+            <li>选择命名模型 → <code>auto-name model</code></li>
+            <li>选择命名思考强度 → <code>auto-name thinking</code></li>
+            <li>预览建议标题 → <code>auto-name preview</code></li>
+            <li>暂停当前会话命名 → <code>auto-name off</code></li>
+            <li>恢复当前会话命名 → <code>auto-name on</code></li>
             <li>禁用此功能并重载</li>
           </ol>
         </div>
         </div>
         <p><strong>未加载的功能</strong>　二级菜单只有「启用此功能并重载」。</p>
-        <p>已注册的快捷命令：<span data-role="commands"><code>/auto-name</code>、<code>/clickable-paths</code>、<code>/statusline-style</code>、<code>/effort</code>、<code>/personal</code></span></p>
+        <p>commands 表里的处理器：<span data-role="commands"><code>auto-name</code>、<code>clickable-paths</code>、<code>statusline-style</code>、<code>effort</code></span>。Pi 里注册的命令只有 <code>/personal</code>。</p>
       </div>
       </details>
     </figure>
@@ -340,11 +337,11 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>使用限制与批量开关</h3>
       <p>
-        <span class="seg" data-seg="entry-16" data-say="斜杠 personal 只在 TUI 模式下打开菜单。在其他模式下，入口只发一条警告，不打开菜单。"><code>/personal</code> 只在 TUI 模式下打开菜单。在其他模式下，入口只发一条警告，不打开菜单。</span>
-        <span class="seg" data-seg="entry-17" data-say="斜杠 personal switches 打开批量功能开关。按空格切换一项，按 Enter 保存并重载，按 Esc 键放弃。"><code>/personal switches</code> 打开「批量功能开关」。按空格切换一项，按 Enter 保存并重载，按 Esc 放弃。</span>
+        <span class="seg" data-seg="entry-16" data-say="斜杠 personal 只要有交互界面就能用：TUI 和 RPC 客户端都行。没有界面时，入口只发一条提示。"><code>/personal</code> 只要有交互界面就能用：TUI 和 RPC 客户端都行。没有界面时，入口只发一条提示。</span>
+        <span class="seg" data-seg="entry-17" data-say="批量功能开关只在 TUI 里可用：斜杠 personal switches 打开它，按空格切换一项，按 Enter 键保存并重载，按 Esc 键放弃。">「批量功能开关」只在 TUI 里可用：<code>/personal switches</code> 打开它，按空格切换一项，按 Enter 键保存并重载，按 Esc 键放弃。</span>
       </p>
       <ul>
-        <li>这条警告在 RPC 模式下会发给客户端；Print 和 JSON 模式不显示通知。</li>
+        <li>没有界面指 Print 和 JSON 模式。RPC 客户端里选「批量功能开关」时，入口提示改用各功能二级菜单里的「启用此功能并重载」或「禁用此功能并重载」。</li>
         <li><code>/personal</code> 只接受两种用法：不带参数，或带 <code>switches</code>。带其他参数时，提示「用法：/personal 或 /personal switches」。</li>
         <li>一级菜单的「批量功能开关」效果相同，保存走同一段写入代码。按键是 README 写的默认键位，确认键跟随 Pi 的 <code>tui.select.confirm</code>。</li>
       </ul>
@@ -371,15 +368,16 @@ const featureApi = Object.assign(Object.create(pi), {
     const root = document.getElementById("ch-entry-demo");
     if (root) {
       // 数据照抄 extensions/pi-personal-extensions.ts 的 features 与 actions
-      const ac = (command, list) => list.map(([label, args]) => ({ label, cmd: `/${command}${args ? ` ${args}` : ""}` }));
+      const ac = (command, list) => list.map(([label, args]) => ({ label, cmd: `${command}${args ? ` ${args}` : ""}` }));
+      const STYLE_NAMES = ["茶墨渐层", "冰川蓝阶", "靛夜层云", "琥珀余温", "紫藤暮色", "松林雾径", "陶火晚照", "玫瑰尘光", "石墨银阶", "潮汐青绿", "Claude 暖纸"];
       const features = [
         { label: "右下角会话标题", command: null, actions: [] },
-        { label: "自动会话命名", command: "/auto-name", actions: ac("auto-name", [["查看状态", "status"], ["选择命名模型", "model"], ["选择命名思考强度", "thinking"], ["预览建议标题", "preview"], ["暂停当前会话命名", "off"], ["恢复当前会话命名", "on"]]) },
+        { label: "自动会话命名", command: "auto-name", actions: ac("auto-name", [["查看状态", "status"], ["选择命名模型", "model"], ["选择命名思考强度", "thinking"], ["预览建议标题", "preview"], ["暂停当前会话命名", "off"], ["恢复当前会话命名", "on"]]) },
         { label: "额度与会话 ID", command: null, actions: [] },
-        { label: "文件路径可点击", command: "/clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
+        { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
-        { label: "状态栏风格选择", command: "/statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""]]) },
-        { label: "原位思考强度（Jev / d1-ultra）", command: "/effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["测试分类模型可用性", "test"]]) },
+        { label: "状态栏风格选择", command: "statusline-style", actions: ac("statusline-style", [["预览并选择配色", ""], ...STYLE_NAMES.map((n, i) => [`应用配色：${i + 1}. ${n}`, String(i + 1)])]) },
+        { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["使用 Jev 分类模型", "model jev"], ["使用 d1-ultra 分类模型", "model d1-ultra"], ["测试分类模型可用性", "test"]]) },
       ];
       const on = features.map(() => true);
       let picked = 1;
@@ -402,8 +400,8 @@ const featureApi = Object.assign(Object.create(pi), {
           ? [...f.actions.map((a) => el("li", {}, `${a.label} → `, el("code", { textContent: a.cmd }))), el("li", { textContent: "禁用此功能并重载" })]
           : [el("li", { textContent: "启用此功能并重载" })];
         $('[data-role="l2"]').replaceChildren(...rows);
-        const names = [...features.filter((x, i) => on[i] && x.command).map((x) => x.command), "/personal"];
-        $('[data-role="commands"]').replaceChildren(...names.flatMap((n, i) => [...(i ? ["、"] : []), el("code", { textContent: n })]));
+        const names = features.filter((x, i) => on[i] && x.command).map((x) => x.command);
+        $('[data-role="commands"]').replaceChildren(...(names.length ? names.flatMap((n, i) => [...(i ? ["、"] : []), el("code", { textContent: n })]) : ["（空）"]));
       };
       render();
       $('[data-role="hint"]').hidden = false;

@@ -4,7 +4,7 @@
     <p class="chapter-sum">会话名显示在哪，「自动会话命名」什么时候起名、起出来什么样，怎么暂停、预览、换命名模型，要注意什么。</p>
     <dl class="meta">
       <dt>功能</dt><dd>「右下角会话标题」显示会话名；「自动会话命名」起会话名</dd>
-      <dt>快捷命令</dt><dd><code>/auto-name</code>（也可以从 <code>/personal</code> → 「自动会话命名」进入）</dd>
+      <dt>入口</dt><dd><code>/personal</code> → 自动会话命名：查看状态、选择命名模型、选择命名思考强度、预览建议标题、暂停当前会话命名、恢复当前会话命名</dd>
       <dt>适用场景</dt><dd>在 Pi 终端界面里自动起名。用 <code>pi -p</code> 等非交互方式运行时，不起名。</dd>
     </dl>
   </header>
@@ -115,7 +115,7 @@
       <h3>手动改了会话名，怎么恢复自动起名</h3>
       <p>
         <span class="seg" data-seg="title-04" data-say="用斜杠 name 手动改会话名后，这个会话暂停自动起名。">用 <code>/name</code> 手动改会话名后，这个会话暂停自动起名。</span>
-        <span class="seg" data-seg="title-05" data-say="用斜杠 auto name on 恢复，下一轮结束后生效；用斜杠 auto name off 主动暂停。">用 <code>/auto-name on</code> 恢复，下一轮结束后生效；用 <code>/auto-name off</code> 主动暂停。</span>
+        <span class="seg" data-seg="title-05" data-say="想恢复，在斜杠 personal 的自动会话命名菜单里选恢复当前会话命名，下一轮结束后生效；选暂停当前会话命名，可以主动暂停。">想恢复，在 <code>/personal</code> → 自动会话命名 里选「恢复当前会话命名」，下一轮结束后生效；选「暂停当前会话命名」，可以主动暂停。</span>
       </p>
       <ul>
         <li>如果打开的会话已经有会话名，而且不是自动起的，「自动会话命名」在这个会话里也是暂停状态。</li>
@@ -126,7 +126,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 184" width="100%" role="img" aria-labelledby="fig-title-3-title fig-title-3-desc">
           <title id="fig-title-3-title">自动起名的开启与暂停</title>
-          <desc id="fig-title-3-desc">手动改会话名或输入 /auto-name off 后进入暂停；输入 /auto-name on 后回到自动起名，下一轮结束后生效；打开已有其他会话名的会话时是暂停状态；只影响当前会话，重载后保持。</desc>
+          <desc id="fig-title-3-desc">手动改会话名或选「暂停当前会话命名」后进入暂停；选「恢复当前会话命名」后回到自动起名，下一轮结束后生效；打开已有其他会话名的会话时是暂停状态；只影响当前会话，重载后保持。</desc>
           <defs>
             <marker id="fig-title-3-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -136,12 +136,12 @@
           <g data-cue="title-04">
             <line x1="192" y1="72" x2="442" y2="72" class="w" marker-end="url(#fig-title-3-ah)"/>
             <rect x="232" y="52" width="176" height="14" class="mask"/>
-            <text x="320" y="63" class="t-cap" text-anchor="middle">手动改名 · /auto-name off</text>
+            <text x="320" y="63" class="t-cap" text-anchor="middle">手动改名 · 暂停当前会话命名</text>
           </g>
           <g data-cue="title-05">
             <line x1="448" y1="104" x2="198" y2="104" class="w" marker-end="url(#fig-title-3-ah)"/>
-            <rect x="228" y="110" width="184" height="14" class="mask"/>
-            <text x="320" y="121" class="t-cap" text-anchor="middle">/auto-name on（下一轮生效）</text>
+            <rect x="216" y="110" width="208" height="14" class="mask"/>
+            <text x="320" y="121" class="t-cap" text-anchor="middle">恢复当前会话命名（下一轮生效）</text>
             <text x="320" y="168" class="t-cap" text-anchor="middle">只影响当前会话；重载后保持</text>
           </g>
           <rect x="16" y="56" width="176" height="64" rx="6" class="n is-focal"/>
@@ -161,7 +161,7 @@
     <div class="beat-text">
       <h3>想先看看会起什么名</h3>
       <p>
-        <span class="seg" data-seg="title-06" data-say="输入斜杠 auto name preview，可以看到建议的会话名。这个命令只弹出提示，不改会话名。">输入 <code>/auto-name preview</code>，可以看到建议的会话名。这个命令只弹出提示，不改会话名。</span>
+        <span class="seg" data-seg="title-06" data-say="在斜杠 personal 的自动会话命名菜单里选预览建议标题，可以看到建议的会话名。它只弹出提示，不改会话名。">在 <code>/personal</code> → 自动会话命名 里选「预览建议标题」，可以看到建议的会话名。它只弹出提示，不改会话名。</span>
       </p>
       <ul>
         <li>等 Pi 回复完，再预览。暂停状态下也能预览。</li>
@@ -172,12 +172,12 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 204" width="100%" role="img" aria-labelledby="fig-title-4-title fig-title-4-desc">
           <title id="fig-title-4-title">预览建议的会话名</title>
-          <desc id="fig-title-4-desc">输入 /auto-name preview 后，Pi 弹出「标题预览」提示；如果当前会话名已合适或信息不足，提示「保持原标题」；会话名本身不变。</desc>
+          <desc id="fig-title-4-desc">选「预览建议标题」后，Pi 弹出「标题预览」提示；如果当前会话名已合适或信息不足，提示「保持原标题」；会话名本身不变。</desc>
           <defs>
             <marker id="fig-title-4-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
           <rect x="16" y="16" width="608" height="40" rx="6" class="n"/>
-          <text x="32" y="41" class="t-mono">/auto-name preview</text>
+          <text x="32" y="41" class="t-mono">/personal → 自动会话命名 → 预览建议标题</text>
           <g data-cue="title-06">
             <line x1="320" y1="56" x2="320" y2="78" class="w" marker-end="url(#fig-title-4-ah)"/>
             <rect x="16" y="84" width="608" height="40" rx="6" class="n is-focal"/>
@@ -199,16 +199,16 @@
     <div class="beat-text">
       <h3>想换命名模型</h3>
       <p>
-        <span class="seg" data-seg="title-07" data-say="输入斜杠 auto name model，从列表里选命名模型。列表只列出斜杠 scoped models 里已认证的模型。">输入 <code>/auto-name model</code>，从列表里选命名模型。列表只列出 <code>/scoped-models</code> 里已认证的模型。</span>
+        <span class="seg" data-seg="title-07" data-say="在斜杠 personal 的自动会话命名菜单里选选择命名模型，再从列表里选一个。列表只列出斜杠 scoped models 里已认证的模型。">在 <code>/personal</code> → 自动会话命名 里选「选择命名模型」，再从列表里选一个。列表只列出 <code>/scoped-models</code> 里已认证的模型。</span>
       </p>
       <ul>
         <li>默认命名模型是 <code>gpt-5.6-luna</code>。命名模型只用来起名，对所有会话生效，不影响主对话。</li>
-        <li>命名用的思考强度：输入 <code>/auto-name thinking</code> 选。默认跟随 Pi 对这个模型的设置；Pi 没设置时用 low。实际用的思考强度受命名模型支持的范围限制。命名模型不支持思考时，用 off。</li>
+        <li>命名用的思考强度：在同一个二级菜单里选「选择命名思考强度」。默认跟随 Pi 对这个模型的设置；Pi 没设置时用 low。实际用的思考强度受命名模型支持的范围限制。命名模型不支持思考时，用 off。</li>
         <li>换成另一个命名模型后，命名用的思考强度恢复成默认值。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-model" id="fig-title-5">
-      <div class="capture-frame"><video data-cue="title-07" src="media/auto-name-model.mp4" poster="media/auto-name-model.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name model，弹出可选命名模型列表，上下移动，按 Esc 键不保存"></video></div>
+      <div class="capture-frame"><video data-cue="title-07" src="media/auto-name-model.mp4" poster="media/auto-name-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「选择命名模型」，在列表里上下移动，按 Esc 键不保存"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 64" width="100%" role="img" aria-labelledby="fig-title-5k-title fig-title-5k-desc">
           <title id="fig-title-5k-title">命名模型列表的按键</title>
@@ -228,7 +228,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>录屏：弹出命名模型列表，上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 选择命名模型，在列表里上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
     </figure>
   </div>
 
@@ -237,12 +237,12 @@
     <div class="beat-text">
       <h3>想看当前设置</h3>
       <p>
-        <span class="seg" data-seg="title-08" data-say="输入斜杠 auto name，一条提示里能看到是否开启、命名模型和命名用的思考强度。">输入 <code>/auto-name</code>，一条提示里能看到是否开启、命名模型和命名用的思考强度。</span>
+        <span class="seg" data-seg="title-08" data-say="在斜杠 personal 的自动会话命名菜单里选查看状态，一条提示里能看到是否开启、命名模型和命名用的思考强度。">在 <code>/personal</code> → 自动会话命名 里选「查看状态」，一条提示里能看到是否开启、命名模型和命名用的思考强度。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-6">
-      <div class="capture-frame"><video data-cue="title-08" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /auto-name，输出一条状态提示：开启状态、命名模型、命名用的思考强度和可用子命令"></video></div>
-      <figcaption>录屏：输出一条状态提示：开启状态、命名模型、命名用的思考强度和可用子命令。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
+      <div class="capture-frame"><video data-cue="title-08" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「查看状态」，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 查看状态，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
     </figure>
   </div>
 
@@ -293,10 +293,10 @@
     <div class="beat-text">
       <h3>会话名一直没变怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="title-11" data-say="在斜杠 personal 里确认「自动会话命名」已加载，再输入斜杠 auto name 看状态。">在 <code>/personal</code> 里确认「自动会话命名」已加载，再输入 <code>/auto-name</code> 看状态。</span></li>
-        <li><span class="seg" data-seg="title-12" data-say="如果显示暂停，输入斜杠 auto name on。">如果显示暂停，输入 <code>/auto-name on</code>。</span></li>
-        <li><span class="seg" data-seg="title-13" data-say="如果提示命名模型不可用，先用斜杠 login 完成服务商认证，再用斜杠 scoped models 选出明确的模型范围，按 Control S 保存。也可以用斜杠 auto name model 换一个命名模型。">如果提示命名模型不可用，先用 <code>/login</code> 完成服务商认证，再用 <code>/scoped-models</code> 选出明确的模型范围，按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 保存。也可以用 <code>/auto-name model</code> 换一个命名模型。</span></li>
-        <li><span class="seg" data-seg="title-14" data-say="如果以上都正常，输入斜杠 auto name preview 试一次。">如果以上都正常，输入 <code>/auto-name preview</code> 试一次。</span></li>
+        <li><span class="seg" data-seg="title-11" data-say="在斜杠 personal 里确认「自动会话命名」已加载，再进入它的菜单选查看状态。">在 <code>/personal</code> 里确认「自动会话命名」已加载，再进入它的菜单选「查看状态」。</span></li>
+        <li><span class="seg" data-seg="title-12" data-say="如果显示暂停，选恢复当前会话命名。">如果显示暂停，选「恢复当前会话命名」。</span></li>
+        <li><span class="seg" data-seg="title-13" data-say="如果提示命名模型不可用，先用斜杠 login 完成服务商认证，再用斜杠 scoped models 选出明确的模型范围，按 Control S 保存。也可以在菜单里选选择命名模型，换一个命名模型。">如果提示命名模型不可用，先用 <code>/login</code> 完成服务商认证，再用 <code>/scoped-models</code> 选出明确的模型范围，按 <kbd>Ctrl</kbd>+<kbd>S</kbd> 保存。也可以在菜单里选「选择命名模型」，换一个命名模型。</span></li>
+        <li><span class="seg" data-seg="title-14" data-say="如果以上都正常，选预览建议标题试一次。">如果以上都正常，选「预览建议标题」试一次。</span></li>
       </ol>
       <ul>
         <li>在 <code>/scoped-models</code> 里全选所有模型时，「自动会话命名」会认为没有可用的命名模型。按 <kbd>Esc</kbd> 键只关闭列表，不保存。</li>
@@ -328,9 +328,9 @@
           <g data-cue="title-12">
             <line x1="264" y1="104" x2="298" y2="104" class="w" marker-end="url(#fig-title-8-ah)"/>
             <rect x="16" y="80" width="248" height="48" rx="6" class="n"/>
-            <text x="140" y="109" class="t" text-anchor="middle">2 /auto-name 显示暂停？</text>
+            <text x="140" y="109" class="t" text-anchor="middle">2 状态显示暂停？</text>
             <rect x="304" y="80" width="320" height="48" rx="6" class="n"/>
-            <text x="320" y="109" class="t-cap">输入 /auto-name on，下一轮生效</text>
+            <text x="320" y="109" class="t-cap">选「恢复当前会话命名」，下一轮生效</text>
           </g>
           <g data-cue="title-13">
             <line x1="264" y1="172" x2="298" y2="172" class="w" marker-end="url(#fig-title-8-ah)"/>
@@ -338,14 +338,14 @@
             <text x="140" y="177" class="t" text-anchor="middle">3 提示命名模型不可用？</text>
             <rect x="304" y="148" width="320" height="48" rx="6" class="n"/>
             <text x="320" y="168" class="t-cap">先 /login，再 /scoped-models 选范围并保存</text>
-            <text x="320" y="186" class="t-cap">或用 /auto-name model 换一个</text>
+            <text x="320" y="186" class="t-cap">或选「选择命名模型」换一个</text>
           </g>
           <g data-cue="title-14">
             <line x1="264" y1="240" x2="298" y2="240" class="w" marker-end="url(#fig-title-8-ah)"/>
             <rect x="16" y="216" width="248" height="48" rx="6" class="n is-focal"/>
             <text x="140" y="245" class="t" text-anchor="middle">4 都正常</text>
             <rect x="304" y="216" width="320" height="48" rx="6" class="n"/>
-            <text x="320" y="245" class="t-cap">输入 /auto-name preview 试一次</text>
+            <text x="320" y="245" class="t-cap">选「预览建议标题」试一次</text>
           </g>
         </svg>
       </div>

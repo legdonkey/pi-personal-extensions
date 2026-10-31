@@ -8,18 +8,18 @@
 - npm run check = tsc --noEmit + node --test --experimental-strip-types tests/*.test.mjs —— package.json:15-19
 - 包是 private —— package.json:6
 - 改代码后 /reload；卸载 pi remove "$(pwd)" —— README.md:15
-- 五个配置文件默认在 ~/.pi/agent/ —— README.md:114-122
-- 五个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:123；extensions/auto-session-name-settings.ts:40、64-65；extensions/jev-inline-effort.ts:24、39；extensions/clickable-paths.ts:235；extensions/statusline-style-picker.ts:218-219；README.md:114-124；tests/personal.test.mjs:35-38
+- 五个配置文件默认在 ~/.pi/agent/ —— README.md:98-106
+- 五个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:128；extensions/auto-session-name-settings.ts:40、64-65；extensions/jev-inline-effort.ts:24、39；extensions/clickable-paths.ts:235；extensions/statusline-style-picker.ts:218-219；README.md:98-108；tests/personal.test.mjs:37-40
 - clickable-paths.json 直接覆盖写入，失败静默 —— extensions/clickable-paths.ts:48-55
-- 其余四个文件先写临时文件再 rename —— extensions/pi-personal-extensions.ts:221-227；extensions/auto-session-name-settings.ts:63-78；extensions/jev-inline-effort.ts:38-49；extensions/statusline-style-picker.ts:234-239
-- 命名和分类器设置不修改 Pi 的 settings.json —— README.md:124
+- 其余四个文件先写临时文件再 rename —— extensions/pi-personal-extensions.ts:230-236；extensions/auto-session-name-settings.ts:63-78；extensions/jev-inline-effort.ts:38-49；extensions/statusline-style-picker.ts:234-239
+- 命名和分类器设置不修改 Pi 的 settings.json —— README.md:108
 - Pi 没有普通用户消息的边框钩子 —— extensions/user-message-border.ts:15
 - 替换 UserMessageComponent.prototype.render，只在 TUI 模式 —— extensions/user-message-border.ts:13、16-17、43
 - 会话关闭时停用本层；当前 render 仍是本层时才恢复原方法 —— extensions/user-message-border.ts:44-48、51-54
 - 宽度小于 8 或行结构检查失败时返回原始渲染；原始 render 抛错没有兜底 —— extensions/user-message-border.ts:21-31
 - 边框测试导入 node_modules 里真实的 UserMessageComponent —— tests/user-message-border.test.mjs:4-10、33-34
-- 升级 Pi 后应验证用户消息边框兼容性 —— README.md:133
+- 升级 Pi 后应验证用户消息边框兼容性 —— README.md:117
 - 「把开发依赖升到同一版本再跑 check、再发消息确认」是讲解给出的操作顺序，依据是测试使用 devDependencies 中的 Pi —— package.json:30-33；tests/user-message-border.test.mjs:4-10
 - 「没有边框时先查 Pi 是否改了消息行结构」：依据回退条件 —— extensions/user-message-border.ts:25-31
-- 开发循环「改代码 → npm run check → /reload」：/reload 来自 README.md:15，check 来自 README.md:133（「运行 npm run check 检查类型并执行全部测试」）；三步的顺序是讲解的组织方式
+- 开发循环「改代码 → npm run check → /reload」：/reload 来自 README.md:15，check 来自 README.md:117（「运行 npm run check 检查类型并执行全部测试」）；三步的顺序是讲解的组织方式
 - 「边框测试加载真实 Pi 组件，新版 Pi 改了这个组件时测试可能先报错」—— tests/user-message-border.test.mjs:4-10、33-64（测试直接调用真实组件的 render）

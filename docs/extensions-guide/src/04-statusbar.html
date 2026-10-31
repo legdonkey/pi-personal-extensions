@@ -4,7 +4,7 @@
     <p class="chapter-sum">额度与会话 ID 往状态栏写数据，状态栏风格选择给状态栏换配色。</p>
     <dl class="meta">
       <dt>功能</dt><dd>额度与会话 ID（<code>substatusline</code>）· 状态栏风格选择（<code>statusline-style-picker</code>）</dd>
-      <dt>快捷命令</dt><dd><code>/statusline-style</code></dd>
+      <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏风格选择</dd>
       <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
       <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包</dd>
     </dl>
@@ -212,17 +212,17 @@
     <div class="beat-text">
       <h3>状态栏风格选择</h3>
       <p>
-        <span class="seg" data-seg="statusbar-08" data-say="状态栏风格选择提供斜杠 statusline style 命令，预览并应用 11 套配色。状态栏本体来自 pi statusline 包，需要另外启用。">状态栏风格选择提供 <code>/statusline-style</code> 命令，预览并应用 11 套配色。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
-        <span class="seg" data-seg="statusbar-09" data-say="命令不带参数时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">命令不带参数时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
+        <span class="seg" data-seg="statusbar-08" data-say="在斜杠 personal 的状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 pi statusline 包，需要另外启用。">在 <code>/personal</code> → 状态栏风格选择里，可以预览并选择配色，也可以直接应用 11 套配色中的一套。状态栏本体来自 <code>pi-statusline</code> 包，需要另外启用。</span>
+        <span class="seg" data-seg="statusbar-09" data-say="选「预览并选择配色」时打开选择器：上下键实时预览，Enter 键应用，Esc 键取消。选择器只在 TUI 模式下可用。">选「预览并选择配色」时打开选择器：上下键实时预览，Enter 应用，Esc 取消。选择器只在 TUI 模式下可用。</span>
       </p>
       <ul>
-        <li>带编号或名称时直接应用，例如 <code>/statusline-style 11</code>。名称不区分大小写，必须完整匹配；找不到时提示「未知风格」，不写文件、不重载。</li>
-        <li>不带参数且不在 TUI 模式时，命令只提示一条警告。</li>
+        <li>二级菜单里的 11 项「应用配色：编号. 名称」直接应用对应配色，不打开选择器。<code>/personal</code> 有 UI 就能用，所以 RPC 客户端也能直接应用。</li>
+        <li>在 TUI 以外选「预览并选择配色」时，只提示一条警告，建议改用直接应用的菜单项。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /statusline-style，出现带色点的 11 套配色列表，上下移动时示例状态栏实时换色，按 Esc 退出不应用"></video></div>
-      <figcaption>录屏：上下移动时，示例状态栏实时换色；按 Esc 退出，不应用。录屏录于改动之前，底部状态栏显示的是会话 ID 前 7 位；ponytail 是本机另一个扩展，不属于本包。</figcaption>
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏风格选择，选预览并选择配色；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：/personal → 状态栏风格选择 → 预览并选择配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。ponytail 是本机另一个扩展，不属于本包。</figcaption>
     </figure>
   </div>
 

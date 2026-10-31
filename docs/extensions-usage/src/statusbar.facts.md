@@ -27,12 +27,12 @@
 
 ## 换配色（fig-statusbar-3 录屏）
 
-- 状态栏本体来自 `npm:@narumitw/pi-statusline`，需要另外安装启用 —— README.md:110；pi-personal-extensions.ts:52
+- 状态栏本体来自 `npm:@narumitw/pi-statusline`，需要另外安装启用 —— README.md:94；pi-personal-extensions.ts:52
 - 安装命令格式 `pi install npm:@scope/package` —— cli.md:241
-- `/statusline-style` 不带参数打开选择器：上下键挑选并实时预览，Enter 应用，Esc 放弃 —— statusline-style-picker.ts:257-300
-- 选择器只在 TUI 模式下打开 —— statusline-style-picker.ts:258-262
-- 可带编号（如 11）或名称（如 茶墨渐层）直接选；名称写错提示「未知风格」，不写文件、不重载 —— statusline-style-picker.ts:14, 171-176, 257, 304-307；tests/statusline-style-picker.test.mjs:56, 63-65
-- 录屏画面：`/statusline-style` 配色列表 01–11，上下移动时菜单内「预览」条换色，底部真实状态栏不变，Esc 不应用（预览条见 statusline-style-picker.ts:282-283） —— docs/extensions-usage/tapes/statusline-style.tape；statusline-style-picker.ts:289-300
+- 入口：`/personal` → 状态栏风格选择 →「预览并选择配色」打开配色列表；上下键挑选并实时预览，Enter 应用，Esc 放弃 —— pi-personal-extensions.ts:51, 94-95；statusline-style-picker.ts:257-300
+- 配色列表只在 TUI（Pi 终端界面）打开；直接应用项在其他带 UI 的客户端也能用 —— statusline-style-picker.ts:258-262；pi-personal-extensions.ts:143-146
+- 二级菜单 11 项「应用配色：编号. 名称」直接应用，例如「应用配色：11. Claude 暖纸」 —— pi-personal-extensions.ts:96-98；statusline-style-picker.ts:133-134, 171-176
+- 录屏画面（新录屏：/personal → 状态栏风格选择 → 预览并选择配色）：配色列表 01–11，上下移动时菜单内「预览」条换色，底部真实状态栏不变，Esc 不应用（预览条见 statusline-style-picker.ts:282-283） —— docs/extensions-usage/tapes/statusline-style.tape；statusline-style-picker.ts:289-300
 
 ## 应用后改什么（并入换配色一节；录屏下方的键帽步骤条 statusbar-07～10 一步一个 cue）
 

@@ -1,45 +1,41 @@
 <section class="chapter" id="ch-faq" data-chapter="faq" aria-labelledby="ch-faq-h">
   <header class="chapter-head">
     <h2 id="ch-faq-h">速查：命令、配置和常见问题</h2>
-    <p class="chapter-sum">所有快捷命令一张表；五个配置文件在哪；出问题时先查什么。</p>
+    <p class="chapter-sum">想做什么对应哪个菜单项；五个配置文件在哪；出问题时先查什么。</p>
   </header>
 
-  <!-- 节拍 1：命令速查 -->
+  <!-- 节拍 1：菜单路径速查 -->
   <div class="beat">
     <div class="beat-text">
-      <h3>想查某个命令</h3>
+      <h3>想找某项设置在哪</h3>
       <p>
-        <span class="seg" data-seg="faq-01" data-say="快捷命令和斜杠 personal 二级菜单里的设置项做同一件事，直接输入命令更快。表里按功能分组。">快捷命令和 <code>/personal</code> 二级菜单里的设置项做同一件事，直接输入命令更快。表里按功能分组。</span>
+        <span class="seg" data-seg="faq-01" data-say="所有设置都从斜杠 personal 进入：先选功能，再选二级菜单里的设置项。表里按想做什么列出菜单路径。">所有设置都从 <code>/personal</code> 进入：先选功能，再选二级菜单里的设置项。表里按「想做什么」列出菜单路径。</span>
       </p>
-      <p>不带参数时，<code>/auto-name</code> 和 <code>/effort</code> 显示当前状态。</p>
+      <p>Pi 自带的 <code>/reload</code>、<code>/name</code> 照常直接输入。</p>
     </div>
     <figure class="beat-fig" id="fig-faq-1">
       <table>
-        <caption>快捷命令速查</caption>
-        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <caption>想做什么 → 菜单路径（都从 /personal 开始）</caption>
+        <thead><tr><th>想做什么</th><th>菜单路径</th></tr></thead>
         <tbody data-cue="faq-01">
-          <tr><td><code>/personal</code></td><td>统一管理菜单：启停、进入设置</td></tr>
-          <tr><td><code>/personal switches</code></td><td>批量功能开关</td></tr>
-          <tr><td><code>/reload</code></td><td>Pi 自带：重载扩展</td></tr>
-        </tbody>
-        <tbody data-cue="faq-01">
-          <tr><td><code>/auto-name</code></td><td>查看自动会话命名的状态、命名模型、命名用的思考强度</td></tr>
-          <tr><td><code>/auto-name model</code> / <code>thinking</code></td><td>选命名模型 / 命名用的思考强度</td></tr>
-          <tr><td><code>/auto-name preview</code></td><td>预览建议的会话名，不改名</td></tr>
-          <tr><td><code>/auto-name off</code> / <code>on</code></td><td>在当前会话暂停 / 恢复自动起名</td></tr>
-          <tr><td><code>/name 新名字</code></td><td>Pi 自带：手动改会话名，之后这个会话暂停自动起名</td></tr>
-          <tr><td><code>/effort</code></td><td>查看是否适用、分类器、最近一条消息选到的档位</td></tr>
-          <tr><td><code>/effort model [jev|d1-ultra]</code></td><td>选分类器；带名字时直接切换。默认 Jev</td></tr>
-          <tr><td><code>/effort test</code></td><td>用固定样例测试分类器能不能用</td></tr>
-        </tbody>
-        <tbody data-cue="faq-01">
-          <tr><td><code>/clickable-paths [on|off]</code></td><td>查看设置 / 开启 / 暂停路径链接</td></tr>
-          <tr><td><code>/clickable-paths editor cursor</code></td><td>换打开方式（示例：cursor）。可选 vscode、vscode-insiders、cursor、windsurf、file</td></tr>
-          <tr><td><code>/clickable-paths bare on|off</code></td><td>识别 / 不识别裸路径</td></tr>
-          <tr><td><code>/statusline-style [编号]</code></td><td>预览并选配色；带编号时直接应用。应用后自动重载</td></tr>
+          <tr><td>开启或关闭一项功能</td><td>功能 → 启用 / 禁用此功能并重载</td></tr>
+          <tr><td>一次开关好几项</td><td><code>/personal switches</code>，或一级菜单最后一行「批量功能开关」</td></tr>
+          <tr><td>查看自动起名的状态</td><td>自动会话命名 → 查看状态</td></tr>
+          <tr><td>换命名模型 / 命名用的思考强度</td><td>自动会话命名 → 选择命名模型 / 选择命名思考强度</td></tr>
+          <tr><td>先看建议的会话名，不改名</td><td>自动会话命名 → 预览建议标题</td></tr>
+          <tr><td>在当前会话暂停 / 恢复自动起名</td><td>自动会话命名 → 暂停当前会话命名 / 恢复当前会话命名</td></tr>
+          <tr><td>查看思考强度是否适用、最近的档位</td><td>原位思考强度 → 查看分类模型与状态</td></tr>
+          <tr><td>换分类器</td><td>原位思考强度 → 选择分类模型，或「使用 Jev 分类模型」「使用 d1-ultra 分类模型」</td></tr>
+          <tr><td>测试分类器能不能用</td><td>原位思考强度 → 测试分类模型可用性</td></tr>
+          <tr><td>查看路径链接设置</td><td>文件路径可点击 → 查看路径链接设置</td></tr>
+          <tr><td>开启 / 暂停路径链接</td><td>文件路径可点击 → 开启路径链接 / 暂停路径链接</td></tr>
+          <tr><td>换打开方式</td><td>文件路径可点击 → 打开方式：vscode、vscode-insiders、cursor、windsurf 或 file</td></tr>
+          <tr><td>识别 / 不识别裸路径</td><td>文件路径可点击 → 识别裸路径 / 不识别裸路径</td></tr>
+          <tr><td>换状态栏配色</td><td>状态栏风格选择 → 预览并选择配色，或「应用配色：编号. 名称」</td></tr>
+          <tr><td>手动改会话名</td><td>Pi 自带：<code>/name 新名字</code>，之后这个会话暂停自动起名</td></tr>
         </tbody>
       </table>
-      <figcaption><code>/auto-name</code>、<code>/effort</code>、<code>/clickable-paths</code>、<code>/statusline-style</code> 只在对应功能开启时可用。</figcaption>
+      <figcaption>设置项只在功能已加载时出现；未加载的功能只有「启用此功能并重载」。</figcaption>
     </figure>
   </div>
 
@@ -50,7 +46,7 @@
       <p>
         <span class="seg" data-seg="faq-02" data-say="五个配置文件都在 agent 目录，默认是主目录下的点 pi 斜杠 agent。">五个配置文件都在 agent 目录，默认是 <code>~/.pi/agent/</code>。</span>
         设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，五个文件改用它指定的目录。
-        <span class="seg" data-seg="faq-03">平时不用手改这些文件。用菜单或快捷命令改全局设置，会自动保存到对应文件。</span>
+        <span class="seg" data-seg="faq-03">平时不用手改这些文件。用 /personal 菜单改全局设置，会自动保存到对应文件。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-faq-2">
@@ -106,7 +102,7 @@
       <h3>改了设置没生效，要不要 /reload</h3>
       <p>
         <span class="seg" data-seg="faq-04" data-say="在别的会话改过设置、手改过配置文件，或刚装好、更新过扩展，已打开的会话要输入斜杠 reload。">在别的会话改过设置、手改过配置文件，或刚装好、更新过扩展，已打开的会话要输入 <code>/reload</code>。</span>
-        <span class="seg" data-seg="faq-05">在当前会话用菜单或快捷命令改，不用重载。</span>
+        <span class="seg" data-seg="faq-05" data-say="在当前会话用斜杠 personal 菜单改，不用重载。">在当前会话用 <code>/personal</code> 菜单改，不用重载。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-faq-3">
@@ -127,17 +123,17 @@
           <g data-cue="faq-05">
             <rect class="n" x="328" y="16" width="296" height="272" rx="6"/>
             <text class="t" x="344" y="44">不用重载</text>
-            <text class="t-mono" x="344" y="80">/personal</text>
+            <text class="t-cap" x="344" y="80" style="fill:var(--ink)">启用 / 禁用功能</text>
             <text class="t-cap" x="608" y="80" text-anchor="end">当前会话自动重载</text>
-            <text class="t-mono" x="344" y="112">/statusline-style</text>
+            <text class="t-cap" x="344" y="112" style="fill:var(--ink)">应用配色</text>
             <text class="t-cap" x="608" y="112" text-anchor="end">应用后自动重载</text>
-            <text class="t-mono" x="344" y="144">/clickable-paths …</text>
+            <text class="t-cap" x="344" y="144" style="fill:var(--ink)">路径链接设置</text>
             <text class="t-cap" x="608" y="144" text-anchor="end">之后的消息生效</text>
-            <text class="t-mono" x="344" y="176">/effort model</text>
+            <text class="t-cap" x="344" y="176" style="fill:var(--ink)">换分类器</text>
             <text class="t-cap" x="608" y="176" text-anchor="end">下一条新消息生效</text>
-            <text class="t-mono" x="344" y="208">/auto-name model</text>
+            <text class="t-cap" x="344" y="208" style="fill:var(--ink)">换命名模型</text>
             <text class="t-cap" x="608" y="208" text-anchor="end">下次起名生效</text>
-            <text class="t-cap" x="344" y="264">都指在当前会话里操作</text>
+            <text class="t-cap" x="344" y="264">都指在当前会话里用 /personal 操作</text>
           </g>
         </svg>
       </div>
@@ -216,11 +212,11 @@ npm install --ignore-scripts \
             <rect class="n" x="16" y="32" width="140" height="64" rx="6"/>
             <text class="t" x="28" y="69">会话名没自动变</text>
             <rect class="n" x="180" y="32" width="224" height="64" rx="6"/>
-            <text class="t-cap" x="192" y="58">/auto-name 显示暂停？</text>
+            <text class="t-cap" x="192" y="58">「查看状态」显示暂停？</text>
             <text class="t-cap" x="192" y="78">或提示命名失败？</text>
             <rect class="n" x="428" y="32" width="196" height="64" rx="6"/>
-            <text class="t-mono" x="440" y="58">/auto-name on</text>
-            <text class="t-mono" x="440" y="78">/auto-name preview</text>
+            <text class="t-cap" x="440" y="58" style="fill:var(--ink)">恢复当前会话命名</text>
+            <text class="t-cap" x="440" y="78" style="fill:var(--ink)">失败时：预览建议标题</text>
 
             <path class="w" d="M156 148 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
             <path class="w" d="M404 148 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
@@ -252,8 +248,8 @@ npm install --ignore-scripts \
             <text class="t-cap" x="192" y="310">文件真实存在吗？</text>
             <text class="t-cap" x="192" y="330">在代码块里吗？</text>
             <rect class="n" x="428" y="284" width="196" height="64" rx="6"/>
-            <text class="t-mono" x="440" y="310">/clickable-paths</text>
-            <text class="t-cap" x="440" y="330">查看开关和打开方式</text>
+            <text class="t-cap" x="440" y="310" style="fill:var(--ink)">查看路径链接设置</text>
+            <text class="t-cap" x="440" y="330">看开关和打开方式</text>
 
             <path class="w" d="M156 400 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
             <path class="w" d="M404 400 H428" style="marker-end:url(#fig-faq-5-arrow)"/>
@@ -264,8 +260,8 @@ npm install --ignore-scripts \
             <text class="t-cap" x="192" y="394">终端支持点击打开链接吗？</text>
             <text class="t-cap" x="192" y="414">选的编辑器装了吗？</text>
             <rect class="n" x="428" y="368" width="196" height="64" rx="6"/>
-            <text class="t-mono" x="440" y="394">/clickable-paths editor</text>
-            <text class="t-cap" x="440" y="414">后接编辑器名，或 file</text>
+            <text class="t-cap" x="440" y="394" style="fill:var(--ink)">打开方式：编辑器名</text>
+            <text class="t-cap" x="440" y="414">或 打开方式：file</text>
 
             <path class="w" d="M156 484 H180" style="marker-end:url(#fig-faq-5-arrow)"/>
             <path class="w" d="M404 484 H428" style="marker-end:url(#fig-faq-5-arrow)"/>

@@ -4,7 +4,7 @@
     <p class="chapter-sum">两项功能都改消息的显示：一项在渲染前把文件路径改写成链接，一项在渲染后给用户消息加边框。</p>
     <dl class="meta">
       <dt>功能</dt><dd>文件路径可点击 <code>clickable-paths</code>；用户消息橙色线框 <code>user-message-border</code></dd>
-      <dt>快捷命令</dt><dd><code>/clickable-paths</code>（用户消息橙色线框没有快捷命令）</dd>
+      <dt>设置入口</dt><dd><code>/personal</code> → 文件路径可点击（用户消息橙色线框只有启用 / 禁用）</dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>clickable-paths.json</code>（默认 <code>~/.pi/agent/</code>，跟随 <code>PI_CODING_AGENT_DIR</code>）</dd>
     </dl>
   </header>
@@ -76,7 +76,7 @@
         <span class="seg" data-seg="message-05" data-say="文件真实存在时，路径才变成链接。示例里的 node 点 js 不是文件，保持原样。">文件真实存在时，路径才变成链接。示例里的 <code>node.js</code> 不是文件，保持原样。</span>
       </p>
       <ul>
-        <li>裸路径的识别可以关闭：<code>/clickable-paths bare off</code>。</li>
+        <li>裸路径的识别可以关闭：<code>/personal</code> → 文件路径可点击 →「不识别裸路径」。</li>
         <li>扩展缓存「文件是否存在」的结果，有效期 5 秒。缓存最多 4000 条；达到上限后，下次写入前清空整个缓存。有效期内删掉的文件，链接可能暂时还在。</li>
       </ul>
     </div>
@@ -277,12 +277,12 @@
     <div class="beat-text">
       <h3>设置和打开方式</h3>
       <p>
-        <span class="seg" data-seg="message-12" data-say="设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项用斜杠 clickable paths 修改，第四项只能改配置文件。">设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项用 <code>/clickable-paths</code> 修改，第四项只能改配置文件。</span>
+        <span class="seg" data-seg="message-12" data-say="设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项在斜杠 personal 的「文件路径可点击」二级菜单里改，第四项只能改配置文件。">设置有四项：总开关、编辑器、是否识别裸路径、是否处理用户消息。前三项在 <code>/personal</code> 的「文件路径可点击」二级菜单里改，第四项只能改配置文件。</span>
         <span class="seg" data-seg="message-13">编辑器选 file 时，扩展生成 file 协议的 URL，交给系统默认程序打开，不带行号。</span>
       </p>
       <ul>
         <li>字段与默认值：<code>enabled: true</code>、<code>editor: "vscode"</code>、<code>bareText: true</code>、<code>userMessages: true</code>。</li>
-        <li><code>/personal</code> 的「文件路径可点击」二级菜单提供同样的设置项。</li>
+        <li>菜单项调用功能内部的 <code>clickable-paths</code> 处理函数。这个函数只登记在 <code>/personal</code> 的命令表里，不注册成斜杠命令。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-message-5">
@@ -326,14 +326,15 @@
           </tbody>
         </table>
       </details>
-      <pre><code># 查看状态、编辑器、裸路径、工作目录
-/clickable-paths
-# 总开关，下一条消息生效
-/clickable-paths on | off
-# 选编辑器
-/clickable-paths editor &lt;vscode|vscode-insiders|cursor|windsurf|file&gt;
-# 是否识别裸路径
-/clickable-paths bare on | off</code></pre>
+      <table>
+        <thead><tr><th><code>/personal</code> → 文件路径可点击</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>查看路径链接设置</td><td>列出「状态」「编辑器」「裸路径」「工作目录」</td></tr>
+          <tr><td>开启路径链接 / 暂停路径链接</td><td>总开关，下一条消息生效</td></tr>
+          <tr><td>打开方式：vscode … file</td><td>选编辑器，共 5 项</td></tr>
+          <tr><td>识别裸路径 / 不识别裸路径</td><td>是否识别没加反引号的路径</td></tr>
+        </tbody>
+      </table>
       <figcaption>换编辑器或改路径文本，URL 跟着变。</figcaption>
     </figure>
   </div>

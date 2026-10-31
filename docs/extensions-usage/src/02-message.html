@@ -4,7 +4,6 @@
     <p class="chapter-sum">自己的消息带橙色线框，回复里的文件路径点一下就在编辑器里打开。</p>
     <dl class="meta">
       <dt>功能</dt><dd>用户消息橙色线框；文件路径可点击</dd>
-      <dt>快捷命令</dt><dd><code>/clickable-paths</code></dd>
       <dt>在哪设置</dt><dd><code>/personal</code> → 选对应功能</dd>
     </dl>
   </header>
@@ -134,8 +133,11 @@
         <span class="seg" data-seg="message-06" data-say="默认用 VS Code 打开。想换编辑器，在斜杠 personal 的「文件路径可点击」里选「打开方式」。">默认用 VS Code 打开。想换编辑器，在 <code>/personal</code> 的「文件路径可点击」里选「打开方式」。</span>
         <span class="seg" data-seg="message-07">打开方式选 file 时，系统用默认程序打开文件，不跳到具体行。</span>
       </p>
-      <pre><code># 也可以直接输入命令，例如换成 Cursor
-/clickable-paths editor cursor</code></pre>
+      <ol>
+        <li>输入 <code>/personal</code>，按 <kbd>Enter</kbd> 键。</li>
+        <li>用 <kbd>↑</kbd> <kbd>↓</kbd> 键选「文件路径可点击」，按 <kbd>Enter</kbd> 键。</li>
+        <li>选「打开方式：cursor」这类菜单项，按 <kbd>Enter</kbd> 键。</li>
+      </ol>
     </div>
     <figure class="beat-fig" id="fig-message-3">
       <div class="demo" data-cue="message-06">
@@ -172,7 +174,7 @@
       </p>
       <ul>
         <li>代码块指用 <code>```</code> 或 <code>~~~</code> 包起来的部分。已经写成链接的文字保持原样。</li>
-        <li>不想识别裸路径：在「文件路径可点击」的二级菜单里选「不识别裸路径」，或输入 <code>/clickable-paths bare off</code>；恢复用 <code>/clickable-paths bare on</code>。</li>
+        <li>不想识别裸路径：在「文件路径可点击」的二级菜单里选「不识别裸路径」；恢复选「识别裸路径」。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-message-4">
@@ -223,7 +225,7 @@
     <div class="beat-text">
       <h3>路径没变成链接怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="message-10" data-say="输入斜杠 clickable paths，确认「状态」是「开启」。">输入 <code>/clickable-paths</code>，确认「状态」是「开启」。</span></li>
+        <li><span class="seg" data-seg="message-10" data-say="在斜杠 personal 的「文件路径可点击」里选「查看路径链接设置」，确认「状态」是「开启」。">在 <code>/personal</code> 的「文件路径可点击」里选「查看路径链接设置」，确认「状态」是「开启」。</span></li>
         <li><span class="seg" data-seg="message-11">确认文件真实存在，并且路径不在代码块或思考内容里。</span></li>
         <li><span class="seg" data-seg="message-12" data-say="如果路径后面跟着括号里的链接地址，说明终端超链接没有启用。这时检查 Pi 的超链接设置、PI HYPERLINKS 环境变量和终端本身。">如果路径后面跟着括号里的链接地址，说明终端超链接没有启用。这时检查 Pi 的超链接设置、<code>PI_HYPERLINKS</code> 环境变量和终端本身。</span></li>
       </ol>
@@ -237,8 +239,8 @@
         <summary>路径变成了链接，但点了没反应</summary>
         <ol>
           <li>确认按住了修饰键，具体按键以终端设置为准。</li>
-          <li>输入 <code>/clickable-paths</code> 看「编辑器」，确认这个编辑器已经安装。</li>
-          <li>用 <code>/clickable-paths editor file</code> 换成系统默认程序打开。已显示的消息不会刷新，旧链接地址可能不变：让 Pi 重新输出一个文件路径，再点新消息里的链接测试。</li>
+          <li>选「查看路径链接设置」看「编辑器」，确认这个编辑器已经安装。</li>
+          <li>选「打开方式：file」，换成系统默认程序打开。已显示的消息不会刷新，旧链接地址可能不变：让 Pi 重新输出一个文件路径，再点新消息里的链接测试。</li>
         </ol>
       </details>
     </div>
@@ -246,7 +248,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 300" width="100%" role="img" aria-labelledby="fig-message-6-title fig-message-6-desc">
           <title id="fig-message-6-title">路径没变成链接时的检查步骤</title>
-          <desc id="fig-message-6-desc">依次检查：第 1 步，路径链接是否开启，没开启就输入 /clickable-paths on；第 2 步，文件是否真实存在、是否在代码块或思考内容里，是的话保持文字是正常的；第 3 步，路径后面是否跟着括号里的链接地址，是的话说明终端超链接没有启用，依次检查 Pi 的 terminal.hyperlinks 设置、PI_HYPERLINKS 环境变量和终端本身。</desc>
+          <desc id="fig-message-6-desc">依次检查：第 1 步，在查看路径链接设置里看路径链接是否开启，没开启就选开启路径链接；第 2 步，文件是否真实存在、是否在代码块或思考内容里，是的话保持文字是正常的；第 3 步，路径后面是否跟着括号里的链接地址，是的话说明终端超链接没有启用，依次检查 Pi 的 terminal.hyperlinks 设置、PI_HYPERLINKS 环境变量和终端本身。</desc>
           <defs>
             <marker id="fig-message-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -261,9 +263,9 @@
             <text class="t-cap" x="320" y="76" text-anchor="middle">否</text>
             <rect class="n" x="16" y="64" width="264" height="44" rx="6"/>
             <text class="t" x="28" y="84">1 「状态」是「开启」？</text>
-            <text class="t-sub" x="28" y="100">/clickable-paths 查看</text>
+            <text class="t-cap" x="28" y="100">「查看路径链接设置」</text>
             <rect class="n" x="360" y="64" width="264" height="44" rx="6"/>
-            <text class="t-mono" x="372" y="91">/clickable-paths on</text>
+            <text class="t" x="372" y="91">选「开启路径链接」</text>
           </g>
 
           <g data-cue="message-11">
@@ -313,14 +315,14 @@
   <div class="beat">
     <div class="beat-text">
       <h3>第 1 步的实际画面</h3>
-      <p>输入 <code>/clickable-paths</code> 后，Pi 列出「状态」「编辑器」「裸路径」「工作目录」四行，后面附三行用法。</p>
+      <p>选「查看路径链接设置」后，Pi 列出「状态」「编辑器」「裸路径」「工作目录」四行，最后一行提示在 <code>/personal</code> → 文件路径可点击 里设置。</p>
       <ul>
-        <li>暂停路径链接：输入 <code>/clickable-paths off</code>，从下一条消息开始生效。恢复：输入 <code>/clickable-paths on</code>。</li>
+        <li>暂停路径链接：选「暂停路径链接」，从下一条消息开始生效。恢复：选「开启路径链接」。</li>
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="clickable-paths-status" id="fig-message-5">
-      <div class="capture-frame"><video data-cue="message-10" src="media/clickable-paths-status.mp4" poster="media/clickable-paths-status.png" muted loop playsinline preload="none" aria-label="录屏：输入 /clickable-paths，显示「状态」「编辑器」「裸路径」「工作目录」和三行用法"></video></div>
-      <figcaption>录屏：输入 <code>/clickable-paths</code>，显示「状态」「编辑器」「裸路径」「工作目录」和用法。画面里的 ponytail 字样来自本机另一个扩展。</figcaption>
+      <div class="capture-frame"><video data-cue="message-10" src="media/clickable-paths-status.mp4" poster="media/clickable-paths-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 的文件路径可点击里选查看路径链接设置，显示「状态」「编辑器」「裸路径」「工作目录」"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 文件路径可点击 →「查看路径链接设置」，显示「状态」「编辑器」「裸路径」「工作目录」。画面里的 ponytail 字样来自本机另一个扩展。</figcaption>
     </figure>
   </div>
 

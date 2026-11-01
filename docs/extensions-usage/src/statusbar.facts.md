@@ -8,10 +8,11 @@
 - 升级时两个旧开关合成一个：只有两个旧开关都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:106-113, 118-120
 - 状态栏显示两项：会话 ID 和服务商剩余额度 —— statusline.ts:9-10, 33-38, 108
 - 会话 ID 显示末尾 8 位 —— statusline.ts:31
-- openai-codex 显示 `weekly N% left`（周额度剩余） —— statusline.ts:287-289
-- zai-coding-cn 显示 `5h N% left · weekly N% left`（5 小时、周额度剩余） —— statusline.ts:312-317
-- N 是剩余百分比（100 − 已用，取整） —— statusline.ts:413-418
-- 图中 `a1b2c3d4`、63%、82%、47% 是示例值，图注已标注；原图注「位置由状态栏决定」无法从源码核实，已删
+- openai-codex 显示 `weekly N% left`（周额度剩余） —— statusline.ts:289-292
+- zai-coding-cn 显示 `5h N% left · weekly N% left`（5 小时、周额度剩余） —— statusline.ts:316-320
+- kimi-coding 显示 `5h N% left`，老套餐附 `weekly N% left`（limit_7d），新套餐附 `monthly N% left`（limit_month_code，缺失回退 limit_month_total）；真实订阅响应已验证 —— statusline.ts:323-362；tests/statusline.test.mjs「kimi-coding 新套餐显示 5 小时和月度额度」「kimi-coding 老套餐显示 5 小时和周额度」
+- N 是剩余百分比（100 − 已用，取整） —— statusline.ts:458-463
+- 图中 `a1b2c3d4`、63%、82%、47%、86%、99% 是示例值，图注已标注；原图注「位置由状态栏决定」无法从源码核实，已删
 
 ## 更新时机（只在排查第 3 步和不朗读列表里出现）
 
@@ -21,9 +22,9 @@
 
 ## 额度为空怎么办（fig-statusbar-2）
 
-- 只有 openai-codex、zai-coding-cn 显示额度，其他服务商时额度为空 —— statusline.ts:14-16, 63-68
-- 额度需要读取该服务商的登录凭据（`pi auth`）；读不到时本次查询失败 —— statusline.ts:264-271, 296-301, 320-329
-- 查询需要访问服务商的用量接口（网络），单步最多 15 秒 —— statusline.ts:13, 281-285, 302-311, 336-344
+- 只有 openai-codex、zai-coding-cn、kimi-coding 显示额度，其他服务商时额度为空 —— statusline.ts:14-17, 63-68
+- 额度需要读取该服务商的登录凭据（`pi auth`）；读不到时本次查询失败 —— statusline.ts:268-274, 299-304, 327-334, 365-373
+- 查询需要访问服务商的用量接口（网络），单步最多 15 秒 —— statusline.ts:13, 284-288, 305-314, 335-343, 376-389
 - 查询失败时保留上次查到的值；从没查到过就为空 —— statusline.ts:109-114
 
 ## 换配色（fig-statusbar-3 录屏）
@@ -40,7 +41,7 @@
 - Pi 正在回复或压缩时，扩展的 `ctx.reload()` 会被拒绝；需等结束后再应用或手动 `/reload` —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:5300-5307
 - 会话 ID 用途未补：`pi --session` 按会话 ID **前缀**匹配，末尾 8 位不能直接用来打开会话 —— node_modules/@earendil-works/pi-coding-agent/dist/main.js:204, 210；docs/cli.md:90-91
 
-- 应用后：配色换成所选（palette、palettePreset → custom），density → compact，separator → round；其他设置不变 —— statusline.ts:644-657；tests/statusline.test.mjs:64-68
-- 文件在 agent 目录（默认 `~/.pi/agent/`，`PI_CODING_AGENT_DIR` 可改） —— statusline.ts:642-643；config.js:438, 453-459
+- 应用后：配色换成所选（palette、palettePreset → custom），density → compact，separator → round；其他设置不变 —— statusline.ts:689-702；tests/statusline.test.mjs:64-68
+- 文件在 agent 目录（默认 `~/.pi/agent/`，`PI_CODING_AGENT_DIR` 可改） —— statusline.ts:687-688；config.js:438, 453-459
 - 写完后自动重载 —— statusline.ts:247-250；tests/statusline.test.mjs:69
 - 写入失败时提示「应用失败」，不重载 —— statusline.ts:247-256

@@ -4,6 +4,8 @@
 
 ## 未发布
 
+- 状态栏额度新增 `kimi-coding` 支持：通过 Kimi Code 订阅的 `GET https://api.kimi.com/coding/v1/usages` 查询，显示 5 小时窗口剩余量；老套餐附周额度（`limit_7d`），新套餐附月度额度（`limit_month_code`，缺失时回退 `limit_month_total`）。
+
 - 配色菜单合并为「选择 pi-statusline 自定义配色」：移除 11 个重复直达项，TUI 预览、RPC 普通列表共用一个入口。选择页说明需要启用 pi-statusline、会覆盖自定义配色并设置紧凑布局和圆角分隔符，不改变 Pi 主题。
 
 - `/personal` 支持 Esc 逐级返回，保存设置或查看状态后留在二级菜单；启停功能和应用配色仍退出并重载。从一级菜单进入批量开关后取消会返回一级；直接执行 `/personal switches` 则退出。

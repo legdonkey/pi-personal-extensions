@@ -142,3 +142,75 @@ test("合并功能同时注册配色处理器与额度事件，保留 usage 和 
   }
   assert.equal(statuses.get("session-id"), undefined);
 });
+
+function kimiUsageContext(statuses) {
+  return {
+    model: { provider: "kimi-coding" },
+    sessionManager: { getSessionId: () => "abc" },
+    ui: { setStatus: (key, value) => statuses.set(key, value) },
+  };
+}
+
+function registerKimiStatusline(events) {
+  statusline({
+    on: (name, handler) => events.set(name, handler),
+    registerCommand() {},
+    exec: async (command, args) => {
+      assert.deepEqual(args, ["auth", "print-bearer-token", "--provider", "kimi-coding", "--min-expiry", "5m"]);
+      return { code: 0, stdout: "test-credential" };
+    },
+  });
+}
+
+test("kimi-coding 新套餐显示 5 小时和月度额度", async (t) => {
+  const events = new Map();
+  const statuses = new Map();
+  registerKimiStatusline(events);
+  t.mock.method(globalThis, "fetch", async (url, init) => {
+    assert.equal(url, "https://api.kimi.com/coding/v1/usages");
+    assert.equal(init.headers.Authorization, "Bearer test-credential");
+    return {
+      ok: true,
+      json: async () => ({
+        limits: [],
+        usages: {
+          limit_5h: { used_ratio: 0.1387, reset_time: "2026-11-01T08:57:41Z" },
+          limit_month_total: { used_ratio: 0.0111, reset_time: "2026-12-02T00:00:00Z" },
+          limit_month_code: { used_ratio: 0.0111, reset_time: "2026-12-02T00:00:00Z" },
+        },
+      }),
+    };
+  });
+  const ctx = kimiUsageContext(statuses);
+  try {
+    events.get("session_start")({}, ctx);
+    await nextTick();
+    assert.equal(statuses.get("usage"), "5h 86% left · monthly 99% left");
+  } finally {
+    events.get("session_shutdown")({}, ctx);
+  }
+});
+
+test("kimi-coding 老套餐显示 5 小时和周额度", async (t) => {
+  const events = new Map();
+  const statuses = new Map();
+  registerKimiStatusline(events);
+  t.mock.method(globalThis, "fetch", async () => ({
+    ok: true,
+    json: async () => ({
+      usages: {
+        limit_5h: { used_ratio: 0.5 },
+        limit_7d: { used_ratio: 0.25 },
+        limit_month_code: { used_ratio: 0.9 },
+      },
+    }),
+  }));
+  const ctx = kimiUsageContext(statuses);
+  try {
+    events.get("session_start")({}, ctx);
+    await nextTick();
+    assert.equal(statuses.get("usage"), "5h 50% left · weekly 75% left");
+  } finally {
+    events.get("session_shutdown")({}, ctx);
+  }
+});

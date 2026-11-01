@@ -3,7 +3,7 @@
 - 六项功能，默认全部开启 —— extensions/pi-personal-extensions.ts:17-54、91-93；README.md:3、28
 - 用户消息带橙色线框（左上角 user）—— extensions/user-message-border.ts:7、33-39
 - 回复里存在的本地文件路径变成可点击链接 —— extensions/clickable-paths.ts:2-10、97、242-249
-- 状态栏显示服务商剩余额度和会话 ID（末尾 8 位）—— extensions/statusline.ts:31-38、289；README.md:36
+- 状态栏显示服务商剩余额度和会话 ID（末尾 8 位）—— extensions/statusline.ts:32-38、292；README.md:36
 - 状态栏配色可换（需另行启用 pi-statusline）—— extensions/statusline.ts:642-663；README.md:36、92
 - 图中会话 ID `7c41e0a2`、会话名、模型名、额度数字都是示例值
 - 输入框下方右侧显示会话名 —— extensions/session-title.ts:17-29

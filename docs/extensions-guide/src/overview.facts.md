@@ -9,7 +9,7 @@
 - 按屏幕区域归类、章号是讲解页的组织方式，源码没有分组概念
 - 用户消息橙色线框：给 TUI 普通用户消息加橙色边框，左上角显示 user —— extensions/user-message-border.ts:7、33-39
 - 文件路径可点击：把本地文件路径改写成可点击链接 —— extensions/clickable-paths.ts:2-10、242-249
-- 状态栏功能（statusline）：用 setStatus 显示剩余额度和会话 ID 末尾 8 位（shortSessionId） —— extensions/statusline.ts:31、33-38、107-108
+- 状态栏功能（statusline）：用 setStatus 显示剩余额度和会话 ID 末尾 8 位（shortSessionId） —— extensions/statusline.ts:32、33-38、107-108
 - 图中第二行示例 `7c41e0a2 · weekly 88% left`：会话 ID 是虚构的 8 位示例值（框内标「示例画面」），`weekly 88% left` 的格式见 extensions/statusline.ts:289、413-418（formatRemaining）
 - 同一项状态栏功能还改 pi-statusline 的配色（同时设置 compact 密度和 round 分隔符，细节在第 4 章）—— extensions/statusline.ts:649-658；extensions/pi-personal-extensions.ts:31-34、85-86
 - 右下角会话标题：在输入框下方右对齐显示会话名 —— extensions/session-title.ts:17-29

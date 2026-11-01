@@ -15,7 +15,7 @@
 - 打开的会话已有别的名字时自动命名暂停 —— extensions/auto-session-name.ts:234-235、253
 - 命名失败或超时（30 秒）保留原名，连续失败只提示一次，preview 可重试 —— extensions/auto-session-name.ts:292、335-336、366-371；README.md:54
 - Print / JSON 模式不自动命名 —— extensions/auto-session-name.ts:269；README.md:45
-- 额度只支持 openai-codex 和 zai-coding-cn；其他服务商不显示 —— extensions/statusline.ts:14-16、63-68、78-79
+- 额度只支持 openai-codex、zai-coding-cn 和 kimi-coding；其他服务商不显示 —— extensions/statusline.ts:14-17、63-68、78-80
 - （本章已不写刷新节奏，见 statusbar 章）额度每 5 分钟刷新，每轮结束后也刷新（30 秒冷却）—— extensions/statusline.ts:11-12、80-86、120-126、128-133、152-155
 - 查询失败保留上次结果 —— extensions/statusline.ts:109-114
 - 🧠 段条件（正文、排查表都写全）：openai-codex-responses 接口、GPT-6 系列、thinking 不为 off —— extensions/inline-effort.ts:70、80-82、299-300

@@ -1123,7 +1123,7 @@ pi remove "$(pwd)"</code></pre>
       <h3>想看懂状态栏上的额度和会话 ID</h3>
       <p>
         <span class="seg" data-seg="statusbar-01">「状态栏：额度、会话 ID 与配色」在状态栏显示两样东西：当前会话 ID 的末尾 8 位，和当前服务商还剩多少额度。</span>
-        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。</span>
+        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。用 kimi coding 时也显示五小时额度，老套餐附周额度，新套餐附月度额度，也就是 monthly。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。用 <code>kimi-coding</code> 时也显示 5 小时额度，老套餐附周额度，新套餐附月度额度（<code>monthly</code>）。</span>
       </p>
       <ul>
         <li>额度、会话 ID 和配色是同一项功能，共用一个开关。升级时，旧版的两个开关合成这一个：只有两个旧开关都关闭，才保持关闭；否则开启。</li>
@@ -1131,9 +1131,9 @@ pi remove "$(pwd)"</code></pre>
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 228" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
+        <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
           <title id="fig-statusbar-1-title">状态栏上的额度和会话 ID（示例）</title>
-          <desc id="fig-statusbar-1-desc">两段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。left 表示还剩。</desc>
+          <desc id="fig-statusbar-1-desc">三段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。kimi-coding 新套餐：5h 86% left 表示 5 小时额度还剩 86%，monthly 99% left 表示月度额度还剩 99%；老套餐第二段为 weekly。left 表示还剩。</desc>
 
           <text class="t-cap" x="12" y="24">openai-codex（示例）</text>
           <rect class="n" x="12" y="36" width="328" height="32" rx="4"/>
@@ -1166,6 +1166,15 @@ pi remove "$(pwd)"</code></pre>
             <path class="w" d="M216 180 V184 H328 V180"/>
             <text class="t-cap" x="252" y="220">周额度还剩 47%</text>
           </g>
+
+          <text class="t-cap" x="12" y="248">kimi-coding（新套餐示例）</text>
+          <rect class="n" x="12" y="260" width="396" height="32" rx="4"/>
+          <text class="t-mono" x="24" y="281">a1b2c3d4</text>
+          <text class="t-mono" x="96" y="281">•</text>
+          <text class="t-mono" x="112" y="281">5h 86% left</text>
+          <text class="t-mono" x="200" y="281">·</text>
+          <text class="t-mono" x="216" y="281">monthly 99% left</text>
+          <text class="t-cap" x="424" y="281">monthly = 月度；老套餐为 weekly</text>
         </svg>
       </div>
       <figcaption>数值是示例。</figcaption>
@@ -1177,8 +1186,8 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>额度一项是空的怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex 和 zai coding cn 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code> 和 <code>zai-coding-cn</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
-        <li><span class="seg" data-seg="statusbar-04">如果服务商是这两个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。</span></li>
+        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex、zai coding cn 和 kimi coding 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code>、<code>zai-coding-cn</code> 和 <code>kimi-coding</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
+        <li><span class="seg" data-seg="statusbar-04">如果服务商是这三个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。</span></li>
         <li><span class="seg" data-seg="statusbar-05">等下一次查询，大约每 5 分钟一次；切换模型时会立即发起查询。数字一直不变，可能是查询失败，显示的是上次的值。</span></li>
       </ol>
       <ul>
@@ -1189,7 +1198,7 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 640 316" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
           <title id="fig-statusbar-2-title">额度为空时先查什么</title>
-          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex 或 zai-coding-cn。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通，再等下一次查询（约 5 分钟内）。另外，数字一直不变时，可能是查询失败，显示的是上次的值。</desc>
+          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex、zai-coding-cn 或 kimi-coding。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通，再等下一次查询（约 5 分钟内）。另外，数字一直不变时，可能是查询失败，显示的是上次的值。</desc>
           <defs>
             <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -1203,8 +1212,9 @@ pi remove "$(pwd)"</code></pre>
             <rect class="mask" x="304" y="94" width="24" height="14"/>
             <text class="t-cap" x="316" y="105" text-anchor="middle">否</text>
             <rect class="n" x="28" y="84" width="264" height="64" rx="6"/>
-            <text class="t" x="40" y="108">当前模型的服务商是</text>
-            <text class="t-sub" x="40" y="130">openai-codex 或 zai-coding-cn？</text>
+            <text class="t" x="40" y="104">当前模型的服务商是</text>
+            <text class="t-sub" x="40" y="124">openai-codex、zai-coding-cn</text>
+            <text class="t-sub" x="40" y="142">或 kimi-coding？</text>
             <rect class="n is-ghost" x="340" y="84" width="288" height="64" rx="6"/>
             <text class="t" x="352" y="108">不显示额度</text>
             <text class="t-cap" x="352" y="130">其他服务商不支持，属正常</text>
@@ -2254,8 +2264,9 @@ npm install --ignore-scripts \
             <rect class="n" x="16" y="116" width="140" height="64" rx="6"/>
             <text class="t" x="28" y="153">状态栏没有额度</text>
             <rect class="n" x="180" y="116" width="224" height="64" rx="6"/>
-            <text class="t-cap" x="192" y="142">服务商是 openai-codex</text>
-            <text class="t-cap" x="192" y="162">或 zai-coding-cn 吗？</text>
+            <text class="t-cap" x="192" y="134">服务商是 openai-codex、</text>
+            <text class="t-cap" x="192" y="154">zai-coding-cn 或</text>
+            <text class="t-cap" x="192" y="174">kimi-coding 吗？</text>
             <rect class="n" x="428" y="116" width="196" height="64" rx="6"/>
             <text class="t-cap" x="440" y="142">其他服务商不显示额度</text>
             <text class="t-cap" x="440" y="162">查询失败时保留上次结果</text>
@@ -2336,7 +2347,7 @@ npm install --ignore-scripts \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=e6c0b4d7","duration":656.66,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":10.08},{"id":"start-02","ch":"start","start":10.4,"end":17.44},{"id":"start-03","ch":"start","start":17.76,"end":24.16},{"id":"start-04","ch":"start","start":24.48,"end":36.72},{"id":"start-05","ch":"start","start":37.04,"end":51.36},{"id":"start-06","ch":"start","start":51.68,"end":59.6},{"id":"start-07","ch":"start","start":59.92,"end":65.44},{"id":"start-08","ch":"start","start":65.76,"end":74.48},{"id":"start-09","ch":"start","start":74.8,"end":78.32},{"id":"start-10","ch":"start","start":78.64,"end":86.72},{"id":"start-11","ch":"start","start":87.04,"end":96},{"id":"start-12","ch":"start","start":96.32,"end":101.28},{"id":"start-13","ch":"start","start":101.6,"end":104.4},{"id":"start-14","ch":"start","start":104.72,"end":108.32},{"id":"start-15","ch":"start","start":108.64,"end":114.48},{"id":"message-00","ch":"message","start":115.38,"end":118.26},{"id":"message-01","ch":"message","start":118.58,"end":127.06},{"id":"message-02","ch":"message","start":127.38,"end":131.22},{"id":"message-03","ch":"message","start":131.54,"end":137.46},{"id":"message-04","ch":"message","start":137.78,"end":145.54},{"id":"message-05","ch":"message","start":145.86,"end":150.5},{"id":"message-06","ch":"message","start":150.82,"end":159.22},{"id":"message-07","ch":"message","start":159.54,"end":165.46},{"id":"message-08","ch":"message","start":165.78,"end":175.06},{"id":"message-09","ch":"message","start":175.38,"end":182.42},{"id":"message-10","ch":"message","start":182.74,"end":190.5},{"id":"message-11","ch":"message","start":190.82,"end":195.94},{"id":"message-12","ch":"message","start":196.26,"end":208.18},{"id":"statusbar-00","ch":"statusbar","start":209.08,"end":211.96},{"id":"statusbar-01","ch":"statusbar","start":212.28,"end":224.12},{"id":"statusbar-02","ch":"statusbar","start":224.44,"end":235.8},{"id":"statusbar-03","ch":"statusbar","start":236.12,"end":248.36},{"id":"statusbar-04","ch":"statusbar","start":248.68,"end":256.76},{"id":"statusbar-05","ch":"statusbar","start":257.08,"end":268.12},{"id":"statusbar-06","ch":"statusbar","start":268.44,"end":276.68},{"id":"statusbar-07","ch":"statusbar","start":277,"end":282.76},{"id":"statusbar-08","ch":"statusbar","start":283.08,"end":288.04},{"id":"statusbar-09","ch":"statusbar","start":288.36,"end":293.64},{"id":"statusbar-10","ch":"statusbar","start":293.96,"end":297.4},{"id":"statusbar-11","ch":"statusbar","start":297.72,"end":305.32},{"id":"title-00","ch":"title","start":306.22,"end":310.3},{"id":"title-01","ch":"title","start":310.62,"end":319.74},{"id":"title-02","ch":"title","start":320.06,"end":327.98},{"id":"title-03","ch":"title","start":328.3,"end":333.34},{"id":"title-04","ch":"title","start":333.66,"end":339.42},{"id":"title-05","ch":"title","start":339.74,"end":352.46},{"id":"title-06","ch":"title","start":352.78,"end":362.94},{"id":"title-07","ch":"title","start":363.26,"end":374.94},{"id":"title-08","ch":"title","start":375.26,"end":385.82},{"id":"title-09","ch":"title","start":386.14,"end":392.94},{"id":"title-10","ch":"title","start":393.26,"end":405.34},{"id":"title-11","ch":"title","start":405.66,"end":412.3},{"id":"title-12","ch":"title","start":412.62,"end":416.06},{"id":"title-13","ch":"title","start":416.38,"end":433.1},{"id":"title-14","ch":"title","start":433.42,"end":437.18},{"id":"effort-00","ch":"effort","start":438.08,"end":442.16},{"id":"effort-01","ch":"effort","start":442.48,"end":452.16},{"id":"effort-02","ch":"effort","start":452.48,"end":454.96},{"id":"effort-03","ch":"effort","start":455.28,"end":468.72},{"id":"effort-04","ch":"effort","start":469.04,"end":473.76},{"id":"effort-05","ch":"effort","start":474.08,"end":485.92},{"id":"effort-06","ch":"effort","start":486.24,"end":491.92},{"id":"effort-07","ch":"effort","start":492.24,"end":507.28},{"id":"effort-08","ch":"effort","start":507.6,"end":515.68},{"id":"effort-09","ch":"effort","start":516,"end":521.36},{"id":"effort-10","ch":"effort","start":521.68,"end":533.6},{"id":"effort-11","ch":"effort","start":533.92,"end":537.44},{"id":"effort-12","ch":"effort","start":537.76,"end":539.6},{"id":"effort-13","ch":"effort","start":539.92,"end":543.76},{"id":"effort-14","ch":"effort","start":544.08,"end":550.72},{"id":"effort-15","ch":"effort","start":551.04,"end":558.16},{"id":"effort-16","ch":"effort","start":558.48,"end":566.96},{"id":"effort-17","ch":"effort","start":567.28,"end":577.36},{"id":"effort-18","ch":"effort","start":577.68,"end":585.76},{"id":"effort-19","ch":"effort","start":586.08,"end":599.2},{"id":"faq-00","ch":"faq","start":600.1,"end":603.7},{"id":"faq-01","ch":"faq","start":604.02,"end":614.02},{"id":"faq-02","ch":"faq","start":614.34,"end":620.42},{"id":"faq-03","ch":"faq","start":620.74,"end":628.74},{"id":"faq-04","ch":"faq","start":629.06,"end":638.42},{"id":"faq-05","ch":"faq","start":638.74,"end":642.9},{"id":"faq-06","ch":"faq","start":643.22,"end":652.26},{"id":"faq-07","ch":"faq","start":652.58,"end":656.66}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=211e55c3","duration":666.9,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":10.08},{"id":"start-02","ch":"start","start":10.4,"end":17.44},{"id":"start-03","ch":"start","start":17.76,"end":24.16},{"id":"start-04","ch":"start","start":24.48,"end":36.72},{"id":"start-05","ch":"start","start":37.04,"end":51.36},{"id":"start-06","ch":"start","start":51.68,"end":59.6},{"id":"start-07","ch":"start","start":59.92,"end":65.44},{"id":"start-08","ch":"start","start":65.76,"end":74.48},{"id":"start-09","ch":"start","start":74.8,"end":78.32},{"id":"start-10","ch":"start","start":78.64,"end":86.72},{"id":"start-11","ch":"start","start":87.04,"end":96},{"id":"start-12","ch":"start","start":96.32,"end":101.28},{"id":"start-13","ch":"start","start":101.6,"end":104.4},{"id":"start-14","ch":"start","start":104.72,"end":108.32},{"id":"start-15","ch":"start","start":108.64,"end":114.48},{"id":"message-00","ch":"message","start":115.38,"end":118.26},{"id":"message-01","ch":"message","start":118.58,"end":127.06},{"id":"message-02","ch":"message","start":127.38,"end":131.22},{"id":"message-03","ch":"message","start":131.54,"end":137.46},{"id":"message-04","ch":"message","start":137.78,"end":145.54},{"id":"message-05","ch":"message","start":145.86,"end":150.5},{"id":"message-06","ch":"message","start":150.82,"end":159.22},{"id":"message-07","ch":"message","start":159.54,"end":165.46},{"id":"message-08","ch":"message","start":165.78,"end":175.06},{"id":"message-09","ch":"message","start":175.38,"end":182.42},{"id":"message-10","ch":"message","start":182.74,"end":190.5},{"id":"message-11","ch":"message","start":190.82,"end":195.94},{"id":"message-12","ch":"message","start":196.26,"end":208.18},{"id":"statusbar-00","ch":"statusbar","start":209.08,"end":211.96},{"id":"statusbar-01","ch":"statusbar","start":212.28,"end":224.12},{"id":"statusbar-02","ch":"statusbar","start":224.44,"end":245.24},{"id":"statusbar-03","ch":"statusbar","start":245.56,"end":257.64},{"id":"statusbar-04","ch":"statusbar","start":257.96,"end":267},{"id":"statusbar-05","ch":"statusbar","start":267.32,"end":278.36},{"id":"statusbar-06","ch":"statusbar","start":278.68,"end":286.92},{"id":"statusbar-07","ch":"statusbar","start":287.24,"end":293},{"id":"statusbar-08","ch":"statusbar","start":293.32,"end":298.28},{"id":"statusbar-09","ch":"statusbar","start":298.6,"end":303.88},{"id":"statusbar-10","ch":"statusbar","start":304.2,"end":307.64},{"id":"statusbar-11","ch":"statusbar","start":307.96,"end":315.56},{"id":"title-00","ch":"title","start":316.46,"end":320.54},{"id":"title-01","ch":"title","start":320.86,"end":329.98},{"id":"title-02","ch":"title","start":330.3,"end":338.22},{"id":"title-03","ch":"title","start":338.54,"end":343.58},{"id":"title-04","ch":"title","start":343.9,"end":349.66},{"id":"title-05","ch":"title","start":349.98,"end":362.7},{"id":"title-06","ch":"title","start":363.02,"end":373.18},{"id":"title-07","ch":"title","start":373.5,"end":385.18},{"id":"title-08","ch":"title","start":385.5,"end":396.06},{"id":"title-09","ch":"title","start":396.38,"end":403.18},{"id":"title-10","ch":"title","start":403.5,"end":415.58},{"id":"title-11","ch":"title","start":415.9,"end":422.54},{"id":"title-12","ch":"title","start":422.86,"end":426.3},{"id":"title-13","ch":"title","start":426.62,"end":443.34},{"id":"title-14","ch":"title","start":443.66,"end":447.42},{"id":"effort-00","ch":"effort","start":448.32,"end":452.4},{"id":"effort-01","ch":"effort","start":452.72,"end":462.4},{"id":"effort-02","ch":"effort","start":462.72,"end":465.2},{"id":"effort-03","ch":"effort","start":465.52,"end":478.96},{"id":"effort-04","ch":"effort","start":479.28,"end":484},{"id":"effort-05","ch":"effort","start":484.32,"end":496.16},{"id":"effort-06","ch":"effort","start":496.48,"end":502.16},{"id":"effort-07","ch":"effort","start":502.48,"end":517.52},{"id":"effort-08","ch":"effort","start":517.84,"end":525.92},{"id":"effort-09","ch":"effort","start":526.24,"end":531.6},{"id":"effort-10","ch":"effort","start":531.92,"end":543.84},{"id":"effort-11","ch":"effort","start":544.16,"end":547.68},{"id":"effort-12","ch":"effort","start":548,"end":549.84},{"id":"effort-13","ch":"effort","start":550.16,"end":554},{"id":"effort-14","ch":"effort","start":554.32,"end":560.96},{"id":"effort-15","ch":"effort","start":561.28,"end":568.4},{"id":"effort-16","ch":"effort","start":568.72,"end":577.2},{"id":"effort-17","ch":"effort","start":577.52,"end":587.6},{"id":"effort-18","ch":"effort","start":587.92,"end":596},{"id":"effort-19","ch":"effort","start":596.32,"end":609.44},{"id":"faq-00","ch":"faq","start":610.34,"end":613.94},{"id":"faq-01","ch":"faq","start":614.26,"end":624.26},{"id":"faq-02","ch":"faq","start":624.58,"end":630.66},{"id":"faq-03","ch":"faq","start":630.98,"end":638.98},{"id":"faq-04","ch":"faq","start":639.3,"end":648.66},{"id":"faq-05","ch":"faq","start":648.98,"end":653.14},{"id":"faq-06","ch":"faq","start":653.46,"end":662.5},{"id":"faq-07","ch":"faq","start":662.82,"end":666.9}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

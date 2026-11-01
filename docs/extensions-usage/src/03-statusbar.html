@@ -16,7 +16,7 @@
       <h3>想看懂状态栏上的额度和会话 ID</h3>
       <p>
         <span class="seg" data-seg="statusbar-01">「状态栏：额度、会话 ID 与配色」在状态栏显示两样东西：当前会话 ID 的末尾 8 位，和当前服务商还剩多少额度。</span>
-        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。</span>
+        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。用 kimi coding 时也显示五小时额度，老套餐附周额度，新套餐附月度额度，也就是 monthly。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。用 <code>kimi-coding</code> 时也显示 5 小时额度，老套餐附周额度，新套餐附月度额度（<code>monthly</code>）。</span>
       </p>
       <ul>
         <li>额度、会话 ID 和配色是同一项功能，共用一个开关。升级时，旧版的两个开关合成这一个：只有两个旧开关都关闭，才保持关闭；否则开启。</li>
@@ -24,9 +24,9 @@
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 228" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
+        <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
           <title id="fig-statusbar-1-title">状态栏上的额度和会话 ID（示例）</title>
-          <desc id="fig-statusbar-1-desc">两段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。left 表示还剩。</desc>
+          <desc id="fig-statusbar-1-desc">三段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。kimi-coding 新套餐：5h 86% left 表示 5 小时额度还剩 86%，monthly 99% left 表示月度额度还剩 99%；老套餐第二段为 weekly。left 表示还剩。</desc>
 
           <text class="t-cap" x="12" y="24">openai-codex（示例）</text>
           <rect class="n" x="12" y="36" width="328" height="32" rx="4"/>
@@ -59,6 +59,15 @@
             <path class="w" d="M216 180 V184 H328 V180"/>
             <text class="t-cap" x="252" y="220">周额度还剩 47%</text>
           </g>
+
+          <text class="t-cap" x="12" y="248">kimi-coding（新套餐示例）</text>
+          <rect class="n" x="12" y="260" width="396" height="32" rx="4"/>
+          <text class="t-mono" x="24" y="281">a1b2c3d4</text>
+          <text class="t-mono" x="96" y="281">•</text>
+          <text class="t-mono" x="112" y="281">5h 86% left</text>
+          <text class="t-mono" x="200" y="281">·</text>
+          <text class="t-mono" x="216" y="281">monthly 99% left</text>
+          <text class="t-cap" x="424" y="281">monthly = 月度；老套餐为 weekly</text>
         </svg>
       </div>
       <figcaption>数值是示例。</figcaption>
@@ -70,8 +79,8 @@
     <div class="beat-text">
       <h3>额度一项是空的怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex 和 zai coding cn 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code> 和 <code>zai-coding-cn</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
-        <li><span class="seg" data-seg="statusbar-04">如果服务商是这两个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。</span></li>
+        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex、zai coding cn 和 kimi coding 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code>、<code>zai-coding-cn</code> 和 <code>kimi-coding</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
+        <li><span class="seg" data-seg="statusbar-04">如果服务商是这三个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。</span></li>
         <li><span class="seg" data-seg="statusbar-05">等下一次查询，大约每 5 分钟一次；切换模型时会立即发起查询。数字一直不变，可能是查询失败，显示的是上次的值。</span></li>
       </ol>
       <ul>
@@ -82,7 +91,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 316" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
           <title id="fig-statusbar-2-title">额度为空时先查什么</title>
-          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex 或 zai-coding-cn。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通，再等下一次查询（约 5 分钟内）。另外，数字一直不变时，可能是查询失败，显示的是上次的值。</desc>
+          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex、zai-coding-cn 或 kimi-coding。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通，再等下一次查询（约 5 分钟内）。另外，数字一直不变时，可能是查询失败，显示的是上次的值。</desc>
           <defs>
             <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -96,8 +105,9 @@
             <rect class="mask" x="304" y="94" width="24" height="14"/>
             <text class="t-cap" x="316" y="105" text-anchor="middle">否</text>
             <rect class="n" x="28" y="84" width="264" height="64" rx="6"/>
-            <text class="t" x="40" y="108">当前模型的服务商是</text>
-            <text class="t-sub" x="40" y="130">openai-codex 或 zai-coding-cn？</text>
+            <text class="t" x="40" y="104">当前模型的服务商是</text>
+            <text class="t-sub" x="40" y="124">openai-codex、zai-coding-cn</text>
+            <text class="t-sub" x="40" y="142">或 kimi-coding？</text>
             <rect class="n is-ghost" x="340" y="84" width="288" height="64" rx="6"/>
             <text class="t" x="352" y="108">不显示额度</text>
             <text class="t-cap" x="352" y="130">其他服务商不支持，属正常</text>

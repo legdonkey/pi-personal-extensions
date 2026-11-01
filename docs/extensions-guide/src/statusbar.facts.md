@@ -27,20 +27,22 @@
 
 ## 一次刷新（fig-statusbar-2）
 
-- 额度窗口 = 按时间段统计的限额（5 小时、周） —— statusline.ts:313-314, 371-375
-- 缺少所需窗口时抛错，与请求失败走同一分支（保留上次成功值） —— statusline.ts:287, 315, 109-114
+- 额度窗口 = 按时间段统计的限额（5 小时、周、月） —— statusline.ts:316-317, 346-352
+- 缺少所需窗口时抛错，与请求失败走同一分支（保留上次成功值） —— statusline.ts:290, 318, 347, 109-114
 
-- 只支持 `openai-codex` 和 `zai-coding-cn` —— statusline.ts:14-16
+- 只支持 `openai-codex`、`zai-coding-cn` 和 `kimi-coding` —— statusline.ts:14-17
 - 当前服务商不在支持列表里时，额度状态为空 —— statusline.ts:65-68
-- 凭据通过 `pi auth` 读取：Codex 用 `print-bearer-token --provider openai-codex --min-expiry 5m`，智谱用 `print-api-key --provider zai-coding-cn` —— statusline.ts:264-271, 296-301, 320-329
-- 读凭据和请求接口各有 15 秒超时（两步分别计时，整次刷新可能超过 15 秒） —— statusline.ts:13, 324, 336-339
-- Codex 接口 `https://chatgpt.com/backend-api/wham/usage`，带 `Bearer` 令牌；能解析出账号 ID 时加 `ChatGPT-Account-ID` —— statusline.ts:272-285, 346-360
-- 智谱接口 `https://open.bigmodel.cn/api/monitor/usage/quota/limit`，`Authorization` 直接放 API Key，不加 Bearer —— statusline.ts:302-311
-- Codex 取 `rate_limit`、`additional_rate_limits` 中 `primary_window`/`secondary_window` 里第一个长度 6～8 天的窗口，显示 `weekly N% left` —— statusline.ts:287-289, 362-385
-- 智谱只读 `TOKENS_LIMIT`、`CREDIT_LIMIT`；`unit 3/number 5` 为 5 小时，`unit 6/number 1` 为周；缺一个就算失败；显示 `5h N% left · weekly N% left` —— statusline.ts:312-317, 387-411
-- 剩余 = 100 − 已用百分比，限制在 0～100，四舍五入 —— statusline.ts:413-418
+- 凭据通过 `pi auth` 读取：Codex 用 `print-bearer-token --provider openai-codex --min-expiry 5m`，智谱用 `print-api-key --provider zai-coding-cn`，Kimi 用 `print-bearer-token --provider kimi-coding --min-expiry 5m` —— statusline.ts:268-274, 299-304, 327-334, 365-373
+- 读凭据和请求接口各有 15 秒超时（两步分别计时，整次刷新可能超过 15 秒） —— statusline.ts:13, 369, 377-381
+- Codex 接口 `https://chatgpt.com/backend-api/wham/usage`，带 `Bearer` 令牌；能解析出账号 ID 时加 `ChatGPT-Account-ID` —— statusline.ts:276-288, 391-405
+- 智谱接口 `https://open.bigmodel.cn/api/monitor/usage/quota/limit`，`Authorization` 直接放 API Key，不加 Bearer —— statusline.ts:305-314
+- Kimi 接口 `https://api.kimi.com/coding/v1/usages`，带 `Bearer` 令牌 —— statusline.ts:335-343
+- Codex 取 `rate_limit`、`additional_rate_limits` 中 `primary_window`/`secondary_window` 里第一个长度 6～8 天的窗口，显示 `weekly N% left` —— statusline.ts:289-292, 407-430
+- 智谱只读 `TOKENS_LIMIT`、`CREDIT_LIMIT`；`unit 3/number 5` 为 5 小时，`unit 6/number 1` 为周；缺一个就算失败；显示 `5h N% left · weekly N% left` —— statusline.ts:316-320, 432-456
+- Kimi 读 `usages`：`limit_5h` 必需，缺失算失败；老套餐有 `limit_7d` 时显示 `5h N% left · weekly N% left`，否则取 `limit_month_code`（缺失回退 `limit_month_total`）显示 `5h N% left · monthly N% left`；`used_ratio` 乘 100 得已用百分比 —— statusline.ts:323-362；真实响应已用本机订阅验证（新套餐返回 limit_5h、limit_month_total、limit_month_code）
+- 剩余 = 100 − 已用百分比，限制在 0～100，四舍五入 —— statusline.ts:458-463
 - 请求失败时保留该服务商上次成功的结果；没有缓存时状态为空 —— statusline.ts:109-114
-- 图中 `weekly 63% left`、`5h 82% left · weekly 47% left` 是示例值，图头已标注
+- 图中 `weekly 63% left`、`5h 82% left · weekly 47% left`、`5h 86% left · monthly 99% left` 是示例值，图头已标注
 
 ## 换配色：选择器（fig-statusbar-3 录屏）
 
@@ -54,19 +56,19 @@
 
 ## 11 套配色怎么分组（fig-statusbar-4）
 
-- 每套 6 组前景色/背景色；色值照抄 STYLES —— statusline.ts:435-568, 669-670
-- 13 个字段分 6 组：brand/provider/model、thinking/tools、cwd、branch、context/tokens/cost、cache/time/turn —— statusline.ts:570-593, 671-672
-- 预览标签 `M sol`、`T high`、`D pi`、`G main`、`C 42%`、`K 76%` —— statusline.ts:603
-- 宽度小于 68 列时预览拆成两行 —— statusline.ts:619-626, 673-676
+- 每套 6 组前景色/背景色；色值照抄 STYLES —— statusline.ts:480-613, 712-715
+- 13 个字段分 6 组：brand/provider/model、thinking/tools、cwd、branch、context/tokens/cost、cache/time/turn —— statusline.ts:615-638, 716-717
+- 预览标签 `M sol`、`T high`、`D pi`、`G main`、`C 42%`、`K 76%` —— statusline.ts:648
+- 宽度小于 68 列时预览拆成两行 —— statusline.ts:664-674, 719-722
 - 每行按终端宽度截断 —— statusline.ts:222；tests/statusline.test.mjs:44-50
 
 ## 应用配色时写什么（fig-statusbar-5）
 
-- 文件写到 `getAgentDir()/pi-statusline.json`，与 pi-statusline 读取的位置一致 —— statusline.ts:642-643
+- 文件写到 `getAgentDir()/pi-statusline.json`，与 pi-statusline 读取的位置一致 —— statusline.ts:687-688
 - `getAgentDir()` 默认 `~/.pi/agent`，设置 `PI_CODING_AGENT_DIR` 时用该目录 —— node_modules/@earendil-works/pi-coding-agent/dist/config.js:433, 438, 453-459
-- 读出原文件，展开原有顶层字段，再覆盖 `palettePreset: "custom"`、`palette`（整个对象替换为 13 字段配色）、`density: "compact"`、`separator: "round"` —— statusline.ts:644-657；tests/statusline.test.mjs:64-68
-- 文件不存在（ENOENT）时从空对象开始；其他读取错误或 JSON 解析错误抛出，算作失败 —— statusline.ts:644-649
-- 先写 `.tmp`（权限 0600），再 rename 替换正式文件（页面只一句带过，说「同第 2 章」） —— statusline.ts:658-663
+- 读出原文件，展开原有顶层字段，再覆盖 `palettePreset: "custom"`、`palette`（整个对象替换为 13 字段配色）、`density: "compact"`、`separator: "round"` —— statusline.ts:689-702；tests/statusline.test.mjs:64-68
+- 文件不存在（ENOENT）时从空对象开始；其他读取错误或 JSON 解析错误抛出，算作失败 —— statusline.ts:689-694
+- 先写 `.tmp`（权限 0600），再 rename 替换正式文件（页面只一句带过，说「同第 2 章」） —— statusline.ts:703-708
 - 写完后自动重载（`ctx.reload()`） —— statusline.ts:247-250；tests/statusline.test.mjs:69
 - 写文件失败时提示「应用失败：<原因>」，不执行重载 —— statusline.ts:247-256
 - 图中原文件的字段是示例，图注已标注

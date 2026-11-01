@@ -13,7 +13,8 @@ const SETTLED_REFRESH_COOLDOWN_MS = 30 * 1000;
 const REQUEST_TIMEOUT_MS = 15 * 1000;
 const CODEX_PROVIDER = "openai-codex";
 const ZAI_PROVIDER = "zai-coding-cn";
-const SUPPORTED_PROVIDERS = new Set([CODEX_PROVIDER, ZAI_PROVIDER]);
+const KIMI_PROVIDER = "kimi-coding";
+const SUPPORTED_PROVIDERS = new Set([CODEX_PROVIDER, ZAI_PROVIDER, KIMI_PROVIDER]);
 
 interface CodexWindow {
 	used_percent?: unknown;
@@ -93,7 +94,9 @@ export default function statusline(pi: ExtensionAPI) {
 			const text =
 				provider === CODEX_PROVIDER
 					? await fetchCodexUsage(pi, controller.signal)
-					: await fetchZaiUsage(pi, controller.signal);
+					: provider === ZAI_PROVIDER
+						? await fetchZaiUsage(pi, controller.signal)
+						: await fetchKimiUsage(pi, controller.signal);
 
 			if (
 				controller.signal.aborted ||
@@ -315,6 +318,48 @@ async function fetchZaiUsage(
 	if (!fiveHour || !weekly) throw new Error("ZAI quota windows are unavailable");
 
 	return `5h ${formatRemaining(fiveHour.percentage)} · weekly ${formatRemaining(weekly.percentage)}`;
+}
+
+async function fetchKimiUsage(
+	pi: ExtensionAPI,
+	signal: AbortSignal,
+): Promise<string> {
+	const token = await readCredential(pi, [
+		"auth",
+		"print-bearer-token",
+		"--provider",
+		KIMI_PROVIDER,
+		"--min-expiry",
+		"5m",
+	]);
+	const body = await fetchJson(
+		"https://api.kimi.com/coding/v1/usages",
+		{
+			Accept: "application/json",
+			Authorization: `Bearer ${token}`,
+			"User-Agent": "pi-provider-usage/1.0",
+		},
+		signal,
+	);
+	if (!isRecord(body) || !isRecord(body.usages))
+		throw new Error("Kimi usage is unavailable");
+	const fiveHour = readKimiUsedPercent(body.usages.limit_5h);
+	if (fiveHour === undefined) throw new Error("Kimi 5-hour usage is unavailable");
+	// 新套餐没有周窗口，改显示月度额度；老套餐仍显示周额度。
+	const weekly = readKimiUsedPercent(body.usages.limit_7d);
+	const monthly =
+		readKimiUsedPercent(body.usages.limit_month_code) ??
+		readKimiUsedPercent(body.usages.limit_month_total);
+	const parts = [`5h ${formatRemaining(fiveHour)}`];
+	if (weekly !== undefined) parts.push(`weekly ${formatRemaining(weekly)}`);
+	else if (monthly !== undefined) parts.push(`monthly ${formatRemaining(monthly)}`);
+	return parts.join(" · ");
+}
+
+function readKimiUsedPercent(value: unknown): number | undefined {
+	if (!isRecord(value)) return undefined;
+	const ratio = asFiniteNumber(value.used_ratio);
+	return ratio === undefined ? undefined : ratio * 100;
 }
 
 async function readCredential(

@@ -120,7 +120,7 @@
       <p>
         <span class="seg" data-seg="statusbar-04">一次刷新分三步。第一步，扩展调用 pi auth，读取当前模型所属服务商的凭据。</span>
         <span class="seg" data-seg="statusbar-05">第二步，扩展带凭据请求服务商的用量接口。读凭据和请求接口各有 15 秒超时。</span>
-        <span class="seg" data-seg="statusbar-06" data-say="第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。openai codex 显示周额度，zai coding cn 显示 5 小时和周额度。">第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。<code>openai-codex</code> 显示周额度，<code>zai-coding-cn</code> 显示 5 小时和周额度。</span>
+        <span class="seg" data-seg="statusbar-06" data-say="第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。openai codex 显示周额度，zai coding cn 显示 5 小时和周额度，kimi coding 显示 5 小时额度，老套餐附周额度，新套餐附月度额度。">第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。<code>openai-codex</code> 显示周额度，<code>zai-coding-cn</code> 显示 5 小时和周额度，<code>kimi-coding</code> 显示 5 小时额度，老套餐附周额度，新套餐附月度额度。</span>
         <span class="seg" data-seg="statusbar-07">请求失败时，状态栏保留这个服务商上次成功的值。从没成功过时，额度一项为空。</span>
       </p>
       <ul>
@@ -130,9 +130,9 @@
     </div>
     <figure class="beat-fig" id="fig-statusbar-2">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 324" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
-          <title id="fig-statusbar-2-title">两个服务商的一次刷新</title>
-          <desc id="fig-statusbar-2-desc">两条泳道。openai-codex：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 chatgpt.com/backend-api/wham/usage，取 6～8 天的周窗口，显示 weekly 63% left（示例）。zai-coding-cn：pi auth print-api-key 读取 API Key，请求 open.bigmodel.cn/api/monitor/usage/quota/limit，取 5 小时窗口和周窗口，显示 5h 82% left · weekly 47% left（示例）。读凭据和请求接口各有 15 秒超时。请求失败或缺少所需窗口时，保留该服务商上次成功的值，从没成功过就为空。</desc>
+        <svg viewBox="0 0 640 436" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
+          <title id="fig-statusbar-2-title">三个服务商的一次刷新</title>
+          <desc id="fig-statusbar-2-desc">三条泳道。openai-codex：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 chatgpt.com/backend-api/wham/usage，取 6～8 天的周窗口，显示 weekly 63% left（示例）。zai-coding-cn：pi auth print-api-key 读取 API Key，请求 open.bigmodel.cn/api/monitor/usage/quota/limit，取 5 小时窗口和周窗口，显示 5h 82% left · weekly 47% left（示例）。kimi-coding：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 api.kimi.com/coding/v1/usages，取 5 小时窗口，老套餐附周窗口（limit_7d），新套餐附月度窗口（limit_month_code），显示 5h 86% left · monthly 99% left（新套餐示例）。读凭据和请求接口各有 15 秒超时。请求失败或缺少所需窗口时，保留该服务商上次成功的值，从没成功过就为空。</desc>
           <defs>
             <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
             <marker id="fig-statusbar-2-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--link)"/></marker>
@@ -143,6 +143,7 @@
           <text class="t-cap" x="404" y="20">③ 显示（示例值）</text>
           <text class="t" x="12" y="48">openai-codex</text>
           <text class="t" x="12" y="160">zai-coding-cn</text>
+          <text class="t" x="12" y="272">kimi-coding</text>
 
           <g data-cue="statusbar-04">
             <rect class="n" x="12" y="56" width="164" height="80" rx="6"/>
@@ -152,6 +153,10 @@
             <rect class="n" x="12" y="168" width="164" height="80" rx="6"/>
             <text class="t" x="24" y="192">pi auth</text>
             <text class="t-sub" x="24" y="214">print-api-key</text>
+            <rect class="n" x="12" y="280" width="164" height="80" rx="6"/>
+            <text class="t" x="24" y="304">pi auth</text>
+            <text class="t-sub" x="24" y="326">print-bearer-token</text>
+            <text class="t-sub" x="24" y="344">--min-expiry 5m</text>
           </g>
 
           <g data-cue="statusbar-05">
@@ -165,6 +170,10 @@
             <text class="t" x="212" y="192">open.bigmodel.cn</text>
             <text class="t-sub" x="212" y="214">/api/monitor/usage/</text>
             <text class="t-sub" x="212" y="232">quota/limit</text>
+            <path class="w is-link" d="M176 320 H200" marker-end="url(#fig-statusbar-2-arrow-link)"/>
+            <rect class="n is-ext" x="200" y="280" width="180" height="80" rx="6"/>
+            <text class="t" x="212" y="304">api.kimi.com</text>
+            <text class="t-sub" x="212" y="326">/coding/v1/usages</text>
           </g>
 
           <g data-cue="statusbar-06">
@@ -177,12 +186,17 @@
             <text class="t" x="416" y="192">5 小时窗口 + 周窗口</text>
             <text class="t-sub" x="416" y="214">5h 82% left ·</text>
             <text class="t-sub" x="416" y="232">weekly 47% left</text>
+            <path class="w" d="M380 320 H404" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <rect class="n is-focal" x="404" y="280" width="224" height="80" rx="6"/>
+            <text class="t" x="416" y="304">5 小时窗口 + 周/月窗口</text>
+            <text class="t-sub" x="416" y="326">5h 86% left ·</text>
+            <text class="t-sub" x="416" y="344">monthly 99% left</text>
           </g>
 
           <g data-cue="statusbar-07">
-            <line x1="12" y1="268" x2="628" y2="268" style="stroke:var(--rule);stroke-width:1"/>
-            <text class="t-cap" x="12" y="290">请求失败或缺少所需窗口：保留该服务商上次成功的值</text>
-            <text class="t-cap" x="12" y="312">从没成功过：额度一项为空</text>
+            <line x1="12" y1="380" x2="628" y2="380" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="12" y="402">请求失败或缺少所需窗口：保留该服务商上次成功的值</text>
+            <text class="t-cap" x="12" y="424">从没成功过：额度一项为空</text>
           </g>
 
           <g data-cue="statusbar-05" data-cue-mode="active">
@@ -192,19 +206,23 @@
             <circle class="dot" r="4" cx="176" cy="208">
               <animateMotion dur="1.4s" begin="indefinite" fill="freeze" path="M0 0 H228"/>
             </circle>
+            <circle class="dot" r="4" cx="176" cy="320">
+              <animateMotion dur="1.4s" begin="indefinite" fill="freeze" path="M0 0 H228"/>
+            </circle>
           </g>
         </svg>
       </div>
       <table>
-        <thead><tr><th></th><th><code>openai-codex</code></th><th><code>zai-coding-cn</code></th></tr></thead>
+        <thead><tr><th></th><th><code>openai-codex</code></th><th><code>zai-coding-cn</code></th><th><code>kimi-coding</code></th></tr></thead>
         <tbody>
-          <tr><th>请求头</th><td><code>Bearer &lt;token&gt;</code><br><code>ChatGPT-Account-ID</code>（可选）</td><td><code>&lt;API Key&gt;</code>（无 <code>Bearer</code>）</td></tr>
-          <tr><th>限额来源</th><td><code>rate_limit</code><br><code>additional_rate_limits</code></td><td><code>TOKENS_LIMIT</code><br><code>CREDIT_LIMIT</code></td></tr>
-          <tr><th>5 小时窗口</th><td>—</td><td><code>unit 3, number 5</code></td></tr>
-          <tr><th>周窗口</th><td><code>primary_window</code><br><code>secondary_window</code>（6～8 天）</td><td><code>unit 6, number 1</code></td></tr>
+          <tr><th>请求头</th><td><code>Bearer &lt;token&gt;</code><br><code>ChatGPT-Account-ID</code>（可选）</td><td><code>&lt;API Key&gt;</code>（无 <code>Bearer</code>）</td><td><code>Bearer &lt;token&gt;</code></td></tr>
+          <tr><th>限额来源</th><td><code>rate_limit</code><br><code>additional_rate_limits</code></td><td><code>TOKENS_LIMIT</code><br><code>CREDIT_LIMIT</code></td><td><code>usages</code></td></tr>
+          <tr><th>5 小时窗口</th><td>—</td><td><code>unit 3, number 5</code></td><td><code>limit_5h</code></td></tr>
+          <tr><th>周窗口</th><td><code>primary_window</code><br><code>secondary_window</code>（6～8 天）</td><td><code>unit 6, number 1</code></td><td><code>limit_7d</code>（老套餐）</td></tr>
+          <tr><th>月窗口</th><td>—</td><td>—</td><td><code>limit_month_code</code>，缺失时 <code>limit_month_total</code>（新套餐，无周窗口时显示）</td></tr>
         </tbody>
       </table>
-      <figcaption>两个服务商各走一条泳道；第 ③ 列的数值是示例。</figcaption>
+      <figcaption>三个服务商各走一条泳道；第 ③ 列的数值是示例。</figcaption>
     </figure>
   </div>
 

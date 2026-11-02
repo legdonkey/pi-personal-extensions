@@ -81,6 +81,12 @@ function isGpt6(id: unknown) {
   return typeof id === "string" && id.startsWith("gpt-6");
 }
 
+function supportsClaudeEffort(model: Model<any> | undefined) {
+  return model?.api === "anthropic-messages" && model.compat && "supportsMidConvoEffort" in model.compat
+    && model.compat.supportsMidConvoEffort === true
+    && ["claude-opus-5", "claude-opus-5-5", "claude-sonnet-5-5"].includes(model.id);
+}
+
 function messageText(message: Message): string {
   if (typeof message.content === "string") return message.content;
   return message.content.flatMap((block) => {
@@ -193,11 +199,12 @@ function apiEffort(model: Model<any>, level: ModelThinkingLevel) {
 }
 
 export default function (pi: ExtensionAPI) {
-  // 同一会话的请求严格串行：context_with_system 之后紧跟同一次调用的 before_provider_request。
+  // Codex 按上下文锚点注入；Claude 保留本次请求快照，供提供方内部重试复用。
   let anchors: Anchor[] | undefined;
   let pendingRequest: AbortController | undefined;
   let picker: AbortController | undefined;
   let generation = 0;
+  let claudeRequest: { model: Model<any>; effort?: string } | undefined;
 
   async function classify(prompt: string, ctx: ExtensionContext, selected: DecisionModel) {
     pendingRequest?.abort();
@@ -297,12 +304,15 @@ export default function (pi: ExtensionAPI) {
   });
 
   const active = (ctx: ExtensionContext) =>
-    ctx.model?.api === CODEX_API && isGpt6(ctx.model.id) && pi.getThinkingLevel() !== "off";
-  const clearStatus = (_event: unknown, ctx: ExtensionContext) => {
+    ((ctx.model?.api === CODEX_API && isGpt6(ctx.model.id)) || supportsClaudeEffort(ctx.model))
+    && pi.getThinkingLevel() !== "off";
+  const clearStatus = (event: { type?: string }, ctx: ExtensionContext) => {
     generation++;
     pendingRequest?.abort();
     picker?.abort();
     anchors = undefined;
+    // 流式期间切模型不应丢掉旧请求已发送的档位。
+    if (event.type !== "model_select" || !claudeRequest?.effort) claudeRequest = undefined;
     ctx.ui.setStatus(STATUS_KEY, undefined);
   };
   pi.on("session_start", clearStatus);
@@ -311,7 +321,9 @@ export default function (pi: ExtensionAPI) {
 
   pi.on("context_with_system", async (event, ctx) => {
     anchors = undefined;
+    claudeRequest = undefined;
     if (!active(ctx)) return;
+    if (supportsClaudeEffort(ctx.model)) claudeRequest = { model: ctx.model! };
     const messages = event.messages;
     anchors = messages.filter(producesUserItem).map(({ role, timestamp }) => ({ role, timestamp }));
 
@@ -344,12 +356,39 @@ export default function (pi: ExtensionAPI) {
       for (const { timestamp } of pending) pi.appendEntry(EFFORT_ENTRY, { timestamp, thinkingLevel, classifier });
     } catch (error) {
       anchors = undefined;
+      claudeRequest = undefined;
       if (ctx.signal?.aborted || (error instanceof Error && error.name === "AbortError")) return;
       throw error;
     }
   });
 
   pi.on("before_provider_request", (event, ctx) => {
+    const request = claudeRequest;
+    if (request) {
+      const body = event.payload as {
+        model?: unknown; max_tokens?: unknown; thinking?: { type?: unknown };
+        messages?: { role?: string; content?: unknown; output_config?: { effort?: unknown } }[];
+      };
+      // shortcut: Pi 预热以 max_tokens:1 回放且无请求 ID；跳过它，待 Pi 提供关联 ID 后改用 ID。
+      if (body.max_tokens === 1 || body.model !== request.model.id) return undefined;
+      request.effort = undefined;
+      ctx.ui.setStatus(STATUS_KEY, undefined);
+      const last = Array.isArray(body.messages) ? body.messages.at(-1) : undefined;
+      // 只替换 Pi 已生成的末尾 effort 标记；历史标记、顶层配置和 thinking blocks 均不动。
+      if (body.thinking?.type !== "adaptive"
+        || last?.role !== "system" || !Array.isArray(last.content) || last.content.length !== 0
+        || typeof last.output_config?.effort !== "string") return undefined;
+      const recorded = decisions(ctx);
+      const decision = recorded.at(-1);
+      if (!decision) return undefined;
+      const mapped = apiEffort(request.model, decision.thinkingLevel);
+      const effort = mapped === "minimal" ? "low" : mapped;
+      if (typeof effort !== "string" || !CLASSIFIED_LEVELS.some((level) => level === effort)) return undefined;
+      const base = last.output_config.effort;
+      request.effort = effort;
+      ctx.ui.setStatus(STATUS_KEY, `${effort === base ? `🧠 ${base}` : `🧠 ${effort} · 基线 ${base}`} · ${classifierLabel(decision.classifier)}`);
+      return { ...body, messages: [...body.messages!.slice(0, -1), { ...last, output_config: { ...last.output_config, effort } }] };
+    }
     const snapshot = anchors;
     anchors = undefined;
     if (!snapshot || !active(ctx)) return undefined;
@@ -387,5 +426,16 @@ export default function (pi: ExtensionAPI) {
     }
     ctx.ui.setStatus(STATUS_KEY, `${running === base ? `🧠 ${base}` : `🧠 ${running} · 基线 ${base}`} · ${classifiedBy}`);
     return input.length === body.input.length ? undefined : { ...body, input };
+  });
+
+  pi.on("message_end", (event) => {
+    const request = claudeRequest;
+    const message = event.message;
+    if (!request || message.role !== "assistant" || message.api !== "anthropic-messages"
+      || message.provider !== request.model.provider || message.model !== request.model.id) return;
+    claudeRequest = undefined;
+    if (!request.effort) return;
+    // Pi 用此字段重建历史 effort 标记，必须保存实际发送值而非会话基线。
+    return { message: { ...message, providerThinkingLevel: request.effort } };
   });
 }

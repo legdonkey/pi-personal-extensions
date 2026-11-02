@@ -4,6 +4,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, 
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { ModelRegistry, ModelRuntime } from "@earendil-works/pi-coding-agent";
+import { streamSimple as streamClaude } from "@earendil-works/pi-ai/api/anthropic-messages";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readEffortSettings, saveEffortSettings } from "../extensions/inline-effort.ts";
@@ -169,12 +170,17 @@ test("分类结果与生效强度相同时不插入 update，也不改写 payloa
   assert.equal(h.branch.length, 1);
 });
 
-test("仅对物理 GPT-6 Codex 模型且思考未关闭时生效", async () => {
+test("不支持的模型、接口或关闭思考时不分类", async () => {
   const cases = [
     { model: { provider: "jev", id: "sol-auto", api: "pi-virtual" } },
     { model: { ...codexModel("gpt-5.6-sol") } },
     { model: { ...codexModel(), api: "openai-responses" } },
     { thinking: "off" },
+    ...["claude-opus-4-6", "claude-opus-4-8", "claude-sonnet-5", "claude-sonnet-4-6"].map((id) => ({ model: claudeModel(id) })),
+    { model: { ...claudeModel(), compat: {} } },
+    { model: { ...claudeModel(), api: "bedrock-converse-stream" } },
+    { model: claudeModel(), thinking: "off" },
+    { model: { provider: "google", id: "gemini-4-argon", api: "google-generative-ai" } },
   ];
   for (const options of cases) {
     const h = setup(options);
@@ -615,6 +621,171 @@ test("空输入、图片、概率边界和无效答案按规则处理", async ()
     invalid.result = { stopReason: "stop", answers };
     assert.deepEqual(updates(await invalid.request([system, user(1)])), []);
   }
+});
+
+function claudeModel(id = "claude-opus-5-5") {
+  return {
+    provider: "anthropic", id, api: "anthropic-messages", reasoning: true,
+    baseUrl: "http://127.0.0.1:1", maxTokens: 1024, contextWindow: 1000000,
+    input: ["text"], cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    compat: { supportsMidConvoEffort: true, forceAdaptiveThinking: true },
+    thinkingLevelMap: { off: null, minimal: "low", low: "low", medium: "medium", high: "high", xhigh: "xhigh", max: "max" },
+  };
+}
+
+// 使用真实 Pi 序列化器，在 onPayload 截止，绝不向提供方发出请求。
+async function serializeClaude(h, messages) {
+  await h.events.get("context_with_system")({ messages }, h.ctx);
+  let payload;
+  const result = await streamClaude(h.model, { messages }, {
+    apiKey: "local-test-credential", reasoning: h.thinking,
+    onPayload(body) {
+      payload = h.events.get("before_provider_request")({ payload: body }, h.ctx) ?? body;
+      throw new Error("serialization-only");
+    },
+  }).result();
+  assert.ok(payload, result.errorMessage);
+  const reply = { ...result, content: [{ type: "text", text: "回答" }], stopReason: "stop" };
+  delete reply.errorMessage;
+  const finalized = h.events.get("message_end")({ message: reply }, h.ctx)?.message ?? reply;
+  return { payload, reply: finalized };
+}
+
+const claudeMarkers = (body) => body.messages.filter((m) => m.output_config).map((m) => m.output_config.effort);
+// Pi 将缓存断点移至最新消息；断点位置不是模型输入正文的一部分。
+const withoutCacheHints = (value) => JSON.parse(JSON.stringify(value, (key, item) => key === "cache_control" ? undefined : item));
+
+test("Claude 原生序列化保持顶层配置和历史前缀，实际 effort 随回复保存并重放", async () => {
+  for (const id of ["claude-opus-5", "claude-opus-5-5", "claude-sonnet-5-5"]) {
+    const h = setup({ model: claudeModel(id) });
+    h.choices = ["xhigh", "low"];
+    const messages = [system, user(1, [{ type: "text", text: "问题 1" }])];
+    const first = await serializeClaude(h, messages);
+    assert.equal(first.payload.thinking.type, "adaptive");
+    assert.ok(first.payload.betas.includes("mid-conversation-output-config-2026-07-01"));
+    assert.deepEqual(claudeMarkers(first.payload), ["xhigh"]);
+    assert.equal(first.reply.providerThinkingLevel, "xhigh");
+    assert.equal(h.thinking, "medium", "主会话基线不变");
+    assert.equal(h.status, "🧠 xhigh · 基线 medium · Jev");
+    messages.push(first.reply, user(3));
+    const second = await serializeClaude(h, messages);
+    assert.deepEqual(second.payload.output_config, first.payload.output_config);
+    assert.deepEqual(second.payload.thinking, first.payload.thinking);
+    assert.deepEqual(withoutCacheHints(second.payload.messages.slice(0, first.payload.messages.length)), withoutCacheHints(first.payload.messages));
+    assert.deepEqual(claudeMarkers(second.payload), ["xhigh", "low"]);
+    assert.equal(second.reply.providerThinkingLevel, "low");
+    assert.equal(h.calls, 2);
+    const restored = setup({ model: h.model });
+    restored.branch.push(...structuredClone(h.branch));
+    assert.deepEqual((await serializeClaude(restored, messages)).payload, second.payload);
+    assert.equal(restored.calls, 0);
+    h.error = new Error("unavailable");
+    messages.push(second.reply, user(5));
+    const failed = await serializeClaude(h, messages);
+    assert.deepEqual(claudeMarkers(failed.payload), ["xhigh", "low", "low"]);
+    assert.equal(failed.reply.providerThinkingLevel, "low");
+    const summary = { role: "user", content: "压缩摘要", timestamp: 100 };
+    const compacted = await serializeClaude(h, [system, summary, failed.reply]);
+    assert.equal(compacted.payload.messages.at(-1).output_config.effort, "low");
+  }
+});
+
+test("Claude 工具续调不重复分类，不改 thinking block；只修正匹配回复的元数据", async () => {
+  const h = setup({ model: claudeModel() });
+  h.choices = ["max"];
+  const messages = [system, user(1)];
+  const first = await serializeClaude(h, messages);
+  first.reply.content = [
+    { type: "thinking", thinking: "原样思考", thinkingSignature: "test-signature" },
+    { type: "toolCall", id: "call_1", name: "test", arguments: {} },
+  ];
+  messages.push(first.reply, { ...toolResult(3), toolCallId: "call_1", toolName: "test", content: [{ type: "text", text: "结果" }] });
+  const continued = await serializeClaude(h, messages);
+  assert.equal(h.calls, 1);
+  assert.deepEqual(claudeMarkers(continued.payload), ["max", "max"]);
+  const thinking = continued.payload.messages.find((m) => m.role === "assistant").content[0];
+  assert.deepEqual(thinking, { type: "thinking", thinking: "原样思考", signature: "test-signature" });
+  assert.equal(continued.reply.providerThinkingLevel, "max");
+  assert.equal(h.events.get("message_end")({ message: continued.reply }, h.ctx), undefined, "已消费的实际档位不泄漏到其他回复");
+});
+
+test("Claude 请求形状不符、取消和生命周期清理时不覆盖 payload 或回复", async () => {
+  const good = {
+    model: "claude-opus-5-5", thinking: { type: "adaptive" }, output_config: { effort: "low" },
+    messages: [{ role: "system", content: [], output_config: { effort: "medium" } }],
+  };
+  for (const patch of [
+    { model: "different" }, { thinking: { type: "disabled" } }, { thinking: { type: "between_tools" } },
+    { messages: [] }, { messages: {} }, { messages: [{ role: "user", content: [] }] },
+    { messages: [{ role: "system", content: "规则", output_config: { effort: "medium" } }] },
+  ]) {
+    const h = setup({ model: claudeModel() });
+    await h.events.get("context_with_system")({ messages: [system, user(1)] }, h.ctx);
+    const payload = { ...good, ...patch };
+    const before = structuredClone(payload);
+    assert.equal(h.events.get("before_provider_request")({ payload }, h.ctx), undefined);
+    assert.deepEqual(payload, before);
+    assert.equal(h.events.get("message_end")({ message: { ...assistant(2), ...h.model, model: h.model.id } }, h.ctx), undefined);
+  }
+  for (const event of ["session_start", "session_shutdown"]) {
+    const h = setup({ model: claudeModel() });
+    await h.events.get("context_with_system")({ messages: [system, user(1)] }, h.ctx);
+    h.events.get("before_provider_request")({ payload: good }, h.ctx);
+    h.events.get(event)({}, h.ctx);
+    assert.equal(h.events.get("message_end")({ message: { ...assistant(2), api: h.model.api, provider: h.model.provider, model: h.model.id } }, h.ctx), undefined);
+  }
+  const cancelled = setup({ model: claudeModel() });
+  cancelled.abortDuringClassification = new AbortController();
+  cancelled.ctx.signal = cancelled.abortDuringClassification.signal;
+  await cancelled.events.get("context_with_system")({ messages: [system, user(1)] }, cancelled.ctx);
+  assert.equal(cancelled.events.get("before_provider_request")({ payload: good }, cancelled.ctx), undefined);
+  assert.equal(cancelled.branch.length, 0);
+});
+
+test("Claude 内部重试重复应用档位，流式切模型后仍为旧回复保存实际值", async () => {
+  const model = claudeModel();
+  const h = setup({ model });
+  h.choices = ["xhigh"];
+  await h.events.get("context_with_system")({ messages: [system, user(1)] }, h.ctx);
+  const body = {
+    model: model.id, max_tokens: 1024, thinking: { type: "adaptive" },
+    output_config: { effort: "low" },
+    messages: [{ role: "system", content: [], output_config: { effort: "medium" } }],
+  };
+  const send = () => h.events.get("before_provider_request")({ payload: structuredClone(body) }, h.ctx);
+  assert.deepEqual(claudeMarkers(send()), ["xhigh"]);
+  assert.deepEqual(claudeMarkers(send()), ["xhigh"], "strict-tools 内部重建不触发 context，仍须应用本次档位");
+  h.model = codexModel();
+  h.events.get("model_select")({ type: "model_select" }, h.ctx);
+  assert.deepEqual(claudeMarkers(send()), ["xhigh"], "旧请求重试使用原模型快照");
+  const reply = { ...assistant(2), api: model.api, provider: model.provider, model: model.id, providerThinkingLevel: "medium" };
+  assert.equal(h.events.get("message_end")({ message: { ...reply, provider: "other" } }, h.ctx), undefined);
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "xhigh");
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx), undefined);
+  assert.equal(send(), undefined, "匹配回复结束后清理快照");
+  assert.equal(h.calls, 1);
+});
+
+test("Claude 分类等待和流式期间的预热回放不消费快照或污染实际档位", async () => {
+  const h = setup({ model: claudeModel() });
+  h.branch.push({ type: "custom", customType: "jev-inline-effort", data: { timestamp: 1, thinkingLevel: "high" } });
+  h.choices = ["low"];
+  let release;
+  h.classifyHook = () => new Promise((resolve) => { release = resolve; });
+  const pending = h.events.get("context_with_system")({ messages: [system, user(1), assistant(2), user(3)] }, h.ctx);
+  const body = {
+    model: h.model.id, max_tokens: 1, thinking: { type: "adaptive" },
+    messages: [{ role: "system", content: [], output_config: { effort: "medium" } }],
+  };
+  assert.equal(h.events.get("before_provider_request")({ payload: body }, h.ctx), undefined);
+  release();
+  await pending;
+  const main = h.events.get("before_provider_request")({ payload: { ...body, max_tokens: 1024 } }, h.ctx);
+  assert.deepEqual(claudeMarkers(main), ["low"]);
+  assert.equal(h.events.get("before_provider_request")({ payload: body }, h.ctx), undefined);
+  const reply = { ...assistant(4), api: h.model.api, provider: h.model.provider, model: h.model.id, providerThinkingLevel: "medium" };
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "low");
+  assert.equal(h.calls, 1);
 });
 
 test("真实 Pi classifier 管线复用 models.json 的代理端点、认证及头部，404 不伪报成功", async () => {

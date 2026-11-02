@@ -29,7 +29,7 @@
 
 ## 换配色（fig-statusbar-3 录屏）
 
-- 状态栏本体来自 `npm:@narumitw/pi-statusline`，需要另外安装启用 —— README.md:92；pi-personal-extensions.ts:33
+- 状态栏本体来自 `npm:@narumitw/pi-statusline`，需要另外安装启用 —— README.md:105；pi-personal-extensions.ts:33
 - 安装命令格式 `pi install npm:@scope/package` —— cli.md:241
 - 入口：`/personal` →「状态栏：额度、会话 ID 与配色」→「选择 pi-statusline 自定义配色」打开配色列表；上下键挑选并实时预览，Enter 应用，Esc 放弃 —— pi-personal-extensions.ts:32, 85-86；statusline.ts:182-237
 - 选择前告知需启用 pi-statusline、不改变 Pi 主题；应用会覆盖自定义配色，设置 compact 密度和 round 分隔符；RPC 支持选择、取消和无效值校验 —— tests/statusline.test.mjs「迁入的风格选择器保留 11 套配色、预览、配置和重载行为」；tests/personal.test.mjs「RPC 从统一配色选择器应用全部 11 套自定义配色，无需 custom」

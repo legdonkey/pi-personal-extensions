@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-effort" data-chapter="effort" aria-labelledby="ch-effort-h">
   <header class="chapter-head">
     <h2 id="ch-effort-h">原位思考强度：每条消息自动选档位</h2>
-    <p class="chapter-sum">用 GPT-6 系列时，按每条新消息的难度自动选档位，你不用手动切换。不用 GPT-6 系列可以跳过本章。</p>
+    <p class="chapter-sum">用 GPT-6 Codex 或三个指定 Claude 模型时，按每条新消息的难度自动选档位，你不用手动切换。不用这些模型可以跳过本章。</p>
     <dl class="meta">
       <dt>功能</dt><dd>原位思考强度</dd>
       <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
@@ -65,26 +65,29 @@
     <div class="beat-text">
       <h3>想让它生效</h3>
       <p>
-        <span class="seg" data-seg="effort-03" data-say="需要用 GPT 六系列、开启 thinking，你还要登录 openai codex、配好 OpenRouter 认证。主模型的接口也有要求，完整条件写在本节的「适用条件」列表里。">需要用 GPT-6 系列、开启 thinking，你还要登录 <code>openai-codex</code>、配好 OpenRouter 认证。主模型的接口也有要求，完整条件写在本节的「适用条件」列表里。</span>
+        <span class="seg" data-seg="effort-03" data-say="需要用支持的模型、开启 thinking，并配好 OpenRouter 认证。使用 Codex 还要登录 openai codex。主模型的接口和模型能力也有要求，完整条件写在本节的「适用条件」列表里。">需要用支持的模型、开启 thinking，并配好 OpenRouter 认证。使用 Codex 还要登录 <code>openai-codex</code>。主模型的接口和模型能力也有要求，完整条件写在本节的「适用条件」列表里。</span>
       </p>
       <ol>
-        <li><span class="seg" data-seg="effort-04" data-say="用 GPT 六系列模型启动 Pi，thinking 设为 medium。">用 GPT-6 系列模型启动 Pi，thinking 设为 <code>medium</code>。</span></li>
+        <li><span class="seg" data-seg="effort-04" data-say="用支持的模型启动 Pi，thinking 设为 medium。下面用 GPT 六 Codex 举例。">用支持的模型启动 Pi，thinking 设为 <code>medium</code>。下面用 GPT-6 Codex 举例。</span></li>
         <li><span class="seg" data-seg="effort-05" data-say="输入斜杠 personal，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。">输入 <code>/personal</code>，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。</span></li>
         <li><span class="seg" data-seg="effort-06">在同一个菜单里选「测试分类模型可用性」，确认分类器能用。</span></li>
-        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
+        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；Codex 出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；Codex 出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
       </ol>
+      <p>
+        <span class="seg" data-seg="effort-07a" data-say="两类主模型的写入方式不同。Codex 在当前用户消息前插入 configuration update。Claude 只修改 Pi 已生成的末尾空 system 消息中的 output config 点 effort，不改顶层配置、历史消息或 thinking block。">两类主模型的写入方式不同。Codex 在当前用户消息前插入 <code>configuration_update</code>。Claude 只修改 Pi 已生成的末尾空 <code>system</code> 消息中的 <code>output_config.effort</code>，不改顶层配置、历史消息或 thinking block。</span>
+      </p>
     </div>
     <figure class="beat-fig" id="fig-effort-2">
       <div class="fig-scroll">
         <svg viewBox="0 0 600 316" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">生效条件和确认步骤</title>
-          <desc id="fig-effort-2-desc">四项条件：主模型是 openai-codex-responses 接口的 GPT-6 系列、thinking 不是 off、登录 openai-codex、配置 OpenRouter 认证。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；出现「未调整」表示这次没有调整档位、按基线发出。</desc>
+          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
           <g data-cue="effort-03">
             <text class="t-cap" x="16" y="16">条件</text>
             <rect class="n" x="16" y="28" width="20" height="20" rx="4"/>
             <path d="M21 38 L25 42 L32 33" style="fill:none;stroke:var(--ok);stroke-width:2"/>
             <text class="t" x="48" y="43">主模型</text>
-            <text class="t-sub" x="132" y="43">GPT-6 系列 · 接口 openai-codex-responses</text>
+            <text class="t-sub" x="132" y="43">支持的 GPT-6 Codex / Claude</text>
             <rect class="n" x="16" y="60" width="20" height="20" rx="4"/>
             <path d="M21 70 L25 74 L32 65" style="fill:none;stroke:var(--ok);stroke-width:2"/>
             <text class="t" x="48" y="75">thinking</text>
@@ -92,7 +95,7 @@
             <rect class="n" x="16" y="92" width="20" height="20" rx="4"/>
             <path d="M21 102 L25 106 L32 97" style="fill:none;stroke:var(--ok);stroke-width:2"/>
             <text class="t" x="48" y="107">登录</text>
-            <text class="t-sub" x="132" y="107">openai-codex</text>
+            <text class="t-sub" x="132" y="107">openai-codex（仅 Codex）</text>
             <rect class="n" x="16" y="124" width="20" height="20" rx="4"/>
             <path d="M21 134 L25 138 L32 129" style="fill:none;stroke:var(--ok);stroke-width:2"/>
             <text class="t" x="48" y="139">认证</text>
@@ -118,16 +121,20 @@
             <text class="t-mono" x="16" y="286">4</text>
             <text class="t-mono" x="40" y="286">发一条消息</text>
             <text class="t-cap" x="232" y="286">看 🧠 段的档位</text>
-            <text class="t-cap" x="232" y="306">分类警告：沿用当前档位 · 「未调整」：按基线发出</text>
+            <text class="t-cap" x="232" y="306">分类警告：沿用当前档位 · Codex 未调整：按基线发出</text>
           </g>
         </svg>
       </div>
 <pre><code>pi --model openai-codex/gpt-6.1-sol --thinking medium</code></pre>
       <ul class="fig-notes">
-        <li>适用条件：主模型接口是 <code>openai-codex-responses</code>；模型 ID 以 <code>gpt-6</code> 开头；thinking 不是 <code>off</code>。</li>
+        <li>GPT-6 Codex：接口是 <code>openai-codex-responses</code>，模型 ID 以 <code>gpt-6</code> 开头，thinking 不是 <code>off</code>。</li>
+        <li>Claude：接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。不新增其他模型。</li>
         <li>「适用」只检查主模型和 thinking，不检查登录和分类器能否连通。</li>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。所需 beta <code>mid-conversation-output-config-2026-07-01</code> 由 Pi 发送。</li>
+        <li>保留缓存前缀不保证缓存 100% 命中。TTL、最小 token 数和其他提示变更仍会影响命中。</li>
+        <li><a href="https://ai.google.dev/gemini-api/docs/latest-model">Gemini 4 Argon</a> 已存在，但官方资料只明确 implicit cache。本次未找到改变 <code>thinking_level</code> 仍保留缓存的明确官方承诺，因此不支持。这是缺少证据，不是证明切换档位一定丢失缓存。</li>
         <li>这项功能默认开启，可以在 <code>/personal</code> 里关闭。</li>
-        <li>不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 一起用；Pi 自己的压缩不受影响。</li>
+        <li>仅 Codex：<code>configuration_update</code> 不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 一起用；Pi 自己的压缩不受影响。</li>
       </ul>
     </figure>
   </div>
@@ -145,7 +152,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 600 284" role="img" aria-labelledby="fig-effort-3-title fig-effort-3-desc">
           <title id="fig-effort-3-title">🧠 段的读法</title>
-          <desc id="fig-effort-3-desc">示例：🧠 xhigh · 基线 medium · Jev，三部分依次是实际档位、基线、分类器。Pi 自带的 thinking 显示 medium 只是基线，实际档位是 🧠 段里的 xhigh。另有三种情况：只显示一个档位表示等于基线；出现「未调整」表示这次按基线发出；没有 🧠 段时，恢复会话或切换模型后会清空，满足条件的下一次请求后显示。</desc>
+          <desc id="fig-effort-3-desc">示例：🧠 xhigh · 基线 medium · Jev，三部分依次是实际档位、基线、分类器。Pi 自带的 thinking 显示 medium 只是基线，实际档位是 🧠 段里的 xhigh。另有三种情况：只显示一个档位表示等于基线；Codex 出现「未调整」表示这次按基线发出；没有 🧠 段时，恢复会话或切换模型后会清空，满足条件的下一次请求后显示。</desc>
           <g data-cue="effort-08">
             <text class="t-cap" x="16" y="18">示例</text>
             <rect class="n" x="16" y="28" width="120" height="32" rx="4"/><text class="t-mono" x="76" y="49" text-anchor="middle">🧠 xhigh</text>

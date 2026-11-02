@@ -4,6 +4,11 @@
 
 ## 未发布
 
+## 0.3.0 - 2026-11-03
+
+- 原位思考强度新增 Claude 支持：仅限 `anthropic-messages` 接口、`compat.supportsMidConvoEffort === true`，且模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5` 或 `claude-sonnet-5-5`；thinking 仍须不为 `off`。扩展只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort`，并在 `message_end` 保存实际 `providerThinkingLevel` 供历史重放；顶层 `output_config`、`thinking`、历史消息和主会话 thinking 基线不变。保留原有 GPT-6 Codex 支持，分类、取消、超时、配置和隐私行为不变。
+- 新增 Claude 真实 Pi 序列化测试，在 `onPayload` 截断且不发远端请求；覆盖历史前缀、恢复、工具续调、thinking block 不变、无效请求形状、取消、清理、内部重试、流式切模型和缓存预热回放。`npm run check` 的 61 项测试全部通过；Pi 1.5.0 临时副本的 inline-effort 测试 28/28 通过。
+
 - 状态栏额度新增 `kimi-coding` 支持：通过 Kimi Code 订阅的 `GET https://api.kimi.com/coding/v1/usages` 查询，显示 5 小时窗口剩余量；老套餐附周额度（`limit_7d`），新套餐附月度额度（`limit_month_code`，缺失时回退 `limit_month_total`）。
 
 - 配色菜单合并为「选择 pi-statusline 自定义配色」：移除 11 个重复直达项，TUI 预览、RPC 普通列表共用一个入口。选择页说明需要启用 pi-statusline、会覆盖自定义配色并设置紧凑布局和圆角分隔符，不改变 Pi 主题。

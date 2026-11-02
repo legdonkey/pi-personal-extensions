@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-effort" data-chapter="effort" aria-labelledby="ch-effort-h">
   <header class="chapter-head">
     <h2 id="ch-effort-h">原位思考强度：每条消息自动选档位</h2>
-    <p class="chapter-sum">用 GPT-6 Codex 或三个指定 Claude 模型时，按每条新消息的难度自动选档位，你不用手动切换。不用这些模型可以跳过本章。</p>
+    <p class="chapter-sum">用 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型时，按每条新消息的难度自动选档位，你不用手动切换。不用这些模型可以跳过本章。</p>
     <dl class="meta">
       <dt>功能</dt><dd>原位思考强度</dd>
       <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
@@ -65,7 +65,7 @@
     <div class="beat-text">
       <h3>想让它生效</h3>
       <p>
-        <span class="seg" data-seg="effort-03" data-say="需要用支持的模型、开启 thinking，并配好 OpenRouter 认证。使用 Codex 还要登录 openai codex。主模型的接口和模型能力也有要求，完整条件写在本节的「适用条件」列表里。">需要用支持的模型、开启 thinking，并配好 OpenRouter 认证。使用 Codex 还要登录 <code>openai-codex</code>。主模型的接口和模型能力也有要求，完整条件写在本节的「适用条件」列表里。</span>
+        <span class="seg" data-seg="effort-03" data-say="需要用支持的模型、开启 thinking，并配好 OpenRouter 认证。使用 Codex 还要登录 openai codex。使用 Antigravity 还要先安装并启用 pi antigravity。主模型的接口和模型能力也有要求，完整条件写在本节的「适用条件」列表里。">需要用支持的模型、开启 thinking，并配好 OpenRouter 认证。使用 Codex 还要登录 <code>openai-codex</code>。使用 Antigravity 还要先安装并启用 <code>pi-antigravity</code>。主模型的接口和模型能力也有要求，完整条件写在本节的「适用条件」列表里。</span>
       </p>
       <ol>
         <li><span class="seg" data-seg="effort-04" data-say="用支持的模型启动 Pi，thinking 设为 medium。下面用 GPT 六 Codex 举例。">用支持的模型启动 Pi，thinking 设为 <code>medium</code>。下面用 GPT-6 Codex 举例。</span></li>
@@ -74,20 +74,21 @@
         <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；Codex 出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；Codex 出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
       </ol>
       <p>
-        <span class="seg" data-seg="effort-07a" data-say="两类主模型的写入方式不同。Codex 在当前用户消息前插入 configuration update。Claude 只修改 Pi 已生成的末尾空 system 消息中的 output config 点 effort，不改顶层配置、历史消息或 thinking block。">两类主模型的写入方式不同。Codex 在当前用户消息前插入 <code>configuration_update</code>。Claude 只修改 Pi 已生成的末尾空 <code>system</code> 消息中的 <code>output_config.effort</code>，不改顶层配置、历史消息或 thinking block。</span>
+        <span class="seg" data-seg="effort-07a" data-say="三个分支的写入方式不同。Codex 在当前用户消息前插入 configuration update。Anthropic 协议分支只修改 Pi 已生成的末尾空 system 消息中的 output config 点 effort，不改顶层配置、历史消息或 thinking block。">三个分支的写入方式不同。Codex 在当前用户消息前插入 <code>configuration_update</code>。Anthropic 协议分支只修改 Pi 已生成的末尾空 <code>system</code> 消息中的 <code>output_config.effort</code>，不改顶层配置、历史消息或 thinking block。</span>
+        <span class="seg" data-seg="effort-07b" data-say="Antigravity 是独立分支。扩展临时包装插件原生 stream simple，只改匹配主请求的 options 点 reasoning，由插件按 runtime ID 路由。max 和 x high 夹到 high，不改会话 thinking 或历史上下文。">Antigravity 是独立分支。扩展临时包装插件原生 <code>streamSimple</code>，只改匹配主请求的 <code>options.reasoning</code>，由插件按 runtime ID 路由。<code>max</code> 和 <code>xhigh</code> 夹到 <code>high</code>，不改会话 thinking 或历史上下文。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-2">
       <div class="fig-scroll">
         <svg viewBox="0 0 600 316" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">生效条件和确认步骤</title>
-          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
+          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex；Antigravity 还需安装并启用 pi-antigravity。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
           <g data-cue="effort-03">
             <text class="t-cap" x="16" y="16">条件</text>
             <rect class="n" x="16" y="28" width="20" height="20" rx="4"/>
             <path d="M21 38 L25 42 L32 33" style="fill:none;stroke:var(--ok);stroke-width:2"/>
             <text class="t" x="48" y="43">主模型</text>
-            <text class="t-sub" x="132" y="43">支持的 GPT-6 Codex / Claude</text>
+            <text class="t-sub" x="132" y="43">支持的 Codex / Claude / Antigravity</text>
             <rect class="n" x="16" y="60" width="20" height="20" rx="4"/>
             <path d="M21 70 L25 74 L32 65" style="fill:none;stroke:var(--ok);stroke-width:2"/>
             <text class="t" x="48" y="75">thinking</text>
@@ -128,9 +129,10 @@
 <pre><code>pi --model openai-codex/gpt-6.1-sol --thinking medium</code></pre>
       <ul class="fig-notes">
         <li>GPT-6 Codex：接口是 <code>openai-codex-responses</code>，模型 ID 以 <code>gpt-6</code> 开头，thinking 不是 <code>off</code>。</li>
-        <li>Claude：接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。不新增其他模型。</li>
+        <li>Claude（Anthropic 协议）：接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。</li>
+        <li>Claude（Antigravity）：provider 是 <code>antigravity</code>，接口是 <code>antigravity-api</code>，模型 ID 精确等于 <code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。需先安装并启用带 legacy <code>streamSimple</code> 注册的 <code>pi-antigravity</code>；本机使用 0.11.0。不新增其他模型。</li>
         <li>「适用」只检查主模型和 thinking，不检查登录和分类器能否连通。</li>
-        <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。所需 beta <code>mid-conversation-output-config-2026-07-01</code> 由 Pi 发送。</li>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确 Anthropic 协议分支的上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。所需 beta <code>mid-conversation-output-config-2026-07-01</code> 由 Pi 发送。</li>
         <li>保留缓存前缀不保证缓存 100% 命中。TTL、最小 token 数和其他提示变更仍会影响命中。</li>
         <li><a href="https://ai.google.dev/gemini-api/docs/latest-model">Gemini 4 Argon</a> 已存在，但官方资料只明确 implicit cache。本次未找到改变 <code>thinking_level</code> 仍保留缓存的明确官方承诺，因此不支持。这是缺少证据，不是证明切换档位一定丢失缓存。</li>
         <li>这项功能默认开启，可以在 <code>/personal</code> 里关闭。</li>

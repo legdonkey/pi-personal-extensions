@@ -4,11 +4,11 @@
 - 用户消息带橙色线框（左上角 user）—— extensions/user-message-border.ts:7、33-39
 - 回复里存在的本地文件路径变成可点击链接 —— extensions/clickable-paths.ts:2-10、97、242-249
 - 状态栏显示服务商剩余额度和会话 ID（末尾 8 位）—— extensions/statusline.ts:32-38、292；README.md:36
-- 状态栏配色可换（需另行启用 pi-statusline）—— extensions/statusline.ts:642-663；README.md:36、105
+- 状态栏配色可换（需另行启用 pi-statusline）—— extensions/statusline.ts:642-663；README.md:36、114
 - 图中会话 ID `7c41e0a2`、会话名、模型名、额度数字都是示例值
 - 输入框下方右侧显示会话名 —— extensions/session-title.ts:17-29
 - 一轮正常结束后后台自动起会话名 —— extensions/auto-session-name.ts:274-280、458-460；README.md:45
-- 原位思考强度适用条件：GPT-6 Codex 使用 openai-codex-responses 接口且 ID 以 gpt-6 开头；Claude 使用 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true，且 ID 精确等于 claude-opus-5、claude-opus-5-5 或 claude-sonnet-5-5；两者 thinking 不为 off。自动选思考强度，🧠 段显示结果 —— extensions/inline-effort.ts:70、80-88、306-308、389、401、427；README.md:39、58-67
+- 原位思考强度适用条件：GPT-6 Codex 使用 openai-codex-responses 接口且 ID 以 gpt-6 开头；Anthropic 协议分支使用 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true，且 ID 精确等于 claude-opus-5、claude-opus-5-5 或 claude-sonnet-5-5；Antigravity 分支要求 provider antigravity、antigravity-api 接口、ID 精确等于 claude-opus-5-5 或 claude-sonnet-5-5，并先安装和启用 pi-antigravity；三个分支 thinking 不为 off。自动选思考强度，🧠 段显示结果 —— extensions/inline-effort.ts:70、80-93、355-359、234、451、462-465、489；README.md:39、58-66
 - 章号对应：消息区第 2 章、状态栏第 3 章、会话名第 4 章、原位思考强度第 5 章、速查第 6 章 —— docs/extensions-usage/src/02～06 文件名
 - 需要 Pi ≥ 1.0.1、Node.js ≥ 22.19 —— README.md:7；package.json:25-29、38
 - 安装三条命令 —— README.md:9-13；npmmirror 镜像 —— README.md:15
@@ -33,7 +33,7 @@
 - personal-switches 录屏：下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃，未按 Enter —— scratchpad/recapture4-actual.md —— scratchpad/usage-captures.md；media/personal-switches.png
 - 列表自带提示「Enter/Space to change」，但入口先截获确认键（tui.select.confirm）保存并重载 —— extensions/pi-personal-extensions.ts:229-233；media/personal-switches.png
 - 「一轮」定义：你发出一条消息到 Pi 回复完 —— 讲解用语（usage-review-zh-2 术语表）
-- 原位思考强度给每条新消息选档位；朗读提示接口和模型能力要求见条件列表 —— extensions/inline-effort.ts:322-356；README.md:58-67、91
+- 原位思考强度给每条新消息选档位；朗读提示接口和模型能力要求见条件列表 —— extensions/inline-effort.ts:391-417；README.md:58-66、100
 - 地图卡片使用 /personal 菜单 label —— extensions/pi-personal-extensions.ts:17-54
 - 自动重载在 Pi 回复或压缩时会被拒绝 —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:5300-5307（回复或压缩中拒绝 /reload）
 - 更新扩展见 faq —— faq.facts.md

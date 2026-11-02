@@ -4,6 +4,11 @@
 
 ## 未发布
 
+## 0.4.0 - 2026-11-03
+
+- 原位思考强度新增 Antigravity 分支：provider 为 `antigravity`，接口为 `antigravity-api`，模型 ID 精确等于 `claude-opus-5-5` 或 `claude-sonnet-5-5`，thinking 仍须不为 `off`。需先安装并启用带 legacy `streamSimple` 注册的 `pi-antigravity`；本机使用 0.11.0。扩展在 `context_with_system` 分类后临时包装插件原生 `streamSimple`，保留 `oauth`、`headers`、`images` 和 `refreshModels`，注册和恢复时携带 `provider.getAllModels` 当前动态目录（含 chat、image、classifier），并按 `type + id` 补回 registered model 的 `headers`。扩展只修改匹配当前 `sessionId`、末条消息 `timestamp` 和模型的主请求 `options.reasoning`，交给插件按 `-low`、`-medium`、`-high` runtime ID 路由。`max` 和 `xhigh` 夹到 `high`；会话 thinking 和历史上下文不变。`message_end` 保存实际 `providerThinkingLevel`；工具续调、重试和恢复沿用原决策；`maxTokens: 1` 预热及辅助 session 不干预；`session_shutdown` 只恢复原 `streamSimple`，保留第三方后来对 `headers` 等字段的部分更新，也不覆盖第三方替换的新流。原 GPT-6 Codex 和 Anthropic 协议分支保留，Antigravity 不使用 Anthropic 消息级 `output_config`。
+- 新增 4 项 Antigravity 回归测试，覆盖两个精确模型 ID、原生流包装与配置保留、动态目录刷新、图片模型、模型级头部、第三方部分注册、档位钳制、请求匹配、工具续调与恢复、实际档位保存、预热与辅助请求、重试、取消和退出恢复。`npm run check` 当前 65/65 通过；本机 Pi 1.5.0 临时副本的 inline-effort 测试 32/32 通过。
+
 ## 0.3.0 - 2026-11-03
 
 - 原位思考强度新增 Claude 支持：仅限 `anthropic-messages` 接口、`compat.supportsMidConvoEffort === true`，且模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5` 或 `claude-sonnet-5-5`；thinking 仍须不为 `off`。扩展只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort`，并在 `message_end` 保存实际 `providerThinkingLevel` 供历史重放；顶层 `output_config`、`thinking`、历史消息和主会话 thinking 基线不变。保留原有 GPT-6 Codex 支持，分类、取消、超时、配置和隐私行为不变。

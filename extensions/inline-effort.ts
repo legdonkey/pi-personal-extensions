@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
-import type { ClassifierModel, Message, Model, ModelThinkingLevel } from "@earendil-works/pi-ai";
+import { clampThinkingLevel, type ClassifierModel, type Message, type Model, type ModelThinkingLevel } from "@earendil-works/pi-ai";
 import type {
   ContextWithSystemEvent,
   ExtensionAPI,
@@ -85,6 +85,11 @@ function supportsClaudeEffort(model: Model<any> | undefined) {
   return model?.api === "anthropic-messages" && model.compat && "supportsMidConvoEffort" in model.compat
     && model.compat.supportsMidConvoEffort === true
     && ["claude-opus-5", "claude-opus-5-5", "claude-sonnet-5-5"].includes(model.id);
+}
+
+function supportsAntigravityEffort(model: Model<any> | undefined) {
+  return model?.provider === "antigravity" && model.api === "antigravity-api"
+    && ["claude-opus-5-5", "claude-sonnet-5-5"].includes(model.id);
 }
 
 function messageText(message: Message): string {
@@ -205,6 +210,50 @@ export default function (pi: ExtensionAPI) {
   let picker: AbortController | undefined;
   let generation = 0;
   let claudeRequest: { model: Model<any>; effort?: string } | undefined;
+  let antigravityRequest: { model: Model<any>; timestamp: number; sessionId: string; ctx: ExtensionContext; effort?: string } | undefined;
+  let restoreAntigravity: (() => void) | undefined;
+
+  function installAntigravity(ctx: ExtensionContext) {
+    if (restoreAntigravity) return;
+    const registry = ctx.modelRegistry;
+    const original = registry.getRegisteredProviderConfig("antigravity");
+    if (original?.api !== "antigravity-api" || !original.streamSimple) return;
+    const streamSimple: NonNullable<typeof original.streamSimple> = (model, context, options) => {
+      const request = antigravityRequest;
+      if (!request || model.provider !== request.model.provider || model.id !== request.model.id
+        || options?.sessionId !== request.sessionId || options.maxTokens === 1
+        || !THINKING_LEVELS.has(options.reasoning) || options.signal?.aborted
+        || context.messages.at(-1)?.timestamp !== request.timestamp) {
+        return original.streamSimple!(model, context, options);
+      }
+      const decision = decisions(request.ctx).at(-1);
+      const level = clampThinkingLevel(model, decision?.thinkingLevel ?? options.reasoning ?? "medium");
+      if (level === "off") return original.streamSimple!(model, context, options);
+      const base = options.reasoning ?? "medium";
+      request.effort = level;
+      request.ctx.ui.setStatus(STATUS_KEY, `${level === base ? `🧠 ${level}` : `🧠 ${level} · 基线 ${base}`} · ${decision ? classifierLabel(decision.classifier) : "未分类"}`);
+      // pi-antigravity 0.11 不调用 onPayload；在其原生路由前仅覆盖本次 reasoning。
+      return original.streamSimple!(model, context, { ...options, reasoning: level });
+    };
+    const liveModels = () => {
+      const provider = registry.getProvider("antigravity");
+      const configured = registry.getRegisteredProviderConfig("antigravity")?.models;
+      return provider ? (provider.getAllModels?.() ?? provider.getModels()).map((model) => ({
+        ...model,
+        headers: configured?.find((entry) => entry.id === model.id
+          && (entry.type ?? "chat") === (model.type ?? "chat"))?.headers ?? model.headers,
+      })) : configured;
+    };
+    // Pi 的刷新目录存在提供方闭包中，重注册时必须携带，不能退回插件的静态旧目录。
+    registry.registerProvider("antigravity", { ...original, models: liveModels(), streamSimple });
+    restoreAntigravity = () => {
+      // 不覆盖其他扩展在本会话中重新注册的提供方。
+      const current = registry.getRegisteredProviderConfig("antigravity");
+      if (current?.streamSimple === streamSimple)
+        registry.registerProvider("antigravity", { ...current, models: liveModels(), streamSimple: original.streamSimple });
+      restoreAntigravity = undefined;
+    };
+  }
 
   async function classify(prompt: string, ctx: ExtensionContext, selected: DecisionModel) {
     pendingRequest?.abort();
@@ -304,7 +353,9 @@ export default function (pi: ExtensionAPI) {
   });
 
   const active = (ctx: ExtensionContext) =>
-    ((ctx.model?.api === CODEX_API && isGpt6(ctx.model.id)) || supportsClaudeEffort(ctx.model))
+    ((ctx.model?.api === CODEX_API && isGpt6(ctx.model.id)) || supportsClaudeEffort(ctx.model)
+      || (supportsAntigravityEffort(ctx.model)
+        && typeof ctx.modelRegistry.getRegisteredProviderConfig?.("antigravity")?.streamSimple === "function"))
     && pi.getThinkingLevel() !== "off";
   const clearStatus = (event: { type?: string }, ctx: ExtensionContext) => {
     generation++;
@@ -313,6 +364,8 @@ export default function (pi: ExtensionAPI) {
     anchors = undefined;
     // 流式期间切模型不应丢掉旧请求已发送的档位。
     if (event.type !== "model_select" || !claudeRequest?.effort) claudeRequest = undefined;
+    if (event.type !== "model_select" || !antigravityRequest?.effort) antigravityRequest = undefined;
+    if (event.type === "session_shutdown") restoreAntigravity?.();
     ctx.ui.setStatus(STATUS_KEY, undefined);
   };
   pi.on("session_start", clearStatus);
@@ -322,7 +375,15 @@ export default function (pi: ExtensionAPI) {
   pi.on("context_with_system", async (event, ctx) => {
     anchors = undefined;
     claudeRequest = undefined;
+    antigravityRequest = undefined;
     if (!active(ctx)) return;
+    if (supportsAntigravityEffort(ctx.model)) {
+      installAntigravity(ctx);
+      const timestamp = event.messages.at(-1)?.timestamp;
+      if (timestamp !== undefined) antigravityRequest = {
+        model: ctx.model!, timestamp, sessionId: ctx.sessionManager.getSessionId(), ctx,
+      };
+    }
     if (supportsClaudeEffort(ctx.model)) claudeRequest = { model: ctx.model! };
     const messages = event.messages;
     anchors = messages.filter(producesUserItem).map(({ role, timestamp }) => ({ role, timestamp }));
@@ -357,6 +418,7 @@ export default function (pi: ExtensionAPI) {
     } catch (error) {
       anchors = undefined;
       claudeRequest = undefined;
+      antigravityRequest = undefined;
       if (ctx.signal?.aborted || (error instanceof Error && error.name === "AbortError")) return;
       throw error;
     }
@@ -429,8 +491,15 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.on("message_end", (event) => {
-    const request = claudeRequest;
     const message = event.message;
+    const antigravity = antigravityRequest;
+    if (antigravity && message.role === "assistant" && message.api === "antigravity-api"
+      && message.provider === antigravity.model.provider && message.model === antigravity.model.id) {
+      antigravityRequest = undefined;
+      if (antigravity.effort) return { message: { ...message, providerThinkingLevel: antigravity.effort } };
+      return;
+    }
+    const request = claudeRequest;
     if (!request || message.role !== "assistant" || message.api !== "anthropic-messages"
       || message.provider !== request.model.provider || message.model !== request.model.id) return;
     claudeRequest = undefined;

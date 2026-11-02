@@ -51,7 +51,7 @@ function setup({ thinking = "medium", model = codexModel() } = {}) {
     signal: undefined,
     hasUI: true,
     isIdle: () => h.idle,
-    sessionManager: { getBranch: () => branch },
+    sessionManager: { getBranch: () => branch, getSessionId: () => "test-session" },
     ui: {
       setStatus(key, value) { assert.equal(key, "jev-inline-effort"); h.status = value; },
       notify(message, type) { h.warnings.push({ message, type }); },
@@ -62,6 +62,9 @@ function setup({ thinking = "medium", model = codexModel() } = {}) {
       },
     },
     modelRegistry: {
+      getRegisteredProviderConfig: () => h.antigravityConfig,
+      getProvider: () => h.antigravityConfig && ({ getAllModels: () => h.antigravityConfig.models }),
+      registerProvider(id, config) { assert.equal(id, "antigravity"); h.antigravityConfig = config; },
       findOfType(type, provider, id) {
         assert.deepEqual([type, provider], ["classifier", "openrouter"]);
         assert.ok(["~typesafe/jev-latest", "liquid/d1-ultra"].includes(id));
@@ -786,6 +789,170 @@ test("Claude 分类等待和流式期间的预热回放不消费快照或污染�
   const reply = { ...assistant(4), api: h.model.api, provider: h.model.provider, model: h.model.id, providerThinkingLevel: "medium" };
   assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "low");
   assert.equal(h.calls, 1);
+});
+
+function antigravityModel(id = "claude-opus-5-5") {
+  return {
+    ...claudeModel(id), provider: "antigravity", api: "antigravity-api",
+    thinkingLevelMap: { off: null, minimal: null, low: "low", medium: "medium", high: "high", xhigh: null, max: null },
+  };
+}
+
+function antigravitySetup(options = {}) {
+  const h = setup({ model: antigravityModel(), ...options });
+  h.sent = [];
+  h.nativeStream = (model, context, options) => {
+    const sent = { model, context, options };
+    h.sent.push(sent);
+    return sent;
+  };
+  h.originalConfig = {
+    api: "antigravity-api", streamSimple: h.nativeStream, models: [h.model],
+    oauth: { name: "test", refreshToken() {} }, refreshModels() {},
+    images: { "antigravity-image": {} }, headers: { "X-Test": "preserved" },
+  };
+  h.antigravityConfig = h.originalConfig;
+  h.send = (messages, extra = {}) => h.antigravityConfig.streamSimple(h.model, { messages }, {
+    reasoning: h.thinking, sessionId: "test-session", maxTokens: 2048, ...extra,
+  });
+  h.context = (messages) => h.events.get("context_with_system")({ messages }, h.ctx);
+  return h;
+}
+
+test("Antigravity 两个模型经原生流调整请求档位，max/xhigh 限制为 high，基线及上下文不变", async () => {
+  for (const id of ["claude-opus-5-5", "claude-sonnet-5-5"]) {
+    const h = antigravitySetup({ model: antigravityModel(id) });
+    h.choices = ["max", "medium", "low", "xhigh"];
+    const messages = [system, user(1)];
+    const original = structuredClone(messages);
+    await h.context(messages);
+    const wrapped = h.antigravityConfig.streamSimple;
+    const first = h.send(messages);
+    assert.equal(first.options.reasoning, "high");
+    assert.equal(first.context.messages, messages);
+    assert.deepEqual(messages, original);
+    assert.equal(h.thinking, "medium");
+    assert.equal(h.status, "🧠 high · 基线 medium · Jev");
+    for (const key of ["oauth", "refreshModels", "images", "headers"])
+      assert.equal(h.antigravityConfig[key], h.originalConfig[key], key);
+    assert.equal(JSON.stringify(h.antigravityConfig.models), JSON.stringify(h.originalConfig.models));
+    assert.equal(h.events.get("before_provider_request")({ payload: {} }, h.ctx), undefined, "原生流不依赖 payload hook");
+    const reply = { ...assistant(2), api: h.model.api, provider: h.model.provider, model: id };
+    assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "high");
+    messages.push(reply, toolResult(3));
+    await h.context(messages);
+    assert.equal(h.send(messages).options.reasoning, "high");
+    assert.equal(h.calls, 1, "工具续调不分类");
+    for (const [time, level] of [[4, "medium"], [6, "low"], [8, "high"]]) {
+      messages.push(assistant(time - 1), user(time));
+      await h.context(messages);
+      assert.equal(h.send(messages).options.reasoning, level);
+      assert.equal(h.antigravityConfig.streamSimple, wrapped, "重复请求不叠加包装");
+    }
+    assert.equal(h.calls, 4);
+    const restored = antigravitySetup({ model: h.model });
+    restored.branch.push(...structuredClone(h.branch));
+    await restored.context(messages);
+    assert.equal(restored.send(messages).options.reasoning, "high");
+    assert.equal(restored.calls, 0);
+    const summary = { role: "compactionSummary", summary: "摘要", timestamp: 100 };
+    await restored.context([system, summary, assistant(101), toolResult(102)]);
+    assert.equal(restored.send([system, user(100), assistant(101), toolResult(102)]).options.reasoning, "high");
+  }
+});
+
+test("Antigravity 预热、辅助请求、错误模型和旧上下文不调整；同一主请求重试仍调整", async () => {
+  const h = antigravitySetup();
+  h.choices = ["low"];
+  const messages = [system, user(1)];
+  let release;
+  h.classifyHook = () => new Promise((resolve) => { release = resolve; });
+  const pending = h.context(messages);
+  assert.equal(h.send(messages, { maxTokens: 1 }).options.reasoning, "medium");
+  release(); await pending;
+  for (const extra of [{ sessionId: "summary" }, { maxTokens: 1 }, { reasoning: "off" }, { signal: AbortSignal.abort() }])
+    assert.equal(h.send(messages, extra).options.reasoning, extra.reasoning ?? "medium");
+  assert.equal(h.send([system, user(2)]).options.reasoning, "medium");
+  assert.equal(h.antigravityConfig.streamSimple(antigravityModel("gemini-4-argon"), { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "medium");
+  assert.equal(h.send(messages).options.reasoning, "low");
+  assert.equal(h.send(messages).options.reasoning, "low", "重复调用不是一次性消费");
+  const previous = h.model;
+  h.model = codexModel();
+  h.events.get("model_select")({ type: "model_select" }, h.ctx);
+  assert.equal(h.antigravityConfig.streamSimple(previous, { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "low");
+  const reply = { ...assistant(3), api: previous.api, provider: previous.provider, model: previous.id };
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "low");
+  assert.equal(h.antigravityConfig.streamSimple(previous, { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "medium");
+});
+
+test("Antigravity 取消不调整；失败沿用原档位；退出恢复原注册且不覆盖第三方重新注册", async () => {
+  const h = antigravitySetup();
+  h.choices = ["low"];
+  await h.context([system, user(1)]);
+  h.error = new Error("unavailable");
+  const messages = [system, user(1), assistant(2), user(3)];
+  await h.context(messages);
+  assert.equal(h.send(messages).options.reasoning, "low");
+  const c = new AbortController(); c.abort(); h.ctx.signal = c.signal;
+  await h.context([...messages, assistant(4), user(5)]);
+  assert.equal(h.send(messages).options.reasoning, "medium");
+  h.events.get("session_shutdown")({ type: "session_shutdown" }, h.ctx);
+  assert.equal(h.antigravityConfig.streamSimple, h.nativeStream);
+  const other = antigravitySetup();
+  await other.context([system, user(1)]);
+  const replacement = { ...other.originalConfig, streamSimple() {} };
+  other.antigravityConfig = replacement;
+  other.events.get("session_shutdown")({ type: "session_shutdown" }, other.ctx);
+  assert.equal(other.antigravityConfig, replacement);
+  for (const model of [antigravityModel("gemini-4-argon"), antigravityModel("claude-opus-4-6"), { ...antigravityModel(), provider: "other" }]) {
+    const unsupported = antigravitySetup({ model });
+    await unsupported.context([system, user(1)]);
+    assert.equal(unsupported.calls, 0);
+    assert.equal(unsupported.antigravityConfig.streamSimple, unsupported.nativeStream);
+  }
+  const disabled = antigravitySetup({ thinking: "off" });
+  await disabled.context([system, user(1)]);
+  assert.equal(disabled.calls, 0);
+});
+
+test("Antigravity 真实 ModelRuntime 重注册与恢复保留动态刷新目录及图片模型", async () => {
+  const runtime = await ModelRuntime.create({ authPath: join(dir, "auth.json"), modelsPath: null, modelsStorePath: join(dir, "catalog.json"), allowModelNetwork: false });
+  const old = antigravityModel("claude-opus-4-6");
+  const image = { type: "image", provider: "antigravity", id: "test-image", name: "test-image", api: "test-image-api", baseUrl: "http://localhost", input: ["text"], output: ["image"], cost: old.cost };
+  let catalog = [antigravityModel(), antigravityModel("claude-sonnet-5-5"), image];
+  const original = {
+    api: "antigravity-api", apiKey: "local-test-credential", baseUrl: "http://localhost",
+    models: [old, { ...catalog[0], headers: { "X-Model-Test": "preserved" } }],
+    streamSimple() { throw new Error("此测试不发请求"); },
+    refreshModels: async () => catalog,
+  };
+  runtime.registerProvider("antigravity", original);
+  await runtime.refresh({ providers: ["antigravity"], allowNetwork: false });
+  const registry = new ModelRegistry(runtime);
+  const h = setup({ model: registry.find("antigravity", "claude-opus-5-5") });
+  assert.ok(h.model);
+  h.ctx.modelRegistry = Object.assign(Object.create(registry), {
+    findOfType: h.ctx.modelRegistry.findOfType,
+    classify: h.ctx.modelRegistry.classify,
+  });
+  const check = (ids) => {
+    for (const id of ids) assert.ok(registry.find("antigravity", id), id);
+    assert.ok(registry.getModelOfType("image", "antigravity", "test-image"));
+  };
+  const headers = async () => (await registry.getApiKeyAndHeaders(registry.find("antigravity", "claude-opus-5-5"))).headers;
+  assert.equal((await headers())["X-Model-Test"], "preserved");
+  await h.events.get("context_with_system")({ messages: [system, user(1)] }, h.ctx);
+  check(["claude-opus-5-5", "claude-sonnet-5-5"]);
+  assert.equal((await headers())["X-Model-Test"], "preserved");
+  catalog = [...catalog, antigravityModel("future-model")];
+  await registry.refresh({ providers: ["antigravity"], allowNetwork: false });
+  check(["claude-opus-5-5", "claude-sonnet-5-5", "future-model"]);
+  registry.registerProvider("antigravity", { headers: { "X-Other-Extension": "latest" } });
+  h.events.get("session_shutdown")({ type: "session_shutdown" }, h.ctx);
+  assert.equal(registry.getRegisteredProviderConfig("antigravity").streamSimple, original.streamSimple);
+  assert.equal((await headers())["X-Model-Test"], "preserved");
+  assert.equal((await headers())["X-Other-Extension"], "latest");
+  check(["claude-opus-5-5", "claude-sonnet-5-5", "future-model"]);
 });
 
 test("真实 Pi classifier 管线复用 models.json 的代理端点、认证及头部，404 不伪报成功", async () => {

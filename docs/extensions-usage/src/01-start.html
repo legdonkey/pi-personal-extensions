@@ -19,9 +19,9 @@
         <li><span class="seg" data-seg="start-02">消息区里，你发的消息带橙色线框；回复里的文件路径可以点击打开。</span></li>
         <li><span class="seg" data-seg="start-03">状态栏显示会话 ID 和服务商的剩余额度。状态栏的配色也能换。</span></li>
         <li><span class="seg" data-seg="start-04">输入框下方显示会话名。一轮指你发出一条消息，到 Pi 回复完。每轮正常结束后，「自动会话命名」在后台起会话名。</span></li>
-        <li><span class="seg" data-seg="start-05" data-say="用 GPT 六 Codex 或三个指定 Claude 模型并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的大脑图标段。另有接口和模型能力要求，见下方条件列表。">用 GPT-6 Codex 或三个指定 Claude 模型并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的 🧠 段。另有接口和模型能力要求，见下方条件列表。</span></li>
+        <li><span class="seg" data-seg="start-05" data-say="用 GPT 六 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的大脑图标段。另有接口和模型能力要求，见下方条件列表。">用 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的 🧠 段。另有接口和模型能力要求，见下方条件列表。</span></li>
       </ul>
-      <p>原位思考强度要求 thinking 不是 <code>off</code>。GPT-6 Codex 使用 <code>openai-codex-responses</code> 接口，模型 ID 以 <code>gpt-6</code> 开头。Claude 使用 <code>anthropic-messages</code> 接口，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>。</p>
+      <p>原位思考强度要求 thinking 不是 <code>off</code>。GPT-6 Codex 使用 <code>openai-codex-responses</code> 接口，模型 ID 以 <code>gpt-6</code> 开头。Anthropic 协议分支使用 <code>anthropic-messages</code> 接口，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>。Antigravity 分支要求 provider 为 <code>antigravity</code>、接口为 <code>antigravity-api</code>，模型 ID 精确等于 <code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，并先安装和启用 <code>pi-antigravity</code>。</p>
     </div>
     <figure class="beat-fig" id="fig-start-1">
       <div class="fig-scroll">

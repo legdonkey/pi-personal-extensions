@@ -36,7 +36,7 @@ pi install "$(pwd)"
 | `statusline` | 显示服务商剩余额度和会话 ID（末尾 8 位），预览并应用 11 套配色 |
 | `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
 | `user-message-border` | 为 TUI 普通用户消息添加橙色圆角边框，不修改上下文 |
-| `inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex 和指定 Claude 模型的思考强度 |
+| `inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型和 Antigravity 分支的指定 Claude 模型的思考强度 |
 
 `pi config` 管理整个扩展包。各功能设置均从 `/personal` 进入（例外：路径链接的 `userMessages` 只能在 `clickable-paths.json` 里改）；启停功能不会清除其独立配置。
 
@@ -55,12 +55,13 @@ TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话�
 
 ## 自动思考强度
 
-支持 GPT-6 Codex 和三个指定 Claude 模型。两类模型都要求 thinking 不为 `off`，并使用 OpenRouter 上的分类器。GPT-6 Codex 还需要 `openai-codex` 登录。
+支持 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型，以及 Antigravity 分支的两个指定 Claude 模型。三个分支都要求 thinking 不为 `off`，并使用 OpenRouter 上的分类器。GPT-6 Codex 还需要 `openai-codex` 登录。Antigravity 还需要先安装并启用 `pi-antigravity`，由插件注册带 legacy `streamSimple` 的 `antigravity` provider；本机使用 `pi-antigravity` 0.11.0。
 
-| 主模型 | 接口 | 模型条件 | 调整方式 |
+| 主模型分支 | provider / 接口 | 模型条件 | 调整方式 |
 | --- | --- | --- | --- |
 | GPT-6 Codex | `openai-codex-responses` | 模型 ID 以 `gpt-6` 开头 | 在当前用户消息前插入 `configuration_update` |
-| Claude | `anthropic-messages` | 模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5` 或 `claude-sonnet-5-5`；`compat.supportsMidConvoEffort === true` | 只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort` |
+| Claude（Anthropic 协议） | `anthropic-messages` | 模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5` 或 `claude-sonnet-5-5`；`compat.supportsMidConvoEffort === true` | 只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort` |
+| Claude（Antigravity） | provider `antigravity`；接口 `antigravity-api` | 模型 ID 精确等于 `claude-opus-5-5` 或 `claude-sonnet-5-5` | 临时包装 `pi-antigravity` 的原生 `streamSimple`，只修改匹配请求的 `options.reasoning` |
 
 不新增其他模型。GPT-6 Codex 启动示例：
 
@@ -79,11 +80,19 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 | `jev` | `~typesafe/jev-latest` |
 | `d1-ultra` | `liquid/d1-ultra` |
 
-分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Claude 使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。`message_end` 保存实际发送的 `providerThinkingLevel`，供 Pi 重放历史标记。主会话 thinking 基线不变。状态栏显示实际强度及最近尝试的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；Pi 自带的 thinking 显示仅反映基线。
+分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及最近尝试的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；Pi 自带的 thinking 显示仅反映基线。
 
-Claude 请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 `max_tokens: 1` 缓存预热回放。当前没有请求 ID 可用于区分请求，因此 `max_tokens: 1` 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。
+`pi-antigravity` 不触发 `onPayload`。因此，Antigravity 分支在 `context_with_system` 分类后，临时包装插件的原生 `streamSimple`。包装保留原 `oauth`、`headers`、`images` 和 `refreshModels`。注册和恢复 wrapper 时，扩展携带 `provider.getAllModels` 的当前动态目录，包括 chat、image 和 classifier 模型，并按 `type + id` 补回 registered model 的 `headers`。只有 `sessionId`、末条消息 `timestamp` 和模型都匹配当前主请求时，扩展才修改 `options.reasoning`，再交给插件按 `-low`、`-medium`、`-high` runtime ID 路由。`max` 和 `xhigh` 夹到 `high`。会话 thinking 和历史上下文不变。
 
-两种方案都以保留缓存前缀为目标，但不保证缓存 100% 命中。缓存命中仍受 TTL、最小 token 数和其他提示变更影响。[Anthropic 官方文档](https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta)明确上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta `mid-conversation-output-config-2026-07-01`，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持，本扩展不扩大模型范围。Pi v1.5.0 的 [Anthropic 序列化实现](https://github.com/earendil-works/pi/blob/v1.5.0/packages/ai/src/api/anthropic-messages.ts)已有原生标记；本仓库依赖的 1.0.1 也有此能力，无需升级依赖。
+Anthropic 协议分支和 Antigravity 分支都在 `message_end` 保存实际发送的 `providerThinkingLevel`。Anthropic 协议分支用该字段供 Pi 重放历史标记。主会话 thinking 基线不变。工具续调、同一主请求重试和会话恢复沿用原决策。
+
+Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 `max_tokens: 1` 缓存预热回放。当前没有请求 ID 可用于区分请求，因此 `max_tokens: 1` 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。Antigravity 的 `maxTokens: 1` 预热和辅助 session 也不干预。`session_shutdown` 只恢复原 `streamSimple`，保留第三方后来对 `headers` 等字段的部分更新；如果其他扩展已替换 `streamSimple`，则不覆盖。
+
+三个分支都以保留缓存前缀为目标，但不保证缓存 100% 命中。缓存命中仍受 TTL、最小 token 数和其他提示变更影响。
+
+本次扩展 wrapper 真实通道短时实测使用固定分类夹具，强制 `low → high → medium → low`，避免分类波动。主模型使用真实 Antigravity。`cacheRead` 分别为：`claude-opus-5-5` 的 `0 / 13981 / 13994 / 14014`，`claude-sonnet-5-5` 的 `0 / 13978 / 13991 / 14011`。请求基线始终为 `medium`，实际 runtime 后缀依次为 `low / high / medium / low`，`message_end` 保存的实际字段与之一致。Opus 在完整成功序列前另有若干次 `SAFETY` 零输出尝试，这些尝试未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证，也不保证 TTL 到期或提示词变化后仍命中。
+
+[Anthropic 官方文档](https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta)明确 Anthropic 协议分支的上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta `mid-conversation-output-config-2026-07-01`，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持，本扩展不扩大模型范围。Pi v1.5.0 的 [Anthropic 序列化实现](https://github.com/earendil-works/pi/blob/v1.5.0/packages/ai/src/api/anthropic-messages.ts)已有原生标记；本仓库依赖的 1.0.1 也有此能力，无需升级依赖。
 
 [Gemini 4 Argon](https://ai.google.dev/gemini-api/docs/latest-model) 已存在，但官方资料只明确 implicit cache。本次未找到「改变 `thinking_level` 仍保留缓存」的明确官方承诺，因此不支持 Gemini 4 Argon。这是缺少证据，不是证明切换档位一定丢失缓存。
 

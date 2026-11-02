@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-effort" data-chapter="effort" aria-labelledby="ch-effort-h">
   <header class="chapter-head">
     <h2 id="ch-effort-h">原位思考强度：按消息选档位</h2>
-    <p class="chapter-sum">按每条新用户消息调整 GPT-6 Codex 或指定 Claude 模型的思考档位。顶层参数保持不变，两类接口分别用各自的逐消息机制写入档位。</p>
+    <p class="chapter-sum">按每条新用户消息调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型或 Antigravity 分支的指定 Claude 模型的思考档位。三个分支分别用 <code>configuration_update</code>、Anthropic 原生逐消息标记或插件 runtime ID 路由写入档位。</p>
     <dl class="meta">
       <dt>功能 ID</dt><dd><code>inline-effort</code></dd>
       <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
@@ -16,7 +16,7 @@
       <h3>什么时候分类</h3>
       <p>
         <span class="seg" data-seg="effort-01" data-say="不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、x high、max 五档里选。">不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、xhigh、max 五档里选。</span>
-        <span class="seg" data-seg="effort-02" data-say="GPT 六 Codex 或三个指定 Claude 模型才适用，thinking 不能是 off。Claude 还要求接口是 anthropic messages，compat 点 supports mid convo effort 为 true。不适用就不分类。">GPT-6 Codex 或三个指定 Claude 模型才适用，thinking 不能是 <code>off</code>。Claude 还要求接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort</code> 为 <code>true</code>。不适用就不分类。</span>
+        <span class="seg" data-seg="effort-02" data-say="GPT 六 Codex、Anthropic 协议分支的三个指定 Claude 模型，或 Antigravity 分支的两个指定 Claude 模型才适用，thinking 不能是 off。Anthropic 协议分支还要求接口是 anthropic messages，compat 点 supports mid convo effort 为 true。Antigravity 分支要求 provider 是 antigravity，接口是 antigravity api。不适用就不分类。">GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型，或 Antigravity 分支的两个指定 Claude 模型才适用，thinking 不能是 <code>off</code>。Anthropic 协议分支还要求接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort</code> 为 <code>true</code>。Antigravity 分支要求 provider 是 <code>antigravity</code>，接口是 <code>antigravity-api</code>。不适用就不分类。</span>
         <span class="seg" data-seg="effort-03">空白输入不调用分类器，沿用当前强度。当前强度是当前分支最近一次决策；没有决策就用基线，也就是 Pi 的 thinking 设置。</span>
         <span class="seg" data-seg="effort-04">非空才调用分类器，最多等 15 秒。</span>
       </p>
@@ -25,7 +25,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 324" role="img" aria-labelledby="fig-effort-1-title fig-effort-1-desc">
           <title id="fig-effort-1-title">分类前的两道检查</title>
-          <desc id="fig-effort-1-desc">新用户消息先检查接口、模型、模型能力和 thinking 是否适用，不适用就不分类；适用时再检查文本，空白就沿用当前强度，非空才调用分类器。</desc>
+          <desc id="fig-effort-1-desc">新用户消息先检查 provider、接口、模型、模型能力和 thinking 是否适用，不适用就不分类；适用时再检查文本，空白就沿用当前强度，非空才调用分类器。</desc>
           <defs>
             <marker id="fig-effort-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -45,7 +45,7 @@
             <text class="t-cap" x="198" y="126" text-anchor="end">请求原样发出</text>
             <polygon class="n" points="320,84 400,112 320,140 240,112"/>
             <text class="t" x="320" y="117" text-anchor="middle">适用？</text>
-            <text class="t-sub" x="412" y="106">GPT-6 Codex / 指定 Claude</text>
+            <text class="t-sub" x="412" y="106">三条受支持分支</text>
             <text class="t-sub" x="412" y="124">能力匹配 · thinking ≠ off</text>
           </g>
 
@@ -79,8 +79,9 @@
         <li>只发对话文本，不发系统提示词、工具结果、思考块和图片数据（图片换成「[附有图片]」）。</li>
         <li>对话内容预算按 UTF-16 单元计：当前请求最多 12000，近期最多 6 条用户或助手消息、最多 8000，合计不超过 16000；另加固定提示语和分类规则。</li>
         <li>GPT-6 Codex：接口是 <code>openai-codex-responses</code>，模型 ID 以 <code>gpt-6</code> 开头，thinking 不是 <code>off</code>。</li>
-        <li>Claude：接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。不新增其他模型。</li>
-        <li>前提：两类模型都需要 OpenRouter 认证；GPT-6 Codex 还需要 <code>openai-codex</code> 登录。功能不替换主模型。</li>
+        <li>Claude（Anthropic 协议）：接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort === true</code>，模型 ID 精确等于 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。</li>
+        <li>Claude（Antigravity）：provider 是 <code>antigravity</code>，接口是 <code>antigravity-api</code>，模型 ID 精确等于 <code>claude-opus-5-5</code> 或 <code>claude-sonnet-5-5</code>，thinking 不是 <code>off</code>。还需先安装并启用 <code>pi-antigravity</code>，由插件注册带 legacy <code>streamSimple</code> 的 provider；本机使用 0.11.0。</li>
+        <li>不新增其他模型。三个分支都需要 OpenRouter 认证；GPT-6 Codex 还需要 <code>openai-codex</code> 登录。功能不替换主模型。</li>
       </ul>
       <figcaption>虚线框是外部服务（OpenRouter）。</figcaption>
     </figure>
@@ -219,7 +220,7 @@
       </div>
       <ul class="fig-notes">
         <li>色条：绿色是与上一次请求相同的开头（缓存前缀），红色是从第一处不同开始的部分，灰色是新增部分。</li>
-        <li>仓库只验证请求怎样构造，没有验证服务端 prompt cache 的命中规则。保留缓存前缀不保证 100% 命中；TTL、最小 token 数和其他提示变更仍会影响命中。</li>
+        <li>本次扩展 wrapper 真实通道短时实测用固定分类夹具强制 <code>low → high → medium → low</code>，主模型是真实 Antigravity。<code>cacheRead</code> 分别为：<code>claude-opus-5-5</code> 的 <code>0 / 13981 / 13994 / 14014</code>，<code>claude-sonnet-5-5</code> 的 <code>0 / 13978 / 13991 / 14011</code>。请求基线始终为 <code>medium</code>，实际 runtime 后缀和 <code>message_end</code> 保存的字段都依次为 <code>low / high / medium / low</code>。Opus 在完整成功序列前有若干次 <code>SAFETY</code> 零输出尝试，未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证；TTL、最小 token 数和其他提示变更仍会影响命中。</li>
         <li><a href="https://ai.google.dev/gemini-api/docs/latest-model">Gemini 4 Argon</a> 已存在，但官方资料只明确 implicit cache。本次未找到改变 <code>thinking_level</code> 仍保留缓存的明确官方承诺，因此不支持。这是缺少证据，不是证明切换档位一定丢失缓存。</li>
         <li>WebSocket 增量续传（传输方式 <code>auto</code> 或 <code>websocket-cached</code>）的前提：当前连接保留着上次的续传状态和响应 ID；除 <code>input</code>、<code>previous_response_id</code> 外其余字段一致；新 input 以「上次 input + 上次响应」开头。满足时只发新增部分。</li>
       </ul>
@@ -230,13 +231,15 @@
   <!-- 4. 插入 configuration_update -->
   <div class="beat">
     <div class="beat-text">
-      <h3>按接口写入档位</h3>
+      <h3>按接入分支写入档位</h3>
       <p>
         <span class="seg" data-seg="effort-12" data-say="对 GPT 六 Codex，扩展让顶层保持基线，在当前用户消息前插入一个 configuration update 项，只写新档位。档位写在 input 里这条消息的位置上，这就是原位。">对 GPT-6 Codex，扩展让顶层保持基线，在当前用户消息前插入一个 <code>configuration_update</code> 项，只写新档位。档位写在 input 里这条消息的位置上，这就是「原位」。</span>
         <span class="seg" data-seg="effort-13">决策按消息时间戳存在会话里。模型、基线和已有上下文不变时，下一次请求重放同样档位，开头逐项不变。</span>
         <span class="seg" data-seg="effort-14">Codex 档位和当前强度相同时，扩展不插入。档位回到基线时，扩展也要插入一项，抵消之前那一项。</span>
-        <span class="seg" data-seg="effort-14a" data-say="Claude 使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 system 消息里的 output config 点 effort。顶层 output config、thinking 和历史消息不变。message end 保存实际发送的 provider thinking level，供 Pi 重放历史标记。主会话 thinking 基线不变。">Claude 使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 <code>system</code> 消息里的 <code>output_config.effort</code>。顶层 <code>output_config</code>、<code>thinking</code> 和历史消息不变。<code>message_end</code> 保存实际发送的 <code>providerThinkingLevel</code>，供 Pi 重放历史标记。主会话 thinking 基线不变。</span>
-        <span class="seg" data-seg="effort-14b" data-say="同一 Claude 请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 max tokens 为 1 的缓存预热回放。当前没有请求 ID 可用于区分请求，因此 max tokens 为 1 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。">同一 Claude 请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 <code>max_tokens: 1</code> 缓存预热回放。当前没有请求 ID 可用于区分请求，因此 <code>max_tokens: 1</code> 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。</span>
+        <span class="seg" data-seg="effort-14a" data-say="Anthropic 协议分支使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 system 消息里的 output config 点 effort。顶层 output config、thinking 和历史消息不变。message end 保存实际发送的 provider thinking level，供 Pi 重放历史标记。主会话 thinking 基线不变。">Anthropic 协议分支使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 <code>system</code> 消息里的 <code>output_config.effort</code>。顶层 <code>output_config</code>、<code>thinking</code> 和历史消息不变。<code>message_end</code> 保存实际发送的 <code>providerThinkingLevel</code>，供 Pi 重放历史标记。主会话 thinking 基线不变。</span>
+        <span class="seg" data-seg="effort-14b" data-say="同一 Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 max tokens 为 1 的缓存预热回放。当前没有请求 ID 可用于区分请求，因此 max tokens 为 1 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。">同一 Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 <code>max_tokens: 1</code> 缓存预热回放。当前没有请求 ID 可用于区分请求，因此 <code>max_tokens: 1</code> 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。</span>
+        <span class="seg" data-seg="effort-14c" data-say="Antigravity 是独立分支，不使用 Anthropic 消息级 output config。插件不触发 on payload，所以扩展在 context with system 分类后临时包装原生 stream simple。扩展只改匹配当前 session、末条消息时间戳和模型的主请求 options 点 reasoning，交给插件按 low、medium、high 后缀的 runtime ID 路由。max 和 x high 夹到 high，会话 thinking 和历史上下文不变。">Antigravity 是独立分支，不使用 Anthropic 消息级 <code>output_config</code>。插件不触发 <code>onPayload</code>，所以扩展在 <code>context_with_system</code> 分类后临时包装原生 <code>streamSimple</code>。扩展只改匹配当前 session、末条消息 <code>timestamp</code> 和模型的主请求 <code>options.reasoning</code>，交给插件按 <code>-low</code>、<code>-medium</code>、<code>-high</code> runtime ID 路由。<code>max</code> 和 <code>xhigh</code> 夹到 <code>high</code>，会话 thinking 和历史上下文不变。</span>
+        <span class="seg" data-seg="effort-14d" data-say="Antigravity 的 message end 保存实际 provider thinking level。工具续调、重试和恢复沿用原决策。max tokens 为 1 的预热和辅助 session 不干预。退出只恢复原 stream simple，保留第三方后来的部分更新，也不覆盖第三方替换的新流。">Antigravity 的 <code>message_end</code> 保存实际 <code>providerThinkingLevel</code>。工具续调、重试和恢复沿用原决策。<code>maxTokens: 1</code> 预热和辅助 session 不干预。退出只恢复原 <code>streamSimple</code>，保留第三方后来的部分更新，也不覆盖第三方替换的新流。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-4">
@@ -297,10 +300,11 @@
   "reasoning": { "effort": "xhigh" }
 }</code></pre>
       <ul class="fig-notes">
-        <li>上图和 JSON 只描述 Codex。Claude 使用 Pi 原生空 <code>system</code> 消息标记，不插入 <code>configuration_update</code>。</li>
+        <li>上图和 JSON 只描述 Codex。Anthropic 协议分支使用 Pi 原生空 <code>system</code> 消息标记，不插入 <code>configuration_update</code>。Antigravity 分支只修改匹配请求的 <code>options.reasoning</code>，不使用这两种机制。</li>
+        <li>Antigravity wrapper 保留原 <code>oauth</code>、<code>headers</code>、<code>images</code> 和 <code>refreshModels</code>。注册和恢复时携带 <code>provider.getAllModels</code> 当前动态目录，包括 chat、image 和 classifier 模型，并按 <code>type + id</code> 补回 registered model 的 <code>headers</code>。</li>
         <li>Codex 插入发生在 <code>before_provider_request</code>，只改写 <code>input</code>。整轮没有任何 update 时，请求原样发出。</li>
         <li>Codex 每条 update 后面紧跟一个用户项，不会相邻。档位先经过模型的 <code>thinkingLevelMap</code> 映射。</li>
-        <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta <code>mid-conversation-output-config-2026-07-01</code>，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持。</li>
+        <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确 Anthropic 协议分支的上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta <code>mid-conversation-output-config-2026-07-01</code>，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持。</li>
         <li>仅 GPT-6 Codex：<code>configuration_update</code> 不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 混用。Pi 在客户端做的压缩不受影响。</li>
       </ul>
       <figcaption>Codex 示例：基线 medium，U2 分为 xhigh，U3 分为 medium。色条含义同上图。</figcaption>
@@ -483,7 +487,7 @@
           <text class="t-sub" x="300" y="73" text-anchor="middle">最多 15 秒</text>
           <rect class="n" x="464" y="36" width="160" height="48" rx="6"/>
           <text class="t" x="544" y="56" text-anchor="middle">主请求</text>
-          <text class="t-sub" x="544" y="73" text-anchor="middle">支持的 Codex / Claude</text>
+          <text class="t-sub" x="544" y="73" text-anchor="middle">Codex / Claude / Antigravity</text>
           <g data-cue="effort-25">
             <path d="M200 96 V100 H400 V96" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
             <text class="t-cap" x="300" y="122" text-anchor="middle">等待：用户要等分类，最多 15 秒</text>
@@ -525,7 +529,7 @@
         const out = (key) => form.querySelector(`[data-out="${key}"]`);
         const LEVELS = ["low", "medium", "high", "xhigh", "max"];
         const IDS = { "Jev": "~typesafe/jev-latest", "d1-ultra": "liquid/d1-ultra" };
-        // 与 extensions/inline-effort.ts 一致：第一条消息时当前强度等于基线（:338），警告见 :352，Codex 状态栏见 :401、:427。
+        // 与 extensions/inline-effort.ts 一致：第一条消息时当前强度等于基线（:399），警告见 :413，Codex 状态栏见 :462-465、:489。
         const render = () => {
           const base = form.base.value;
           const name = form.model.value;

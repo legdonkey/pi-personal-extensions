@@ -14,7 +14,8 @@ const REQUEST_TIMEOUT_MS = 15 * 1000;
 const CODEX_PROVIDER = "openai-codex";
 const ZAI_PROVIDER = "zai-coding-cn";
 const KIMI_PROVIDER = "kimi-coding";
-const SUPPORTED_PROVIDERS = new Set([CODEX_PROVIDER, ZAI_PROVIDER, KIMI_PROVIDER]);
+const ANTIGRAVITY_PROVIDER = "antigravity";
+const SUPPORTED_PROVIDERS = new Set([CODEX_PROVIDER, ZAI_PROVIDER, KIMI_PROVIDER, ANTIGRAVITY_PROVIDER]);
 
 interface CodexWindow {
 	used_percent?: unknown;
@@ -41,6 +42,7 @@ const showSessionId = (ctx: ExtensionContext) => {
 export default function statusline(pi: ExtensionAPI) {
 	let activeSessionManager: ExtensionContext["sessionManager"] | undefined;
 	let activeProvider: string | undefined;
+	let activeModel: ExtensionContext["model"];
 	let refreshGeneration = 0;
 	let refreshTimer: ReturnType<typeof setInterval> | undefined;
 	let requestController: AbortController | undefined;
@@ -68,7 +70,7 @@ export default function statusline(pi: ExtensionAPI) {
 			return;
 		}
 
-		ctx.ui.setStatus(STATUS_KEY, cache.get(provider));
+		ctx.ui.setStatus(STATUS_KEY, provider === ANTIGRAVITY_PROVIDER ? undefined : cache.get(provider));
 	};
 
 	const refresh = async (
@@ -84,6 +86,11 @@ export default function statusline(pi: ExtensionAPI) {
 		)
 			return;
 
+		if (provider === ANTIGRAVITY_PROVIDER) {
+			// 多账号切换后不能沿用另一账号的额度；查询失败时隐藏旧值。
+			cache.delete(provider);
+			ctx.ui.setStatus(STATUS_KEY, undefined);
+		}
 		lastRefreshStartedAt = Date.now();
 		const generation = ++refreshGeneration;
 		cancelRequest("Provider usage refresh replaced");
@@ -92,7 +99,9 @@ export default function statusline(pi: ExtensionAPI) {
 
 		try {
 			const text =
-				provider === CODEX_PROVIDER
+				provider === ANTIGRAVITY_PROVIDER && activeModel
+					? await fetchAntigravityUsage(ctx, activeModel, controller.signal)
+					: provider === CODEX_PROVIDER
 					? await fetchCodexUsage(pi, controller.signal)
 					: provider === ZAI_PROVIDER
 						? await fetchZaiUsage(pi, controller.signal)
@@ -110,7 +119,7 @@ export default function statusline(pi: ExtensionAPI) {
 			cache.set(provider, text);
 			ctx.ui.setStatus(STATUS_KEY, text);
 		} catch {
-			if (controller.signal.aborted) return;
+			if (controller.signal.aborted || generation !== refreshGeneration || !ownsSession(ctx)) return;
 			// 查询失败时保留同一 Provider 的上次成功结果，避免短暂网络故障造成状态闪烁。
 			if (activeProvider === provider) {
 				ctx.ui.setStatus(STATUS_KEY, cache.get(provider));
@@ -130,6 +139,7 @@ export default function statusline(pi: ExtensionAPI) {
 
 	pi.on("session_start", (_event, ctx) => {
 		activeSessionManager = ctx.sessionManager;
+		activeModel = ctx.model;
 		showProvider(ctx.model?.provider, ctx);
 		showSessionId(ctx);
 		startTimer(ctx);
@@ -138,6 +148,7 @@ export default function statusline(pi: ExtensionAPI) {
 
 	pi.on("session_tree", (_event, ctx) => {
 		activeSessionManager = ctx.sessionManager;
+		activeModel = ctx.model;
 		showProvider(ctx.model?.provider, ctx);
 		showSessionId(ctx);
 		startTimer(ctx);
@@ -148,6 +159,7 @@ export default function statusline(pi: ExtensionAPI) {
 		if (!ownsSession(ctx)) return;
 		refreshGeneration += 1;
 		cancelRequest("Provider changed");
+		activeModel = event.model;
 		showProvider(event.model.provider, ctx);
 		void refresh(event.model.provider, ctx, { force: true });
 	});
@@ -166,6 +178,7 @@ export default function statusline(pi: ExtensionAPI) {
 		ctx.ui.setStatus(SESSION_STATUS_KEY, undefined);
 		activeSessionManager = undefined;
 		activeProvider = undefined;
+		activeModel = undefined;
 	});
 
 	pi.registerCommand("statusline-style", {
@@ -259,6 +272,68 @@ export default function statusline(pi: ExtensionAPI) {
 			}
 		},
 	});
+}
+
+// 只匹配同一公开模型的运行变体，不把其他模型的额度冒充当前模型额度。
+export function formatAntigravityUsage(body: unknown, modelId: string): string {
+	if (!isRecord(body) || !isRecord(body.models))
+		throw new Error("Antigravity model quotas are unavailable");
+	const fractions: number[] = [];
+	for (const [id, model] of Object.entries(body.models)) {
+		const baseId = id.replace(/-(extra-low|extra-high|minimal|medium|high|low|thinking|tiered)$/, "");
+		if (id !== modelId && baseId !== modelId &&
+			!(modelId === "gemini-3.1-pro" && id === "gemini-pro-agent") &&
+			!(modelId === "gemini-3.5-flash" && id === "gemini-3-flash-agent")) continue;
+		if (!isRecord(model) || model.isInternal === true || !isRecord(model.quotaInfo)) continue;
+		const fraction = model.quotaInfo.remainingFraction;
+		if (typeof fraction === "number" && Number.isFinite(fraction))
+			fractions.push(Math.max(0, Math.min(1, fraction)));
+	}
+	if (!fractions.length) throw new Error("Antigravity model quota is unavailable");
+	// 同一模型有多个变体时取最低剩余值，避免高估可用额度。
+	return `quota ${Math.round(Math.min(...fractions) * 100)}% left`;
+}
+
+async function fetchAntigravityUsage(
+	ctx: ExtensionContext,
+	model: NonNullable<ExtensionContext["model"]>,
+	signal: AbortSignal,
+): Promise<string> {
+	// 由当前进程中的 provider 解析及刷新凭据，不读取或输出账号文件。
+	const key = await ctx.modelRegistry.getApiKeyForProvider(ANTIGRAVITY_PROVIDER);
+	signal.throwIfAborted();
+	if (!key) throw new Error("Antigravity credentials are unavailable");
+	const credentials: unknown = JSON.parse(key);
+	if (!isRecord(credentials) || typeof credentials.token !== "string" || !credentials.token ||
+		typeof credentials.projectId !== "string" || !credentials.projectId)
+		throw new Error("Antigravity credentials are invalid");
+	const requestSignal = AbortSignal.any([signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)]);
+	for (const endpoint of [
+		"https://daily-cloudcode-pa.googleapis.com",
+		"https://daily-cloudcode-pa.sandbox.googleapis.com",
+		"https://cloudcode-pa.googleapis.com",
+	]) {
+		try {
+			const response = await fetch(`${endpoint}/v1internal:fetchAvailableModels`, {
+				method: "POST",
+				redirect: "error",
+				headers: {
+					Authorization: `Bearer ${credentials.token}`,
+					"Content-Type": "application/json",
+					"User-Agent": process.env.ANTIGRAVITY_USER_AGENT || process.env.NOAGY_USER_AGENT ||
+						"antigravity/cli/1.4.0 (aidev_client; os_type=linux; arch=amd64; cl=982146307; auth_method=consumer)",
+				},
+				body: JSON.stringify({ project: process.env.ANTIGRAVITY_PROJECT_ID?.trim() ||
+					process.env.NOAGY_PROJECT_ID?.trim() || credentials.projectId }),
+				signal: requestSignal,
+			});
+			if (response.ok) return formatAntigravityUsage(await response.json(), model.id);
+		} catch {
+			if (requestSignal.aborted) break;
+		}
+		if (requestSignal.aborted) break;
+	}
+	throw new Error("Antigravity usage is unavailable");
 }
 
 async function fetchCodexUsage(

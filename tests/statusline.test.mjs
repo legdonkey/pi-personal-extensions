@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { setImmediate as nextTick } from "node:timers/promises";
 import { visibleWidth } from "@earendil-works/pi-tui";
-import statusline, { shortSessionId } from "../extensions/statusline.ts";
+import statusline, { shortSessionId, formatAntigravityUsage } from "../extensions/statusline.ts";
 
 test("迁入的风格选择器保留 11 套配色、预览、配置和重载行为", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
@@ -141,6 +141,91 @@ test("合并功能同时注册配色处理器与额度事件，保留 usage 和 
     events.get("session_shutdown")({}, ctx);
   }
   assert.equal(statuses.get("session-id"), undefined);
+});
+
+test("Antigravity 仅显示当前模型额度，兼容变体和 Pro 别名并校验响应", () => {
+  const quota = (remainingFraction) => ({ quotaInfo: { remainingFraction } });
+  const body = { models: {
+    "gemini-3.1-pro-low": quota(0.8), "gemini-pro-agent": quota(0.6),
+    "claude-opus-4-6-thinking": quota(0.25), "gemini-4-argon-tiered": quota(1),
+  } };
+  assert.equal(formatAntigravityUsage(body, "gemini-3.1-pro"), "quota 60% left");
+  assert.equal(formatAntigravityUsage(body, "claude-opus-4-6"), "quota 25% left");
+  assert.equal(formatAntigravityUsage(body, "gemini-4-argon"), "quota 100% left");
+  for (const [value, expected] of [[0, 0], [-1, 0], [2, 100], [0.556, 56]])
+    assert.equal(formatAntigravityUsage({ models: { x: quota(value) } }, "x"), `quota ${expected}% left`);
+  for (const value of [null, "0.5", false, NaN, Infinity, undefined])
+    assert.throws(() => formatAntigravityUsage({ models: { x: quota(value) } }, "x"));
+  for (const value of [null, {}, { models: [] }, body])
+    assert.throws(() => formatAntigravityUsage(value, "unknown"));
+});
+
+test("Antigravity 从当前 provider 获取凭据，切换模型和账号不复用旧额度", async (t) => {
+  const events = new Map();
+  const statuses = new Map();
+  let account = "first";
+  let fail = false;
+  let pending;
+  let requests = 0;
+  statusline({
+    on: (name, handler) => events.set(name, handler), registerCommand() {},
+    exec: async () => assert.fail("Antigravity 不通过子进程读取凭据"),
+  });
+  const ctx = {
+    model: { provider: "antigravity", id: "gemini-4-argon" },
+    sessionManager: { getSessionId: () => "abc" },
+    modelRegistry: { getApiKeyForProvider: async (provider) => {
+      assert.equal(provider, "antigravity");
+      return JSON.stringify({ token: account, projectId: "test-project" });
+    } },
+    ui: { setStatus: (key, value) => statuses.set(key, value) },
+  };
+  t.mock.method(globalThis, "fetch", async (url, init) => {
+    requests++;
+    assert.match(url, /^https:\/\/(daily-cloudcode-pa(?:\.sandbox)?|cloudcode-pa)\.googleapis\.com\/v1internal:fetchAvailableModels$/);
+    assert.equal(init.method, "POST");
+    assert.equal(init.redirect, "error");
+    assert.deepEqual(JSON.parse(init.body), { project: "test-project" });
+    assert.equal(init.headers.Authorization, `Bearer ${account}`);
+    if (pending) await pending;
+    return { ok: !fail, json: async () => ({ models: {
+      "gemini-4-argon": { quotaInfo: { remainingFraction: account === "first" ? 0.8 : 0.4 } },
+      "claude-opus-4-6-thinking": { quotaInfo: { remainingFraction: 0.1 } },
+    } }) };
+  });
+  const select = (id) => events.get("model_select")({ model: { provider: "antigravity", id } }, ctx);
+  try {
+    events.get("session_start")({}, ctx);
+    await nextTick();
+    assert.equal(statuses.get("usage"), "quota 80% left");
+    select("claude-opus-4-6");
+    assert.equal(statuses.get("usage"), undefined);
+    await nextTick();
+    assert.equal(statuses.get("usage"), "quota 10% left");
+    account = "second";
+    select("gemini-4-argon");
+    await nextTick();
+    assert.equal(statuses.get("usage"), "quota 40% left");
+    fail = true;
+    select("gemini-4-argon");
+    await nextTick();
+    assert.equal(statuses.get("usage"), undefined);
+    const before = requests;
+    events.get("agent_settled")({}, ctx);
+    await nextTick();
+    assert.equal(requests, before, "保留 30 秒冷却");
+    fail = false;
+    let resolve;
+    pending = new Promise((r) => { resolve = r; });
+    select("gemini-4-argon");
+    await nextTick();
+    events.get("model_select")({ model: { provider: "unsupported" } }, ctx);
+    resolve();
+    await nextTick();
+    assert.equal(statuses.get("usage"), undefined, "过期结果不能覆盖新模型");
+  } finally {
+    events.get("session_shutdown")({}, ctx);
+  }
 });
 
 function kimiUsageContext(statuses) {

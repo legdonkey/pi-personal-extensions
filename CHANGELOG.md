@@ -4,6 +4,9 @@
 
 ## 未发布
 
+- 状态栏额度新增 Antigravity 支持：需先启用 `pi-antigravity`，通过 `ctx.modelRegistry.getApiKeyForProvider('antigravity')` 获取当前 provider 的 JSON 凭据，POST Google `fetchAvailableModels`，固定官方 endpoint 依次回退，总网络超时 15 秒。扩展按当前模型精确 ID 或运行变体后缀匹配；`gemini-3.1-pro` 兼容 `gemini-pro-agent`，`gemini-3.5-flash` 兼容 `gemini-3-flash-agent`。只接受有限数值 `remainingFraction`，约束到 0～1，多个同模型变体取最低值，显示如 `quota 60% left`。该值是当前模型在服务端对应的配额，可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。找不到配额或查询失败时隐藏 Antigravity 旧值，其他 provider 保留缓存；每次刷新重新解析当前账号凭据，账号变化在下一刷新生效，不主动监听账号切换；模型切换强制查询，不显示旧模型缓存。刷新时机和冷却不变。
+- 新增 2 项 Antigravity 回归测试，覆盖模型与变体匹配、别名、配额校验、当前 provider 凭据、模型和账号切换、失败隐藏旧值及刷新冷却；`npm run check` 当前 67/67 通过。
+
 ## 0.4.0 - 2026-11-03
 
 - 原位思考强度新增 Antigravity 分支：provider 为 `antigravity`，接口为 `antigravity-api`，模型 ID 精确等于 `claude-opus-5-5` 或 `claude-sonnet-5-5`，thinking 仍须不为 `off`。需先安装并启用带 legacy `streamSimple` 注册的 `pi-antigravity`；本机使用 0.11.0。扩展在 `context_with_system` 分类后临时包装插件原生 `streamSimple`，保留 `oauth`、`headers`、`images` 和 `refreshModels`，注册和恢复时携带 `provider.getAllModels` 当前动态目录（含 chat、image、classifier），并按 `type + id` 补回 registered model 的 `headers`。扩展只修改匹配当前 `sessionId`、末条消息 `timestamp` 和模型的主请求 `options.reasoning`，交给插件按 `-low`、`-medium`、`-high` runtime ID 路由。`max` 和 `xhigh` 夹到 `high`；会话 thinking 和历史上下文不变。`message_end` 保存实际 `providerThinkingLevel`；工具续调、重试和恢复沿用原决策；`maxTokens: 1` 预热及辅助 session 不干预；`session_shutdown` 只恢复原 `streamSimple`，保留第三方后来对 `headers` 等字段的部分更新，也不覆盖第三方替换的新流。原 GPT-6 Codex 和 Anthropic 协议分支保留，Antigravity 不使用 Anthropic 消息级 `output_config`。

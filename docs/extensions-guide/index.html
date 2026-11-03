@@ -1572,7 +1572,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <dt>功能</dt><dd>状态栏：额度、会话 ID 与配色（<code>statusline</code>，源码 <code>extensions/statusline.ts</code>）</dd>
       <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏：额度、会话 ID 与配色</dd>
       <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
-      <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包</dd>
+      <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包；Antigravity 额度需要另行启用 <code>pi-antigravity</code></dd>
     </dl>
   </header>
 
@@ -1684,32 +1684,35 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>一次刷新做什么</h3>
       <p>
-        <span class="seg" data-seg="statusbar-04">一次刷新分三步。第一步，扩展调用 pi auth，读取当前模型所属服务商的凭据。</span>
-        <span class="seg" data-seg="statusbar-05">第二步，扩展带凭据请求服务商的用量接口。读凭据和请求接口各有 15 秒超时。</span>
-        <span class="seg" data-seg="statusbar-06" data-say="第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。openai codex 显示周额度，zai coding cn 显示 5 小时和周额度，kimi coding 显示 5 小时额度，老套餐附周额度，新套餐附月度额度。">第三步，扩展挑出额度窗口，显示剩余百分比。额度窗口是按时间段统计的限额。<code>openai-codex</code> 显示周额度，<code>zai-coding-cn</code> 显示 5 小时和周额度，<code>kimi-coding</code> 显示 5 小时额度，老套餐附周额度，新套餐附月度额度。</span>
-        <span class="seg" data-seg="statusbar-07">请求失败时，状态栏保留这个服务商上次成功的值。从没成功过时，额度一项为空。</span>
+        <span class="seg" data-seg="statusbar-04">一次刷新分三步。第一步，扩展读取当前模型所属服务商的凭据。Antigravity 从当前 provider 获取 JSON 凭据，其他服务商调用 pi auth。</span>
+        <span class="seg" data-seg="statusbar-05">第二步，扩展带凭据请求服务商的用量接口。前三个服务商读取凭据和请求接口各有 15 秒超时。Antigravity 使用固定官方 endpoint 回退，总网络超时 15 秒。</span>
+        <span class="seg" data-seg="statusbar-06" data-say="第三步，扩展挑出额度窗口或当前模型配额，显示剩余百分比。额度窗口是按时间段统计的限额。openai codex 显示周额度，zai coding cn 显示 5 小时和周额度，kimi coding 显示 5 小时额度，老套餐附周额度，新套餐附月度额度。antigravity 显示 quota 60% left 这样的当前模型配额。这个配额可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。">第三步，扩展挑出额度窗口或当前模型配额，显示剩余百分比。额度窗口是按时间段统计的限额。<code>openai-codex</code> 显示周额度，<code>zai-coding-cn</code> 显示 5 小时和周额度，<code>kimi-coding</code> 显示 5 小时额度，老套餐附周额度，新套餐附月度额度。<code>antigravity</code> 显示 <code>quota 60% left</code> 这样的当前模型配额。这个配额可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。</span>
+        <span class="seg" data-seg="statusbar-07">请求失败时，其他服务商保留上次成功的值。Antigravity 找不到当前模型配额或查询失败时隐藏旧值。从没成功过时，额度一项为空。</span>
       </p>
       <ul>
-        <li>当前模型来自其他服务商时，额度一项为空。</li>
-        <li>剩余百分比 = 100 − 已用百分比，限制在 0～100，四舍五入。</li>
+        <li>当前模型来自其他服务商时，额度一项为空。Antigravity 额度需要先安装并启用 <code>pi-antigravity</code>。</li>
+        <li>Codex、智谱和 Kimi 的剩余百分比 = 100 − 已用百分比，限制在 0～100，四舍五入。Antigravity 只接受有限数值 <code>remainingFraction</code>，约束到 0～1，再乘 100 并四舍五入；多个同模型变体取最低值。</li>
+        <li>Antigravity 按当前模型精确 ID 匹配，也匹配去掉 <code>-extra-low</code>、<code>-extra-high</code>、<code>-minimal</code>、<code>-medium</code>、<code>-high</code>、<code>-low</code>、<code>-thinking</code>、<code>-tiered</code> 后缀的运行变体。<code>gemini-3.1-pro</code> 还匹配 <code>gemini-pro-agent</code>，<code>gemini-3.5-flash</code> 还匹配 <code>gemini-3-flash-agent</code>。</li>
+        <li>Antigravity 每次刷新重新解析当前账号凭据。账号变化在下一刷新生效，扩展不主动监听账号切换。切换模型会强制查询，不显示旧模型缓存。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-statusbar-2">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 436" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
-          <title id="fig-statusbar-2-title">三个服务商的一次刷新</title>
-          <desc id="fig-statusbar-2-desc">三条泳道。openai-codex：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 chatgpt.com/backend-api/wham/usage，取 6～8 天的周窗口，显示 weekly 63% left（示例）。zai-coding-cn：pi auth print-api-key 读取 API Key，请求 open.bigmodel.cn/api/monitor/usage/quota/limit，取 5 小时窗口和周窗口，显示 5h 82% left · weekly 47% left（示例）。kimi-coding：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 api.kimi.com/coding/v1/usages，取 5 小时窗口，老套餐附周窗口（limit_7d），新套餐附月度窗口（limit_month_code），显示 5h 86% left · monthly 99% left（新套餐示例）。读凭据和请求接口各有 15 秒超时。请求失败或缺少所需窗口时，保留该服务商上次成功的值，从没成功过就为空。</desc>
+        <svg viewBox="0 0 640 552" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
+          <title id="fig-statusbar-2-title">四个服务商的一次刷新</title>
+          <desc id="fig-statusbar-2-desc">四条泳道。openai-codex：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 chatgpt.com/backend-api/wham/usage，取 6～8 天的周窗口，显示 weekly 63% left（示例）。zai-coding-cn：pi auth print-api-key 读取 API Key，请求 open.bigmodel.cn/api/monitor/usage/quota/limit，取 5 小时窗口和周窗口，显示 5h 82% left · weekly 47% left（示例）。kimi-coding：pi auth print-bearer-token --min-expiry 5m 读取令牌，请求 api.kimi.com/coding/v1/usages，取 5 小时窗口，老套餐附周窗口（limit_7d），新套餐附月度窗口（limit_month_code），显示 5h 86% left · monthly 99% left（新套餐示例）。antigravity：从当前 provider 获取 JSON 凭据，POST 固定官方 endpoint 的 /v1internal:fetchAvailableModels，显示当前模型配额 quota 60% left（示例），配额可能使用共享池。前三个服务商读取凭据和请求接口各有 15 秒超时；Antigravity 的所有 endpoint 回退共用 15 秒网络超时。前三个服务商请求失败或缺少所需窗口时保留上次成功的值；Antigravity 找不到配额或查询失败时隐藏旧值。从没成功过就为空。</desc>
           <defs>
             <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
             <marker id="fig-statusbar-2-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--link)"/></marker>
           </defs>
 
-          <text class="t-cap" x="12" y="20">① 读取凭据（15 秒）</text>
-          <text class="t-cap" x="200" y="20">② 请求用量接口（15 秒）</text>
+          <text class="t-cap" x="12" y="20">① 读取凭据</text>
+          <text class="t-cap" x="200" y="20">② 请求用量接口</text>
           <text class="t-cap" x="404" y="20">③ 显示（示例值）</text>
           <text class="t" x="12" y="48">openai-codex</text>
           <text class="t" x="12" y="160">zai-coding-cn</text>
           <text class="t" x="12" y="272">kimi-coding</text>
+          <text class="t" x="12" y="384">antigravity</text>
 
           <g data-cue="statusbar-04">
             <rect class="n" x="12" y="56" width="164" height="80" rx="6"/>
@@ -1723,6 +1726,10 @@ const featureApi = Object.assign(Object.create(pi), {
             <text class="t" x="24" y="304">pi auth</text>
             <text class="t-sub" x="24" y="326">print-bearer-token</text>
             <text class="t-sub" x="24" y="344">--min-expiry 5m</text>
+            <rect class="n" x="12" y="392" width="164" height="80" rx="6"/>
+            <text class="t" x="24" y="416">当前 provider</text>
+            <text class="t-sub" x="24" y="438">getApiKeyForProvider</text>
+            <text class="t-sub" x="24" y="456">JSON 凭据</text>
           </g>
 
           <g data-cue="statusbar-05">
@@ -1740,6 +1747,11 @@ const featureApi = Object.assign(Object.create(pi), {
             <rect class="n is-ext" x="200" y="280" width="180" height="80" rx="6"/>
             <text class="t" x="212" y="304">api.kimi.com</text>
             <text class="t-sub" x="212" y="326">/coding/v1/usages</text>
+            <path class="w is-link" d="M176 432 H200" marker-end="url(#fig-statusbar-2-arrow-link)"/>
+            <rect class="n is-ext" x="200" y="392" width="180" height="80" rx="6"/>
+            <text class="t" x="212" y="416">Google 固定 endpoint</text>
+            <text class="t-sub" x="212" y="438">POST /v1internal:</text>
+            <text class="t-sub" x="212" y="456">fetchAvailableModels</text>
           </g>
 
           <g data-cue="statusbar-06">
@@ -1757,12 +1769,17 @@ const featureApi = Object.assign(Object.create(pi), {
             <text class="t" x="416" y="304">5 小时窗口 + 周/月窗口</text>
             <text class="t-sub" x="416" y="326">5h 86% left ·</text>
             <text class="t-sub" x="416" y="344">monthly 99% left</text>
+            <path class="w" d="M380 432 H404" marker-end="url(#fig-statusbar-2-arrow)"/>
+            <rect class="n is-focal" x="404" y="392" width="224" height="80" rx="6"/>
+            <text class="t" x="416" y="416">当前模型配额（可能共享）</text>
+            <text class="t-sub" x="416" y="444">quota 60% left</text>
+            <text class="t-cap" x="416" y="462">多个变体取最低值</text>
           </g>
 
           <g data-cue="statusbar-07">
-            <line x1="12" y1="380" x2="628" y2="380" style="stroke:var(--rule);stroke-width:1"/>
-            <text class="t-cap" x="12" y="402">请求失败或缺少所需窗口：保留该服务商上次成功的值</text>
-            <text class="t-cap" x="12" y="424">从没成功过：额度一项为空</text>
+            <line x1="12" y1="496" x2="628" y2="496" style="stroke:var(--rule);stroke-width:1"/>
+            <text class="t-cap" x="12" y="518">其他服务商失败或缺少窗口：保留上次成功的值</text>
+            <text class="t-cap" x="12" y="540">Antigravity 找不到配额或失败：隐藏旧值；从没成功过：为空</text>
           </g>
 
           <g data-cue="statusbar-05" data-cue-mode="active">
@@ -1775,20 +1792,23 @@ const featureApi = Object.assign(Object.create(pi), {
             <circle class="dot" r="4" cx="176" cy="320">
               <animateMotion dur="1.4s" begin="indefinite" fill="freeze" path="M0 0 H228"/>
             </circle>
+            <circle class="dot" r="4" cx="176" cy="432">
+              <animateMotion dur="1.4s" begin="indefinite" fill="freeze" path="M0 0 H228"/>
+            </circle>
           </g>
         </svg>
       </div>
       <div class="table-scroll"><table>
-        <thead><tr><th></th><th><code>openai-codex</code></th><th><code>zai-coding-cn</code></th><th><code>kimi-coding</code></th></tr></thead>
+        <thead><tr><th></th><th><code>openai-codex</code></th><th><code>zai-coding-cn</code></th><th><code>kimi-coding</code></th><th><code>antigravity</code></th></tr></thead>
         <tbody>
-          <tr><th>请求头</th><td><code>Bearer &lt;token&gt;</code><br><code>ChatGPT-Account-ID</code>（可选）</td><td><code>&lt;API Key&gt;</code>（无 <code>Bearer</code>）</td><td><code>Bearer &lt;token&gt;</code></td></tr>
-          <tr><th>限额来源</th><td><code>rate_limit</code><br><code>additional_rate_limits</code></td><td><code>TOKENS_LIMIT</code><br><code>CREDIT_LIMIT</code></td><td><code>usages</code></td></tr>
-          <tr><th>5 小时窗口</th><td>—</td><td><code>unit 3, number 5</code></td><td><code>limit_5h</code></td></tr>
-          <tr><th>周窗口</th><td><code>primary_window</code><br><code>secondary_window</code>（6～8 天）</td><td><code>unit 6, number 1</code></td><td><code>limit_7d</code>（老套餐）</td></tr>
-          <tr><th>月窗口</th><td>—</td><td>—</td><td><code>limit_month_code</code>，缺失时 <code>limit_month_total</code>（新套餐，无周窗口时显示）</td></tr>
+          <tr><th>请求头</th><td><code>Bearer &lt;token&gt;</code><br><code>ChatGPT-Account-ID</code>（可选）</td><td><code>&lt;API Key&gt;</code>（无 <code>Bearer</code>）</td><td><code>Bearer &lt;token&gt;</code></td><td><code>Bearer &lt;token&gt;</code></td></tr>
+          <tr><th>限额来源</th><td><code>rate_limit</code><br><code>additional_rate_limits</code></td><td><code>TOKENS_LIMIT</code><br><code>CREDIT_LIMIT</code></td><td><code>usages</code></td><td><code>models</code><br><code>quotaInfo.remainingFraction</code></td></tr>
+          <tr><th>5 小时窗口</th><td>—</td><td><code>unit 3, number 5</code></td><td><code>limit_5h</code></td><td>—</td></tr>
+          <tr><th>周窗口</th><td><code>primary_window</code><br><code>secondary_window</code>（6～8 天）</td><td><code>unit 6, number 1</code></td><td><code>limit_7d</code>（老套餐）</td><td>—</td></tr>
+          <tr><th>月窗口</th><td>—</td><td>—</td><td><code>limit_month_code</code>，缺失时 <code>limit_month_total</code>（新套餐，无周窗口时显示）</td><td>—</td></tr>
         </tbody>
       </table></div>
-      <figcaption>三个服务商各走一条泳道；第 ③ 列的数值是示例。</figcaption>
+      <figcaption>四个服务商各走一条泳道；第 ③ 列的数值是示例。</figcaption>
     </figure>
   </div>
 
@@ -3569,7 +3589,7 @@ npm view &lt;包名&gt; version \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=92ff1920","duration":1298.2,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.28},{"id":"overview-01","ch":"overview","start":3.6,"end":12.4},{"id":"overview-02","ch":"overview","start":12.72,"end":24.48},{"id":"overview-03","ch":"overview","start":24.8,"end":31.6},{"id":"overview-04","ch":"overview","start":31.92,"end":41.2},{"id":"overview-05","ch":"overview","start":41.52,"end":51.6},{"id":"overview-06","ch":"overview","start":51.92,"end":69.36},{"id":"overview-07","ch":"overview","start":69.68,"end":74.56},{"id":"entry-00","ch":"entry","start":75.46,"end":78.74},{"id":"entry-01","ch":"entry","start":79.06,"end":91.62},{"id":"entry-02","ch":"entry","start":91.94,"end":100.58},{"id":"entry-03","ch":"entry","start":100.9,"end":105.7},{"id":"entry-04","ch":"entry","start":106.02,"end":110.58},{"id":"entry-05","ch":"entry","start":110.9,"end":116.9},{"id":"entry-06","ch":"entry","start":117.22,"end":123.22},{"id":"entry-07","ch":"entry","start":123.54,"end":131.38},{"id":"entry-08","ch":"entry","start":131.7,"end":138.9},{"id":"entry-09","ch":"entry","start":139.22,"end":148.18},{"id":"entry-10","ch":"entry","start":148.5,"end":166.82},{"id":"entry-11","ch":"entry","start":167.14,"end":173.62},{"id":"entry-12","ch":"entry","start":173.94,"end":178.26},{"id":"entry-13","ch":"entry","start":178.58,"end":185.78},{"id":"entry-14","ch":"entry","start":186.1,"end":192.5},{"id":"entry-15","ch":"entry","start":192.82,"end":200.74},{"id":"entry-16","ch":"entry","start":201.06,"end":210.02},{"id":"entry-17","ch":"entry","start":210.34,"end":221.78},{"id":"message-00","ch":"message","start":222.68,"end":225.72},{"id":"message-01","ch":"message","start":226.04,"end":237.32},{"id":"message-02","ch":"message","start":237.64,"end":246.12},{"id":"message-03","ch":"message","start":246.44,"end":254.04},{"id":"message-04","ch":"message","start":254.36,"end":266.2},{"id":"message-05","ch":"message","start":266.52,"end":274.36},{"id":"message-06","ch":"message","start":274.68,"end":283.16},{"id":"message-07","ch":"message","start":283.48,"end":292.28},{"id":"message-08","ch":"message","start":292.6,"end":306.92},{"id":"message-09","ch":"message","start":307.24,"end":317.72},{"id":"message-10","ch":"message","start":318.04,"end":326.2},{"id":"message-11","ch":"message","start":326.52,"end":335.32},{"id":"message-12","ch":"message","start":335.64,"end":350.28},{"id":"message-13","ch":"message","start":350.6,"end":358.6},{"id":"message-14","ch":"message","start":358.92,"end":369.72},{"id":"message-15","ch":"message","start":370.04,"end":376.6},{"id":"message-16","ch":"message","start":376.92,"end":385.08},{"id":"message-17","ch":"message","start":385.4,"end":391.8},{"id":"message-18","ch":"message","start":392.12,"end":395.72},{"id":"message-19","ch":"message","start":396.04,"end":403.4},{"id":"message-20","ch":"message","start":403.72,"end":409.64},{"id":"statusbar-00","ch":"statusbar","start":410.54,"end":413.02},{"id":"statusbar-01","ch":"statusbar","start":413.34,"end":427.5},{"id":"statusbar-02","ch":"statusbar","start":427.82,"end":438.38},{"id":"statusbar-03","ch":"statusbar","start":438.7,"end":447.18},{"id":"statusbar-04","ch":"statusbar","start":447.5,"end":455.58},{"id":"statusbar-05","ch":"statusbar","start":455.9,"end":464.38},{"id":"statusbar-06","ch":"statusbar","start":464.7,"end":488.3},{"id":"statusbar-07","ch":"statusbar","start":488.62,"end":496.38},{"id":"statusbar-08","ch":"statusbar","start":496.7,"end":511.18},{"id":"statusbar-09","ch":"statusbar","start":511.5,"end":524.3},{"id":"statusbar-10","ch":"statusbar","start":524.62,"end":532.78},{"id":"statusbar-11","ch":"statusbar","start":533.1,"end":539.42},{"id":"statusbar-12","ch":"statusbar","start":539.74,"end":546.22},{"id":"statusbar-13","ch":"statusbar","start":546.54,"end":551.74},{"id":"statusbar-14","ch":"statusbar","start":552.06,"end":559.9},{"id":"statusbar-15","ch":"statusbar","start":560.22,"end":568.3},{"id":"title-00","ch":"title","start":569.2,"end":572.64},{"id":"title-01","ch":"title","start":572.96,"end":582.32},{"id":"title-02","ch":"title","start":582.64,"end":597.92},{"id":"title-03","ch":"title","start":598.24,"end":606.16},{"id":"title-04","ch":"title","start":606.48,"end":616.48},{"id":"title-05","ch":"title","start":616.8,"end":624.96},{"id":"title-06","ch":"title","start":625.28,"end":634.88},{"id":"title-07","ch":"title","start":635.2,"end":645.6},{"id":"title-08","ch":"title","start":645.92,"end":657.6},{"id":"title-09","ch":"title","start":657.92,"end":668.8},{"id":"title-10","ch":"title","start":669.12,"end":674.24},{"id":"title-11","ch":"title","start":674.56,"end":682.24},{"id":"title-12","ch":"title","start":682.56,"end":690.4},{"id":"title-13","ch":"title","start":690.72,"end":698.16},{"id":"title-14","ch":"title","start":698.48,"end":708.8},{"id":"title-15","ch":"title","start":709.12,"end":718.72},{"id":"title-16","ch":"title","start":719.04,"end":731.28},{"id":"title-17","ch":"title","start":731.6,"end":736.48},{"id":"title-18","ch":"title","start":736.8,"end":742.32},{"id":"title-19","ch":"title","start":742.64,"end":749.28},{"id":"title-20","ch":"title","start":749.6,"end":758.96},{"id":"title-21","ch":"title","start":759.28,"end":765.04},{"id":"title-22","ch":"title","start":765.36,"end":776.88},{"id":"title-23","ch":"title","start":777.2,"end":785.44},{"id":"title-24","ch":"title","start":785.76,"end":793.76},{"id":"title-25","ch":"title","start":794.08,"end":806.4},{"id":"title-26","ch":"title","start":806.72,"end":815.04},{"id":"title-27","ch":"title","start":815.36,"end":823.68},{"id":"effort-00","ch":"effort","start":824.58,"end":828.18},{"id":"effort-01","ch":"effort","start":828.5,"end":846.02},{"id":"effort-02","ch":"effort","start":846.34,"end":875.46},{"id":"effort-03","ch":"effort","start":875.78,"end":888.1},{"id":"effort-04","ch":"effort","start":888.42,"end":891.62},{"id":"effort-05","ch":"effort","start":891.94,"end":901.94},{"id":"effort-06","ch":"effort","start":902.26,"end":911.22},{"id":"effort-07","ch":"effort","start":911.54,"end":915.62},{"id":"effort-08","ch":"effort","start":915.94,"end":919.94},{"id":"effort-09","ch":"effort","start":920.26,"end":931.86},{"id":"effort-10","ch":"effort","start":932.18,"end":946.5},{"id":"effort-11","ch":"effort","start":946.82,"end":962.82},{"id":"effort-12","ch":"effort","start":963.14,"end":977.7},{"id":"effort-13","ch":"effort","start":978.02,"end":989.22},{"id":"effort-14","ch":"effort","start":989.54,"end":999.46},{"id":"effort-14a","ch":"effort","start":999.78,"end":1024.02},{"id":"effort-14b","ch":"effort","start":1024.34,"end":1052.26},{"id":"effort-14c","ch":"effort","start":1052.58,"end":1086.26},{"id":"effort-14d","ch":"effort","start":1086.58,"end":1106.82},{"id":"effort-15","ch":"effort","start":1107.14,"end":1121.14},{"id":"effort-16","ch":"effort","start":1121.46,"end":1134.02},{"id":"effort-17","ch":"effort","start":1134.34,"end":1142.1},{"id":"effort-18","ch":"effort","start":1142.42,"end":1156.1},{"id":"effort-19","ch":"effort","start":1156.42,"end":1168.58},{"id":"effort-20","ch":"effort","start":1168.9,"end":1182.5},{"id":"effort-21","ch":"effort","start":1182.82,"end":1196.26},{"id":"effort-22","ch":"effort","start":1196.58,"end":1206.18},{"id":"effort-23","ch":"effort","start":1206.5,"end":1221.94},{"id":"effort-24","ch":"effort","start":1222.26,"end":1231.86},{"id":"effort-25","ch":"effort","start":1232.18,"end":1244.1},{"id":"setup-00","ch":"setup","start":1245,"end":1247.08},{"id":"setup-01","ch":"setup","start":1247.4,"end":1256.84},{"id":"setup-02","ch":"setup","start":1257.16,"end":1263.88},{"id":"setup-03","ch":"setup","start":1264.2,"end":1270.36},{"id":"setup-04","ch":"setup","start":1270.68,"end":1277.64},{"id":"setup-05","ch":"setup","start":1277.96,"end":1282.36},{"id":"setup-06","ch":"setup","start":1282.68,"end":1293},{"id":"setup-07","ch":"setup","start":1293.32,"end":1298.2}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=faaee3b1","duration":1329.08,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.28},{"id":"overview-01","ch":"overview","start":3.6,"end":12.4},{"id":"overview-02","ch":"overview","start":12.72,"end":24.48},{"id":"overview-03","ch":"overview","start":24.8,"end":31.6},{"id":"overview-04","ch":"overview","start":31.92,"end":41.2},{"id":"overview-05","ch":"overview","start":41.52,"end":51.6},{"id":"overview-06","ch":"overview","start":51.92,"end":69.36},{"id":"overview-07","ch":"overview","start":69.68,"end":74.56},{"id":"entry-00","ch":"entry","start":75.46,"end":78.74},{"id":"entry-01","ch":"entry","start":79.06,"end":91.62},{"id":"entry-02","ch":"entry","start":91.94,"end":100.58},{"id":"entry-03","ch":"entry","start":100.9,"end":105.7},{"id":"entry-04","ch":"entry","start":106.02,"end":110.58},{"id":"entry-05","ch":"entry","start":110.9,"end":116.9},{"id":"entry-06","ch":"entry","start":117.22,"end":123.22},{"id":"entry-07","ch":"entry","start":123.54,"end":131.38},{"id":"entry-08","ch":"entry","start":131.7,"end":138.9},{"id":"entry-09","ch":"entry","start":139.22,"end":148.18},{"id":"entry-10","ch":"entry","start":148.5,"end":166.82},{"id":"entry-11","ch":"entry","start":167.14,"end":173.62},{"id":"entry-12","ch":"entry","start":173.94,"end":178.26},{"id":"entry-13","ch":"entry","start":178.58,"end":185.78},{"id":"entry-14","ch":"entry","start":186.1,"end":192.5},{"id":"entry-15","ch":"entry","start":192.82,"end":200.74},{"id":"entry-16","ch":"entry","start":201.06,"end":210.02},{"id":"entry-17","ch":"entry","start":210.34,"end":221.78},{"id":"message-00","ch":"message","start":222.68,"end":225.72},{"id":"message-01","ch":"message","start":226.04,"end":237.32},{"id":"message-02","ch":"message","start":237.64,"end":246.12},{"id":"message-03","ch":"message","start":246.44,"end":254.04},{"id":"message-04","ch":"message","start":254.36,"end":266.2},{"id":"message-05","ch":"message","start":266.52,"end":274.36},{"id":"message-06","ch":"message","start":274.68,"end":283.16},{"id":"message-07","ch":"message","start":283.48,"end":292.28},{"id":"message-08","ch":"message","start":292.6,"end":306.92},{"id":"message-09","ch":"message","start":307.24,"end":317.72},{"id":"message-10","ch":"message","start":318.04,"end":326.2},{"id":"message-11","ch":"message","start":326.52,"end":335.32},{"id":"message-12","ch":"message","start":335.64,"end":350.28},{"id":"message-13","ch":"message","start":350.6,"end":358.6},{"id":"message-14","ch":"message","start":358.92,"end":369.72},{"id":"message-15","ch":"message","start":370.04,"end":376.6},{"id":"message-16","ch":"message","start":376.92,"end":385.08},{"id":"message-17","ch":"message","start":385.4,"end":391.8},{"id":"message-18","ch":"message","start":392.12,"end":395.72},{"id":"message-19","ch":"message","start":396.04,"end":403.4},{"id":"message-20","ch":"message","start":403.72,"end":409.64},{"id":"statusbar-00","ch":"statusbar","start":410.54,"end":413.02},{"id":"statusbar-01","ch":"statusbar","start":413.34,"end":427.5},{"id":"statusbar-02","ch":"statusbar","start":427.82,"end":438.38},{"id":"statusbar-03","ch":"statusbar","start":438.7,"end":447.18},{"id":"statusbar-04","ch":"statusbar","start":447.5,"end":460.7},{"id":"statusbar-05","ch":"statusbar","start":461.02,"end":476.54},{"id":"statusbar-06","ch":"statusbar","start":476.86,"end":512.46},{"id":"statusbar-07","ch":"statusbar","start":512.78,"end":527.26},{"id":"statusbar-08","ch":"statusbar","start":527.58,"end":542.06},{"id":"statusbar-09","ch":"statusbar","start":542.38,"end":555.18},{"id":"statusbar-10","ch":"statusbar","start":555.5,"end":563.66},{"id":"statusbar-11","ch":"statusbar","start":563.98,"end":570.3},{"id":"statusbar-12","ch":"statusbar","start":570.62,"end":577.1},{"id":"statusbar-13","ch":"statusbar","start":577.42,"end":582.62},{"id":"statusbar-14","ch":"statusbar","start":582.94,"end":590.78},{"id":"statusbar-15","ch":"statusbar","start":591.1,"end":599.18},{"id":"title-00","ch":"title","start":600.08,"end":603.52},{"id":"title-01","ch":"title","start":603.84,"end":613.2},{"id":"title-02","ch":"title","start":613.52,"end":628.8},{"id":"title-03","ch":"title","start":629.12,"end":637.04},{"id":"title-04","ch":"title","start":637.36,"end":647.36},{"id":"title-05","ch":"title","start":647.68,"end":655.84},{"id":"title-06","ch":"title","start":656.16,"end":665.76},{"id":"title-07","ch":"title","start":666.08,"end":676.48},{"id":"title-08","ch":"title","start":676.8,"end":688.48},{"id":"title-09","ch":"title","start":688.8,"end":699.68},{"id":"title-10","ch":"title","start":700,"end":705.12},{"id":"title-11","ch":"title","start":705.44,"end":713.12},{"id":"title-12","ch":"title","start":713.44,"end":721.28},{"id":"title-13","ch":"title","start":721.6,"end":729.04},{"id":"title-14","ch":"title","start":729.36,"end":739.68},{"id":"title-15","ch":"title","start":740,"end":749.6},{"id":"title-16","ch":"title","start":749.92,"end":762.16},{"id":"title-17","ch":"title","start":762.48,"end":767.36},{"id":"title-18","ch":"title","start":767.68,"end":773.2},{"id":"title-19","ch":"title","start":773.52,"end":780.16},{"id":"title-20","ch":"title","start":780.48,"end":789.84},{"id":"title-21","ch":"title","start":790.16,"end":795.92},{"id":"title-22","ch":"title","start":796.24,"end":807.76},{"id":"title-23","ch":"title","start":808.08,"end":816.32},{"id":"title-24","ch":"title","start":816.64,"end":824.64},{"id":"title-25","ch":"title","start":824.96,"end":837.28},{"id":"title-26","ch":"title","start":837.6,"end":845.92},{"id":"title-27","ch":"title","start":846.24,"end":854.56},{"id":"effort-00","ch":"effort","start":855.46,"end":859.06},{"id":"effort-01","ch":"effort","start":859.38,"end":876.9},{"id":"effort-02","ch":"effort","start":877.22,"end":906.34},{"id":"effort-03","ch":"effort","start":906.66,"end":918.98},{"id":"effort-04","ch":"effort","start":919.3,"end":922.5},{"id":"effort-05","ch":"effort","start":922.82,"end":932.82},{"id":"effort-06","ch":"effort","start":933.14,"end":942.1},{"id":"effort-07","ch":"effort","start":942.42,"end":946.5},{"id":"effort-08","ch":"effort","start":946.82,"end":950.82},{"id":"effort-09","ch":"effort","start":951.14,"end":962.74},{"id":"effort-10","ch":"effort","start":963.06,"end":977.38},{"id":"effort-11","ch":"effort","start":977.7,"end":993.7},{"id":"effort-12","ch":"effort","start":994.02,"end":1008.58},{"id":"effort-13","ch":"effort","start":1008.9,"end":1020.1},{"id":"effort-14","ch":"effort","start":1020.42,"end":1030.34},{"id":"effort-14a","ch":"effort","start":1030.66,"end":1054.9},{"id":"effort-14b","ch":"effort","start":1055.22,"end":1083.14},{"id":"effort-14c","ch":"effort","start":1083.46,"end":1117.14},{"id":"effort-14d","ch":"effort","start":1117.46,"end":1137.7},{"id":"effort-15","ch":"effort","start":1138.02,"end":1152.02},{"id":"effort-16","ch":"effort","start":1152.34,"end":1164.9},{"id":"effort-17","ch":"effort","start":1165.22,"end":1172.98},{"id":"effort-18","ch":"effort","start":1173.3,"end":1186.98},{"id":"effort-19","ch":"effort","start":1187.3,"end":1199.46},{"id":"effort-20","ch":"effort","start":1199.78,"end":1213.38},{"id":"effort-21","ch":"effort","start":1213.7,"end":1227.14},{"id":"effort-22","ch":"effort","start":1227.46,"end":1237.06},{"id":"effort-23","ch":"effort","start":1237.38,"end":1252.82},{"id":"effort-24","ch":"effort","start":1253.14,"end":1262.74},{"id":"effort-25","ch":"effort","start":1263.06,"end":1274.98},{"id":"setup-00","ch":"setup","start":1275.88,"end":1277.96},{"id":"setup-01","ch":"setup","start":1278.28,"end":1287.72},{"id":"setup-02","ch":"setup","start":1288.04,"end":1294.76},{"id":"setup-03","ch":"setup","start":1295.08,"end":1301.24},{"id":"setup-04","ch":"setup","start":1301.56,"end":1308.52},{"id":"setup-05","ch":"setup","start":1308.84,"end":1313.24},{"id":"setup-06","ch":"setup","start":1313.56,"end":1323.88},{"id":"setup-07","ch":"setup","start":1324.2,"end":1329.08}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

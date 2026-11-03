@@ -111,7 +111,9 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 
 在 `/personal → 状态栏：额度、会话 ID 与配色` 中统一启停额度、会话 ID 和配色选择功能。通过「选择 pi-statusline 自定义配色」选择 11 套配色：TUI 支持实时预览，RPC 使用普通列表。应用后覆盖 `pi-statusline.json` 中的自定义配色（`palettePreset: "custom"`），并设为紧凑布局、圆角分隔符，再自动重载；不改变 Pi 主题。需另行安装并启用 pi-statusline。
 
-额度与会话 ID 由本包提供。配色需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含该状态栏本体。额度显示支持 `openai-codex` 周额度、`zai-coding-cn` 的 5 小时和周额度，以及 `kimi-coding` 的 5 小时额度（老套餐另显示周额度，新套餐另显示月度额度）。
+额度与会话 ID 由本包提供。配色需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含该状态栏本体。额度显示支持 `openai-codex` 周额度、`zai-coding-cn` 的 5 小时和周额度、`kimi-coding` 的 5 小时额度（老套餐另显示周额度，新套餐另显示月度额度），以及 `antigravity` 的当前模型配额（例如 `quota 60% left`）。
+
+Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前 provider 获取 JSON 凭据，请求 Google `fetchAvailableModels`，再按当前模型 ID、运行变体或指定别名匹配配额；多个同模型变体取最低剩余值。`quota` 是当前模型在服务端对应的配额，可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。找不到配额或查询失败时隐藏 Antigravity 旧值，其他服务商仍保留各自缓存。每次刷新都会重新解析当前账号凭据，账号变化在下一刷新生效；扩展不主动监听账号切换。切换模型会强制查询，不显示旧模型缓存。刷新时机和冷却不变。
 
 ## 配置文件
 

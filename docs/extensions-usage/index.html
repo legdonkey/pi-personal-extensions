@@ -1112,7 +1112,7 @@ pi remove "$(pwd)"</code></pre>
     <dl class="meta">
       <dt>功能</dt><dd>状态栏：额度、会话 ID 与配色（一个开关）</dd>
       <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏：额度、会话 ID 与配色</dd>
-      <dt>前提</dt><dd>换配色需要先装 <code>npm:@narumitw/pi-statusline</code></dd>
+      <dt>前提</dt><dd>换配色需要先装 <code>npm:@narumitw/pi-statusline</code>；Antigravity 额度需要先装 <code>pi-antigravity</code></dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>pi-statusline.json</code>（默认 <code>~/.pi/agent/</code>）</dd>
     </dl>
   </header>
@@ -1123,7 +1123,7 @@ pi remove "$(pwd)"</code></pre>
       <h3>想看懂状态栏上的额度和会话 ID</h3>
       <p>
         <span class="seg" data-seg="statusbar-01">「状态栏：额度、会话 ID 与配色」在状态栏显示两样东西：当前会话 ID 的末尾 8 位，和当前服务商还剩多少额度。</span>
-        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。用 kimi coding 时也显示五小时额度，老套餐附周额度，新套餐附月度额度，也就是 monthly。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。用 <code>kimi-coding</code> 时也显示 5 小时额度，老套餐附周额度，新套餐附月度额度（<code>monthly</code>）。</span>
+        <span class="seg" data-seg="statusbar-02" data-say="用 openai codex 时显示周额度，也就是 weekly；用 zai coding cn 时，前面多一段五小时额度，也就是五 H。用 kimi coding 时也显示五小时额度，老套餐附周额度，新套餐附月度额度，也就是 monthly。用 antigravity 时显示 quota 60% left 这样的当前模型配额。这个配额可能使用共享池，不是独立的五小时或周额度，也不是 token 计数。">用 <code>openai-codex</code> 时显示周额度（<code>weekly</code>）；用 <code>zai-coding-cn</code> 时，前面多一段 5 小时额度（<code>5h</code>）。用 <code>kimi-coding</code> 时也显示 5 小时额度，老套餐附周额度，新套餐附月度额度（<code>monthly</code>）。用 <code>antigravity</code> 时显示 <code>quota 60% left</code> 这样的当前模型配额。这个配额可能使用共享池，不是独立的 5 小时或周额度，也不是 token 计数。</span>
       </p>
       <ul>
         <li>额度、会话 ID 和配色是同一项功能，共用一个开关。升级时，旧版的两个开关合成这一个：只有两个旧开关都关闭，才保持关闭；否则开启。</li>
@@ -1131,9 +1131,9 @@ pi remove "$(pwd)"</code></pre>
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 300" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
+        <svg viewBox="0 0 640 400" role="img" aria-labelledby="fig-statusbar-1-title fig-statusbar-1-desc">
           <title id="fig-statusbar-1-title">状态栏上的额度和会话 ID（示例）</title>
-          <desc id="fig-statusbar-1-desc">三段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。kimi-coding 新套餐：5h 86% left 表示 5 小时额度还剩 86%，monthly 99% left 表示月度额度还剩 99%；老套餐第二段为 weekly。left 表示还剩。</desc>
+          <desc id="fig-statusbar-1-desc">四段示例状态栏。openai-codex：a1b2c3d4 是会话 ID 的末尾 8 位，weekly 63% left 表示周额度还剩 63%。zai-coding-cn：5h 82% left 表示 5 小时额度还剩 82%，weekly 47% left 表示周额度还剩 47%。kimi-coding 新套餐：5h 86% left 表示 5 小时额度还剩 86%，monthly 99% left 表示月度额度还剩 99%；老套餐第二段为 weekly。antigravity：quota 60% left 表示当前模型配额还剩 60%，配额可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。left 表示还剩。</desc>
 
           <text class="t-cap" x="12" y="24">openai-codex（示例）</text>
           <rect class="n" x="12" y="36" width="328" height="32" rx="4"/>
@@ -1175,6 +1175,16 @@ pi remove "$(pwd)"</code></pre>
           <text class="t-mono" x="200" y="281">·</text>
           <text class="t-mono" x="216" y="281">monthly 99% left</text>
           <text class="t-cap" x="424" y="281">monthly = 月度；老套餐为 weekly</text>
+
+          <g data-cue="statusbar-02">
+            <text class="t-cap" x="12" y="320">antigravity（示例）</text>
+            <rect class="n" x="12" y="332" width="316" height="32" rx="4"/>
+            <text class="t-mono" x="24" y="353">a1b2c3d4</text>
+            <text class="t-mono" x="96" y="353">•</text>
+            <text class="t-mono" x="112" y="353">quota 60% left</text>
+            <text class="t-cap" x="352" y="353">当前模型配额；可能使用共享池</text>
+            <text class="t-cap" x="12" y="388">不是独立的 5 小时或周窗口，也不是 token 计数</text>
+          </g>
         </svg>
       </div>
       <figcaption>数值是示例。</figcaption>
@@ -1186,19 +1196,20 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>额度一项是空的怎么办</h3>
       <ol>
-        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex、zai coding cn 和 kimi coding 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code>、<code>zai-coding-cn</code> 和 <code>kimi-coding</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
-        <li><span class="seg" data-seg="statusbar-04">如果服务商是这三个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。</span></li>
-        <li><span class="seg" data-seg="statusbar-05">等下一次查询，大约每 5 分钟一次；切换模型时会立即发起查询。数字一直不变，可能是查询失败，显示的是上次的值。</span></li>
+        <li><span class="seg" data-seg="statusbar-03" data-say="先看当前模型的服务商。只有 openai codex、zai coding cn、kimi coding 和 antigravity 显示额度。用其他服务商时，额度一项为空，属正常。">先看当前模型的服务商。只有 <code>openai-codex</code>、<code>zai-coding-cn</code>、<code>kimi-coding</code> 和 <code>antigravity</code> 显示额度。用其他服务商时，额度一项为空，属正常。</span></li>
+        <li><span class="seg" data-seg="statusbar-04">如果服务商是这四个之一，额度却还是空的：确认已登录这个服务商，并确认网络能连通。Antigravity 还要确认已启用 pi-antigravity。</span></li>
+        <li><span class="seg" data-seg="statusbar-05">等下一次查询，大约每 5 分钟一次；切换模型时会立即发起查询。其他服务商的数字一直不变，可能是查询失败，显示的是上次的值。Antigravity 查询失败会隐藏旧值。</span></li>
       </ol>
       <ul>
         <li>更新时机：会话开始、在会话树里跳转、切换模型时立即发起查询；之后每 5 分钟查询一次；Pi 每回复完一轮也会查询，但距上次查询开始不足 30 秒就跳过（失败的查询也算）。</li>
+        <li>Antigravity 每次查询重新读取当前账号凭据。账号变化在下一刷新生效，扩展不主动监听账号切换。切换模型会强制查询，不显示旧模型缓存。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-statusbar-2">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 316" role="img" aria-labelledby="fig-statusbar-2-title fig-statusbar-2-desc">
           <title id="fig-statusbar-2-title">额度为空时先查什么</title>
-          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex、zai-coding-cn 或 kimi-coding。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通，再等下一次查询（约 5 分钟内）。另外，数字一直不变时，可能是查询失败，显示的是上次的值。</desc>
+          <desc id="fig-statusbar-2-desc">决策图。额度一项是空的：先看当前模型的服务商是不是 openai-codex、zai-coding-cn、kimi-coding 或 antigravity。不是：不显示额度，属正常。是：说明还没查到过额度，按顺序确认已登录该服务商、确认网络能连通；Antigravity 还要确认已启用 pi-antigravity。然后等下一次查询（约 5 分钟内）。其他服务商的数字一直不变时，可能是查询失败，显示的是上次的值；Antigravity 查询失败会隐藏旧值。</desc>
           <defs>
             <marker id="fig-statusbar-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -1213,8 +1224,8 @@ pi remove "$(pwd)"</code></pre>
             <text class="t-cap" x="316" y="105" text-anchor="middle">否</text>
             <rect class="n" x="28" y="84" width="264" height="64" rx="6"/>
             <text class="t" x="40" y="104">当前模型的服务商是</text>
-            <text class="t-sub" x="40" y="124">openai-codex、zai-coding-cn</text>
-            <text class="t-sub" x="40" y="142">或 kimi-coding？</text>
+            <text class="t-sub" x="40" y="124">openai-codex、zai-coding-cn、</text>
+            <text class="t-sub" x="40" y="142">kimi-coding 或 antigravity？</text>
             <rect class="n is-ghost" x="340" y="84" width="288" height="64" rx="6"/>
             <text class="t" x="352" y="108">不显示额度</text>
             <text class="t-cap" x="352" y="130">其他服务商不支持，属正常</text>
@@ -1231,7 +1242,7 @@ pi remove "$(pwd)"</code></pre>
             <rect class="n is-ghost" x="340" y="160" width="288" height="108" rx="6"/>
             <text class="t" x="352" y="180">按顺序检查</text>
             <rect class="n" x="352" y="190" width="264" height="22" rx="4"/>
-            <text class="t-cap" x="362" y="205">1. 确认已登录这个服务商</text>
+            <text class="t-cap" x="362" y="205">1. 登录；Antigravity 需启用插件</text>
             <rect class="n" x="352" y="216" width="264" height="22" rx="4"/>
             <text class="t-cap" x="362" y="231">2. 确认网络能连通</text>
           </g>
@@ -1240,7 +1251,7 @@ pi remove "$(pwd)"</code></pre>
             <rect class="n" x="352" y="242" width="264" height="22" rx="4"/>
             <text class="t-cap" x="362" y="257">3. 等下一次查询（约 5 分钟内）</text>
             <line x1="12" y1="284" x2="628" y2="284" style="stroke:var(--rule);stroke-width:1"/>
-            <text class="t-cap" x="12" y="306">数字一直不变：可能是查询失败，显示的是上次的值</text>
+            <text class="t-cap" x="12" y="306">其他服务商失败可能显示旧值；Antigravity 失败会隐藏旧值</text>
           </g>
         </svg>
       </div>
@@ -2356,7 +2367,7 @@ npm install --ignore-scripts \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=1b1eb659","duration":719.38,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":10.08},{"id":"start-02","ch":"start","start":10.4,"end":17.44},{"id":"start-03","ch":"start","start":17.76,"end":24.16},{"id":"start-04","ch":"start","start":24.48,"end":36.72},{"id":"start-05","ch":"start","start":37.04,"end":59.92},{"id":"start-06","ch":"start","start":60.24,"end":68.16},{"id":"start-07","ch":"start","start":68.48,"end":74},{"id":"start-08","ch":"start","start":74.32,"end":83.04},{"id":"start-09","ch":"start","start":83.36,"end":86.88},{"id":"start-10","ch":"start","start":87.2,"end":95.28},{"id":"start-11","ch":"start","start":95.6,"end":104.56},{"id":"start-12","ch":"start","start":104.88,"end":109.84},{"id":"start-13","ch":"start","start":110.16,"end":112.96},{"id":"start-14","ch":"start","start":113.28,"end":116.88},{"id":"start-15","ch":"start","start":117.2,"end":123.04},{"id":"message-00","ch":"message","start":123.94,"end":126.82},{"id":"message-01","ch":"message","start":127.14,"end":135.62},{"id":"message-02","ch":"message","start":135.94,"end":139.78},{"id":"message-03","ch":"message","start":140.1,"end":146.02},{"id":"message-04","ch":"message","start":146.34,"end":154.1},{"id":"message-05","ch":"message","start":154.42,"end":159.06},{"id":"message-06","ch":"message","start":159.38,"end":167.78},{"id":"message-07","ch":"message","start":168.1,"end":174.02},{"id":"message-08","ch":"message","start":174.34,"end":183.62},{"id":"message-09","ch":"message","start":183.94,"end":190.98},{"id":"message-10","ch":"message","start":191.3,"end":199.06},{"id":"message-11","ch":"message","start":199.38,"end":204.5},{"id":"message-12","ch":"message","start":204.82,"end":216.74},{"id":"statusbar-00","ch":"statusbar","start":217.64,"end":220.52},{"id":"statusbar-01","ch":"statusbar","start":220.84,"end":232.68},{"id":"statusbar-02","ch":"statusbar","start":233,"end":253.8},{"id":"statusbar-03","ch":"statusbar","start":254.12,"end":266.2},{"id":"statusbar-04","ch":"statusbar","start":266.52,"end":275.56},{"id":"statusbar-05","ch":"statusbar","start":275.88,"end":286.92},{"id":"statusbar-06","ch":"statusbar","start":287.24,"end":295.48},{"id":"statusbar-07","ch":"statusbar","start":295.8,"end":301.56},{"id":"statusbar-08","ch":"statusbar","start":301.88,"end":306.84},{"id":"statusbar-09","ch":"statusbar","start":307.16,"end":312.44},{"id":"statusbar-10","ch":"statusbar","start":312.76,"end":316.2},{"id":"statusbar-11","ch":"statusbar","start":316.52,"end":324.12},{"id":"title-00","ch":"title","start":325.02,"end":329.1},{"id":"title-01","ch":"title","start":329.42,"end":338.54},{"id":"title-02","ch":"title","start":338.86,"end":346.78},{"id":"title-03","ch":"title","start":347.1,"end":352.14},{"id":"title-04","ch":"title","start":352.46,"end":358.22},{"id":"title-05","ch":"title","start":358.54,"end":371.26},{"id":"title-06","ch":"title","start":371.58,"end":381.74},{"id":"title-07","ch":"title","start":382.06,"end":393.74},{"id":"title-08","ch":"title","start":394.06,"end":404.62},{"id":"title-09","ch":"title","start":404.94,"end":411.74},{"id":"title-10","ch":"title","start":412.06,"end":424.14},{"id":"title-11","ch":"title","start":424.46,"end":431.1},{"id":"title-12","ch":"title","start":431.42,"end":434.86},{"id":"title-13","ch":"title","start":435.18,"end":451.9},{"id":"title-14","ch":"title","start":452.22,"end":455.98},{"id":"effort-00","ch":"effort","start":456.88,"end":460.96},{"id":"effort-01","ch":"effort","start":461.28,"end":470.96},{"id":"effort-02","ch":"effort","start":471.28,"end":473.76},{"id":"effort-03","ch":"effort","start":474.08,"end":494.16},{"id":"effort-04","ch":"effort","start":494.48,"end":501.2},{"id":"effort-05","ch":"effort","start":501.52,"end":513.36},{"id":"effort-06","ch":"effort","start":513.68,"end":519.36},{"id":"effort-07","ch":"effort","start":519.68,"end":534.56},{"id":"effort-07a","ch":"effort","start":534.88,"end":552.48},{"id":"effort-07b","ch":"effort","start":552.8,"end":570},{"id":"effort-08","ch":"effort","start":570.32,"end":578.4},{"id":"effort-09","ch":"effort","start":578.72,"end":584.08},{"id":"effort-10","ch":"effort","start":584.4,"end":596.32},{"id":"effort-11","ch":"effort","start":596.64,"end":600.16},{"id":"effort-12","ch":"effort","start":600.48,"end":602.32},{"id":"effort-13","ch":"effort","start":602.64,"end":606.48},{"id":"effort-14","ch":"effort","start":606.8,"end":613.44},{"id":"effort-15","ch":"effort","start":613.76,"end":620.88},{"id":"effort-16","ch":"effort","start":621.2,"end":629.68},{"id":"effort-17","ch":"effort","start":630,"end":640.08},{"id":"effort-18","ch":"effort","start":640.4,"end":648.48},{"id":"effort-19","ch":"effort","start":648.8,"end":661.92},{"id":"faq-00","ch":"faq","start":662.82,"end":666.42},{"id":"faq-01","ch":"faq","start":666.74,"end":676.74},{"id":"faq-02","ch":"faq","start":677.06,"end":683.14},{"id":"faq-03","ch":"faq","start":683.46,"end":691.46},{"id":"faq-04","ch":"faq","start":691.78,"end":701.14},{"id":"faq-05","ch":"faq","start":701.46,"end":705.62},{"id":"faq-06","ch":"faq","start":705.94,"end":714.98},{"id":"faq-07","ch":"faq","start":715.3,"end":719.38}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=83a1c322","duration":739.94,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":10.08},{"id":"start-02","ch":"start","start":10.4,"end":17.44},{"id":"start-03","ch":"start","start":17.76,"end":24.16},{"id":"start-04","ch":"start","start":24.48,"end":36.72},{"id":"start-05","ch":"start","start":37.04,"end":59.92},{"id":"start-06","ch":"start","start":60.24,"end":68.16},{"id":"start-07","ch":"start","start":68.48,"end":74},{"id":"start-08","ch":"start","start":74.32,"end":83.04},{"id":"start-09","ch":"start","start":83.36,"end":86.88},{"id":"start-10","ch":"start","start":87.2,"end":95.28},{"id":"start-11","ch":"start","start":95.6,"end":104.56},{"id":"start-12","ch":"start","start":104.88,"end":109.84},{"id":"start-13","ch":"start","start":110.16,"end":112.96},{"id":"start-14","ch":"start","start":113.28,"end":116.88},{"id":"start-15","ch":"start","start":117.2,"end":123.04},{"id":"message-00","ch":"message","start":123.94,"end":126.82},{"id":"message-01","ch":"message","start":127.14,"end":135.62},{"id":"message-02","ch":"message","start":135.94,"end":139.78},{"id":"message-03","ch":"message","start":140.1,"end":146.02},{"id":"message-04","ch":"message","start":146.34,"end":154.1},{"id":"message-05","ch":"message","start":154.42,"end":159.06},{"id":"message-06","ch":"message","start":159.38,"end":167.78},{"id":"message-07","ch":"message","start":168.1,"end":174.02},{"id":"message-08","ch":"message","start":174.34,"end":183.62},{"id":"message-09","ch":"message","start":183.94,"end":190.98},{"id":"message-10","ch":"message","start":191.3,"end":199.06},{"id":"message-11","ch":"message","start":199.38,"end":204.5},{"id":"message-12","ch":"message","start":204.82,"end":216.74},{"id":"statusbar-00","ch":"statusbar","start":217.64,"end":220.52},{"id":"statusbar-01","ch":"statusbar","start":220.84,"end":232.68},{"id":"statusbar-02","ch":"statusbar","start":233,"end":265.08},{"id":"statusbar-03","ch":"statusbar","start":265.4,"end":278.2},{"id":"statusbar-04","ch":"statusbar","start":278.52,"end":291.88},{"id":"statusbar-05","ch":"statusbar","start":292.2,"end":307.48},{"id":"statusbar-06","ch":"statusbar","start":307.8,"end":316.04},{"id":"statusbar-07","ch":"statusbar","start":316.36,"end":322.12},{"id":"statusbar-08","ch":"statusbar","start":322.44,"end":327.4},{"id":"statusbar-09","ch":"statusbar","start":327.72,"end":333},{"id":"statusbar-10","ch":"statusbar","start":333.32,"end":336.76},{"id":"statusbar-11","ch":"statusbar","start":337.08,"end":344.68},{"id":"title-00","ch":"title","start":345.58,"end":349.66},{"id":"title-01","ch":"title","start":349.98,"end":359.1},{"id":"title-02","ch":"title","start":359.42,"end":367.34},{"id":"title-03","ch":"title","start":367.66,"end":372.7},{"id":"title-04","ch":"title","start":373.02,"end":378.78},{"id":"title-05","ch":"title","start":379.1,"end":391.82},{"id":"title-06","ch":"title","start":392.14,"end":402.3},{"id":"title-07","ch":"title","start":402.62,"end":414.3},{"id":"title-08","ch":"title","start":414.62,"end":425.18},{"id":"title-09","ch":"title","start":425.5,"end":432.3},{"id":"title-10","ch":"title","start":432.62,"end":444.7},{"id":"title-11","ch":"title","start":445.02,"end":451.66},{"id":"title-12","ch":"title","start":451.98,"end":455.42},{"id":"title-13","ch":"title","start":455.74,"end":472.46},{"id":"title-14","ch":"title","start":472.78,"end":476.54},{"id":"effort-00","ch":"effort","start":477.44,"end":481.52},{"id":"effort-01","ch":"effort","start":481.84,"end":491.52},{"id":"effort-02","ch":"effort","start":491.84,"end":494.32},{"id":"effort-03","ch":"effort","start":494.64,"end":514.72},{"id":"effort-04","ch":"effort","start":515.04,"end":521.76},{"id":"effort-05","ch":"effort","start":522.08,"end":533.92},{"id":"effort-06","ch":"effort","start":534.24,"end":539.92},{"id":"effort-07","ch":"effort","start":540.24,"end":555.12},{"id":"effort-07a","ch":"effort","start":555.44,"end":573.04},{"id":"effort-07b","ch":"effort","start":573.36,"end":590.56},{"id":"effort-08","ch":"effort","start":590.88,"end":598.96},{"id":"effort-09","ch":"effort","start":599.28,"end":604.64},{"id":"effort-10","ch":"effort","start":604.96,"end":616.88},{"id":"effort-11","ch":"effort","start":617.2,"end":620.72},{"id":"effort-12","ch":"effort","start":621.04,"end":622.88},{"id":"effort-13","ch":"effort","start":623.2,"end":627.04},{"id":"effort-14","ch":"effort","start":627.36,"end":634},{"id":"effort-15","ch":"effort","start":634.32,"end":641.44},{"id":"effort-16","ch":"effort","start":641.76,"end":650.24},{"id":"effort-17","ch":"effort","start":650.56,"end":660.64},{"id":"effort-18","ch":"effort","start":660.96,"end":669.04},{"id":"effort-19","ch":"effort","start":669.36,"end":682.48},{"id":"faq-00","ch":"faq","start":683.38,"end":686.98},{"id":"faq-01","ch":"faq","start":687.3,"end":697.3},{"id":"faq-02","ch":"faq","start":697.62,"end":703.7},{"id":"faq-03","ch":"faq","start":704.02,"end":712.02},{"id":"faq-04","ch":"faq","start":712.34,"end":721.7},{"id":"faq-05","ch":"faq","start":722.02,"end":726.18},{"id":"faq-06","ch":"faq","start":726.5,"end":735.54},{"id":"faq-07","ch":"faq","start":735.86,"end":739.94}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

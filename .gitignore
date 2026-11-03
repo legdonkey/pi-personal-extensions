@@ -5,6 +5,7 @@ node_modules/
 .impeccable/hook.cache.json
 .oil-diff/
 docs/*/.cache/
+/docs/promo/
 .capture-sandbox/
 .impeccable/config.local.json
 *.tgz

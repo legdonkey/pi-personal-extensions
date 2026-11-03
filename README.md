@@ -2,6 +2,10 @@
 
 个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理六项功能。每项功能各用一个实现文件。
 
+## 功能演示
+
+https://github.com/user-attachments/assets/b752ae51-9b07-481a-919d-2403c3324da7
+
 ## 安装与开发
 
 需要 Pi ≥ 1.0.1、Node.js ≥ 22.19。在仓库根目录执行：

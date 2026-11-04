@@ -14,7 +14,7 @@ test("菜单逐级返回，取消不保存，保存后留在二级菜单，重�
       const commands = new Map();
       personal({
         registerCommand: (name, command) => commands.set(name, command),
-        on() {}, registerMarkdownTransformer() {},
+        on() {}, registerMarkdownTransformer() {}, registerTool() {},
       });
       const path = join(dir, "inline-effort.json");
       rmSync(path, { force: true });
@@ -50,7 +50,7 @@ test("菜单逐级返回，取消不保存，保存后留在二级菜单，重�
       assert.equal(steps.length, 0);
       assert.equal(reloads, 0);
       if (mode === "tui") {
-        steps.push([/统一管理/, 6], [/统一管理/, undefined]);
+        steps.push([/统一管理/, 7], [/统一管理/, undefined]);
         await command.handler("", ctx);
         assert.equal(steps.length, 0, "批量开关取消后返回一级菜单");
         steps.push([/统一管理/, 2], [/状态栏.*返回上一级/, 0], [/状态栏.*返回上一级/, undefined], [/统一管理/, undefined]);

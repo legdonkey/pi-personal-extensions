@@ -40,7 +40,7 @@
 - clickable-paths 的处理函数只登记进 `/personal` 的命令表，不注册成斜杠命令 —— pi-personal-extensions.ts:130-134；clickable-paths.ts:252
 - 编辑器选项：vscode / vscode-insiders / cursor / windsurf / file —— clickable-paths.ts:20, 232
 - 设置入口只有 `/personal` → 文件路径可点击；用户消息橙色线框在 actions 表里没有设置项，只有启用 / 禁用 —— pi-personal-extensions.ts:36-47, 61-88, 163-164
-- 配置文件在 agent 目录下：`path.join(getAgentDir(), "clickable-paths.json")`，默认 `~/.pi/agent/`，跟随 `PI_CODING_AGENT_DIR` —— clickable-paths.ts:16, 235；pi-coding-agent/dist/config.js:453-458；README.md:116-128
+- 配置文件在 agent 目录下：`path.join(getAgentDir(), "clickable-paths.json")`，默认 `~/.pi/agent/`，跟随 `PI_CODING_AGENT_DIR` —— clickable-paths.ts:16, 235；pi-coding-agent/dist/config.js:453-458；README.md:128-140
 - 演示：presets 和工作目录、主目录均为示例；演示假定文件存在，不模拟冒号文件名回退；绝对路径原样保留 `..`，`~/` 和相对路径规范化 —— clickable-paths.ts:117, 120（path.join / path.resolve 规范化，绝对路径不处理）
 
 ## 用户消息橙色线框
@@ -60,4 +60,4 @@
 - 正文行原样保留：ANSI、链接、内边距 —— user-message-border.test.mjs:76-82
 - 退回条件：width < 8；行数 < 2；首末行缺少 width−2 个连续普通空格；任一行可见宽度 ≠ width−2 —— user-message-border.ts:21, 24-31；user-message-border.test.mjs:89-94
 - 退回时按完整宽度调用原始渲染，不画边框；功能仍是「已加载」状态（回退只发生在 render 内，不卸载功能） —— user-message-border.ts:21, 31
-- 升级 Pi 后应验证兼容性；`npm run check` 检查类型并执行全部测试 —— README.md:144
+- 升级 Pi 后应验证兼容性；`npm run check` 检查类型并执行全部测试 —— README.md:156

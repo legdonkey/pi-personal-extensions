@@ -14,6 +14,7 @@ const ids = [
   "clickable-paths",
   "user-message-border",
   "inline-effort",
+  "understand-video",
 ];
 const off = Object.fromEntries(ids.map((id) => [id, false]));
 const styleNames = ["茶墨渐层", "冰川蓝阶", "靛夜层云", "琥珀余温", "紫藤暮色", "松林雾径", "陶火晚照", "玫瑰尘光", "石墨银阶", "潮汐青绿", "Claude 暖纸"];
@@ -22,17 +23,19 @@ function load(overrides = {}) {
   const events = [];
   const transformers = [];
   const virtualModels = [];
+  const tools = [];
   personal({
+    registerTool: (tool) => tools.push(tool),
     registerCommand: (name, command) => commands.set(name, command),
     on: (name) => events.push(name),
     registerMarkdownTransformer: (fn) => transformers.push(fn),
     registerVirtualModel: (model) => virtualModels.push(model),
     ...overrides,
   });
-  return { commands, events, transformers, virtualModels };
+  return { commands, events, transformers, virtualModels, tools };
 }
 
-test("统一入口按开关注册六项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册七项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -72,6 +75,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
         loaded.transformers.length,
         id === "clickable-paths" ? 1 : 0,
       );
+      assert.deepEqual(loaded.tools.map((tool) => tool.name), id === "understand-video" ? ["understand_video"] : []);
       assert.deepEqual(loaded.virtualModels, [], "不注册任何虚拟模型");
       assert.equal(
         loaded.events.includes("session_shutdown"),
@@ -144,7 +148,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
     });
     assert.equal(reloads, 1);
     assert.ok(load().events.includes("session_info_changed"));
-    for (const invalid of ["{", "null", "[]", '{"session-title":"false"}']) {
+    for (const invalid of ["{", "null", "[]", '{"session-title":"false"}', '{"understand-video":"false"}']) {
       writeFileSync(path, invalid);
       assert.throws(load, /配置/);
       assert.equal(readFileSync(path, "utf8"), invalid);
@@ -165,7 +169,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
   }
 });
 
-test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写六个新键", async () => {
+test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写七个新键", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-migration-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -284,7 +288,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       },
     };
     await personal.handler("", ctx);
-    assert.equal(menus[0].options.length, 7);
+    assert.equal(menus[0].options.length, 8);
     assert.equal(menus[0].options.filter((label) => label.startsWith("状态栏：")).length, 1);
     assert.equal(menus[0].options[2], "状态栏：额度、会话 ID 与配色 · 已加载");
     assert.equal(readFileSync(path, "utf8"), "{}");
@@ -293,6 +297,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       3: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
       2: ["选择 pi-statusline 自定义配色"],
       5: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "测试分类模型可用性"],
+      6: ["查看通路与限制"],
     };
     for (let feature = 0; feature < ids.length; feature++) {
       choices = [feature, undefined];

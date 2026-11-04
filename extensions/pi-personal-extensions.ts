@@ -13,6 +13,7 @@ import statusline from "./statusline.ts";
 import sessionTitle from "./session-title.ts";
 import userMessageBorder from "./user-message-border.ts";
 import inlineEffort from "./inline-effort.ts";
+import understandVideo from "./understand-video.ts";
 
 const features = [
   {
@@ -51,6 +52,12 @@ const features = [
     description: "通过 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 配置分类器，原位调整强度并保留缓存",
     register: inlineEffort,
   },
+  {
+    id: "understand-video",
+    label: "原视频审查",
+    description: "将获授权的本地 MP4 原视频交给 Argon，额外消耗模型额度；/personal → 原视频审查 → 查看通路与限制",
+    register: understandVideo,
+  },
 ] as const;
 
 type FeatureId = (typeof features)[number]["id"];
@@ -59,6 +66,9 @@ type Command = Parameters<ExtensionAPI["registerCommand"]>[1];
 
 // 菜单只描述入口，设置和校验继续交给各功能已有的命令处理器。
 const actions: Partial<Record<FeatureId, { label: string; command: string; args: string }[]>> = {
+  "understand-video": [
+    { label: "查看通路与限制", command: "understand-video-status", args: "" },
+  ],
   "auto-session-name": [
     { label: "查看状态", command: "auto-name", args: "status" },
     { label: "选择命名模型", command: "auto-name", args: "model" },

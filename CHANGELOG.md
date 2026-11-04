@@ -4,6 +4,10 @@
 
 ## 未发布
 
+## 0.5.0 - 2026-11-05
+
+- 新增第七项功能「原视频审查」：统一入口注册 `understand_video`，通过 `/personal → 原视频审查 → 查看通路与限制` 管理。独立 worker 使用现有 SDK OAuth 与正常 Argon 路由发送真实 `video/mp4`，不覆写主宿主 `fetch`、不修改核心或第三方包。仅允许工作目录内非隐藏、无符号/硬链接的 MP4（24 bytes–20 MiB），父子双检和摘要比对，120 秒超时/取消清理，正文最多 32 KiB，失败不回退、不暴露鉴权和原始 provider 错误。统一入口和 `video-reviewer` 的真实工具调用均正确识别三秒红蓝绿测试视频；音轨未可靠验证，长视频和快速转场不保证覆盖。角色新增工具白名单，实测后台子代理可继承扩展，已移除冗余的 child-only 加载路径；其他权限和模型不变。新增隔离进程、安全边界、异常、空响应、取消及菜单回归测试，并更新两份讲解页。
+
 - 调整 `inline-effort` 五档判据：按推理结构区分常规档位，将 `max` 收紧为例外攻坚；近期对话只补全同一任务要求，不继承旧难度；`high` 仅在无法识别任务要求时保守兜底。不按主题、精美成片、代理数量、敏感操作或反复报错自动提档，不以思考强度替代模型专长、授权与实测。历史决策、输入范围和档位映射保持不变，补充两种分类器共用提示契约的离线测试。
 
 - 状态栏额度新增 Antigravity 支持：需先启用 `pi-antigravity`，通过 `ctx.modelRegistry.getApiKeyForProvider('antigravity')` 获取当前 provider 的 JSON 凭据，POST Google `fetchAvailableModels`，固定官方 endpoint 依次回退，总网络超时 15 秒。扩展按当前模型精确 ID 或运行变体后缀匹配；`gemini-3.1-pro` 兼容 `gemini-pro-agent`，`gemini-3.5-flash` 兼容 `gemini-3-flash-agent`。只接受有限数值 `remainingFraction`，约束到 0～1，多个同模型变体取最低值，显示如 `quota 60% left`。该值是当前模型在服务端对应的配额，可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。找不到配额或查询失败时隐藏 Antigravity 旧值，其他 provider 保留缓存；每次刷新重新解析当前账号凭据，账号变化在下一刷新生效，不主动监听账号切换；模型切换强制查询，不显示旧模型缓存。刷新时机和冷却不变。

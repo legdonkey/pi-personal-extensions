@@ -8,9 +8,9 @@
 - 用户消息外加橙色圆角线框，左上角写 `user` —— user-message-border.ts:7, 35-39
 - 只在 TUI（终端界面）模式生效 —— user-message-border.ts:13
 - 不用设置：`/personal` 二级菜单里只有启用 / 禁用 —— pi-personal-extensions.ts:61-88（actions 表里没有 user-message-border）, 167-168
-- 只改显示，不改消息内容 —— README.md:38；user-message-border.ts:20-41（只包装 render）
+- 只改显示，不改消息内容 —— README.md:39；user-message-border.ts:20-41（只包装 render）
 - 可以在 `/personal` 里关闭这项功能（步骤在第 1 章） —— pi-personal-extensions.ts:154-169
-- 升级 Pi 后线框可能不再显示，消息照常显示（行结构检查不通过时退回原始渲染） —— user-message-border.ts:15, 25-31；README.md:144
+- 升级 Pi 后线框可能不再显示，消息照常显示（行结构检查不通过时退回原始渲染） —— user-message-border.ts:15, 25-31；README.md:156
 
 ## 文件路径可点击
 
@@ -36,7 +36,7 @@
 - 回复输出中不改，输出完再变链接 —— clickable-paths.ts:244-245
 - 查看设置：二级菜单「查看路径链接设置」，显示「状态」「编辑器」「裸路径」「工作目录」四行，最后一行提示在 `/personal` → 文件路径可点击 里设置 —— pi-personal-extensions.ts:76；clickable-paths.ts:284-296
 - 暂停：二级菜单「暂停路径链接」，下一条消息生效；恢复选「开启路径链接」 —— pi-personal-extensions.ts:77-78；clickable-paths.ts:258-264
-- 设置保存在 agent 目录下的 `clickable-paths.json`（默认 `~/.pi/agent/`） —— clickable-paths.ts:235；README.md:116-128
+- 设置保存在 agent 目录下的 `clickable-paths.json`（默认 `~/.pi/agent/`） —— clickable-paths.ts:235；README.md:128-140
 - Pi 没有启用终端超链接时，链接文字后面用括号显示链接地址 —— pi-tui/dist/components/markdown.js:542-557
 - 是否启用终端超链接的优先级：Pi 设置 `terminal.hyperlinks`（true/false）> 环境变量 `PI_HYPERLINKS`（1/0）> 自动检测 —— pi-coding-agent/dist/core/settings-manager.js:889-895；pi-coding-agent/dist/modes/interactive/interactive-mode.js:356；pi-tui/dist/terminal-image.js:92-94, 106, 109-116；pi-coding-agent/docs/terminal-setup.md:207-215
 - `terminal.hyperlinks` 写在 agent 目录或项目 `.pi/` 下的 `settings.json` —— pi-coding-agent/dist/core/settings-manager.js:99-100；pi-coding-agent/dist/config.js:435；pi-coding-agent/docs/settings.md:107

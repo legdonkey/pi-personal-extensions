@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-overview" data-chapter="overview" aria-labelledby="ch-overview-h">
   <header class="chapter-head">
-    <h2 id="ch-overview-h">总览：Pi&nbsp;屏幕上的六项功能</h2>
-    <p class="chapter-sum">六项功能各改 Pi 屏幕的哪一块，由哪一章讲。</p>
+    <h2 id="ch-overview-h">总览：七项功能分别做什么</h2>
+    <p class="chapter-sum">界面功能各改哪一块，以及原视频审查的工具通路。</p>
     <dl class="meta">
       <dt>入口文件</dt><dd><code>extensions/pi-personal-extensions.ts</code></dd>
       <dt>管理命令</dt><dd><code>/personal</code></dd>
@@ -12,23 +12,24 @@
   <div class="beat">
     <div class="beat-text">
       <p>
-        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共六项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共六项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
-        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载六项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载六项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
+        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共七项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共七项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
+        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载七项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载七项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
       </p>
       <ul>
         <li><span class="seg" data-seg="overview-03" data-say="看图。消息区有两项：用户消息橙色线框，和文件路径可点击。">消息区有两项：用户消息橙色线框，和文件路径可点击。</span></li>
         <li><span class="seg" data-seg="overview-04" data-say="状态栏由一项功能负责：它把额度和会话 ID 写进扩展状态行，还给 pi statusline 那一行换配色。">状态栏由一项功能负责：它把额度和会话 ID 写进扩展状态行，还给 pi-statusline 那一行换配色。</span></li>
         <li><span class="seg" data-seg="overview-05">输入框下方的会话名由右下角会话标题显示；自动会话命名在一轮正常结束后，用命名模型在后台起名。</span></li>
         <li><span class="seg" data-seg="overview-06" data-say="状态栏里带大脑图标的那一段来自原位思考强度。它支持 GPT 六 Codex、Anthropic 协议分支的三个指定 Claude 模型和 Antigravity 分支的两个指定 Claude 模型，为新用户消息选择思考强度。">状态栏里的 🧠 段来自原位思考强度。它支持 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型和 Antigravity 分支的两个指定 Claude 模型，为新用户消息选择思考强度。</span></li>
+        <li><span class="seg" data-seg="overview-08">原视频审查新增 understand_video 工具，把明确获授权的本地 MP4 交给 Argon 分析；它不改变主会话模型，详见原视频审查章节。</span></li>
       </ul>
       <p>
-        <span class="seg" data-seg="overview-07">六项功能默认全部开启，每一项都能单独关闭。</span>
+        <span class="seg" data-seg="overview-07">七项功能默认全部开启，每一项都能单独关闭。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-overview-1">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 488" width="100%" role="img" aria-labelledby="fig-overview-1-title fig-overview-1-desc">
-          <title id="fig-overview-1-title">Pi 屏幕地图：六项功能的位置</title>
+          <title id="fig-overview-1-title">Pi 屏幕地图：界面功能的位置</title>
           <desc id="fig-overview-1-desc">Pi 终端界面从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击（第 3 章）；输入框下方有右下角会话标题和自动会话命名（第 5 章）；状态栏的额度、会话 ID 和配色由「状态栏：额度、会话 ID 与配色」负责（第 4 章）；状态栏的 🧠 段来自原位思考强度（第 6 章）；界面外的 /personal 命令统一启停（第 2 章）。</desc>
           <defs>
             <marker id="fig-overview-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
@@ -56,7 +57,7 @@
             <rect class="n is-focal" x="16" y="24" width="440" height="48" rx="6"/>
             <text class="t-mono" x="32" y="45">/personal</text>
             <text class="t-sub" x="440" y="45" text-anchor="end">第 2 章</text>
-            <text class="t-cap" x="32" y="63">按开关加载六项功能，统一启停和设置</text>
+            <text class="t-cap" x="32" y="63">按开关加载七项功能，统一启停和设置</text>
           </g>
 
           <!-- 消息区 -->

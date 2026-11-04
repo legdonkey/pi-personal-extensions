@@ -1,0 +1,26 @@
+<section class="chapter" id="ch-video" data-chapter="video" aria-labelledby="ch-video-h">
+  <header class="chapter-head">
+    <h2 id="ch-video-h">原视频审查：隔离调用，不改变主会话</h2>
+    <p class="chapter-sum">把原视频交给工具内部的模型调用，并保留输入、权限和验证边界。</p>
+    <dl class="meta"><dt>工具</dt><dd><code>understand_video</code></dd><dt>管理路径</dt><dd><code>/personal → 原视频审查 → 查看通路与限制</code></dd><dt>实测环境</dt><dd>Pi 1.5.0、pi-antigravity 0.11.0，常规 npm 安装位置</dd></dl>
+  </header>
+  <div class="beat">
+    <div class="beat-text">
+      <p><span class="seg" data-seg="video-01">原视频审查将用户明确授权的本地 MP4 按原始视频格式发送给 Antigravity 的 Argon 模型，以 medium 思考强度分析。这是工具内部调用，不是主会话直接获得视频附件。</span></p>
+      <p><span class="seg" data-seg="video-02">父进程和独立 worker 分别检查文件，并比对 SHA-256 摘要。worker 只加载必要的提供方，自行通过 SDK 获取现有 OAuth，按正常动态路由调用 Argon；仅在子进程内注入视频数据，主宿主的 fetch 不变。</span></p>
+      <p><span class="seg" data-seg="video-03">只允许当前工作目录内非隐藏、无符号链接或硬链接的 MP4，大小从 24 bytes 到 20 MiB；问题最多 8000 字符，分析正文最多 32 KiB。取消或满 120 秒即终止隔离进程，等待进程关闭后返回；失败不切换提供方、模型或浏览器。</span></p>
+      <p><span class="seg" data-seg="video-04">视频会外发并消耗额度，当前不汇入主会话用量统计。统一入口和 video-reviewer 的真实工具调用，均正确识别三秒测试视频的红、蓝、绿顺序；这只验证短视频视觉通路，音轨未可靠验证，长视频和快速转场不保证完整覆盖。</span></p>
+      <p><span class="seg" data-seg="video-05">全局注册不等于角色获权。video-reviewer 需要显式允许这个工具。当前后台子代理已实测可继承父会话扩展，无需额外指定扩展路径；其余只读权限、全新上下文和模型覆盖保持不变。已打开的主会话需自行重载，再从原视频审查菜单查看通路与限制。</span></p>
+    </div>
+    <figure class="beat-fig" id="fig-video-route">
+      <div class="fig-scroll"><svg viewBox="0 0 640 330" width="100%" role="img" aria-labelledby="video-route-title video-route-desc">
+        <title id="video-route-title">原视频审查的隔离调用链</title><desc id="video-route-desc">用户授权后，父工具验证工作目录内的 MP4；独立 worker 再次检查文件，以现有 OAuth 调用 Argon；只返回分析文本。</desc>
+        <g data-cue="video-01"><rect class="n" x="20" y="24" width="270" height="68" rx="8"/><text class="t" x="36" y="50">获授权的本地 MP4</text><text class="t-cap" x="36" y="74">不发送完整会话历史</text></g>
+        <g data-cue="video-02"><path class="w is-flow" d="M290 58H350"/><rect class="n is-focal" x="350" y="24" width="270" height="68" rx="8"/><text class="t" x="366" y="50">父工具：路径与摘要检查</text><text class="t-cap" x="366" y="74">主宿主 fetch 不变</text><path class="w is-flow" d="M485 92V140"/><rect class="n" x="350" y="140" width="270" height="76" rx="8"/><text class="t" x="366" y="166">独立 worker 再次检查</text><text class="t-cap" x="366" y="192">SDK OAuth → Argon → 分析文本</text></g>
+        <g data-cue="video-03"><rect class="n" x="20" y="140" width="270" height="76" rx="8"/><text class="t" x="36" y="166">20 MiB · 120 秒</text><text class="t-cap" x="36" y="192">取消后等待进程退出</text></g>
+        <g data-cue="video-04"><rect class="n is-ghost" x="20" y="256" width="600" height="52" rx="8"/><text class="t-cap" x="36" y="287">仅短视频视觉已验证；音轨、长视频、快速转场仍有限制</text></g>
+      </svg></div>
+      <figcaption>实现流程示意，不是用户视频内容。没有 Cookie、浏览器或独立 Gemini API 回退。</figcaption>
+    </figure>
+  </div>
+</section>

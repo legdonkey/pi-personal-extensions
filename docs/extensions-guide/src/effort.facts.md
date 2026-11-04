@@ -61,7 +61,7 @@
 
 - Pi 每次请求前按当前上下文构造完整 input —— codex:379-394
 - 基线在 Codex 请求顶层 `reasoning.effort` —— ext:458；codex:414-424
-- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:91；CHANGELOG.md:39
+- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:91；CHANGELOG.md:44
 - 保留缓存前缀不保证 100% 命中；TTL、最小 token 数和其他提示变更仍会影响命中 —— README.md:91, README.md:93
 - 本次 wrapper 真实通道实测：固定分类夹具强制 low → high → medium → low，真实 Antigravity 主模型的 cacheRead 为 Opus `0 / 13981 / 13994 / 14014`、Sonnet `0 / 13978 / 13991 / 14011`；基线始终 medium，实际 runtime 后缀和 message_end 字段依次为 low / high / medium / low。Opus 完整成功序列前有若干次 SAFETY 零输出尝试，未计入成功序列；固定夹具不等于真实 Jev 端到端，短时实测不是厂商保证 —— README.md:93；主代理提供的本轮验收记录
 - Gemini 4 Argon 已存在，但官方资料只明确 implicit cache；未找到改变 thinking_level 保缓存的明确官方承诺，因此本次不支持。这是缺证，不是证明会丢缓存 —— README.md:97；https://ai.google.dev/gemini-api/docs/latest-model
@@ -104,7 +104,7 @@
 - wrapper 保留 oauth、headers、images、refreshModels；注册和恢复时携带 provider.getAllModels 当前动态目录（chat、image、classifier），按 type + id 补回 registered model.headers —— ext:238-256；test:822-839, test:918-956；README.md:85
 - message_end 保存实际 providerThinkingLevel；工具续调、同一主请求重试和恢复沿用原决策；maxTokens: 1 预热和辅助 session 不干预 —— ext:221-245, ext:493-501；test:822-915；README.md:87, README.md:89
 - session_shutdown 只恢复原 streamSimple，保留第三方后来对 headers 等字段的部分更新；第三方已替换 streamSimple 时不覆盖 —— ext:249-256, ext:360-372；test:888-956；README.md:89
-- 新增 4 项 Antigravity 回归测试；真实 ModelRuntime 用例覆盖动态刷新目录、图片模型、模型级头部和第三方部分注册 —— test:822-956；CHANGELOG.md:9-10
+- 新增 4 项 Antigravity 回归测试；真实 ModelRuntime 用例覆盖动态刷新目录、图片模型、模型级头部和第三方部分注册 —— test:822-956；CHANGELOG.md:15
 
 ## 5. 决策跟随会话分支（图 5）
 
@@ -145,6 +145,13 @@
 - 子代理需加载本扩展，基线取子代理自己的 thinking 设置；外部 CLI 代理不经过本扩展 —— README.md:105；ext:399（基线 = pi.getThinkingLevel()）
 - 分类增加等待、消耗服务额度，文本可能含业务信息 —— README.md:101
 - d1-ultra 付费，价格以 OpenRouter 端点信息为准 —— README.md:103
+
+## 按推理结构选档
+
+- low 直接执行明确操作，medium 判断可在局部完成，high 综合多项行为或交付约束，xhigh 消解冲突证据、排查混杂解释或检验跨边界行为；max 是需系统反证、严格推导与失效分析的例外攻坚，或需有排除外部阻碍后深入分析仍不足的具体证据 —— ext:154-160；test:1011-1045（两种分类器共用提示契约，不验证线上语义效果）
+- 近期对话只补全同任务的目标、约束和交付要求；不继承旧难度，简短的继续或修改也结合前文判断；不按主题、代理数量、精美成片、操作敏感或重试提档；high 仅在无法识别任务要求时保守兜底，不替代模型专长、授权与实测 —— ext:154；test:1025-1032
+- 字号调整、图示设计、查数画图与混杂归因为判据示例，不是线上分类保证 —— ext:156-159；test:1011-1045 只校验发送内容
+- 分类看不到图片与工具结果，同轮工具续调不重分类，已有历史决策不变；修改提示不改变输入或映射 —— ext:95-119, ext:230, ext:391-408, ext:446-448, ext:479-483
 
 ## 改名与兼容（inline-effort）
 

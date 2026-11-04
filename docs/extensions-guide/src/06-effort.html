@@ -17,6 +17,9 @@
       <p>
         <span class="seg" data-seg="effort-01" data-say="不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、x high、max 五档里选。">不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、xhigh、max 五档里选。</span>
         <span class="seg" data-seg="effort-02" data-say="GPT 六 Codex、Anthropic 协议分支的三个指定 Claude 模型，或 Antigravity 分支的两个指定 Claude 模型才适用，thinking 不能是 off。Anthropic 协议分支还要求接口是 anthropic messages，compat 点 supports mid convo effort 为 true。Antigravity 分支要求 provider 是 antigravity，接口是 antigravity api。不适用就不分类。">GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型，或 Antigravity 分支的两个指定 Claude 模型才适用，thinking 不能是 <code>off</code>。Anthropic 协议分支还要求接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort</code> 为 <code>true</code>。Antigravity 分支要求 provider 是 <code>antigravity</code>，接口是 <code>antigravity-api</code>。不适用就不分类。</span>
+        <span class="seg" data-seg="effort-01a">自动选档按推理结构切分：low 直接执行明确操作，medium 做局部判断，high 综合多项约束，xhigh 处理冲突证据与耦合推理，max 仅作例外攻坚。</span>
+        <span class="seg" data-seg="effort-01b">近期对话只补全同一任务的信息，不继承旧难度。示例：修改位置和方式明确的字号调整可用 low，改做图示设计可用 high；按成熟口径查数画图可用 medium，排查混杂原因可用 xhigh。示例不是线上分类保证。</span>
+        <span class="seg" data-seg="effort-01c">不因专业主题、成片精美、代理多或反复报错自动提档；只有无法识别任务要求时才以 high 保守兜底。思考强度不替代模型专长、授权和实测。分类器只读有限文本，看不到图片和工具结果，同轮工具续调不重新分类，历史决策不变。</span>
         <span class="seg" data-seg="effort-03">空白输入不调用分类器，沿用当前强度。当前强度是当前分支最近一次决策；没有决策就用基线，也就是 Pi 的 thinking 设置。</span>
         <span class="seg" data-seg="effort-04">非空才调用分类器，最多等 15 秒。</span>
       </p>

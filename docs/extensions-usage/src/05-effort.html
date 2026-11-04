@@ -16,6 +16,9 @@
       <p>
         <span class="seg" data-seg="effort-01">思考强度分五个档位。「原位思考强度」给每条新消息在 low 到 max 之间自动选一档，你不用手动切换。</span>
         <span class="seg" data-seg="effort-02">它只调档位，不换主模型。</span>
+        <span class="seg" data-seg="effort-02a">扩展按本轮任务的推理复杂度选档：low 到 xhigh 对应直接操作、局部判断、多约束综合与耦合推理四档常规工作，max 是例外攻坚档。</span>
+        <span class="seg" data-seg="effort-02b">近期对话只补全同一任务的信息，不继承旧难度。示例：修改位置和方式明确的字号调整可用 low，改做图示设计可用 high；按成熟口径查数画图可用 medium，排查混杂原因可用 xhigh。示例不是线上分类保证。</span>
+        <span class="seg" data-seg="effort-02c">不因专业主题、成片精美、代理多或反复报错自动提档；只有无法识别任务要求时才以 high 保守兜底。思考强度不替代模型专长、授权和实测。分类器只读有限文本，看不到图片和工具结果，同轮工具续调不重新分类，历史决策不变。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-1">
@@ -37,7 +40,7 @@
             <rect class="n" x="16" y="82" width="216" height="36" rx="6"/>
             <text class="t-cap" x="28" y="105">解释这段报错是什么意思</text>
             <rect class="n" x="16" y="138" width="216" height="36" rx="6"/>
-            <text class="t-cap" x="28" y="161">排查跨模块的偶发问题</text>
+            <text class="t-cap" x="28" y="161">排查相互矛盾的故障证据</text>
             <rect class="n" x="264" y="28" width="80" height="32" rx="4"/><text class="t-mono" x="304" y="49" text-anchor="middle">low</text>
             <rect class="n" x="264" y="84" width="80" height="32" rx="4"/><text class="t-mono" x="304" y="105" text-anchor="middle">medium</text>
             <rect class="n" x="264" y="140" width="80" height="32" rx="4"/><text class="t-mono" x="304" y="161" text-anchor="middle">xhigh</text>

@@ -4,6 +4,8 @@
 
 ## 未发布
 
+- 调整 `inline-effort` 五档判据：按推理结构区分常规档位，将 `max` 收紧为例外攻坚；近期对话只补全同一任务要求，不继承旧难度；`high` 仅在无法识别任务要求时保守兜底。不按主题、精美成片、代理数量、敏感操作或反复报错自动提档，不以思考强度替代模型专长、授权与实测。历史决策、输入范围和档位映射保持不变，补充两种分类器共用提示契约的离线测试。
+
 - 状态栏额度新增 Antigravity 支持：需先启用 `pi-antigravity`，通过 `ctx.modelRegistry.getApiKeyForProvider('antigravity')` 获取当前 provider 的 JSON 凭据，POST Google `fetchAvailableModels`，固定官方 endpoint 依次回退，总网络超时 15 秒。扩展按当前模型精确 ID 或运行变体后缀匹配；`gemini-3.1-pro` 兼容 `gemini-pro-agent`，`gemini-3.5-flash` 兼容 `gemini-3-flash-agent`。只接受有限数值 `remainingFraction`，约束到 0～1，多个同模型变体取最低值，显示如 `quota 60% left`。该值是当前模型在服务端对应的配额，可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。找不到配额或查询失败时隐藏 Antigravity 旧值，其他 provider 保留缓存；每次刷新重新解析当前账号凭据，账号变化在下一刷新生效，不主动监听账号切换；模型切换强制查询，不显示旧模型缓存。刷新时机和冷却不变。
 - 新增 2 项 Antigravity 回归测试，覆盖模型与变体匹配、别名、配额校验、当前 provider 凭据、模型和账号切换、失败隐藏旧值及刷新冷却；`npm run check` 当前 67/67 通过。
 

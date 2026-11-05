@@ -4,6 +4,9 @@
 
 ## 未发布
 
+- `understand_video` 在工具结果 `details` 中补充调用与用量元数据：透传 `bytes`、`provider`、`model`（逻辑模型名，非已确认服务端路由）、`inputMode`（`native-video/mp4`）与 `durationMs`（从 `execute` 进入计时到结果格式化，包含主进程文件校验、worker 启动、模型调用与等待子进程关闭）。`usage` 按数值白名单只保留有限非负数且缺失字段不补零，附带 `usageSource: "provider-normalized"`，有 `cost` 时附带 `costSource: "local-estimate"`；`cost` 是本地估算而非账单，底层可能将未返回统计归一化为零，零值不代表免费。用量仅放在 `details` 中，未设置工具顶层 `usage`，不汇入 Pi 会话用量统计，也不查询额外账户额度。区分 `stopReason` 与 `outputTruncated` 两种独立状态，`length` 和本地 32 KiB 截断均在正文附加警告，调用成功不保证输出完整。错误 `details` 只返回安全的 `errorCode` 与 `failurePhase`，不转发原始错误或猜测登录、额度原因。无新增 UI、菜单或配置；此次新增元数据仅由离线 fake SDK 测试验证。
+- 修复 `understand_video` 的 IPC 序列化边界：`MAX_RESULT_BYTES` 设为 `6 * 32 * 1024 + 8 * 1024`（200 KiB），容纳 32 KiB 正文 JSON 最坏六倍转义与 8 KiB 元数据；保留完整序列化包上限检查，并独立校验正文不超过 32 KiB、元数据（`JSON.stringify({ ...result, text: "" })`）不超过 8 KiB，不放宽正文上限。新增回归测试覆盖引号、反斜杠和控制字符在 32 KiB 边界下的转义返回，以及超限正文与元数据的拒绝。
+
 ## 0.5.0 - 2026-11-05
 
 - 新增第七项功能「原视频审查」：统一入口注册 `understand_video`，通过 `/personal → 原视频审查 → 查看通路与限制` 管理。独立 worker 使用现有 SDK OAuth 与正常 Argon 路由发送真实 `video/mp4`，不覆写主宿主 `fetch`、不修改核心或第三方包。仅允许工作目录内非隐藏、无符号/硬链接的 MP4（24 bytes–20 MiB），父子双检和摘要比对，120 秒超时/取消清理，正文最多 32 KiB，失败不回退、不暴露鉴权和原始 provider 错误。统一入口和 `video-reviewer` 的真实工具调用均正确识别三秒红蓝绿测试视频；音轨未可靠验证，长视频和快速转场不保证覆盖。角色新增工具白名单，实测后台子代理可继承扩展，已移除冗余的 child-only 加载路径；其他权限和模型不变。新增隔离进程、安全边界、异常、空响应、取消及菜单回归测试，并更新两份讲解页。

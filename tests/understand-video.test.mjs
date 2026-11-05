@@ -3,8 +3,8 @@ import { after, test } from "node:test";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, linkSync, readFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readAuthorizedVideo, injectVideo, MAX_VIDEO_BYTES } from "../extensions/understand-video-worker.mjs";
-import understandVideo, { runVideoWorker } from "../extensions/understand-video.ts";
+import { readAuthorizedVideo, injectVideo, pickVideoUsage, MAX_VIDEO_BYTES } from "../extensions/understand-video-worker.mjs";
+import understandVideo, { runVideoWorker, formatVideoResult } from "../extensions/understand-video.ts";
 
 const previous = process.env.PI_CODING_AGENT_DIR;
 const root = mkdtempSync(join(tmpdir(), "pi-understand-video-test-"));
@@ -23,7 +23,7 @@ function fixture() {
 }
 
 // 假 SDK 不加载任何真实账号或 provider，用真实隔离进程验证 IPC、取消与清理。
-function fakeSDK(mode = "ok") {
+function fakeSDK(mode = "ok", responseText) {
   const sdkDir = mkdtempSync(join(root, "sdk-"));
   mkdirSync(join(sdkDir, "dist"));
   writeFileSync(join(sdkDir, "package.json"), '{"type":"module"}');
@@ -46,18 +46,59 @@ function fakeSDK(mode = "ok") {
           if (options.reasoning !== 'medium') throw Error('reasoning');
           if (${JSON.stringify(mode)} === 'hang') await new Promise(() => setInterval(() => {}, 1000));
           if (${JSON.stringify(mode)} === 'error') throw Error('Bearer SECRET account@example.com');
+          if (${JSON.stringify(mode)}.startsWith('ipc-')) {
+            process.send(${JSON.stringify(mode === "ipc-text" ? { ok: true, text: "x".repeat(32769) } : { ok: true, text: "ok", extra: "x".repeat(8192) })});
+            await new Promise(() => setInterval(() => {}, 1000));
+          }
           await fetch('https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent', { body: JSON.stringify({model:'gemini-4-argon-medium',request:{contents:[{role:'user',parts:[{text:context.messages[0].content}]}]}}) });
-          return {stopReason:'stop', content:[{type:'text',text:${JSON.stringify(mode === "empty" ? "" : mode === "large" ? "中".repeat(20000) : "0–1 秒红色；1–2 秒蓝色；2–3 秒绿色。音轨未审查。")}}]};
+          return {stopReason:${JSON.stringify(mode.includes("length") ? "length" : mode === "response-error" ? "error" : "stop")}, usage: ${JSON.stringify(mode === "no-usage" ? undefined : { input: 12, output: 8, reasoning: 3, totalTokens: 20, cost: { total: 0.001, secret: "SECRET" }, secret: "SECRET" }) ?? "undefined"}, errorMessage:'Bearer SECRET account@example.com', content:[{type:'text',text:${JSON.stringify(responseText ?? (mode === "empty" ? "" : mode === "large" || mode === "large-length" ? "中".repeat(20000) : "0–1 秒红色；1–2 秒蓝色；2–3 秒绿色。音轨未审查。"))}}]};
         }
       } } };
     }
   `);
   return sdkDir;
 }
-async function request(mode = "ok") {
+async function request(mode = "ok", responseText) {
   const f = fixture();
-  return { cwd: f.cwd, path: f.path, digest: (await readAuthorizedVideo(f.cwd, f.path)).digest, agentDir: root, sdkDir: fakeSDK(mode), providerPath: join(root, "fake-provider.ts"), question: "颜色顺序？" };
+  return { cwd: f.cwd, path: f.path, digest: (await readAuthorizedVideo(f.cwd, f.path)).digest, agentDir: root, sdkDir: fakeSDK(mode, responseText), providerPath: join(root, "fake-provider.ts"), question: "颜色顺序？" };
 }
+
+test("IPC 允许 32 KiB 正文的 JSON 转义膨胀，仍限制正文和元数据", async () => {
+  const texts = ['"'.repeat(8000) + "a".repeat(24768), "\\".repeat(32768), "\u0001".repeat(32768)];
+  for (const text of texts) {
+    const result = await runVideoWorker(await request("ok", text));
+    assert.equal(result.ok, true);
+    assert.equal(result.text, text);
+    assert.equal(result.outputTruncated, false);
+    assert.equal(result.usage.input, 12);
+    assert.ok(Buffer.byteLength(JSON.stringify(result)) > 40 * 1024);
+  }
+  for (const mode of ["ipc-text", "ipc-metadata"]) {
+    await assert.rejects(runVideoWorker(await request(mode)), error => error.errorCode === "worker_failure");
+  }
+});
+
+test("用量只保留有限非负数值，缺失字段不补零", () => {
+  assert.equal(pickVideoUsage(undefined), undefined);
+  assert.equal(pickVideoUsage({ input: -1, output: NaN, totalTokens: Infinity, cost: { total: "0" }, secret: "SECRET" }), undefined);
+  assert.deepEqual(pickVideoUsage({ input: 0, output: 2, cacheRead: "3" }), { input: 0, output: 2 });
+});
+test("模型长度限制和本地截断独立警告，用量缺失保持缺失", async () => {
+  for (const mode of ["length", "large-length"]) {
+    const result = await runVideoWorker(await request(mode));
+    assert.equal(result.ok, true);
+    assert.equal(result.stopReason, "length");
+    assert.equal(result.outputTruncated, mode === "large-length");
+    assert.match(result.text, /模型达到输出 token 上限/);
+    if (mode === "large-length") assert.match(result.text, /工具本地 32 KiB/);
+    assert.ok(Buffer.byteLength(result.text) <= 32 * 1024);
+    assert.doesNotMatch(result.text, /\uFFFD/);
+  }
+  const missing = await runVideoWorker(await request("no-usage"));
+  assert.equal(missing.usage, undefined);
+  assert.equal(missing.usageSource, undefined);
+  assert.equal(missing.costSource, undefined);
+});
 
 test("合法 MP4、相对路径和 @ 前缀；拒绝越界、隐藏、类型和链接", async () => {
   const f = fixture();
@@ -107,12 +148,26 @@ test("真实隔离进程成功返回，宿主 fetch 不变，返回时已确认�
   assert.equal(result.ok, true);
   assert.match(result.text, /红色.*蓝色.*绿色/);
   assert.equal(result.inputMode, "native-video/mp4");
+  assert.equal(result.outputTruncated, false);
+  assert.equal(result.stopReason, "stop");
+  assert.deepEqual(result.usage, { input: 12, output: 8, reasoning: 3, totalTokens: 20, cost: { total: 0.001 } });
+  const tool = formatVideoResult(result, 123);
+  assert.equal(tool.details.durationMs, 123);
+  for (const key of ["usage", "usageSource", "costSource", "bytes", "provider", "model", "stopReason", "outputTruncated"]) assert.deepEqual(tool.details[key], result[key]);
+  assert.equal(tool.details.bytes, 32);
+  assert.equal(tool.details.usageSource, "provider-normalized");
+  assert.equal(tool.details.costSource, "local-estimate");
+  assert.equal("text" in tool.details, false);
+  assert.doesNotMatch(JSON.stringify(tool), /SECRET|Bearer|account@/);
   assert.equal(globalThis.fetch, original);
 });
 test("API 异常、空响应和授权后文件替换安全失败且不泄漏鉴权", async () => {
-  for (const mode of ["error", "empty"]) {
+  for (const mode of ["error", "empty", "response-error"]) {
     const result = await runVideoWorker(await request(mode));
     assert.equal(result.ok, false);
+    assert.equal(result.failurePhase, mode === "error" ? "model-request" : "model-response");
+    assert.equal(result.errorCode, mode === "empty" ? "empty_response" : "provider_failure");
+    if (mode === "response-error") assert.equal(result.usage.input, 12);
     assert.doesNotMatch(JSON.stringify(result), /SECRET|Bearer|account@/);
   }
   const req = await request();
@@ -120,21 +175,31 @@ test("API 异常、空响应和授权后文件替换安全失败且不泄漏鉴�
   assert.equal((await runVideoWorker(req)).ok, false);
 });
 test("取消和超时终止隔离进程；预取消不启动", async () => {
-  await assert.rejects(runVideoWorker(await request("hang"), undefined, 100), /120 秒/);
+  await assert.rejects(runVideoWorker(await request("hang"), undefined, 100), error => error.errorCode === "timeout" && /120 秒/.test(error.message));
   const controller = new AbortController();
   const req = await request("hang");
   const work = runVideoWorker(req, controller.signal);
   const timer = setTimeout(() => controller.abort(), 100);
-  await assert.rejects(work, /已取消/); clearTimeout(timer);
+  await assert.rejects(work, error => error.errorCode === "cancelled" && /已取消/.test(error.message)); clearTimeout(timer);
   await assert.rejects(runVideoWorker(req, controller.signal));
 });
 test("输出限制与工具非法参数错误，不向外发送非法文件", async () => {
   const result = await runVideoWorker(await request("large"));
   assert.equal(result.ok, true); assert.match(result.text, /结果已截断/);
+  assert.equal(result.outputTruncated, true);
   assert.ok(Buffer.byteLength(result.text) <= 32 * 1024);
   assert.doesNotMatch(result.text, /\uFFFD/);
   const tools = []; understandVideo({ registerCommand() {}, registerTool: tool => tools.push(tool) });
   assert.equal(tools[0].name, "understand_video");
   const response = await tools[0].execute("test", {path:"/etc/passwd",question:"审查"}, undefined, undefined, {cwd:root});
-  assert.equal(response.isError, true); assert.doesNotMatch(JSON.stringify(response), /\/etc\/passwd/);
+  assert.equal(response.isError, true);
+  assert.equal(response.details.errorCode, "invalid_file");
+  assert.equal(response.details.failurePhase, "file-validation");
+  assert.ok(response.details.durationMs >= 0);
+  const invalidQuestion = await tools[0].execute("test", {path:"video.mp4",question:" "}, undefined, undefined, {cwd:root});
+  assert.equal(invalidQuestion.details.errorCode, "invalid_question");
+  const controller = new AbortController(); controller.abort();
+  const cancelled = await tools[0].execute("test", {path:"video.mp4",question:"检查"}, controller.signal, undefined, {cwd:root});
+  assert.equal(cancelled.details.errorCode, "cancelled");
+  assert.doesNotMatch(JSON.stringify(response), /\/etc\/passwd/);
 });

@@ -11,6 +11,7 @@
       <p><span class="seg" data-seg="video-03">工具只读取非隐藏、没有符号链接或硬链接的 MP4，大小从 24 bytes 到 20 MiB。问题最多 8000 字符，120 秒超时，分析正文最多 32 KiB。路径越界或调用失败会报告失败，不会偷偷改用别的模型或浏览器。</span></p>
       <p><span class="seg" data-seg="video-04">视频由工具内部外发并消耗额度，不是当前主会话直接获得视频附件。三秒测试视频的红、蓝、绿顺序已通过统一入口和视频审查角色实测；音轨未可靠验证，长视频和快速转场不保证完整覆盖。不能确认的项目应标为未审查。</span></p>
       <p><span class="seg" data-seg="video-05">从原视频审查菜单可以启停功能，或查看通路与限制。已有主会话需要自行重载；角色缺少工具或调用失败时，先报告阻塞，不要让助手用读取文件来假装看过原视频。</span></p>
+      <p><span class="seg" data-seg="video-06">工具在 details 中返回字节数、提供方、逻辑模型名、输入模式，以及从进入执行到子进程关闭的总耗时；逻辑模型名不代表已确认的服务端路由。若底层返回统计，还会透传有限非负的归一化用量与本地估算费用，缺失字段不补零；估算费不是账单，零值也不代表免费，且只放在 details 中，不计入 Pi 会话用量或额外查询额度。模型达到长度上限与本地 32 KiB 截断相互独立，都会在正文告警，调用成功不保证输出完整；失败只返回安全的阶段和错误码，不转发原始错误或猜测原因。新增元数据仅由离线假 SDK 验证，不能把之前的短视频实测当成新增字段的线上验收。</span></p>
     </div>
     <figure class="beat-fig" id="fig-video-use"><div class="fig-scroll"><svg viewBox="0 0 640 340" width="100%" role="img" aria-labelledby="video-use-title video-use-desc">
       <title id="video-use-title">使用原视频审查的三个步骤</title><desc id="video-use-desc">准备当前目录内的 MP4，明确授权发送给现有 Antigravity 通路并提出问题，按带时间戳的工具结果核查画面；音轨无法确认则标记未审查。</desc>

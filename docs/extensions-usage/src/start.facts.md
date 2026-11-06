@@ -33,7 +33,7 @@
 - personal-switches 录屏：下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃，未按 Enter —— scratchpad/recapture4-actual.md —— scratchpad/usage-captures.md；media/personal-switches.png
 - 列表自带提示「Enter/Space to change」，但入口先截获确认键（tui.select.confirm）保存并重载 —— extensions/pi-personal-extensions.ts:239-243；media/personal-switches.png
 - 「一轮」定义：你发出一条消息到 Pi 回复完 —— 讲解用语（usage-review-zh-2 术语表）
-- 原位思考强度给每条新消息选档位；朗读提示接口和模型能力要求见条件列表 —— extensions/inline-effort.ts:391-417；README.md:70-78、112
+- 原位思考强度给每条新消息选档位；朗读提示接口和模型能力要求见条件列表 —— extensions/inline-effort.ts:420-452；README.md:70-78、112
 - 地图卡片使用 /personal 菜单 label —— extensions/pi-personal-extensions.ts:18-61
 - 自动重载在 Pi 回复或压缩时会被拒绝 —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:5300-5307（回复或压缩中拒绝 /reload）
 - 更新扩展见 faq —— faq.facts.md

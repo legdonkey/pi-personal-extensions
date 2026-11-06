@@ -15,7 +15,7 @@
 - 右下角会话标题：在输入框下方右对齐显示会话名 —— extensions/session-title.ts:17-29
 - 自动会话命名：agent_settled 后触发检查，满足条件（有 UI、空闲、开启、未被手动名保护等）才后台请求 —— extensions/auto-session-name.ts:269-287、458-460
 - 原位思考强度：支持 openai-codex-responses 接口的 GPT-6 Codex；Anthropic 协议分支要求 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true 且 ID 精确匹配三个 Claude 模型；Antigravity 分支要求 provider antigravity、antigravity-api 接口且 ID 精确匹配两个 Claude 模型；三个分支都要求 thinking 不为 off。状态栏显示 `🧠 当前 · 基线 … · 分类器`，始终带分类器名；当前强度等于基线时省略基线段（图中示例 `🧠 low · 基线 medium · d1-ultra`） —— extensions/inline-effort.ts:70、80-93、355-359、234、451、462-465、489；README.md:70-78
-- 「为新用户消息选择思考强度」：同批多条消息可共用一次分类，空白文本不调用 —— extensions/inline-effort.ts:105-119、391-417（细节在第 6 章）
+- 「为新用户消息选择思考强度」：同批多条消息可共用一次分类，空白文本不调用 —— extensions/inline-effort.ts:106-120、391-417（细节在第 6 章）
 - 七项功能默认全部开启 —— extensions/pi-personal-extensions.ts:101-103；README.md:28
 - 每项可以单独关闭 —— extensions/pi-personal-extensions.ts:145-147、190
 - 入口是 Pi 加载的那个文件 —— package.json:20-24

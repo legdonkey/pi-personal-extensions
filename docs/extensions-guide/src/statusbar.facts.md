@@ -6,8 +6,8 @@
 
 - 一项功能：ID `statusline`，label「状态栏：额度、会话 ID 与配色」，源码 `extensions/statusline.ts`，一个开关 —— pi-personal-extensions.ts:30-35
 - 迁移：旧开关 `substatusline`、`statusline-style-picker` 仍做布尔校验；新键缺失时，两个旧键都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:106-113, 118-120
-- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:126；pi-personal-extensions.ts:33
-- Antigravity 额度需要先安装并启用 `pi-antigravity` —— README.md:128；statusline.ts:17-18, 297-309
+- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:128；pi-personal-extensions.ts:33
+- Antigravity 额度需要先安装并启用 `pi-antigravity` —— README.md:130；statusline.ts:17-18, 297-309
 
 ## 额度：什么时候刷新（fig-statusbar-1）
 

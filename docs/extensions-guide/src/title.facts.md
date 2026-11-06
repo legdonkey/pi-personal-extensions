@@ -117,7 +117,7 @@
 
 ## 代价（title-25 ～ 26，图 10）与命令（title-27，录屏 auto-name-status）
 
-- 对照：原位思考强度的分类超时 15 秒 —— extensions/inline-effort.ts:72
+- 对照：原位思考强度每个模型限时 15 秒，含回退最多约 30 秒 —— extensions/inline-effort.ts:72, extensions/inline-effort.ts:280-310；tests/inline-effort.test.mjs「d1-ultra 超时后 Jev 使用独立 15 秒预算，迟到结果不能当作成功」
 - 命名请求在后台、最多 30 秒，用户不用等 —— 命名:292, 459-460
 
 - 命名和预览额外消耗模型额度，不计入 Pi 自带会话用量统计 —— README.md:65；命名:313-365（结果不写入会话用量），codex-b 核对 agent-session.js:3345-3378

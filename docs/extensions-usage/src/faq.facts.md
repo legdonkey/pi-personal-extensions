@@ -8,8 +8,8 @@
 - 排查表「怎么做」列改为菜单项：恢复当前会话命名、预览建议标题、查看路径链接设置、打开方式：编辑器名 / file —— extensions/pi-personal-extensions.ts:68-96
 - /name 手动改名后自动命名暂停 —— extensions/auto-session-name.ts:261-266；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25
 - /reload、/name 为 Pi 自带命令 —— README.md:15；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25、49
-- 五个配置文件都在 getAgentDir()：默认 ~/.pi/agent/，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:137；extensions/auto-session-name.ts:61-62；extensions/inline-effort.ts:48；extensions/clickable-paths.ts:235；extensions/statusline.ts:643；README.md:128-140
-- 五个文件的内容 —— README.md:132-138
+- 五个配置文件都在 getAgentDir()：默认 ~/.pi/agent/，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:137；extensions/auto-session-name.ts:61-62；extensions/inline-effort.ts:48；extensions/clickable-paths.ts:235；extensions/statusline.ts:643；README.md:130-142
+- 五个文件的内容 —— README.md:134-140
 - 用 /personal 菜单修改全局设置后自动保存 —— extensions/pi-personal-extensions.ts:252-258；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/clickable-paths.ts:48-55；extensions/statusline.ts:658-663
 - 会话名没变：「查看状态」显示「暂停（保护当前名称）」时，选「恢复当前会话命名」 —— extensions/auto-session-name.ts:469-479、492
 - 打开的会话已有别的名字时自动命名暂停 —— extensions/auto-session-name.ts:234-235、253
@@ -19,8 +19,8 @@
 - （本章已不写刷新节奏，见 statusbar 章）额度每 5 分钟刷新，每轮结束后也刷新（30 秒冷却）—— extensions/statusline.ts:11-12、80-86、120-126、128-133、152-155
 - 查询失败保留上次结果 —— extensions/statusline.ts:109-114
 - 🧠 段条件：GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型，对应 provider、接口和模型能力符合要求，thinking 不为 off；完整模型 ID 和 compat 条件见第 1、5 章 —— extensions/inline-effort.ts:70、80-93、355-359；README.md:70-78
-- 🧠 段在会话开始、切换模型时清除，下一次请求时显示 —— extensions/inline-effort.ts:360-373、221-245、427-490
-- 分类器不可用时提示，这条消息沿用当前强度；需要 OpenRouter 认证 —— extensions/inline-effort.ts:404-417；README.md:70、115
+- 🧠 段在会话开始、切换模型时清除，下一次请求时显示 —— extensions/inline-effort.ts:389-402、221-245、427-490
+- 分类器不可用时提示，这条消息沿用当前强度；需要 OpenRouter 认证 —— extensions/inline-effort.ts:434-452；README.md:70、115
 - 只有真实存在的文件变成链接 —— extensions/clickable-paths.ts:85-105
 - 多行代码块（``` 或 ~~~ 围栏）里的路径不转换 —— extensions/clickable-paths.ts:205-226
 - 回复还在输出时不转换，输出完才转换 —— extensions/clickable-paths.ts:245

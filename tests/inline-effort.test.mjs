@@ -79,7 +79,7 @@ function setup({ thinking = "medium", model = codexModel() } = {}) {
         h.calls++;
         h.classifierModels.push(model);
         h.inputs.push(input);
-        await h.classifyHook?.(options.signal);
+        await h.classifyHook?.(options.signal, model);
         assert.equal(options.timeoutMs, 15000);
         h.abortDuringClassification?.abort();
         if (h.error) throw h.error;
@@ -292,7 +292,7 @@ test("分类不可用、出错、截断、低置信度或结果无效时沿用�
     error: (h) => { h.stopReason = "error"; },
     length: (h) => { h.stopReason = "length"; },
     confidence: (h) => { h.confidence = 0.49; },
-    unknown: (h) => { h.choices = ["invalid"]; },
+    unknown: (h) => { h.result = { stopReason: "stop", answers: { thinking: { type: "choice", choice: "invalid", probabilities: { invalid: 1 } } } }; },
   };
   for (const selected of ["jev", "d1-ultra"]) {
     saveEffortSettings(selected);
@@ -302,10 +302,10 @@ test("分类不可用、出错、截断、低置信度或结果无效时沿用�
       const payload = await h.request([system, user(1)], { base: "high" });
       assert.deepEqual(updates(payload), [], failure);
       assert.deepEqual(h.branch.map(({ data }) => data), [{ timestamp: 1, thinkingLevel: "high", classifier: selected }], failure);
-      const warned = ["missing", "exception", "error"].includes(failure);
-      assert.equal(h.warnings.length, warned ? 1 : 0, failure);
-      if (warned) assert.match(h.warnings[0].message, /思考强度沿用 high/);
-      assert.ok(h.classifierModels.every(({ id }) => id === (selected === "jev" ? "~typesafe/jev-latest" : "liquid/d1-ultra")));
+      assert.equal(h.warnings.length, selected === "d1-ultra" ? 2 : 1, failure);
+      assert.match(h.warnings.at(-1).message, /思考强度沿用 high/);
+      assert.deepEqual(h.classifierModels.map(({ id }) => id), failure === "missing" ? []
+        : selected === "jev" ? ["~typesafe/jev-latest"] : ["liquid/d1-ultra", "~typesafe/jev-latest"]);
     }
   }
 });
@@ -327,7 +327,7 @@ test("取消分类时不记录决策、不提示失败", async () => {
       assert.deepEqual(updates(payload), [], name);
       assert.equal(h.branch.length, 0, name);
       assert.equal(h.warnings.length, 0, name);
-      if (name === "before" || name === "customReason") assert.equal(h.calls, 0);
+      assert.equal(h.calls, name === "before" || name === "customReason" ? 0 : 1, "取消不调用回退模型");
     }
   }
 });
@@ -496,7 +496,7 @@ test("切换只影响新消息，不重分类旧消息；恢复、fork、分支�
   assert.equal(restored.classifierModels[0].id, "~typesafe/jev-latest");
 });
 
-test("d1-ultra 优先使用 Pi 目录中的条目；不可用不调用其他模型或改动主模型", async () => {
+test("d1-ultra 优先使用 Pi 目录条目；两者失败不改主模型、基线或配置", async () => {
   saveEffortSettings("d1-ultra");
   const h = setup();
   h.d1InCatalog = true;
@@ -506,12 +506,138 @@ test("d1-ultra 优先使用 Pi 目录中的条目；不可用不调用其他模�
   const mainThinking = h.thinking;
   h.stopReason = "error";
   await h.request([system, user(1), assistant(2), user(3)]);
-  assert.deepEqual(h.classifierModels.map(({ id }) => id), ["liquid/d1-ultra", "liquid/d1-ultra"]);
+  assert.deepEqual(h.classifierModels.map(({ id }) => id), ["liquid/d1-ultra", "liquid/d1-ultra", "~typesafe/jev-latest"]);
   assert.equal(h.branch.at(-1).data.thinkingLevel, "high");
-  assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra.*沿用 high.*不会切换/);
+  assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra.*~typesafe\/jev-latest.*沿用 high/);
   assert.equal(h.model, mainModel);
   assert.equal(h.thinking, mainThinking);
   assert.deepEqual(readEffortSettings(), { model: "d1-ultra" });
+});
+
+test("d1-ultra 服务出错、无效或低置信度时回退 Jev，警告先显示安全原因和正在切换", async () => {
+  saveEffortSettings("d1-ultra");
+  const failures = [
+    ["HTTP 429：服务限流", (h) => { h.result = { stopReason: "error", errorMessage: '429 {"error":{"message":"secret-key-from-proxy: rate limited"}}' }; }],
+    ["网络连接失败", (h) => { h.error = new Error("fetch failed: secret-key-from-proxy"); }],
+    ["分类服务异常", (h) => { h.error = new Error("secret-key-from-proxy"); }],
+    ["结果无效", (h) => { h.result = { stopReason: "stop", answers: {} }; }],
+    ["结果无效", (h) => { h.stopReason = "length"; }],
+    ["所选概率低于 0.5", (h) => { h.confidence = 0.49; }],
+  ];
+  for (const [reason, apply] of failures) {
+    const h = setup({ thinking: "max" });
+    h.choices = ["low", "low"];
+    h.classifyHook = (_signal, model) => {
+      if (model.id === "liquid/d1-ultra") apply(h);
+      else {
+        assert.equal(h.warnings.length, 1, "Jev 请求发出前已经提示切换");
+        assert.equal(h.warnings[0].type, "warning");
+        assert.ok(h.warnings[0].message.includes(reason));
+        assert.match(h.warnings[0].message, /正在切换到 openrouter\/~typesafe\/jev-latest/);
+        h.result = undefined; h.error = undefined; h.stopReason = "stop"; h.confidence = 1;
+      }
+    };
+    const payload = await h.request([system, user(1)]);
+    assert.deepEqual(h.classifierModels.map(({ id }) => id), ["liquid/d1-ultra", "~typesafe/jev-latest"]);
+    assert.deepEqual(h.inputs[0], h.inputs[1], "回退使用同一份已筛选的文本和规则");
+    assert.deepEqual(updates(payload), [[1, "low"]]);
+    assert.deepEqual(h.branch[0].data, { timestamp: 1, thinkingLevel: "low", classifier: "jev", fallbackFrom: "d1-ultra" });
+    assert.equal(h.status, "🧠 low · 基线 medium · Jev（d1-ultra 回退）");
+    assert.match(h.warnings.at(-1).message, /已回退到.*本次思考强度：low.*下条新消息会重新尝试/);
+    assert.ok(h.warnings.every(({ message }) => !message.includes("secret-key-from-proxy")));
+    assert.deepEqual(readEffortSettings(), { model: "d1-ultra" });
+    await h.command("status");
+    assert.match(h.warnings.at(-1).message, /后续分类：openrouter\/liquid\/d1-ultra；失败回退：Jev（仅本次）；最近决策：low · Jev（d1-ultra 回退）/);
+  }
+});
+
+test("回退决策可恢复、工具续调不重分类；下条新消息重新尝试 d1-ultra", async () => {
+  saveEffortSettings("d1-ultra");
+  const h = setup();
+  h.choices = ["low"];
+  h.classifyHook = (_signal, model) => { h.error = model.id === "liquid/d1-ultra" ? new Error("HTTP 503 secret-key-from-proxy") : undefined; };
+  const messages = [system, user(1)];
+  const first = await h.request(messages);
+  assert.match(h.warnings[0].message, /HTTP 503：上游服务异常/);
+  const restored = setup();
+  restored.branch.push(...structuredClone(h.branch));
+  assert.deepEqual(updates(await restored.request(messages)), [[1, "low"]]);
+  assert.equal(restored.status, "🧠 low · 基线 medium · Jev（d1-ultra 回退）");
+  assert.equal(restored.calls, 0);
+  messages.push(assistant(2), toolResult(3));
+  const continued = await h.request(messages);
+  assert.equal(h.calls, 2);
+  assert.ok(isPrefix(first.input, continued.input));
+  h.classifyHook = undefined;
+  h.choices = ["medium"];
+  messages.push(assistant(4), user(5));
+  const recovered = await h.request(messages);
+  assert.equal(h.classifierModels.at(-1).id, "liquid/d1-ultra");
+  assert.equal(h.calls, 3);
+  assert.deepEqual(h.branch.at(-1).data, { timestamp: 5, thinkingLevel: "medium", classifier: "d1-ultra" });
+  assert.equal(h.status, "🧠 medium · d1-ultra");
+  assert.ok(isPrefix(continued.input, recovered.input));
+});
+
+test("d1-ultra 超时后 Jev 使用独立 15 秒预算，迟到结果不能当作成功", async (t) => {
+  saveEffortSettings("d1-ultra");
+  const timers = [];
+  t.mock.method(AbortSignal, "timeout", (ms) => {
+    assert.equal(ms, 15000);
+    const timer = new AbortController(); timers.push(timer); return timer.signal;
+  });
+  const h = setup();
+  h.choices = ["max", "low"];
+  h.classifyHook = (signal, model) => {
+    if (model.id === "liquid/d1-ultra") timers[0].abort(new DOMException("超时", "TimeoutError"));
+    else assert.equal(signal.aborted, false);
+  };
+  assert.deepEqual(updates(await h.request([system, user(1)])), [[1, "low"]]);
+  assert.equal(timers.length, 2);
+  assert.match(h.warnings[0].message, /分类请求超时（15 秒）.*正在切换/);
+  assert.equal(h.branch[0].data.classifier, "jev");
+});
+
+test("Jev 回退期间取消或切换会话，不写决策、不显示迟到成功或失败", async () => {
+  saveEffortSettings("d1-ultra");
+  for (const event of ["abort", "session_start", "session_shutdown", "model_select"]) {
+    const h = setup();
+    const controller = new AbortController(); h.ctx.signal = controller.signal;
+    let release; const fallback = Promise.withResolvers();
+    h.classifyHook = (_signal, model) => {
+      h.error = model.id === "liquid/d1-ultra" ? new Error("429") : undefined;
+      if (model.id !== "liquid/d1-ultra") return new Promise((resolve) => { release = resolve; fallback.resolve(); });
+    };
+    const request = h.request([system, user(1)]);
+    await fallback.promise;
+    if (event === "abort") controller.abort();
+    else h.events.get(event)({ type: event }, h.ctx);
+    release();
+    assert.deepEqual(updates(await request), []);
+    assert.equal(h.calls, 2);
+    assert.equal(h.branch.length, 0);
+    assert.equal(h.warnings.length, 1, "只保留取消前已发出的切换提示");
+  }
+});
+
+test("回退同样适用于 Claude 和 Antigravity，状态栏和实际发送档位一致", async () => {
+  saveEffortSettings("d1-ultra");
+  for (const kind of ["claude", "antigravity"]) {
+    const h = kind === "claude" ? setup({ model: claudeModel() }) : antigravitySetup();
+    h.choices = ["low"];
+    h.classifyHook = (_signal, model) => { h.error = model.id === "liquid/d1-ultra" ? new Error("429") : undefined; };
+    if (kind === "claude") {
+      const { payload, reply } = await serializeClaude(h, [system, user(1)]);
+      assert.deepEqual(claudeMarkers(payload), ["low"]);
+      assert.equal(reply.providerThinkingLevel, "low");
+    } else {
+      const messages = [system, user(1)];
+      await h.context(messages);
+      assert.equal(h.send(messages).options.reasoning, "low");
+    }
+    assert.equal(h.status, "🧠 low · 基线 medium · Jev（d1-ultra 回退）");
+    assert.equal(h.thinking, "medium");
+  }
 });
 
 test("可用性测试只发送固定样例，成功、低置信度和失败均不写决策或改变状态", async () => {
@@ -526,12 +652,12 @@ test("可用性测试只发送固定样例，成功、低置信度和失败均�
   assert.equal(h.status, "原状态");
   h.confidence = 0.49;
   await h.command("test");
-  assert.match(h.warnings.at(-1).message, /已响应.*不会用于调整/);
+  assert.match(h.warnings.at(-1).message, /结果无效或所选概率低于 0.5/);
   for (const failure of ["error", "throw"]) {
     h.stopReason = failure === "error" ? "error" : "stop";
     h.error = failure === "throw" ? new Error("secret-key-from-proxy") : undefined;
     await h.command("test");
-    assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra.*不可用/);
+    assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra.*~typesafe\/jev-latest/);
     assert.ok(!h.warnings.at(-1).message.includes("secret-key-from-proxy"));
     assert.equal(h.warnings.at(-1).type, "warning");
   }
@@ -957,15 +1083,17 @@ test("Antigravity 真实 ModelRuntime 重注册与恢复保留动态刷新目录
 
 test("真实 Pi classifier 管线复用 models.json 的代理端点、认证及头部，404 不伪报成功", async () => {
   const requests = [];
+  let d1Unavailable = false;
   let unavailable = false;
   const server = createServer(async (request, response) => {
     let data = "";
     for await (const chunk of request) data += chunk;
     const body = JSON.parse(data);
     requests.push({ url: request.url, headers: request.headers, body });
-    response.writeHead(unavailable ? 404 : 200, { "Content-Type": "application/json" });
-    response.end(JSON.stringify(unavailable
-      ? { error: { code: 404, message: "secret-key-from-proxy: no endpoints" } }
+    const status = unavailable ? 404 : d1Unavailable && body.model === "liquid/d1-ultra" ? 429 : 200;
+    response.writeHead(status, { "Content-Type": "application/json" });
+    response.end(JSON.stringify(status !== 200
+      ? { error: { code: status, message: "secret-key-from-proxy: no endpoints" } }
       : { answers: { thinking: { type: "choice", choice: "low", confidence: 1, probabilities: { low: 1 } } }, usage: { input_tokens: 10, output_tokens: 1 } }));
   });
   server.listen(0, "127.0.0.1");
@@ -994,15 +1122,27 @@ test("真实 Pi classifier 管线复用 models.json 的代理端点、认证及�
     assert.equal(requests[0].body.model, "liquid/d1-ultra");
     assert.equal(requests[0].body.questions.thinking.type, "choice");
     assert.deepEqual(registry.getModelsOfType("chat", "openrouter").map(({ id }) => id), before);
-    unavailable = true;
+    d1Unavailable = true;
     await h.command("test");
-    assert.equal(requests.length, 2);
+    const fallbackRequests = requests.slice(1);
+    assert.ok(fallbackRequests.length >= 2, "Pi 原生 HTTP 管线可能重试 429");
+    assert.ok(fallbackRequests.slice(0, -1).every(({ body }) => body.model === "liquid/d1-ultra"));
+    assert.equal(fallbackRequests.at(-1).body.model, "~typesafe/jev-latest");
+    assert.match(h.warnings.at(-2).message, /HTTP 429：服务限流.*正在切换/);
+    assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra 不可用，已回退到.*样例分类：low/);
+    unavailable = true;
+    const beforeFailure = requests.length;
+    await h.command("test");
+    assert.deepEqual(requests.slice(beforeFailure).map(({ body }) => body.model), ["liquid/d1-ultra", "~typesafe/jev-latest"]);
     assert.equal(h.warnings.at(-1).type, "warning");
-    assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra.*不可用/);
-    assert.ok(!h.warnings.at(-1).message.includes("secret-key-from-proxy"));
+    assert.match(h.warnings.at(-1).message, /liquid\/d1-ultra：HTTP 404.*~typesafe\/jev-latest：HTTP 404/);
+    assert.ok(h.warnings.every(({ message }) => !message.includes("secret-key-from-proxy")));
     assert.equal(h.branch.length, 1);
-    assert.equal(requests[1].body.model, "liquid/d1-ultra");
-    assert.deepEqual(requests[1].body.state, { prompt: "当前用户请求:\n把 hello 转成大写。" });
+    for (const { body, headers } of requests.slice(1)) {
+      assert.deepEqual(body.state, { prompt: "当前用户请求:\n把 hello 转成大写。" });
+      assert.equal(headers.authorization, "Bearer local-test-credential");
+      assert.equal(headers["x-test-proxy"], "configured");
+    }
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }

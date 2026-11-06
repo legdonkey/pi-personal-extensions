@@ -60,7 +60,7 @@ export function saveEffortSettings(model: DecisionModel): void {
 
 type AgentMessage = ContextWithSystemEvent["messages"][number];
 type Anchor = { role: string; timestamp: number };
-type Decision = { timestamp: number; thinkingLevel: ModelThinkingLevel; classifier?: DecisionModel | null };
+type Decision = { timestamp: number; thinkingLevel: ModelThinkingLevel; classifier?: DecisionModel | null; fallbackFrom?: DecisionModel };
 type InputItem = { type?: string; role?: string };
 type Payload = { model?: unknown; input?: InputItem[]; reasoning?: { effort?: unknown } };
 
@@ -71,7 +71,8 @@ const CODEX_API = "openai-codex-responses";
 const CLASSIFIER_PROVIDER = "openrouter";
 const CLASSIFICATION_TIMEOUT_MS = 15_000;
 const modelKey = (model: DecisionModel) => `${CLASSIFIER_PROVIDER}/${DECISION_MODELS[model].id}`;
-const classifierLabel = (model: unknown) => model === undefined ? "Jev" // 旧决策均来自 Jev。
+const classifierLabel = (model: unknown, fallbackFrom?: unknown) => model === "jev" && fallbackFrom === "d1-ultra" ? "Jev（d1-ultra 回退）"
+  : model === undefined ? "Jev" // 旧决策均来自 Jev。
   : model === "elephant" ? "Elephant（历史）"
   : isDecisionModel(model) ? DECISION_MODELS[model].name : "未分类";
 const CLASSIFIED_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
@@ -127,12 +128,33 @@ function resolveClassifier(ctx: ExtensionContext, selected: DecisionModel): Clas
     ? ctx.modelRegistry.findOfType("classifier", CLASSIFIER_PROVIDER, DECISION_MODELS.jev.id) : undefined;
   if (!template || template.api !== "typesafe-system-one")
     throw new Error("Pi 中没有可用的 OpenRouter System One classifier。");
-  // 价格来自 OpenRouter 公开端点元数据；不配置替代模型。
+  // 价格来自 OpenRouter 公开端点元数据；不改服务商的模型目录。
   return {
     ...template, id: DECISION_MODELS["d1-ultra"].id, name: DECISION_MODELS["d1-ultra"].name,
     input: ["text"], contextWindow: 32_768,
     cost: { input: 0.042, output: 0, cacheRead: 0.042, cacheWrite: 0 },
   };
+}
+
+/** 只输出白名单原因和 HTTP 状态码，服务端原文可能包含认证信息。 */
+function classificationFailure(error: unknown): string {
+  const message = error instanceof Error ? error.message : typeof error === "string" ? error : "";
+  const status = message.match(/\b(400|401|402|403|404|408|413|429|5\d\d)\b/)?.[1];
+  const reasons: Record<string, string> = {
+    "400": "分类请求被拒绝", "401": "认证失败", "402": "额度不足", "403": "权限或策略限制",
+    "404": "模型或端点不可用", "408": "服务请求超时", "413": "分类输入过大", "429": "服务限流",
+  };
+  const reason = status ? reasons[status] ?? "上游服务异常"
+    : /没有可用的.*classifier/.test(message) ? "Pi 中找不到可用的分类模型"
+    : /guardrail|privacy|data policy/i.test(message) ? "OpenRouter 策略或白名单限制"
+    : /no (?:available )?endpoints/i.test(message) ? "没有可用的模型端点"
+    : /rate.?limit|too many requests/i.test(message) ? "服务限流"
+    : /api.?key|credential|unauthori[sz]ed/i.test(message) ? "认证不可用"
+    : /timeout|timed out/i.test(message) ? "服务请求超时"
+    : /fetch failed|network|ECONN|ENOTFOUND|EAI_AGAIN|socket|TLS|certificate/i.test(message) ? "网络连接失败"
+    : /invalid.*(?:response|answer)|parse|JSON/i.test(message) ? "分类响应格式无效"
+    : "分类服务异常（未返回可识别的原因）";
+  return status ? `HTTP ${status}：${reason}` : reason;
 }
 
 /** 无效或低置信度结果返回 undefined；取消和服务错误交给调用方区分处理。 */
@@ -167,8 +189,8 @@ async function classifyThinking(
 
   signal.throwIfAborted();
   if (result.stopReason === "aborted") throw new DOMException("分类请求已取消", "AbortError");
-  // 不显示服务端错误原文，避免代理或认证错误把密钥带入通知或日志。
-  if (result.stopReason === "error") throw new Error("分类服务不可用（模型下线、无权限或网络异常）。");
+  // 原文只交给 classificationFailure 做白名单映射，不直接显示或记录。
+  if (result.stopReason === "error") throw new Error(result.errorMessage ?? "");
   if (result.stopReason !== "stop") return undefined;
   const thinking = result.answers?.thinking;
   if (thinking?.type !== "choice") return undefined;
@@ -231,7 +253,7 @@ export default function (pi: ExtensionAPI) {
       if (level === "off") return original.streamSimple!(model, context, options);
       const base = options.reasoning ?? "medium";
       request.effort = level;
-      request.ctx.ui.setStatus(STATUS_KEY, `${level === base ? `🧠 ${level}` : `🧠 ${level} · 基线 ${base}`} · ${decision ? classifierLabel(decision.classifier) : "未分类"}`);
+      request.ctx.ui.setStatus(STATUS_KEY, `${level === base ? `🧠 ${level}` : `🧠 ${level} · 基线 ${base}`} · ${decision ? classifierLabel(decision.classifier, decision.fallbackFrom) : "未分类"}`);
       // pi-antigravity 0.11 不调用 onPayload；在其原生路由前仅覆盖本次 reasoning。
       return original.streamSimple!(model, context, { ...options, reasoning: level });
     };
@@ -259,18 +281,28 @@ export default function (pi: ExtensionAPI) {
     pendingRequest?.abort();
     const controller = new AbortController();
     pendingRequest = controller;
-    const signal = AbortSignal.any([
-      controller.signal, AbortSignal.timeout(CLASSIFICATION_TIMEOUT_MS),
-      ...(ctx.signal ? [ctx.signal] : []),
-    ]);
+    const requestSignal = AbortSignal.any([controller.signal, ...(ctx.signal ? [ctx.signal] : [])]);
+    const candidates: DecisionModel[] = selected === "d1-ultra" ? [selected, "jev"] : [selected];
+    const failures: string[] = [];
     try {
-      return await classifyThinking(prompt, ctx, selected, signal);
-    } catch (error) {
-      if (ctx.signal?.aborted || controller.signal.aborted)
-        throw new DOMException("分类请求已取消", "AbortError");
-      if (signal.aborted) throw new DOMException("分类请求超时", "TimeoutError");
-      if (error instanceof Error && error.name === "AbortError") throw error;
-      throw new Error(`${modelKey(selected)} 分类服务不可用（模型下线、无权限或网络异常）。`);
+      for (const classifier of candidates) {
+        if (requestSignal.aborted) throw new DOMException("分类请求已取消", "AbortError");
+        const signal = AbortSignal.any([requestSignal, AbortSignal.timeout(CLASSIFICATION_TIMEOUT_MS)]);
+        let reason: string;
+        try {
+          const thinkingLevel = await classifyThinking(prompt, ctx, classifier, signal);
+          if (thinkingLevel) return { thinkingLevel, classifier, ...(classifier !== selected ? { fallbackFrom: selected } : {}) };
+          reason = "结果无效或所选概率低于 0.5";
+        } catch (error) {
+          if (requestSignal.aborted || (!signal.aborted && error instanceof Error && error.name === "AbortError"))
+            throw new DOMException("分类请求已取消", "AbortError");
+          reason = signal.aborted ? "分类请求超时（15 秒）" : classificationFailure(error);
+        }
+        failures.push(`${modelKey(classifier)}：${reason}`);
+        if (classifier === "d1-ultra")
+          ctx.ui.notify(`${modelKey(classifier)} 分类失败（${reason}），正在切换到 ${modelKey("jev")}。仅本次回退，全局选择不变。`, "warning");
+      }
+      throw new Error(`${failures.join("；")}。`);
     } finally {
       if (pendingRequest === controller) pendingRequest = undefined;
     }
@@ -289,7 +321,7 @@ export default function (pi: ExtensionAPI) {
           const selected = readEffortSettings().model;
           const last = decisions(ctx).at(-1);
           ctx.ui.notify(
-            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier)}` : "尚无"}。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。`,
+            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；失败回退：${selected === "d1-ultra" ? "Jev（仅本次）" : "无"}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier, last.fallbackFrom)}` : "尚无"}。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。`,
             "info",
           );
           return;
@@ -302,12 +334,9 @@ export default function (pi: ExtensionAPI) {
           const started = generation;
           const selected = readEffortSettings().model;
           // 固定公开样例，不读取会话、系统规则或工具结果；不记录决策或改变当前强度。
-          const level = await classify("当前用户请求:\n把 hello 转成大写。", ctx, selected);
+          const result = await classify("当前用户请求:\n把 hello 转成大写。", ctx, selected);
           if (generation !== started) return;
-          ctx.ui.notify(level
-            ? `${modelKey(selected)} 测试成功，样例分类：${level}。此结果不保证后续可用性或价格。`
-            : `${modelKey(selected)} 已响应，但结果无效或所选概率低于 0.5；不会用于调整强度。`,
-          level ? "info" : "warning");
+          ctx.ui.notify(`${result.fallbackFrom ? `${modelKey(selected)} 不可用，已回退到 ${modelKey(result.classifier)}` : `${modelKey(result.classifier)} 测试成功`}，样例分类：${result.thinkingLevel}。此结果不保证后续可用性或价格。`, "info");
           return;
         }
         let selected: unknown = value;
@@ -399,22 +428,28 @@ export default function (pi: ExtensionAPI) {
     const current = recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel();
     let thinkingLevel = current;
     let classifier: DecisionModel | null = null;
+    let fallbackFrom: DecisionModel | undefined;
     try {
       ctx.signal?.throwIfAborted();
       const prompt = classificationPrompt(messages.filter(({ role }) => role === "user" || role === "assistant") as Message[]);
       try {
         if (prompt) {
           classifier = readEffortSettings().model;
-          thinkingLevel = await classify(prompt, ctx, classifier) ?? current;
+          const result = await classify(prompt, ctx, classifier);
+          ctx.signal?.throwIfAborted();
+          if (generation !== started) return;
+          ({ thinkingLevel, classifier, fallbackFrom } = result);
+          if (fallbackFrom)
+            ctx.ui.notify(`已回退到 ${modelKey(classifier)}，本次思考强度：${thinkingLevel}。全局选择仍为 ${modelKey(fallbackFrom)}，下条新消息会重新尝试。`, "info");
         }
       } catch (error) {
         ctx.signal?.throwIfAborted();
         if (error instanceof Error && error.name === "AbortError") throw error;
-        ctx.ui.notify(`${classifier ? modelKey(classifier) : "分类模型配置"} 不可用，思考强度沿用 ${current}。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`, "warning");
+        ctx.ui.notify(`${error instanceof Error ? error.message : "分类失败。"} 思考强度沿用 ${current}。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`, "warning");
       }
       ctx.signal?.throwIfAborted();
       if (generation !== started) return;
-      for (const { timestamp } of pending) pi.appendEntry(EFFORT_ENTRY, { timestamp, thinkingLevel, classifier });
+      for (const { timestamp } of pending) pi.appendEntry(EFFORT_ENTRY, { timestamp, thinkingLevel, classifier, ...(fallbackFrom ? { fallbackFrom } : {}) });
     } catch (error) {
       anchors = undefined;
       claudeRequest = undefined;
@@ -448,7 +483,7 @@ export default function (pi: ExtensionAPI) {
       if (typeof effort !== "string" || !CLASSIFIED_LEVELS.some((level) => level === effort)) return undefined;
       const base = last.output_config.effort;
       request.effort = effort;
-      ctx.ui.setStatus(STATUS_KEY, `${effort === base ? `🧠 ${base}` : `🧠 ${effort} · 基线 ${base}`} · ${classifierLabel(decision.classifier)}`);
+      ctx.ui.setStatus(STATUS_KEY, `${effort === base ? `🧠 ${base}` : `🧠 ${effort} · 基线 ${base}`} · ${classifierLabel(decision.classifier, decision.fallbackFrom)}`);
       return { ...body, messages: [...body.messages!.slice(0, -1), { ...last, output_config: { ...last.output_config, effort } }] };
     }
     const snapshot = anchors;
@@ -458,7 +493,7 @@ export default function (pi: ExtensionAPI) {
     const base = body.reasoning?.effort;
     if (!Array.isArray(body.input) || typeof base !== "string" || !isGpt6(body.model)) return undefined;
     const recorded = decisions(ctx);
-    const classifiedBy = recorded.length ? classifierLabel(recorded.at(-1)?.classifier) : "未分类";
+    const classifiedBy = recorded.length ? classifierLabel(recorded.at(-1)?.classifier, recorded.at(-1)?.fallbackFrom) : "未分类";
     if (body.input.filter(({ role }) => role === "user").length !== snapshot.length) {
       ctx.ui.setStatus(STATUS_KEY, `🧠 ${base} · 未调整 · ${classifiedBy}`);
       return undefined;

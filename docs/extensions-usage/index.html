@@ -1762,7 +1762,7 @@ pi remove "$(pwd)"</code></pre>
         <li><span class="seg" data-seg="effort-04" data-say="用支持的模型启动 Pi，thinking 设为 medium。下面用 GPT 六 Codex 举例。">用支持的模型启动 Pi，thinking 设为 <code>medium</code>。下面用 GPT-6 Codex 举例。</span></li>
         <li><span class="seg" data-seg="effort-05" data-say="输入斜杠 personal，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。">输入 <code>/personal</code>，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。</span></li>
         <li><span class="seg" data-seg="effort-06">在同一个菜单里选「测试分类模型可用性」，确认分类器能用。</span></li>
-        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；Codex 出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。弹出分类警告，表示这次分类失败，沿用当前档位；Codex 出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
+        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。切换警告只表示首选失败，Jev 回退成功后会显示实际档位；全部失败才沿用当前档位。Codex 出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。切换警告只表示首选失败，Jev 回退成功后会显示实际档位；全部失败才沿用当前档位。Codex 出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
       </ol>
       <p>
         <span class="seg" data-seg="effort-07a" data-say="三个分支的写入方式不同。Codex 在当前用户消息前插入 configuration update。Anthropic 协议分支只修改 Pi 已生成的末尾空 system 消息中的 output config 点 effort，不改顶层配置、历史消息或 thinking block。">三个分支的写入方式不同。Codex 在当前用户消息前插入 <code>configuration_update</code>。Anthropic 协议分支只修改 Pi 已生成的末尾空 <code>system</code> 消息中的 <code>output_config.effort</code>，不改顶层配置、历史消息或 thinking block。</span>
@@ -1773,7 +1773,7 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 600 316" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">生效条件和确认步骤</title>
-          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex；Antigravity 还需安装并启用 pi-antigravity。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：弹出分类警告表示分类失败、沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
+          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex；Antigravity 还需安装并启用 pi-antigravity。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：先看回退结果，只有全部失败才沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
           <g data-cue="effort-03">
             <text class="t-cap" x="16" y="16">条件</text>
             <rect class="n" x="16" y="28" width="20" height="20" rx="4"/>
@@ -1813,7 +1813,7 @@ pi remove "$(pwd)"</code></pre>
             <text class="t-mono" x="16" y="286">4</text>
             <text class="t-mono" x="40" y="286">发一条消息</text>
             <text class="t-cap" x="232" y="286">看 🧠 段的档位</text>
-            <text class="t-cap" x="232" y="306">分类警告：沿用当前档位 · Codex 未调整：按基线发出</text>
+            <text class="t-cap" x="232" y="306">先看回退结果 · 全失败沿用 · 未调整按基线</text>
           </g>
         </svg>
       </div>
@@ -1878,7 +1878,7 @@ pi remove "$(pwd)"</code></pre>
           <text class="t-cap" x="232" y="270">满足条件的下一次请求后显示</text>
         </svg>
       </div>
-      <figcaption>示例。🧠 段的分类器部分显示最近一次选档位用的分类器；空白消息不分类，显示「未分类」。</figcaption>
+      <figcaption>示例。🧠 段显示最近一次选档位用的分类器，回退成功显示「Jev（d1-ultra 回退）」；全部失败时仍标注首选模型，表示最近尝试。空白消息不分类，显示「未分类」。</figcaption>
     </figure>
   </div>
 
@@ -1887,12 +1887,12 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想看现在的状态</h3>
       <p>
-        <span class="seg" data-seg="effort-10" data-say="在斜杠 personal 的原位思考强度菜单里选「查看分类模型与状态」，看是否适用、之后用哪个分类器、上一条消息选到的档位。">在 <code>/personal</code> 的原位思考强度菜单里选「查看分类模型与状态」，看是否适用、之后用哪个分类器、上一条消息选到的档位。</span>
+        <span class="seg" data-seg="effort-10" data-say="在斜杠 personal 的原位思考强度菜单里选「查看分类模型与状态」，看是否适用、之后用哪个分类器、失败回退策略、上一条消息选到的档位。">在 <code>/personal</code> 的原位思考强度菜单里选「查看分类模型与状态」，看是否适用、之后用哪个分类器、失败回退策略、上一条消息选到的档位。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-4">
-      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、最近决策尚无，以及切换和测试的菜单路径"></video></div>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
+      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、失败回退 Jev、最近决策尚无，以及切换和测试的菜单路径"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -1975,30 +1975,31 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>分类失败怎么办</h3>
       <p>
-        <span class="seg" data-seg="effort-16">如果分类器 15 秒内没有结果，或者服务出错，这条消息按当前档位照常发出，Pi 弹出警告。</span>
-        <span class="seg" data-seg="effort-17" data-say="看到警告，先在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」；还不行，就选「选择分类模型」换一个。">看到警告，先在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」；还不行，就选「选择分类模型」换一个。</span>
+        <span class="seg" data-seg="effort-16">d1-ultra 超时、出错、档位无效或把握不足时，警告会说明原因并提示「正在切换到 Jev」。Jev 成功后，提示实际档位，状态栏显示「Jev（d1-ultra 回退）」。</span>
+        <span class="seg" data-seg="effort-17" data-say="Jev 也失败时，警告会列出两个模型的原因并沿用当前档位。可在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」检查。">Jev 也失败时，警告会列出两个模型的原因并沿用当前档位。可在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」检查。</span>
+        <span class="seg" data-seg="effort-17a">自动回退只影响本次，不改全局选择，下一条新消息仍先尝试 d1-ultra。直接选择 Jev 时不反向回退。用户取消时停止分类，不回退，也不写决策。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="fig-scroll">
         <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-6-title fig-effort-6-desc">
           <title id="fig-effort-6-title">分类失败时会怎样</title>
-          <desc id="fig-effort-6-desc">超时、服务出错或响应格式损坏时按当前档位发出并警告；分类器返回的档位无效或把握不足时按当前档位发出，不提示。当前档位是上一条消息的档位，没有上一条消息时用基线。看到警告先在 /personal 的原位思考强度菜单里选「测试分类模型可用性」，仍失败就选「选择分类模型」换分类器。</desc>
+          <desc id="fig-effort-6-desc">d1-ultra 超时、出错、无效或低置信度时，显示安全原因并尝试 Jev。Jev 成功就采用新档位；全部失败才沿用上次档位，没有决策时用基线。可在 /personal 的原位思考强度菜单里测试分类模型可用性。</desc>
           <defs>
             <marker id="fig-effort-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
           <g data-cue="effort-16">
             <line class="w" x1="264" y1="40" x2="294" y2="40" marker-end="url(#fig-effort-6-arrow)"/>
             <rect class="n" x="16" y="20" width="248" height="40" rx="6"/>
-            <text class="t" x="140" y="45" text-anchor="middle">超时、服务出错、格式损坏</text>
+            <text class="t" x="140" y="45" text-anchor="middle">d1-ultra 超时、出错或无效</text>
             <rect class="n" x="296" y="20" width="288" height="40" rx="6"/>
-            <text class="t" x="440" y="45" text-anchor="middle">按当前档位发出，弹出警告</text>
+            <text class="t" x="440" y="45" text-anchor="middle">说明原因 → Jev 自动回退</text>
           </g>
           <line class="w" x1="264" y1="96" x2="294" y2="96" marker-end="url(#fig-effort-6-arrow)"/>
           <rect class="n" x="16" y="76" width="248" height="40" rx="6"/>
-          <text class="t" x="140" y="101" text-anchor="middle">档位无效或把握不足</text>
+          <text class="t" x="140" y="101" text-anchor="middle">Jev 成功 / 所有尝试失败</text>
           <rect class="n" x="296" y="76" width="288" height="40" rx="6"/>
-          <text class="t" x="440" y="101" text-anchor="middle">按当前档位发出，不提示</text>
+          <text class="t" x="440" y="101" text-anchor="middle">采用新档位 / 沿用并警告</text>
           <text class="t-cap" x="16" y="140">当前档位：上一条消息的档位；没有上一条消息时，用基线。对话照常进行。</text>
           <g data-cue="effort-17">
             <line class="w" x1="264" y1="180" x2="294" y2="180" marker-end="url(#fig-effort-6-arrow)"/>
@@ -2009,7 +2010,7 @@ pi remove "$(pwd)"</code></pre>
           </g>
         </svg>
       </div>
-      <figcaption>「把握不足」指分类器给所选档位的概率低于 0.5。警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。</code></figcaption>
+      <figcaption>「把握不足」指所选档位概率低于 0.5。切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code>原因只显示安全分类和 HTTP 状态码，不显示服务端原文或凭据；无法识别时明确提示原因未知。所有尝试都失败才沿用当前分支最近档位，没有决策时用基线。</figcaption>
     </figure>
   </div>
 
@@ -2018,7 +2019,7 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>要注意什么：额度和隐私</h3>
       <p>
-        <span class="seg" data-seg="effort-18" data-say="每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；D1 Ultra 是付费模型。">每次分类要多等一会儿，最多 15 秒，并消耗 OpenRouter 额度；d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-18" data-say="每个分类模型最多等 15 秒，含回退最多约 30 秒。分类和回退都消耗 OpenRouter 额度；D1 Ultra 是付费模型。">每个分类模型最多等 15 秒，含回退最多约 30 秒。分类和回退都消耗 OpenRouter 额度；d1-ultra 是付费模型。</span>
         <span class="seg" data-seg="effort-19">「原位思考强度」把当前消息和之前最多 6 条对话消息的文本发给分类器，可能含业务信息。工具输出、思考内容和图片不发送。</span>
       </p>
     </div>
@@ -2026,7 +2027,7 @@ pi remove "$(pwd)"</code></pre>
       <div class="fig-scroll">
         <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-7-title fig-effort-7-desc">
           <title id="fig-effort-7-title">新消息多出的一步</title>
-          <desc id="fig-effort-7-desc">你的消息先经过 OpenRouter 上的分类器，最多 15 秒，再交给主模型。代价是等待和 OpenRouter 额度；发出的是当前消息和之前最多 6 条对话消息的文本，不发系统提示词、工具输出、思考内容和图片。</desc>
+          <desc id="fig-effort-7-desc">你的消息先经过 OpenRouter 上的分类器，每个模型最多等 15 秒，含回退最多约 30 秒，再交给主模型。代价是等待和 OpenRouter 额度；发出的是当前消息和之前最多 6 条对话消息的文本，不发系统提示词、工具输出、思考内容和图片。</desc>
           <defs>
             <marker id="fig-effort-7-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -2041,7 +2042,7 @@ pi remove "$(pwd)"</code></pre>
           <text class="t" x="516" y="53" text-anchor="middle">主模型</text>
           <g data-cue="effort-18">
             <path d="M192 84 V88 H392 V84" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
-            <text class="t-cap" x="292" y="108" text-anchor="middle">多等最多 15 秒</text>
+            <text class="t-cap" x="292" y="108" text-anchor="middle">每模型 15 秒 · 回退共约 30 秒</text>
             <text class="t-cap" x="292" y="128" text-anchor="middle">消耗 OpenRouter 额度（d1-ultra 付费）</text>
           </g>
           <g data-cue="effort-19">
@@ -2397,7 +2398,7 @@ npm install --ignore-scripts \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=3233e5dc","duration":959.16,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":6.96},{"id":"start-02","ch":"start","start":7.28,"end":14.32},{"id":"start-03","ch":"start","start":14.64,"end":21.04},{"id":"start-04","ch":"start","start":21.36,"end":33.6},{"id":"start-05","ch":"start","start":33.92,"end":56.8},{"id":"start-video","ch":"start","start":57.12,"end":66.88},{"id":"start-06","ch":"start","start":67.2,"end":75.12},{"id":"start-07","ch":"start","start":75.44,"end":80.96},{"id":"start-08","ch":"start","start":81.28,"end":90.16},{"id":"start-09","ch":"start","start":90.48,"end":94},{"id":"start-10","ch":"start","start":94.32,"end":102.4},{"id":"start-11","ch":"start","start":102.72,"end":111.68},{"id":"start-12","ch":"start","start":112,"end":116.96},{"id":"start-13","ch":"start","start":117.28,"end":120.08},{"id":"start-14","ch":"start","start":120.4,"end":124},{"id":"start-15","ch":"start","start":124.32,"end":130.16},{"id":"message-00","ch":"message","start":131.06,"end":133.94},{"id":"message-01","ch":"message","start":134.26,"end":142.74},{"id":"message-02","ch":"message","start":143.06,"end":146.9},{"id":"message-03","ch":"message","start":147.22,"end":153.14},{"id":"message-04","ch":"message","start":153.46,"end":161.22},{"id":"message-05","ch":"message","start":161.54,"end":166.18},{"id":"message-06","ch":"message","start":166.5,"end":174.9},{"id":"message-07","ch":"message","start":175.22,"end":181.14},{"id":"message-08","ch":"message","start":181.46,"end":190.74},{"id":"message-09","ch":"message","start":191.06,"end":198.1},{"id":"message-10","ch":"message","start":198.42,"end":206.18},{"id":"message-11","ch":"message","start":206.5,"end":211.62},{"id":"message-12","ch":"message","start":211.94,"end":223.86},{"id":"statusbar-00","ch":"statusbar","start":224.76,"end":227.64},{"id":"statusbar-01","ch":"statusbar","start":227.96,"end":239.8},{"id":"statusbar-02","ch":"statusbar","start":240.12,"end":272.2},{"id":"statusbar-03","ch":"statusbar","start":272.52,"end":285.32},{"id":"statusbar-04","ch":"statusbar","start":285.64,"end":299},{"id":"statusbar-05","ch":"statusbar","start":299.32,"end":314.6},{"id":"statusbar-06","ch":"statusbar","start":314.92,"end":323.16},{"id":"statusbar-07","ch":"statusbar","start":323.48,"end":329.24},{"id":"statusbar-08","ch":"statusbar","start":329.56,"end":334.52},{"id":"statusbar-09","ch":"statusbar","start":334.84,"end":340.12},{"id":"statusbar-10","ch":"statusbar","start":340.44,"end":343.88},{"id":"statusbar-11","ch":"statusbar","start":344.2,"end":351.8},{"id":"title-00","ch":"title","start":352.7,"end":356.78},{"id":"title-01","ch":"title","start":357.1,"end":366.22},{"id":"title-02","ch":"title","start":366.54,"end":374.46},{"id":"title-03","ch":"title","start":374.78,"end":379.82},{"id":"title-04","ch":"title","start":380.14,"end":385.9},{"id":"title-05","ch":"title","start":386.22,"end":398.94},{"id":"title-06","ch":"title","start":399.26,"end":409.42},{"id":"title-07","ch":"title","start":409.74,"end":421.42},{"id":"title-08","ch":"title","start":421.74,"end":432.3},{"id":"title-09","ch":"title","start":432.62,"end":439.42},{"id":"title-10","ch":"title","start":439.74,"end":451.82},{"id":"title-11","ch":"title","start":452.14,"end":458.78},{"id":"title-12","ch":"title","start":459.1,"end":462.54},{"id":"title-13","ch":"title","start":462.86,"end":479.58},{"id":"title-14","ch":"title","start":479.9,"end":483.66},{"id":"effort-00","ch":"effort","start":484.56,"end":488.64},{"id":"effort-01","ch":"effort","start":488.96,"end":498.64},{"id":"effort-02","ch":"effort","start":498.96,"end":501.44},{"id":"effort-02a","ch":"effort","start":501.76,"end":514.24},{"id":"effort-02b","ch":"effort","start":514.56,"end":534.24},{"id":"effort-02c","ch":"effort","start":534.56,"end":556.08},{"id":"effort-03","ch":"effort","start":556.4,"end":576.48},{"id":"effort-04","ch":"effort","start":576.8,"end":583.52},{"id":"effort-05","ch":"effort","start":583.84,"end":595.68},{"id":"effort-06","ch":"effort","start":596,"end":601.68},{"id":"effort-07","ch":"effort","start":602,"end":616.88},{"id":"effort-07a","ch":"effort","start":617.2,"end":634.8},{"id":"effort-07b","ch":"effort","start":635.12,"end":652.32},{"id":"effort-08","ch":"effort","start":652.64,"end":660.72},{"id":"effort-09","ch":"effort","start":661.04,"end":666.4},{"id":"effort-10","ch":"effort","start":666.72,"end":678.64},{"id":"effort-11","ch":"effort","start":678.96,"end":682.48},{"id":"effort-12","ch":"effort","start":682.8,"end":684.64},{"id":"effort-13","ch":"effort","start":684.96,"end":688.8},{"id":"effort-14","ch":"effort","start":689.12,"end":695.76},{"id":"effort-15","ch":"effort","start":696.08,"end":703.2},{"id":"effort-16","ch":"effort","start":703.52,"end":712},{"id":"effort-17","ch":"effort","start":712.32,"end":722.4},{"id":"effort-18","ch":"effort","start":722.72,"end":730.8},{"id":"effort-19","ch":"effort","start":731.12,"end":744.24},{"id":"faq-00","ch":"faq","start":745.14,"end":748.74},{"id":"faq-01","ch":"faq","start":749.06,"end":759.06},{"id":"faq-02","ch":"faq","start":759.38,"end":765.46},{"id":"faq-03","ch":"faq","start":765.78,"end":773.78},{"id":"faq-04","ch":"faq","start":774.1,"end":783.46},{"id":"faq-05","ch":"faq","start":783.78,"end":787.94},{"id":"faq-06","ch":"faq","start":788.26,"end":797.3},{"id":"faq-07","ch":"faq","start":797.62,"end":801.7},{"id":"video-00","ch":"video","start":802.6,"end":805.96},{"id":"video-01","ch":"video","start":806.28,"end":822.68},{"id":"video-02","ch":"video","start":823,"end":841.96},{"id":"video-03","ch":"video","start":842.28,"end":864.6},{"id":"video-04","ch":"video","start":864.92,"end":889},{"id":"video-05","ch":"video","start":889.32,"end":905.24},{"id":"video-06","ch":"video","start":905.56,"end":959.16}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=a96d437a","duration":994.84,"segs":[{"id":"start-00","ch":"start","start":0,"end":3.28},{"id":"start-01","ch":"start","start":3.6,"end":6.96},{"id":"start-02","ch":"start","start":7.28,"end":14.32},{"id":"start-03","ch":"start","start":14.64,"end":21.04},{"id":"start-04","ch":"start","start":21.36,"end":33.6},{"id":"start-05","ch":"start","start":33.92,"end":56.8},{"id":"start-video","ch":"start","start":57.12,"end":66.88},{"id":"start-06","ch":"start","start":67.2,"end":75.12},{"id":"start-07","ch":"start","start":75.44,"end":80.96},{"id":"start-08","ch":"start","start":81.28,"end":90.16},{"id":"start-09","ch":"start","start":90.48,"end":94},{"id":"start-10","ch":"start","start":94.32,"end":102.4},{"id":"start-11","ch":"start","start":102.72,"end":111.68},{"id":"start-12","ch":"start","start":112,"end":116.96},{"id":"start-13","ch":"start","start":117.28,"end":120.08},{"id":"start-14","ch":"start","start":120.4,"end":124},{"id":"start-15","ch":"start","start":124.32,"end":130.16},{"id":"message-00","ch":"message","start":131.06,"end":133.94},{"id":"message-01","ch":"message","start":134.26,"end":142.74},{"id":"message-02","ch":"message","start":143.06,"end":146.9},{"id":"message-03","ch":"message","start":147.22,"end":153.14},{"id":"message-04","ch":"message","start":153.46,"end":161.22},{"id":"message-05","ch":"message","start":161.54,"end":166.18},{"id":"message-06","ch":"message","start":166.5,"end":174.9},{"id":"message-07","ch":"message","start":175.22,"end":181.14},{"id":"message-08","ch":"message","start":181.46,"end":190.74},{"id":"message-09","ch":"message","start":191.06,"end":198.1},{"id":"message-10","ch":"message","start":198.42,"end":206.18},{"id":"message-11","ch":"message","start":206.5,"end":211.62},{"id":"message-12","ch":"message","start":211.94,"end":223.86},{"id":"statusbar-00","ch":"statusbar","start":224.76,"end":227.64},{"id":"statusbar-01","ch":"statusbar","start":227.96,"end":239.8},{"id":"statusbar-02","ch":"statusbar","start":240.12,"end":272.2},{"id":"statusbar-03","ch":"statusbar","start":272.52,"end":285.32},{"id":"statusbar-04","ch":"statusbar","start":285.64,"end":299},{"id":"statusbar-05","ch":"statusbar","start":299.32,"end":314.6},{"id":"statusbar-06","ch":"statusbar","start":314.92,"end":323.16},{"id":"statusbar-07","ch":"statusbar","start":323.48,"end":329.24},{"id":"statusbar-08","ch":"statusbar","start":329.56,"end":334.52},{"id":"statusbar-09","ch":"statusbar","start":334.84,"end":340.12},{"id":"statusbar-10","ch":"statusbar","start":340.44,"end":343.88},{"id":"statusbar-11","ch":"statusbar","start":344.2,"end":351.8},{"id":"title-00","ch":"title","start":352.7,"end":356.78},{"id":"title-01","ch":"title","start":357.1,"end":366.22},{"id":"title-02","ch":"title","start":366.54,"end":374.46},{"id":"title-03","ch":"title","start":374.78,"end":379.82},{"id":"title-04","ch":"title","start":380.14,"end":385.9},{"id":"title-05","ch":"title","start":386.22,"end":398.94},{"id":"title-06","ch":"title","start":399.26,"end":409.42},{"id":"title-07","ch":"title","start":409.74,"end":421.42},{"id":"title-08","ch":"title","start":421.74,"end":432.3},{"id":"title-09","ch":"title","start":432.62,"end":439.42},{"id":"title-10","ch":"title","start":439.74,"end":451.82},{"id":"title-11","ch":"title","start":452.14,"end":458.78},{"id":"title-12","ch":"title","start":459.1,"end":462.54},{"id":"title-13","ch":"title","start":462.86,"end":479.58},{"id":"title-14","ch":"title","start":479.9,"end":483.66},{"id":"effort-00","ch":"effort","start":484.56,"end":488.64},{"id":"effort-01","ch":"effort","start":488.96,"end":498.64},{"id":"effort-02","ch":"effort","start":498.96,"end":501.44},{"id":"effort-02a","ch":"effort","start":501.76,"end":514.24},{"id":"effort-02b","ch":"effort","start":514.56,"end":534.24},{"id":"effort-02c","ch":"effort","start":534.56,"end":556.08},{"id":"effort-03","ch":"effort","start":556.4,"end":576.48},{"id":"effort-04","ch":"effort","start":576.8,"end":583.52},{"id":"effort-05","ch":"effort","start":583.84,"end":595.68},{"id":"effort-06","ch":"effort","start":596,"end":601.68},{"id":"effort-07","ch":"effort","start":602,"end":621.68},{"id":"effort-07a","ch":"effort","start":622,"end":639.6},{"id":"effort-07b","ch":"effort","start":639.92,"end":657.12},{"id":"effort-08","ch":"effort","start":657.44,"end":665.52},{"id":"effort-09","ch":"effort","start":665.84,"end":671.2},{"id":"effort-10","ch":"effort","start":671.52,"end":685.2},{"id":"effort-11","ch":"effort","start":685.52,"end":689.04},{"id":"effort-12","ch":"effort","start":689.36,"end":691.2},{"id":"effort-13","ch":"effort","start":691.52,"end":695.36},{"id":"effort-14","ch":"effort","start":695.68,"end":702.32},{"id":"effort-15","ch":"effort","start":702.64,"end":709.76},{"id":"effort-16","ch":"effort","start":710.08,"end":726.24},{"id":"effort-17","ch":"effort","start":726.56,"end":739.84},{"id":"effort-17a","ch":"effort","start":740.16,"end":755.6},{"id":"effort-18","ch":"effort","start":755.92,"end":766.48},{"id":"effort-19","ch":"effort","start":766.8,"end":779.92},{"id":"faq-00","ch":"faq","start":780.82,"end":784.42},{"id":"faq-01","ch":"faq","start":784.74,"end":794.74},{"id":"faq-02","ch":"faq","start":795.06,"end":801.14},{"id":"faq-03","ch":"faq","start":801.46,"end":809.46},{"id":"faq-04","ch":"faq","start":809.78,"end":819.14},{"id":"faq-05","ch":"faq","start":819.46,"end":823.62},{"id":"faq-06","ch":"faq","start":823.94,"end":832.98},{"id":"faq-07","ch":"faq","start":833.3,"end":837.38},{"id":"video-00","ch":"video","start":838.28,"end":841.64},{"id":"video-01","ch":"video","start":841.96,"end":858.36},{"id":"video-02","ch":"video","start":858.68,"end":877.64},{"id":"video-03","ch":"video","start":877.96,"end":900.28},{"id":"video-04","ch":"video","start":900.6,"end":924.68},{"id":"video-05","ch":"video","start":925,"end":940.92},{"id":"video-06","ch":"video","start":941.24,"end":994.84}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

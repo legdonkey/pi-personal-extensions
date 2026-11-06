@@ -2566,7 +2566,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <h3>代价：额度与外发文本</h3>
       <p>
         <span class="seg" data-seg="title-25">命名和预览都额外消耗命名模型的额度，这部分消耗不计入 Pi 自带的会话用量统计。发送的对话文本可能包含业务信息。</span>
-        <span class="seg" data-seg="title-26">和下一章对照：原位思考强度要先等分类器，最多 15 秒；自动命名在后台跑，用户不用等。</span>
+        <span class="seg" data-seg="title-26">和下一章对照：原位思考强度要先等分类器，每个模型最多 15 秒，含回退最多约 30 秒；自动命名在后台跑，用户不用等。</span>
       </p>
       <ul>
         <li>命名请求使用新的随机 <code>sessionId</code>，<code>cacheRetention</code> 为 <code>none</code>，不带工具；认证、请求头、API 端点 <code>baseUrl</code> 和环境变量复用 Pi 为该模型解析的结果。</li>
@@ -2576,7 +2576,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <div class="fig-scroll">
         <svg viewBox="0 0 640 220" width="100%" role="img" aria-labelledby="fig-title-10-title fig-title-10-desc">
           <title id="fig-title-10-title">一轮结束后多出的命名请求</title>
-          <desc id="fig-title-10-desc">一轮结束后，自动会话命名在后台请求命名模型，30 秒后触发取消，成功时再改会话名；用户不用等待。代价是额度消耗和对外发送对话文本。对照：原位思考强度要先等分类器，最多 15 秒。</desc>
+          <desc id="fig-title-10-desc">一轮结束后，自动会话命名在后台请求命名模型，30 秒后触发取消，成功时再改会话名；用户不用等待。代价是额度消耗和对外发送对话文本。对照：原位思考强度要先等分类器，每个模型最多 15 秒，含回退最多约 30 秒。</desc>
           <defs>
             <marker id="fig-title-10-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -2599,7 +2599,7 @@ const featureApi = Object.assign(Object.create(pi), {
           <g data-cue="title-26">
             <line x1="16" y1="168" x2="624" y2="168" style="stroke:var(--rule)"/>
             <text class="t-cap" x="16" y="190">用户：一轮结束后直接输入下一条，不等命名结果</text>
-            <text class="t-cap" x="16" y="210">对照第 6 章：原位思考强度要先等分类器，最多 15 秒</text>
+            <text class="t-cap" x="16" y="210">对照第 6 章：每模型等 15 秒，含回退共约 30 秒</text>
           </g>
         </svg>
       </div>
@@ -2825,7 +2825,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="effort-01b">近期对话只补全同一任务的信息，不继承旧难度。示例：修改位置和方式明确的字号调整可用 low，改做图示设计可用 high；按成熟口径查数画图可用 medium，排查混杂原因可用 xhigh。示例不是线上分类保证。</span>
         <span class="seg" data-seg="effort-01c">不因专业主题、成片精美、代理多或反复报错自动提档；只有无法识别任务要求时才以 high 保守兜底。思考强度不替代模型专长、授权和实测。分类器只读有限文本，看不到图片和工具结果，同轮工具续调不重新分类，历史决策不变。</span>
         <span class="seg" data-seg="effort-03">空白输入不调用分类器，沿用当前强度。当前强度是当前分支最近一次决策；没有决策就用基线，也就是 Pi 的 thinking 设置。</span>
-        <span class="seg" data-seg="effort-04">非空才调用分类器，最多等 15 秒。</span>
+        <span class="seg" data-seg="effort-04">非空才调用分类器。每个分类模型最多等 15 秒；d1-ultra 失败后尝试 Jev，合计最多约 30 秒。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-1">
@@ -2876,7 +2876,7 @@ const featureApi = Object.assign(Object.create(pi), {
             <text class="t-cap" x="344" y="242" text-anchor="middle">非空</text>
             <rect class="n is-ext" x="224" y="256" width="192" height="52" rx="6"/>
             <text class="t" x="320" y="278" text-anchor="middle">分类器</text>
-            <text class="t-sub" x="320" y="296" text-anchor="middle">Jev 或 d1-ultra · 15 秒</text>
+            <text class="t-sub" x="320" y="296" text-anchor="middle">每个模型 15 秒 · 回退共约 30 秒</text>
           </g>
         </svg>
       </div>
@@ -2900,8 +2900,8 @@ const featureApi = Object.assign(Object.create(pi), {
       <h3>分类结果怎么用</h3>
       <p>
         <span class="seg" data-seg="effort-05">分类正常完成、档位有效，且概率是 0.5 到 1 之间的有限数，这叫结果合格。结果合格，扩展就采用这个档位。</span>
-        <span class="seg" data-seg="effort-06">超时、出错或响应无法解析时，扩展沿用当前强度并警告。结果不合格时也沿用，但不警告。</span>
-        <span class="seg" data-seg="effort-07">两种情况都写入决策；用户取消时不写。</span>
+        <span class="seg" data-seg="effort-06">d1-ultra 超时、出错或结果不合格时，警告先显示安全原因和「正在切换到 Jev」。Jev 成功就采用新档位；所有尝试都失败才列出原因、警告并沿用当前强度。直接选择 Jev 时不反向回退。</span>
+        <span class="seg" data-seg="effort-07">采用和最终沿用都写入决策。回退成功时记录实际分类器和回退来源；用户取消时不回退、不写入。</span>
         <span class="seg" data-seg="effort-08">多条新消息只分类一次，结果写给每一条。</span>
       </p>
     </div>
@@ -2909,7 +2909,7 @@ const featureApi = Object.assign(Object.create(pi), {
       <div class="fig-scroll">
         <svg viewBox="0 0 640 320" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">分类结果的去向</title>
-          <desc id="fig-effort-2-desc">分类结果合格就采用该档位，不合格或出错就沿用当前强度；两条路都写入决策，用户取消时不写；多条新消息只分类一次、各写一条。</desc>
+          <desc id="fig-effort-2-desc">d1-ultra 失败先尝试 Jev；最终结果合格就采用该档位，全部失败才警告并沿用当前强度。两条路都写入决策，用户取消不回退、不写；同批新消息共用结果。</desc>
           <defs>
             <marker id="fig-effort-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
             <marker id="fig-effort-2-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--accent)"/></marker>
@@ -2917,7 +2917,7 @@ const featureApi = Object.assign(Object.create(pi), {
 
           <line class="w" x1="320" y1="60" x2="320" y2="78" marker-end="url(#fig-effort-2-arrow)"/>
           <rect class="n is-ext" x="224" y="16" width="192" height="44" rx="6"/>
-          <text class="t" x="320" y="36" text-anchor="middle">分类器返回</text>
+          <text class="t" x="320" y="36" text-anchor="middle">最终分类器返回</text>
           <text class="t-sub" x="320" y="52" text-anchor="middle">档位 + 概率</text>
 
           <g data-cue="effort-05">
@@ -2938,8 +2938,8 @@ const featureApi = Object.assign(Object.create(pi), {
             <text class="t-cap" x="434" y="100" text-anchor="middle">否</text>
             <rect class="n" x="464" y="84" width="160" height="56" rx="6"/>
             <text class="t" x="544" y="108" text-anchor="middle">沿用当前强度</text>
-            <text class="t-cap" x="544" y="126" text-anchor="middle">超时 · 出错 · 不合格</text>
-            <text class="t-cap" x="556" y="172">出错时警告</text>
+            <text class="t-cap" x="544" y="126" text-anchor="middle">所有尝试均失败</text>
+            <text class="t-cap" x="556" y="172">列出安全原因</text>
           </g>
 
           <g data-cue="effort-07">
@@ -2963,7 +2963,9 @@ const featureApi = Object.assign(Object.create(pi), {
       <ul class="fig-notes">
         <li>「合格」：分类正常完成，档位在五档之内，所选档位的概率是 0.5 到 1 之间的有限数。</li>
         <li>多条新消息时，扩展按最后一条用户消息分类。</li>
-        <li>警告原文：<code>openrouter/&lt;模型 ID&gt; 不可用，思考强度沿用 &lt;档位&gt;。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。</code></li>
+        <li>d1-ultra 失败先尝试 Jev；只有最终仍无合格结果，才走「沿用当前强度」分支。不会改全局选择，下一条新消息重新尝试首选模型。</li>
+        <li>切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code></li>
+        <li>原因只显示 HTTP 状态码及白名单中文分类；不显示服务端原文、端点或凭据。无法识别时明确提示原因未知。Jev 也失败时，列出两者原因及沿用档位，并提示通过 <code>/personal</code> 检查。</li>
         <li>分类进行中如果切换了会话或模型，迟到的结果不写入。</li>
       </ul>
     </figure>
@@ -3175,7 +3177,7 @@ const featureApi = Object.assign(Object.create(pi), {
         </svg>
       </div>
       <ul class="fig-notes">
-        <li>决策条目类型沿用旧名 <code>jev-inline-effort</code>，旧会话可以直接恢复；内容是 <code>{ timestamp, thinkingLevel, classifier }</code>。</li>
+        <li>决策条目类型沿用旧名 <code>jev-inline-effort</code>，旧会话可以直接恢复；内容是 <code>{ timestamp, thinkingLevel, classifier }</code>，回退成功时另带 <code>fallbackFrom</code>。</li>
         <li>会话开始、退出和切换模型时，扩展清掉状态栏里的 🧠 段，并取消进行中的分类。</li>
       </ul>
       <figcaption>示例。分支 b 读不到 U2 的决策。</figcaption>
@@ -3188,12 +3190,13 @@ const featureApi = Object.assign(Object.create(pi), {
       <h3>状态栏</h3>
       <p>
         <span class="seg" data-seg="effort-18" data-say="状态栏的思考强度段显示当前强度、基线和最近一次决策的分类器，例如：x high，基线 medium，Jev。当前强度等于基线时，只显示一个档位。">状态栏的 🧠 段显示当前强度、基线和最近一次决策的分类器，例如 <code>🧠 xhigh · 基线 medium · Jev</code>。当前强度等于基线时，只显示一个档位。</span>
+        <span class="seg" data-seg="effort-18a">d1-ultra 回退成功时，分类器显示「Jev（d1-ultra 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。</span>
         <span class="seg" data-seg="effort-19">对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="demo" id="effort-demo">
-        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位，否则沿用当前强度。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
+        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；d1-ultra 失败先回退 Jev，最终仍失败才沿用当前强度。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
         <form class="effort-demo-form" hidden>
           <div class="effort-demo-grid">
             <label>基线 thinking
@@ -3209,7 +3212,7 @@ const featureApi = Object.assign(Object.create(pi), {
             <label>分类结果
               <select name="result">
                 <option>low</option><option>medium</option><option>high</option><option selected>xhigh</option><option>max</option>
-                <option value="error">超时、出错或无法解析</option>
+                <option value="error">服务限流（示例 HTTP 429）</option>
                 <option value="invalid">档位无效</option>
                 <option value="empty">空白输入（不调用）</option>
               </select>
@@ -3218,6 +3221,7 @@ const featureApi = Object.assign(Object.create(pi), {
               <input type="range" name="p" min="0" max="1" step="0.01" value="0.8">
             </label>
           </div>
+          <label class="effort-demo-check"><input type="checkbox" name="fallbackOk" checked> Jev 回退成功（示例：low，概率 1）</label>
           <label class="effort-demo-check" data-cue="effort-19"><input type="checkbox" name="misaligned"> 用户项数和上下文不一致</label>
           <div class="effort-demo-out" aria-live="polite">
             <p><span>当前强度</span><span data-out="level"></span></p>
@@ -3241,18 +3245,18 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>在 <code>/personal</code> 里管理</h3>
       <p>
-        <span class="seg" data-seg="effort-20" data-say="在斜杠 personal 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。">在 <code>/personal</code> 里选原位思考强度，再选「查看分类模型与状态」。它显示三项：是否适用、后续用哪个分类器、当前分支最近一次决策。</span>
+        <span class="seg" data-seg="effort-20" data-say="在斜杠 personal 里选原位思考强度，再选「查看分类模型与状态」。它显示四项：是否适用、后续用哪个分类器、失败回退策略、当前分支最近一次决策。">在 <code>/personal</code> 里选原位思考强度，再选「查看分类模型与状态」。它显示四项：是否适用、后续用哪个分类器、失败回退策略、当前分支最近一次决策。</span>
         <span class="seg" data-seg="effort-21">通过「选择分类模型」打开选择器，选择后保存到全局配置，从下一条未分类的消息生效。其他会话和子代理的后续分类也读取这份配置。</span>
-        <span class="seg" data-seg="effort-22">「测试分类模型可用性」用固定样例测试分类器，不写决策。Pi 运行 agent 时，选择和测试都不可用。</span>
+        <span class="seg" data-seg="effort-22">「测试分类模型可用性」用固定样例测试首选模型和回退流程，明确显示实际成功的模型，不写决策。Pi 运行 agent 时，选择和测试都不可用。</span>
         <span class="seg" data-seg="effort-23" data-say="功能 ID 从 jev inline effort 改为 inline effort。旧的开关和配置文件仍能读取，保存时只写新文件；会话里的决策条目沿用旧类型名，旧会话可以直接恢复。">功能 ID 从 <code>jev-inline-effort</code> 改为 <code>inline-effort</code>。旧的开关和配置文件仍能读取，保存时只写新文件；会话里的决策条目沿用旧类型名，旧会话可以直接恢复。</span>
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-7">
-      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、最近决策尚无，以及切换和测试的菜单路径"></video></div>
+      <div class="capture-frame"><video data-cue="effort-20" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、失败回退 Jev、最近决策尚无，以及切换和测试的菜单路径"></video></div>
       <div class="table-scroll"><table>
         <thead><tr><th>菜单项</th><th>处理函数参数</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
         <tbody>
-          <tr><td>查看分类模型与状态</td><td><code>status</code></td><td>是否适用、后续分类器、当前分支最近决策</td><td>可用</td></tr>
+          <tr><td>查看分类模型与状态</td><td><code>status</code></td><td>是否适用、后续分类器、失败回退策略、当前分支最近决策</td><td>可用</td></tr>
           <tr data-cue="effort-21"><td>选择分类模型（Jev / d1-ultra）</td><td><code>model</code></td><td>选择器，<kbd>Esc</kbd> 键取消不保存</td><td>不可用</td></tr>
           <tr data-cue="effort-22"><td>测试分类模型可用性</td><td><code>test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
         </tbody>
@@ -3264,7 +3268,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <li>兼容规则：<code>inline-effort.json</code> 不存在时才读 <code>jev-inline-effort.json</code>；新文件格式错误时报错，不回退旧文件；旧文件保留不改写。开关新键 <code>inline-effort</code> 存在时以新键为准，否则读旧键 <code>jev-inline-effort</code>。</li>
         <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
       </ul>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」录制环境选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -3274,14 +3278,14 @@ const featureApi = Object.assign(Object.create(pi), {
       <h3>子代理与代价</h3>
       <p>
         <span class="seg" data-seg="effort-24">子代理要加载本扩展才会分类，基线取子代理自己的 thinking 设置。外部 CLI 代理不经过本扩展。</span>
-        <span class="seg" data-seg="effort-25" data-say="代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。D1 Ultra 是付费模型。">代价有三项：每条新消息多等一次分类；分类消耗 OpenRouter 的额度；发出的文本可能含业务信息。d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-25" data-say="代价有三项：每条新消息等待分类，每个模型最多 15 秒，含回退最多约 30 秒；分类及回退消耗 OpenRouter 的额度；发出的文本可能含业务信息。D1 Ultra 是付费模型。">代价有三项：每条新消息等待分类，每个模型最多 15 秒，含回退最多约 30 秒；分类及回退消耗 OpenRouter 的额度；发出的文本可能含业务信息。d1-ultra 是付费模型。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-8">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 176" role="img" aria-labelledby="fig-effort-8-title fig-effort-8-desc">
           <title id="fig-effort-8-title">一条新消息多出的分类步骤</title>
-          <desc id="fig-effort-8-desc">用户消息先经过分类器，最多 15 秒，再发主请求；分类带来等待、OpenRouter 额度消耗和对外发送文本三项代价。</desc>
+          <desc id="fig-effort-8-desc">用户消息先经过分类器，每个模型最多 15 秒，含回退最多约 30 秒，再发主请求；分类带来等待、OpenRouter 额度消耗和对外发送文本三项代价。</desc>
           <defs>
             <marker id="fig-effort-8-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -3291,13 +3295,13 @@ const featureApi = Object.assign(Object.create(pi), {
           <text class="t" x="80" y="65" text-anchor="middle">用户消息</text>
           <rect class="n is-ext" x="200" y="36" width="200" height="48" rx="6"/>
           <text class="t" x="300" y="56" text-anchor="middle">分类器</text>
-          <text class="t-sub" x="300" y="73" text-anchor="middle">最多 15 秒</text>
+          <text class="t-sub" x="300" y="73" text-anchor="middle">每模型 15 秒 · 回退共约 30 秒</text>
           <rect class="n" x="464" y="36" width="160" height="48" rx="6"/>
           <text class="t" x="544" y="56" text-anchor="middle">主请求</text>
           <text class="t-sub" x="544" y="73" text-anchor="middle">Codex / Claude / Antigravity</text>
           <g data-cue="effort-25">
             <path d="M200 96 V100 H400 V96" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
-            <text class="t-cap" x="300" y="122" text-anchor="middle">等待：用户要等分类，最多 15 秒</text>
+            <text class="t-cap" x="300" y="122" text-anchor="middle">等待：每模型 15 秒，回退共约 30 秒</text>
             <text class="t-cap" x="300" y="142" text-anchor="middle">额度：消耗 OpenRouter 额度，d1-ultra 付费</text>
             <text class="t-cap" x="300" y="162" text-anchor="middle">外发：对话文本可能含业务信息</text>
           </g>
@@ -3336,7 +3340,7 @@ const featureApi = Object.assign(Object.create(pi), {
         const out = (key) => form.querySelector(`[data-out="${key}"]`);
         const LEVELS = ["low", "medium", "high", "xhigh", "max"];
         const IDS = { "Jev": "~typesafe/jev-latest", "d1-ultra": "liquid/d1-ultra" };
-        // 与 extensions/inline-effort.ts 一致：第一条消息时当前强度等于基线（:399），警告见 :413，Codex 状态栏见 :462-465、:489。
+        // 本地示例计算；实际回退会重新调用 Jev，不保证得到 low。
         const render = () => {
           const base = form.base.value;
           const name = form.model.value;
@@ -3347,9 +3351,20 @@ const featureApi = Object.assign(Object.create(pi), {
           let level = base;
           let label = name;
           let warn = "无";
+          const failed = result !== "empty" && !(LEVELS.includes(result) && p >= 0.5 && p <= 1);
+          form.fallbackOk.disabled = name !== "d1-ultra" || !failed;
           if (result === "empty") label = "未分类";
-          else if (result === "error") warn = `openrouter/${IDS[name]} 不可用，思考强度沿用 ${base}。不会切换分类模型；请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`;
-          else if (LEVELS.includes(result) && p >= 0.5 && p <= 1) level = result;
+          else if (!failed) level = result;
+          else {
+            const reason = result === "error" ? "HTTP 429：服务限流" : "结果无效或所选概率低于 0.5";
+            if (name === "d1-ultra") {
+              warn = `openrouter/${IDS[name]} 分类失败（${reason}），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。`;
+              if (form.fallbackOk.checked) {
+                level = "low"; label = "Jev（d1-ultra 回退）";
+                warn += " 已回退到 Jev，本次分类：low（示例）。";
+              } else warn += ` Jev 也失败（示例：HTTP 503：上游服务异常），思考强度沿用 ${base}。`;
+            } else warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${base}。`;
+          }
           if (form.misaligned.checked) {
             out("level").textContent = `${level}（本次请求未生效）`;
             out("update").textContent = "不插入";
@@ -3623,7 +3638,7 @@ npm view &lt;包名&gt; version \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=84547a0f","duration":1563.02,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.04},{"id":"overview-01","ch":"overview","start":3.36,"end":12.08},{"id":"overview-02","ch":"overview","start":12.4,"end":23.04},{"id":"overview-03","ch":"overview","start":23.36,"end":30.16},{"id":"overview-04","ch":"overview","start":30.48,"end":39.76},{"id":"overview-05","ch":"overview","start":40.08,"end":50.16},{"id":"overview-06","ch":"overview","start":50.48,"end":67.92},{"id":"overview-08","ch":"overview","start":68.24,"end":80.88},{"id":"overview-07","ch":"overview","start":81.2,"end":86.24},{"id":"entry-00","ch":"entry","start":87.14,"end":90.42},{"id":"entry-01","ch":"entry","start":90.74,"end":103.3},{"id":"entry-02","ch":"entry","start":103.62,"end":112.74},{"id":"entry-03","ch":"entry","start":113.06,"end":117.86},{"id":"entry-04","ch":"entry","start":118.18,"end":122.74},{"id":"entry-05","ch":"entry","start":123.06,"end":129.06},{"id":"entry-06","ch":"entry","start":129.38,"end":135.38},{"id":"entry-07","ch":"entry","start":135.7,"end":143.54},{"id":"entry-08","ch":"entry","start":143.86,"end":151.3},{"id":"entry-09","ch":"entry","start":151.62,"end":160.58},{"id":"entry-10","ch":"entry","start":160.9,"end":179.22},{"id":"entry-11","ch":"entry","start":179.54,"end":186.02},{"id":"entry-12","ch":"entry","start":186.34,"end":190.66},{"id":"entry-13","ch":"entry","start":190.98,"end":198.18},{"id":"entry-14","ch":"entry","start":198.5,"end":204.9},{"id":"entry-15","ch":"entry","start":205.22,"end":213.14},{"id":"entry-16","ch":"entry","start":213.46,"end":222.42},{"id":"entry-17","ch":"entry","start":222.74,"end":234.18},{"id":"message-00","ch":"message","start":235.08,"end":238.12},{"id":"message-01","ch":"message","start":238.44,"end":249.72},{"id":"message-02","ch":"message","start":250.04,"end":258.52},{"id":"message-03","ch":"message","start":258.84,"end":266.44},{"id":"message-04","ch":"message","start":266.76,"end":278.6},{"id":"message-05","ch":"message","start":278.92,"end":286.76},{"id":"message-06","ch":"message","start":287.08,"end":295.56},{"id":"message-07","ch":"message","start":295.88,"end":304.68},{"id":"message-08","ch":"message","start":305,"end":319.32},{"id":"message-09","ch":"message","start":319.64,"end":330.12},{"id":"message-10","ch":"message","start":330.44,"end":338.6},{"id":"message-11","ch":"message","start":338.92,"end":347.72},{"id":"message-12","ch":"message","start":348.04,"end":362.68},{"id":"message-13","ch":"message","start":363,"end":371},{"id":"message-14","ch":"message","start":371.32,"end":382.12},{"id":"message-15","ch":"message","start":382.44,"end":389},{"id":"message-16","ch":"message","start":389.32,"end":397.48},{"id":"message-17","ch":"message","start":397.8,"end":404.2},{"id":"message-18","ch":"message","start":404.52,"end":408.12},{"id":"message-19","ch":"message","start":408.44,"end":415.8},{"id":"message-20","ch":"message","start":416.12,"end":422.04},{"id":"statusbar-00","ch":"statusbar","start":422.94,"end":425.42},{"id":"statusbar-01","ch":"statusbar","start":425.74,"end":439.9},{"id":"statusbar-02","ch":"statusbar","start":440.22,"end":450.78},{"id":"statusbar-03","ch":"statusbar","start":451.1,"end":459.58},{"id":"statusbar-04","ch":"statusbar","start":459.9,"end":473.1},{"id":"statusbar-05","ch":"statusbar","start":473.42,"end":488.94},{"id":"statusbar-06","ch":"statusbar","start":489.26,"end":524.86},{"id":"statusbar-07","ch":"statusbar","start":525.18,"end":539.66},{"id":"statusbar-08","ch":"statusbar","start":539.98,"end":554.46},{"id":"statusbar-09","ch":"statusbar","start":554.78,"end":567.58},{"id":"statusbar-10","ch":"statusbar","start":567.9,"end":576.06},{"id":"statusbar-11","ch":"statusbar","start":576.38,"end":582.7},{"id":"statusbar-12","ch":"statusbar","start":583.02,"end":589.5},{"id":"statusbar-13","ch":"statusbar","start":589.82,"end":595.02},{"id":"statusbar-14","ch":"statusbar","start":595.34,"end":603.18},{"id":"statusbar-15","ch":"statusbar","start":603.5,"end":611.58},{"id":"title-00","ch":"title","start":612.48,"end":615.92},{"id":"title-01","ch":"title","start":616.24,"end":625.6},{"id":"title-02","ch":"title","start":625.92,"end":641.2},{"id":"title-03","ch":"title","start":641.52,"end":649.44},{"id":"title-04","ch":"title","start":649.76,"end":659.76},{"id":"title-05","ch":"title","start":660.08,"end":668.24},{"id":"title-06","ch":"title","start":668.56,"end":678.16},{"id":"title-07","ch":"title","start":678.48,"end":688.88},{"id":"title-08","ch":"title","start":689.2,"end":700.88},{"id":"title-09","ch":"title","start":701.2,"end":712.08},{"id":"title-10","ch":"title","start":712.4,"end":717.52},{"id":"title-11","ch":"title","start":717.84,"end":725.52},{"id":"title-12","ch":"title","start":725.84,"end":733.68},{"id":"title-13","ch":"title","start":734,"end":741.44},{"id":"title-14","ch":"title","start":741.76,"end":752.08},{"id":"title-15","ch":"title","start":752.4,"end":762},{"id":"title-16","ch":"title","start":762.32,"end":774.56},{"id":"title-17","ch":"title","start":774.88,"end":779.76},{"id":"title-18","ch":"title","start":780.08,"end":785.6},{"id":"title-19","ch":"title","start":785.92,"end":792.56},{"id":"title-20","ch":"title","start":792.88,"end":802.24},{"id":"title-21","ch":"title","start":802.56,"end":808.32},{"id":"title-22","ch":"title","start":808.64,"end":820.16},{"id":"title-23","ch":"title","start":820.48,"end":828.72},{"id":"title-24","ch":"title","start":829.04,"end":837.04},{"id":"title-25","ch":"title","start":837.36,"end":849.68},{"id":"title-26","ch":"title","start":850,"end":858.32},{"id":"title-27","ch":"title","start":858.64,"end":866.96},{"id":"effort-00","ch":"effort","start":867.86,"end":871.46},{"id":"effort-01","ch":"effort","start":871.78,"end":889.3},{"id":"effort-02","ch":"effort","start":889.62,"end":918.74},{"id":"effort-01a","ch":"effort","start":919.06,"end":933.38},{"id":"effort-01b","ch":"effort","start":933.7,"end":953.38},{"id":"effort-01c","ch":"effort","start":953.7,"end":975.22},{"id":"effort-03","ch":"effort","start":975.54,"end":987.86},{"id":"effort-04","ch":"effort","start":988.18,"end":991.38},{"id":"effort-05","ch":"effort","start":991.7,"end":1001.7},{"id":"effort-06","ch":"effort","start":1002.02,"end":1010.98},{"id":"effort-07","ch":"effort","start":1011.3,"end":1015.38},{"id":"effort-08","ch":"effort","start":1015.7,"end":1019.7},{"id":"effort-09","ch":"effort","start":1020.02,"end":1031.62},{"id":"effort-10","ch":"effort","start":1031.94,"end":1046.26},{"id":"effort-11","ch":"effort","start":1046.58,"end":1062.58},{"id":"effort-12","ch":"effort","start":1062.9,"end":1077.46},{"id":"effort-13","ch":"effort","start":1077.78,"end":1088.98},{"id":"effort-14","ch":"effort","start":1089.3,"end":1099.22},{"id":"effort-14a","ch":"effort","start":1099.54,"end":1123.78},{"id":"effort-14b","ch":"effort","start":1124.1,"end":1152.02},{"id":"effort-14c","ch":"effort","start":1152.34,"end":1186.02},{"id":"effort-14d","ch":"effort","start":1186.34,"end":1206.58},{"id":"effort-15","ch":"effort","start":1206.9,"end":1220.9},{"id":"effort-16","ch":"effort","start":1221.22,"end":1233.78},{"id":"effort-17","ch":"effort","start":1234.1,"end":1241.86},{"id":"effort-18","ch":"effort","start":1242.18,"end":1255.86},{"id":"effort-19","ch":"effort","start":1256.18,"end":1268.34},{"id":"effort-20","ch":"effort","start":1268.66,"end":1282.26},{"id":"effort-21","ch":"effort","start":1282.58,"end":1296.02},{"id":"effort-22","ch":"effort","start":1296.34,"end":1305.94},{"id":"effort-23","ch":"effort","start":1306.26,"end":1321.7},{"id":"effort-24","ch":"effort","start":1322.02,"end":1331.62},{"id":"effort-25","ch":"effort","start":1331.94,"end":1343.86},{"id":"setup-00","ch":"setup","start":1344.76,"end":1346.84},{"id":"setup-01","ch":"setup","start":1347.16,"end":1356.6},{"id":"setup-02","ch":"setup","start":1356.92,"end":1363.64},{"id":"setup-03","ch":"setup","start":1363.96,"end":1370.12},{"id":"setup-04","ch":"setup","start":1370.44,"end":1377.4},{"id":"setup-05","ch":"setup","start":1377.72,"end":1382.12},{"id":"setup-06","ch":"setup","start":1382.44,"end":1392.76},{"id":"setup-07","ch":"setup","start":1393.08,"end":1397.96},{"id":"video-00","ch":"video","start":1398.86,"end":1402.86},{"id":"video-01","ch":"video","start":1403.18,"end":1419.58},{"id":"video-02","ch":"video","start":1419.9,"end":1439.18},{"id":"video-03","ch":"video","start":1439.5,"end":1465.58},{"id":"video-04","ch":"video","start":1465.9,"end":1486.54},{"id":"video-05","ch":"video","start":1486.86,"end":1509.1},{"id":"video-06","ch":"video","start":1509.42,"end":1563.02}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=80d29b1a","duration":1615.58,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.04},{"id":"overview-01","ch":"overview","start":3.36,"end":12.08},{"id":"overview-02","ch":"overview","start":12.4,"end":23.04},{"id":"overview-03","ch":"overview","start":23.36,"end":30.16},{"id":"overview-04","ch":"overview","start":30.48,"end":39.76},{"id":"overview-05","ch":"overview","start":40.08,"end":50.16},{"id":"overview-06","ch":"overview","start":50.48,"end":67.92},{"id":"overview-08","ch":"overview","start":68.24,"end":80.88},{"id":"overview-07","ch":"overview","start":81.2,"end":86.24},{"id":"entry-00","ch":"entry","start":87.14,"end":90.42},{"id":"entry-01","ch":"entry","start":90.74,"end":103.3},{"id":"entry-02","ch":"entry","start":103.62,"end":112.74},{"id":"entry-03","ch":"entry","start":113.06,"end":117.86},{"id":"entry-04","ch":"entry","start":118.18,"end":122.74},{"id":"entry-05","ch":"entry","start":123.06,"end":129.06},{"id":"entry-06","ch":"entry","start":129.38,"end":135.38},{"id":"entry-07","ch":"entry","start":135.7,"end":143.54},{"id":"entry-08","ch":"entry","start":143.86,"end":151.3},{"id":"entry-09","ch":"entry","start":151.62,"end":160.58},{"id":"entry-10","ch":"entry","start":160.9,"end":179.22},{"id":"entry-11","ch":"entry","start":179.54,"end":186.02},{"id":"entry-12","ch":"entry","start":186.34,"end":190.66},{"id":"entry-13","ch":"entry","start":190.98,"end":198.18},{"id":"entry-14","ch":"entry","start":198.5,"end":204.9},{"id":"entry-15","ch":"entry","start":205.22,"end":213.14},{"id":"entry-16","ch":"entry","start":213.46,"end":222.42},{"id":"entry-17","ch":"entry","start":222.74,"end":234.18},{"id":"message-00","ch":"message","start":235.08,"end":238.12},{"id":"message-01","ch":"message","start":238.44,"end":249.72},{"id":"message-02","ch":"message","start":250.04,"end":258.52},{"id":"message-03","ch":"message","start":258.84,"end":266.44},{"id":"message-04","ch":"message","start":266.76,"end":278.6},{"id":"message-05","ch":"message","start":278.92,"end":286.76},{"id":"message-06","ch":"message","start":287.08,"end":295.56},{"id":"message-07","ch":"message","start":295.88,"end":304.68},{"id":"message-08","ch":"message","start":305,"end":319.32},{"id":"message-09","ch":"message","start":319.64,"end":330.12},{"id":"message-10","ch":"message","start":330.44,"end":338.6},{"id":"message-11","ch":"message","start":338.92,"end":347.72},{"id":"message-12","ch":"message","start":348.04,"end":362.68},{"id":"message-13","ch":"message","start":363,"end":371},{"id":"message-14","ch":"message","start":371.32,"end":382.12},{"id":"message-15","ch":"message","start":382.44,"end":389},{"id":"message-16","ch":"message","start":389.32,"end":397.48},{"id":"message-17","ch":"message","start":397.8,"end":404.2},{"id":"message-18","ch":"message","start":404.52,"end":408.12},{"id":"message-19","ch":"message","start":408.44,"end":415.8},{"id":"message-20","ch":"message","start":416.12,"end":422.04},{"id":"statusbar-00","ch":"statusbar","start":422.94,"end":425.42},{"id":"statusbar-01","ch":"statusbar","start":425.74,"end":439.9},{"id":"statusbar-02","ch":"statusbar","start":440.22,"end":450.78},{"id":"statusbar-03","ch":"statusbar","start":451.1,"end":459.58},{"id":"statusbar-04","ch":"statusbar","start":459.9,"end":473.1},{"id":"statusbar-05","ch":"statusbar","start":473.42,"end":488.94},{"id":"statusbar-06","ch":"statusbar","start":489.26,"end":524.86},{"id":"statusbar-07","ch":"statusbar","start":525.18,"end":539.66},{"id":"statusbar-08","ch":"statusbar","start":539.98,"end":554.46},{"id":"statusbar-09","ch":"statusbar","start":554.78,"end":567.58},{"id":"statusbar-10","ch":"statusbar","start":567.9,"end":576.06},{"id":"statusbar-11","ch":"statusbar","start":576.38,"end":582.7},{"id":"statusbar-12","ch":"statusbar","start":583.02,"end":589.5},{"id":"statusbar-13","ch":"statusbar","start":589.82,"end":595.02},{"id":"statusbar-14","ch":"statusbar","start":595.34,"end":603.18},{"id":"statusbar-15","ch":"statusbar","start":603.5,"end":611.58},{"id":"title-00","ch":"title","start":612.48,"end":615.92},{"id":"title-01","ch":"title","start":616.24,"end":625.6},{"id":"title-02","ch":"title","start":625.92,"end":641.2},{"id":"title-03","ch":"title","start":641.52,"end":649.44},{"id":"title-04","ch":"title","start":649.76,"end":659.76},{"id":"title-05","ch":"title","start":660.08,"end":668.24},{"id":"title-06","ch":"title","start":668.56,"end":678.16},{"id":"title-07","ch":"title","start":678.48,"end":688.88},{"id":"title-08","ch":"title","start":689.2,"end":700.88},{"id":"title-09","ch":"title","start":701.2,"end":712.08},{"id":"title-10","ch":"title","start":712.4,"end":717.52},{"id":"title-11","ch":"title","start":717.84,"end":725.52},{"id":"title-12","ch":"title","start":725.84,"end":733.68},{"id":"title-13","ch":"title","start":734,"end":741.44},{"id":"title-14","ch":"title","start":741.76,"end":752.08},{"id":"title-15","ch":"title","start":752.4,"end":762},{"id":"title-16","ch":"title","start":762.32,"end":774.56},{"id":"title-17","ch":"title","start":774.88,"end":779.76},{"id":"title-18","ch":"title","start":780.08,"end":785.6},{"id":"title-19","ch":"title","start":785.92,"end":792.56},{"id":"title-20","ch":"title","start":792.88,"end":802.24},{"id":"title-21","ch":"title","start":802.56,"end":808.32},{"id":"title-22","ch":"title","start":808.64,"end":820.16},{"id":"title-23","ch":"title","start":820.48,"end":828.72},{"id":"title-24","ch":"title","start":829.04,"end":837.04},{"id":"title-25","ch":"title","start":837.36,"end":849.68},{"id":"title-26","ch":"title","start":850,"end":860.56},{"id":"title-27","ch":"title","start":860.88,"end":869.2},{"id":"effort-00","ch":"effort","start":870.1,"end":873.7},{"id":"effort-01","ch":"effort","start":874.02,"end":891.54},{"id":"effort-02","ch":"effort","start":891.86,"end":920.98},{"id":"effort-01a","ch":"effort","start":921.3,"end":935.62},{"id":"effort-01b","ch":"effort","start":935.94,"end":955.62},{"id":"effort-01c","ch":"effort","start":955.94,"end":977.46},{"id":"effort-03","ch":"effort","start":977.78,"end":990.1},{"id":"effort-04","ch":"effort","start":990.42,"end":1000.1},{"id":"effort-05","ch":"effort","start":1000.42,"end":1010.42},{"id":"effort-06","ch":"effort","start":1010.74,"end":1031.94},{"id":"effort-07","ch":"effort","start":1032.26,"end":1042.9},{"id":"effort-08","ch":"effort","start":1043.22,"end":1047.22},{"id":"effort-09","ch":"effort","start":1047.54,"end":1059.14},{"id":"effort-10","ch":"effort","start":1059.46,"end":1073.78},{"id":"effort-11","ch":"effort","start":1074.1,"end":1090.1},{"id":"effort-12","ch":"effort","start":1090.42,"end":1104.98},{"id":"effort-13","ch":"effort","start":1105.3,"end":1116.5},{"id":"effort-14","ch":"effort","start":1116.82,"end":1126.74},{"id":"effort-14a","ch":"effort","start":1127.06,"end":1151.3},{"id":"effort-14b","ch":"effort","start":1151.62,"end":1179.54},{"id":"effort-14c","ch":"effort","start":1179.86,"end":1213.54},{"id":"effort-14d","ch":"effort","start":1213.86,"end":1234.1},{"id":"effort-15","ch":"effort","start":1234.42,"end":1248.42},{"id":"effort-16","ch":"effort","start":1248.74,"end":1261.3},{"id":"effort-17","ch":"effort","start":1261.62,"end":1269.38},{"id":"effort-18","ch":"effort","start":1269.7,"end":1283.38},{"id":"effort-18a","ch":"effort","start":1283.7,"end":1296.34},{"id":"effort-19","ch":"effort","start":1296.66,"end":1308.82},{"id":"effort-20","ch":"effort","start":1309.14,"end":1324.5},{"id":"effort-21","ch":"effort","start":1324.82,"end":1338.26},{"id":"effort-22","ch":"effort","start":1338.58,"end":1352.02},{"id":"effort-23","ch":"effort","start":1352.34,"end":1367.78},{"id":"effort-24","ch":"effort","start":1368.1,"end":1377.7},{"id":"effort-25","ch":"effort","start":1378.02,"end":1396.42},{"id":"setup-00","ch":"setup","start":1397.32,"end":1399.4},{"id":"setup-01","ch":"setup","start":1399.72,"end":1409.16},{"id":"setup-02","ch":"setup","start":1409.48,"end":1416.2},{"id":"setup-03","ch":"setup","start":1416.52,"end":1422.68},{"id":"setup-04","ch":"setup","start":1423,"end":1429.96},{"id":"setup-05","ch":"setup","start":1430.28,"end":1434.68},{"id":"setup-06","ch":"setup","start":1435,"end":1445.32},{"id":"setup-07","ch":"setup","start":1445.64,"end":1450.52},{"id":"video-00","ch":"video","start":1451.42,"end":1455.42},{"id":"video-01","ch":"video","start":1455.74,"end":1472.14},{"id":"video-02","ch":"video","start":1472.46,"end":1491.74},{"id":"video-03","ch":"video","start":1492.06,"end":1518.14},{"id":"video-04","ch":"video","start":1518.46,"end":1539.1},{"id":"video-05","ch":"video","start":1539.42,"end":1561.66},{"id":"video-06","ch":"video","start":1561.98,"end":1615.58}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

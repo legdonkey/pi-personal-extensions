@@ -157,13 +157,13 @@ function classificationFailure(error: unknown): string {
   return status ? `HTTP ${status}：${reason}` : reason;
 }
 
-/** 无效或低置信度结果返回 undefined；取消和服务错误交给调用方区分处理。 */
+/** 区分无效结果与有效但低置信度的结果；取消和服务错误交给调用方处理。 */
 async function classifyThinking(
   prompt: string,
   ctx: ExtensionContext,
   selected: DecisionModel,
   signal: AbortSignal,
-): Promise<ModelThinkingLevel | undefined> {
+): Promise<ModelThinkingLevel | "low-confidence" | undefined> {
   signal.throwIfAborted();
   const model = resolveClassifier(ctx, selected);
   const result = await ctx.modelRegistry.classify(
@@ -195,9 +195,9 @@ async function classifyThinking(
   const thinking = result.answers?.thinking;
   if (thinking?.type !== "choice") return undefined;
   const probability = thinking.probabilities?.[thinking.choice];
-  return typeof probability === "number" && Number.isFinite(probability) && probability >= 0.5 && probability <= 1
-    ? CLASSIFIED_LEVELS.find((level) => level === thinking.choice)
-    : undefined;
+  const level = CLASSIFIED_LEVELS.find((level) => level === thinking.choice);
+  if (!level || typeof probability !== "number" || !Number.isFinite(probability) || probability < 0 || probability > 1) return undefined;
+  return probability < 0.5 ? "low-confidence" : level;
 }
 
 /** 与 convertToLlm 和 Responses 消息转换一致：这些消息各自成为一个 role:"user" 输入项。 */
@@ -291,8 +291,9 @@ export default function (pi: ExtensionAPI) {
         let reason: string;
         try {
           const thinkingLevel = await classifyThinking(prompt, ctx, classifier, signal);
+          if (thinkingLevel === "low-confidence") continue;
           if (thinkingLevel) return { thinkingLevel, classifier, ...(classifier !== selected ? { fallbackFrom: selected } : {}) };
-          reason = "结果无效或所选概率低于 0.5";
+          reason = "结果无效";
         } catch (error) {
           if (requestSignal.aborted || (!signal.aborted && error instanceof Error && error.name === "AbortError"))
             throw new DOMException("分类请求已取消", "AbortError");
@@ -302,7 +303,7 @@ export default function (pi: ExtensionAPI) {
         if (classifier === "d1-ultra")
           ctx.ui.notify(`${modelKey(classifier)} 分类失败（${reason}），正在切换到 ${modelKey("jev")}。仅本次回退，全局选择不变。`, "warning");
       }
-      throw new Error(`${failures.join("；")}。`);
+      if (failures.length) throw new Error(`${failures.join("；")}。`);
     } finally {
       if (pendingRequest === controller) pendingRequest = undefined;
     }
@@ -336,6 +337,10 @@ export default function (pi: ExtensionAPI) {
           // 固定公开样例，不读取会话、系统规则或工具结果；不记录决策或改变当前强度。
           const result = await classify("当前用户请求:\n把 hello 转成大写。", ctx, selected);
           if (generation !== started) return;
+          if (!result) {
+            ctx.ui.notify("分类模型已返回有效结果，但所选概率低于 0.5，未采用样例档位。", "info");
+            return;
+          }
           ctx.ui.notify(`${result.fallbackFrom ? `${modelKey(selected)} 不可用，已回退到 ${modelKey(result.classifier)}` : `${modelKey(result.classifier)} 测试成功`}，样例分类：${result.thinkingLevel}。此结果不保证后续可用性或价格。`, "info");
           return;
         }
@@ -438,7 +443,7 @@ export default function (pi: ExtensionAPI) {
           const result = await classify(prompt, ctx, classifier);
           ctx.signal?.throwIfAborted();
           if (generation !== started) return;
-          ({ thinkingLevel, classifier, fallbackFrom } = result);
+          if (result) ({ thinkingLevel, classifier, fallbackFrom } = result);
           if (fallbackFrom)
             ctx.ui.notify(`已回退到 ${modelKey(classifier)}，本次思考强度：${thinkingLevel}。全局选择仍为 ${modelKey(fallbackFrom)}，下条新消息会重新尝试。`, "info");
         }

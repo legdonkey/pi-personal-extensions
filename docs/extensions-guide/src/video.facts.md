@@ -1,7 +1,7 @@
 # video 事实清单
 
 - 工具名、参数、顺序执行、菜单内状态说明及严格目录/大小限制 —— extensions/understand-video.ts:69-94；extensions/pi-personal-extensions.ts:55-60、69-71。
-- 父子双检：工作目录真实路径、非隐藏路径、MP4 后缀与 ftyp、普通文件、无符号/硬链接、20 MiB、有限读取、读取期间变更及 SHA-256 摘要 —— extensions/understand-video-worker.mjs:7-43、67-71；tests/understand-video.test.mjs「合法 MP4、相对路径和 @ 前缀；拒绝越界、隐藏、类型和链接」「权限不足不读取文件」「文件类型、空文件、超限和目录均拒绝」「API 异常、空响应和授权后文件替换安全失败且不泄漏鉴权」。
+- 父子双检：工作目录真实路径、非隐藏路径、MP4 后缀与 ftyp、普通文件、无符号/硬链接、50 MiB、有限读取、读取期间变更及 SHA-256 摘要 —— extensions/understand-video-worker.mjs:7-43、67-71；tests/understand-video.test.mjs「合法 MP4、相对路径和 @ 前缀；拒绝越界、隐藏、类型和链接」「权限不足不读取文件」「文件类型、空文件、超限和目录均拒绝」「API 异常、空响应和授权后文件替换安全失败且不泄漏鉴权」。 大小边界另见 tests/understand-video.test.mjs「50 MiB 上限：超过旧上限及恰好新上限可读，多一个字节拒绝」；仅验证本地文件校验，未实测上游 50 MiB 上传。
 - worker 只加载指定 provider，无 ambient 扩展、技能或上下文；内存设置/会话，由 SDK 自行处理既有账号，使用宿主 getPackageDir() —— extensions/understand-video.ts:93；extensions/understand-video-worker.mjs:72-83。
 - 正常 provider 的 Argon 动态路由，medium 调用，只在独立进程适配真实 video/mp4，官方 HTTPS endpoint 和模型形状不符时不注入 —— extensions/understand-video-worker.mjs:45-54、88-98；tests/understand-video.test.mjs「只注入 Google 原生视频请求，不硬编码 medium 路由，不干预其他请求」。
 - 宿主 fetch 不变；超时/取消杀进程，close 后才返回，IPC 有限输出且不转发原始 provider 错误；worker 自有看门狗、断连退出 —— extensions/understand-video.ts:8-9、19-22、31-67、93-101；extensions/understand-video-worker.mjs:106-109、117-132；tests/understand-video.test.mjs「真实隔离进程成功返回，宿主 fetch 不变，返回时已确认子进程关闭」「取消和超时终止隔离进程；预取消不启动」「输出限制与工具非法参数错误，不向外发送非法文件」。

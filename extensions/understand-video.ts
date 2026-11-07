@@ -70,14 +70,14 @@ export default function understandVideo(pi: ExtensionAPI) {
   pi.registerCommand("understand-video-status", {
     description: "查看原视频审查的通路和限制",
     async handler(_args, ctx) {
-      ctx.ui.notify(`${VIDEO_BOUNDARY} 仅允许当前工作目录内非隐藏、无符号链接或硬链接的 MP4，最大 20 MiB，问题最多 8000 字符。通过 /personal → 原视频审查 启停；需要 Pi 1.5.0 与 pi-antigravity 0.11.x。`, "info");
+      ctx.ui.notify(`${VIDEO_BOUNDARY} 仅允许当前工作目录内非隐藏、无符号链接或硬链接的 MP4，最大 50 MiB，问题最多 8000 字符。通过 /personal → 原视频审查 启停；需要 Pi 1.5.0 与 pi-antigravity 0.11.x。`, "info");
     },
   });
   pi.registerTool({
     name: "understand_video",
     label: "原视频审查",
     executionMode: "sequential",
-    description: `${VIDEO_BOUNDARY} 仅在用户明确授权上传该文件后调用。只读当前工作目录内非隐藏路径的 MP4（无符号/硬链接），24 bytes–20 MiB；120 秒超时，输出最多约 32 KiB。失败不回退其他模型。`,
+    description: `${VIDEO_BOUNDARY} 仅在用户明确授权上传该文件后调用。只读当前工作目录内非隐藏路径的 MP4（无符号/硬链接），24 bytes–50 MiB；120 秒超时，输出最多约 32 KiB。失败不回退其他模型。`,
     promptSnippet: "通过现有 Antigravity OAuth 将获授权的本地 MP4 原视频交给 Argon 审查",
     promptGuidelines: ["调用 understand_video 前必须确认用户授权将该视频外发。understand_video 仅返回模型分析，不代表主会话已直接看到视频；音轨无法确认时标为未审查。"],
     parameters: Type.Object({ path: Type.String({ minLength: 1, maxLength: 4096, description: "用户授权的工作目录内 MP4 路径" }), question: Type.String({ minLength: 1, maxLength: 8000, description: "要审查的问题" }) }),
@@ -96,7 +96,7 @@ export default function understandVideo(pi: ExtensionAPI) {
       } catch (error) {
         // 不转发路径、SDK 或 provider 原始异常，避免把账号/鉴权信息带入会话。
         const errorCode = signal?.aborted ? "cancelled" : error instanceof VideoWorkerError ? error.errorCode : failurePhase === "file-validation" ? "invalid_file" : failurePhase === "request-validation" ? "invalid_question" : "unknown";
-        return formatVideoResult({ ok: false, text: "原视频审查失败或已取消：仅支持工作目录内非隐藏、无链接的 MP4（24 bytes–20 MiB）；请检查授权、登录、额度及兼容版本。超时为 120 秒，未切换模型。通过 /personal → 原视频审查 → 查看通路与限制 了解边界。", failurePhase, errorCode }, Math.round(performance.now() - started));
+        return formatVideoResult({ ok: false, text: "原视频审查失败或已取消：仅支持工作目录内非隐藏、无链接的 MP4（24 bytes–50 MiB）；请检查授权、登录、额度及兼容版本。超时为 120 秒，未切换模型。通过 /personal → 原视频审查 → 查看通路与限制 了解边界。", failurePhase, errorCode }, Math.round(performance.now() - started));
       }
     },
   });

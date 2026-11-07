@@ -191,6 +191,7 @@ test("输出限制与工具非法参数错误，不向外发送非法文件", as
   assert.doesNotMatch(result.text, /\uFFFD/);
   const tools = []; understandVideo({ registerCommand() {}, registerTool: tool => tools.push(tool) });
   assert.equal(tools[0].name, "understand_video");
+  assert.match(tools[0].description, /50 MiB/);
   const response = await tools[0].execute("test", {path:"/etc/passwd",question:"审查"}, undefined, undefined, {cwd:root});
   assert.equal(response.isError, true);
   assert.equal(response.details.errorCode, "invalid_file");
@@ -202,4 +203,16 @@ test("输出限制与工具非法参数错误，不向外发送非法文件", as
   const cancelled = await tools[0].execute("test", {path:"video.mp4",question:"检查"}, controller.signal, undefined, {cwd:root});
   assert.equal(cancelled.details.errorCode, "cancelled");
   assert.doesNotMatch(JSON.stringify(response), /\/etc\/passwd/);
+});
+
+test("50 MiB 上限：超过旧上限及恰好新上限可读，多一个字节拒绝", async () => {
+  assert.equal(MAX_VIDEO_BYTES, 50 * 1024 * 1024);
+  const f = fixture();
+  for (const size of [20 * 1024 * 1024 + 1, MAX_VIDEO_BYTES, MAX_VIDEO_BYTES + 1]) {
+    const bytes = Buffer.alloc(size);
+    f.bytes.copy(bytes);
+    writeFileSync(f.path, bytes);
+    if (size <= MAX_VIDEO_BYTES) assert.equal((await readAuthorizedVideo(f.cwd, f.path)).bytes.length, size);
+    else await assert.rejects(readAuthorizedVideo(f.cwd, f.path), /50 MiB/);
+  }
 });

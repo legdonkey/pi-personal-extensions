@@ -28,7 +28,17 @@ test("讲解页演示区分回退成功、全部失败、直接 Jev、空输入�
   assert.match(jev.outputs.warn.textContent, /HTTP 429：服务限流.*沿用 medium/);
   assert.doesNotMatch(jev.outputs.warn.textContent, /切换/);
   assert.equal(jev.form.fallbackOk.disabled, true);
-  assert.match(demo({ result: "high", probability: 0.49 }).outputs.warn.textContent, /所选概率低于 0.5/);
+  const lowConfidence = demo({ result: "high", probability: 0.49 });
+  assert.match(lowConfidence.outputs.warn.textContent, /已回退.*普通提示/);
+  assert.doesNotMatch(lowConfidence.outputs.warn.textContent, /分类失败|结果无效|正在切换/);
+  assert.equal(demo({ model: "Jev", result: "high", probability: 0.49 }).outputs.warn.textContent, "无");
+  assert.equal(demo({ model: "Jev", result: "high", probability: 0 }).outputs.warn.textContent, "无");
+  assert.match(demo({ model: "Jev", result: "high", probability: -0.1 }).outputs.warn.textContent, /结果无效/);
+  assert.match(demo({ model: "Jev", result: "invalid", probability: 0.1 }).outputs.warn.textContent, /结果无效/);
+  assert.equal(demo({ model: "Jev", result: "high", probability: 0.5 }).outputs.status.textContent, "🧠 high · 基线 medium · Jev");
+  const mixed = demo({ result: "high", probability: 0.49, fallbackOk: false }).outputs.warn.textContent;
+  assert.match(mixed, /HTTP 503/);
+  assert.doesNotMatch(mixed, /结果无效|正在切换/);
   assert.equal(demo({ result: "empty" }).outputs.status.textContent, "🧠 medium · 未分类");
   assert.equal(demo({ misaligned: true }).outputs.status.textContent, "🧠 medium · 未调整 · Jev（d1-ultra 回退）");
 });

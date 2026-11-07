@@ -302,8 +302,8 @@ test("分类不可用、出错、截断、低置信度或结果无效时沿用�
       const payload = await h.request([system, user(1)], { base: "high" });
       assert.deepEqual(updates(payload), [], failure);
       assert.deepEqual(h.branch.map(({ data }) => data), [{ timestamp: 1, thinkingLevel: "high", classifier: selected }], failure);
-      assert.equal(h.warnings.length, selected === "d1-ultra" ? 2 : 1, failure);
-      assert.match(h.warnings.at(-1).message, /思考强度沿用 high/);
+      assert.equal(h.warnings.length, failure === "confidence" ? 0 : selected === "d1-ultra" ? 2 : 1, failure);
+      if (failure !== "confidence") assert.match(h.warnings.at(-1).message, /思考强度沿用 high/);
       assert.deepEqual(h.classifierModels.map(({ id }) => id), failure === "missing" ? []
         : selected === "jev" ? ["~typesafe/jev-latest"] : ["liquid/d1-ultra", "~typesafe/jev-latest"]);
     }
@@ -514,7 +514,7 @@ test("d1-ultra 优先使用 Pi 目录条目；两者失败不改主模型、基�
   assert.deepEqual(readEffortSettings(), { model: "d1-ultra" });
 });
 
-test("d1-ultra 服务出错、无效或低置信度时回退 Jev，警告先显示安全原因和正在切换", async () => {
+test("d1-ultra 服务出错或无效时回退 Jev，警告先显示安全原因和正在切换", async () => {
   saveEffortSettings("d1-ultra");
   const failures = [
     ["HTTP 429：服务限流", (h) => { h.result = { stopReason: "error", errorMessage: '429 {"error":{"message":"secret-key-from-proxy: rate limited"}}' }; }],
@@ -522,7 +522,6 @@ test("d1-ultra 服务出错、无效或低置信度时回退 Jev，警告先显�
     ["分类服务异常", (h) => { h.error = new Error("secret-key-from-proxy"); }],
     ["结果无效", (h) => { h.result = { stopReason: "stop", answers: {} }; }],
     ["结果无效", (h) => { h.stopReason = "length"; }],
-    ["所选概率低于 0.5", (h) => { h.confidence = 0.49; }],
   ];
   for (const [reason, apply] of failures) {
     const h = setup({ thinking: "max" });
@@ -549,6 +548,49 @@ test("d1-ultra 服务出错、无效或低置信度时回退 Jev，警告先显�
     await h.command("status");
     assert.match(h.warnings.at(-1).message, /后续分类：openrouter\/liquid\/d1-ultra；失败回退：Jev（仅本次）；最近决策：low · Jev（d1-ultra 回退）/);
   }
+});
+
+test("低置信度静默回退，混合无效结果只警告真实错误", async () => {
+  saveEffortSettings("d1-ultra");
+  for (const [primary, fallback] of [["low", "valid"], ["low", "invalid"], ["invalid", "low"]]) {
+    const h = setup({ thinking: "max" });
+    h.classifyHook = (_signal, model) => {
+      const outcome = model.id === "liquid/d1-ultra" ? primary : fallback;
+      if (model.id !== "liquid/d1-ultra" && primary === "low") assert.equal(h.warnings.length, 0);
+      h.confidence = outcome === "low" ? 0.49 : 1;
+      h.result = outcome === "invalid" ? { stopReason: "stop", answers: {} } : undefined;
+    };
+    await h.request([system, user(1)]);
+    assert.equal(h.calls, 2);
+    assert.equal(h.branch.at(-1).data.thinkingLevel, fallback === "valid" ? "high" : "max");
+    const warnings = h.warnings.filter(({ type }) => type === "warning");
+    assert.equal(warnings.length, primary === "invalid" ? 2 : fallback === "invalid" ? 1 : 0);
+    for (const { message } of warnings) {
+      assert.match(message, /结果无效/);
+      assert.doesNotMatch(message, /概率低于|低置信度/);
+    }
+    if (fallback === "valid") assert.equal(h.branch.at(-1).data.fallbackFrom, "d1-ultra");
+  }
+});
+
+test("低置信度沿用上次决策，工具续调与恢复不重复分类", async () => {
+  const h = setup();
+  h.choices = ["max"];
+  const messages = [system, user(1)];
+  await h.request(messages);
+  h.confidence = 0.49;
+  messages.push(assistant(2), user(3));
+  await h.request(messages);
+  assert.equal(h.branch.at(-1).data.thinkingLevel, "max");
+  assert.equal(h.warnings.length, 0);
+  messages.push(assistant(4), toolResult(5));
+  await h.request(messages);
+  assert.equal(h.calls, 2);
+  const restored = setup();
+  restored.branch.push(...structuredClone(h.branch));
+  await restored.request(messages);
+  assert.equal(restored.calls, 0);
+  assert.equal(restored.status, "🧠 max · 基线 medium · Jev");
 });
 
 test("回退决策可恢复、工具续调不重分类；下条新消息重新尝试 d1-ultra", async () => {
@@ -652,7 +694,8 @@ test("可用性测试只发送固定样例，成功、低置信度和失败均�
   assert.equal(h.status, "原状态");
   h.confidence = 0.49;
   await h.command("test");
-  assert.match(h.warnings.at(-1).message, /结果无效或所选概率低于 0.5/);
+  assert.match(h.warnings.at(-1).message, /有效结果.*所选概率低于 0.5/);
+  assert.equal(h.warnings.at(-1).type, "info");
   for (const failure of ["error", "throw"]) {
     h.stopReason = failure === "error" ? "error" : "stop";
     h.error = failure === "throw" ? new Error("secret-key-from-proxy") : undefined;
@@ -736,13 +779,14 @@ test("空输入、图片、概率边界和无效答案按规则处理", async ()
   await image.request([system, user(1, [{ type: "image", data: "secret-image", mimeType: "image/png" }])]);
   assert.match(image.inputs[0].state.prompt, /附有图片/);
   assert.ok(!image.inputs[0].state.prompt.includes("secret-image"));
-  for (const probability of [0.5, 1, 0.4999, -1, 1.01, NaN, Infinity, "1", undefined]) {
+  for (const probability of [0.5, 1, 0, 0.4999, -1, 1.01, NaN, Infinity, "1", undefined]) {
     const h = setup();
     h.confidence = probability;
     const payload = await h.request([system, user(1)]);
     const accepted = probability === 0.5 || probability === 1;
     assert.deepEqual(updates(payload), accepted ? [[1, "high"]] : []);
     assert.equal(h.classifierModels[0].id, "liquid/d1-ultra");
+    assert.equal(h.warnings.length, accepted || probability === 0 || probability === 0.4999 ? 0 : 2);
   }
   const invalid = setup();
   for (const answers of [{}, { thinking: { type: "bool", probability: 1 } }, { thinking: { type: "choice", choice: "high" } }]) {

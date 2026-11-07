@@ -96,7 +96,7 @@
       <h3>分类结果怎么用</h3>
       <p>
         <span class="seg" data-seg="effort-05">分类正常完成、档位有效，且概率是 0.5 到 1 之间的有限数，这叫结果合格。结果合格，扩展就采用这个档位。</span>
-        <span class="seg" data-seg="effort-06">d1-ultra 超时、出错或结果不合格时，警告先显示安全原因和「正在切换到 Jev」。Jev 成功就采用新档位；所有尝试都失败才列出原因、警告并沿用当前强度。直接选择 Jev 时不反向回退。</span>
+        <span class="seg" data-seg="effort-06">d1-ultra 超时、出错或结果无效时，警告先显示安全原因和「正在切换到 Jev」。有效结果的概率低于 0.5 时也尝试 Jev，但不发警告。Jev 成功就采用新档位；最终没有合格结果则沿用当前强度，只报告实际错误。仅有低置信度时静默沿用。直接选择 Jev 时不反向回退。</span>
         <span class="seg" data-seg="effort-07">采用和最终沿用都写入决策。回退成功时记录实际分类器和回退来源；用户取消时不回退、不写入。</span>
         <span class="seg" data-seg="effort-08">多条新消息只分类一次，结果写给每一条。</span>
       </p>
@@ -105,7 +105,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 320" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">分类结果的去向</title>
-          <desc id="fig-effort-2-desc">d1-ultra 失败先尝试 Jev；最终结果合格就采用该档位，全部失败才警告并沿用当前强度。两条路都写入决策，用户取消不回退、不写；同批新消息共用结果。</desc>
+          <desc id="fig-effort-2-desc">d1-ultra 失败先尝试 Jev；最终结果合格就采用该档位，最终没有合格结果则沿用当前强度，只有实际错误才警告，低置信度不警告。两条路都写入决策，用户取消不回退、不写；同批新消息共用结果。</desc>
           <defs>
             <marker id="fig-effort-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
             <marker id="fig-effort-2-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--accent)"/></marker>
@@ -135,7 +135,7 @@
             <rect class="n" x="464" y="84" width="160" height="56" rx="6"/>
             <text class="t" x="544" y="108" text-anchor="middle">沿用当前强度</text>
             <text class="t-cap" x="544" y="126" text-anchor="middle">所有尝试均失败</text>
-            <text class="t-cap" x="556" y="172">列出安全原因</text>
+            <text class="t-cap" x="464" y="172">仅实际错误警告</text>
           </g>
 
           <g data-cue="effort-07">
@@ -161,7 +161,7 @@
         <li>多条新消息时，扩展按最后一条用户消息分类。</li>
         <li>d1-ultra 失败先尝试 Jev；只有最终仍无合格结果，才走「沿用当前强度」分支。不会改全局选择，下一条新消息重新尝试首选模型。</li>
         <li>切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code></li>
-        <li>原因只显示 HTTP 状态码及白名单中文分类；不显示服务端原文、端点或凭据。无法识别时明确提示原因未知。Jev 也失败时，列出两者原因及沿用档位，并提示通过 <code>/personal</code> 检查。</li>
+        <li>原因只显示 HTTP 状态码及白名单中文分类；不显示服务端原文、端点或凭据。无法识别时明确提示原因未知。最终没有合格结果时，仅列出实际错误及沿用档位，低置信度不警告，并提示通过 <code>/personal</code> 检查。</li>
         <li>分类进行中如果切换了会话或模型，迟到的结果不写入。</li>
       </ul>
     </figure>
@@ -547,19 +547,20 @@
           let level = base;
           let label = name;
           let warn = "无";
+          const lowConfidence = LEVELS.includes(result) && Number.isFinite(p) && p >= 0 && p < 0.5;
           const failed = result !== "empty" && !(LEVELS.includes(result) && p >= 0.5 && p <= 1);
           form.fallbackOk.disabled = name !== "d1-ultra" || !failed;
           if (result === "empty") label = "未分类";
           else if (!failed) level = result;
           else {
-            const reason = result === "error" ? "HTTP 429：服务限流" : "结果无效或所选概率低于 0.5";
+            const reason = result === "error" ? "HTTP 429：服务限流" : "结果无效";
             if (name === "d1-ultra") {
-              warn = `openrouter/${IDS[name]} 分类失败（${reason}），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。`;
+              warn = lowConfidence ? "" : `openrouter/${IDS[name]} 分类失败（${reason}），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。`;
               if (form.fallbackOk.checked) {
                 level = "low"; label = "Jev（d1-ultra 回退）";
-                warn += " 已回退到 Jev，本次分类：low（示例）。";
+                warn += " 已回退到 Jev，本次分类：low（示例，普通提示）。";
               } else warn += ` Jev 也失败（示例：HTTP 503：上游服务异常），思考强度沿用 ${base}。`;
-            } else warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${base}。`;
+            } else if (!lowConfidence) warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${base}。`;
           }
           if (form.misaligned.checked) {
             out("level").textContent = `${level}（本次请求未生效）`;

@@ -287,8 +287,8 @@
     <div class="beat-text">
       <h3>分类失败怎么办</h3>
       <p>
-        <span class="seg" data-seg="effort-16">d1-ultra 超时、出错、档位无效或把握不足时，警告会说明原因并提示「正在切换到 Jev」。Jev 成功后，提示实际档位，状态栏显示「Jev（d1-ultra 回退）」。</span>
-        <span class="seg" data-seg="effort-17" data-say="Jev 也失败时，警告会列出两个模型的原因并沿用当前档位。可在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」检查。">Jev 也失败时，警告会列出两个模型的原因并沿用当前档位。可在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」检查。</span>
+        <span class="seg" data-seg="effort-16">d1-ultra 超时、出错或结果无效时，警告会说明原因并提示「正在切换到 Jev」。有效结果的概率低于 0.5 时也尝试 Jev，但不发警告。Jev 成功后，提示实际档位，状态栏显示「Jev（d1-ultra 回退）」。</span>
+        <span class="seg" data-seg="effort-17" data-say="最终没有合格结果时沿用当前档位，只报告实际错误；仅有低置信度时不发警告。可在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」检查。">最终没有合格结果时沿用当前档位，只报告实际错误；仅有低置信度时不发警告。可在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」检查。</span>
         <span class="seg" data-seg="effort-17a">自动回退只影响本次，不改全局选择，下一条新消息仍先尝试 d1-ultra。直接选择 Jev 时不反向回退。用户取消时停止分类，不回退，也不写决策。</span>
       </p>
     </div>
@@ -296,7 +296,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-6-title fig-effort-6-desc">
           <title id="fig-effort-6-title">分类失败时会怎样</title>
-          <desc id="fig-effort-6-desc">d1-ultra 超时、出错、无效或低置信度时，显示安全原因并尝试 Jev。Jev 成功就采用新档位；全部失败才沿用上次档位，没有决策时用基线。可在 /personal 的原位思考强度菜单里测试分类模型可用性。</desc>
+          <desc id="fig-effort-6-desc">d1-ultra 超时、出错或结果无效时，警告显示安全原因并尝试 Jev；有效结果的概率低于 0.5 时也尝试 Jev，但不发警告。Jev 成功就采用新档位；全部失败才沿用上次档位，没有决策时用基线。可在 /personal 的原位思考强度菜单里测试分类模型可用性。</desc>
           <defs>
             <marker id="fig-effort-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -311,7 +311,7 @@
           <rect class="n" x="16" y="76" width="248" height="40" rx="6"/>
           <text class="t" x="140" y="101" text-anchor="middle">Jev 成功 / 所有尝试失败</text>
           <rect class="n" x="296" y="76" width="288" height="40" rx="6"/>
-          <text class="t" x="440" y="101" text-anchor="middle">采用新档位 / 沿用并警告</text>
+          <text class="t" x="440" y="101" text-anchor="middle">采用 / 沿用，仅错误警告</text>
           <text class="t-cap" x="16" y="140">当前档位：上一条消息的档位；没有上一条消息时，用基线。对话照常进行。</text>
           <g data-cue="effort-17">
             <line class="w" x1="264" y1="180" x2="294" y2="180" marker-end="url(#fig-effort-6-arrow)"/>
@@ -322,7 +322,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>「把握不足」指所选档位概率低于 0.5。切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code>原因只显示安全分类和 HTTP 状态码，不显示服务端原文或凭据；无法识别时明确提示原因未知。所有尝试都失败才沿用当前分支最近档位，没有决策时用基线。</figcaption>
+      <figcaption>「把握不足」指有效结果的所选档位概率低于 0.5，不发警告；缺答案、非法档位、概率缺失或超出范围仍是无效结果，要发警告。切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code>原因只显示安全分类和 HTTP 状态码，不显示服务端原文或凭据；无法识别时明确提示原因未知。所有尝试都失败才沿用当前分支最近档位，没有决策时用基线。</figcaption>
     </figure>
   </div>
 

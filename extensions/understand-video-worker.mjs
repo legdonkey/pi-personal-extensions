@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { isAbsolute, relative, resolve, sep, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-export const MAX_VIDEO_BYTES = 20 * 1024 * 1024;
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 export const MAX_OUTPUT_BYTES = 32 * 1024;
 let phase = "file-validation";
 
@@ -22,7 +22,7 @@ export async function readAuthorizedVideo(cwd, input) {
   const file = await open(candidate, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
   try {
     const before = await file.stat();
-    if (!before.isFile() || before.nlink !== 1 || before.size < 24 || before.size > MAX_VIDEO_BYTES) throw new Error("视频须为普通文件，大小 24 bytes 至 20 MiB，不允许硬链接");
+    if (!before.isFile() || before.nlink !== 1 || before.size < 24 || before.size > MAX_VIDEO_BYTES) throw new Error("视频须为普通文件，大小 24 bytes 至 50 MiB，不允许硬链接");
     const bytes = Buffer.alloc(before.size + 1);
     let length = 0;
     while (length < bytes.length) {

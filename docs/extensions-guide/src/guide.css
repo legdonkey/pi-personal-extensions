@@ -328,7 +328,7 @@ svg text { font-family: var(--font-sans); }
 .dock .icon-btn:hover { color: var(--ink); background: var(--paper-2); }
 .dock-mid { min-width: 0; display: grid; gap: 6px; }
 .now { display: flex; gap: 10px; align-items: baseline; min-width: 0; font-size: 14px; }
-.now .ch { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.now .ch { color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .now .line { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .rail { position: relative; height: 18px; cursor: pointer; touch-action: none; }
 .rail::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-radius: 3px; background: var(--rule); }

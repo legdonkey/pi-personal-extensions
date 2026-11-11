@@ -337,7 +337,7 @@ svg text { font-family: var(--font-sans); }
 .dock .icon-btn:hover { color: var(--ink); background: var(--paper-2); }
 .dock-mid { min-width: 0; display: grid; gap: 6px; }
 .now { display: flex; gap: 10px; align-items: baseline; min-width: 0; font-size: 14px; }
-.now .ch { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.now .ch { color: var(--ink); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .now .line { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .rail { position: relative; height: 18px; cursor: pointer; touch-action: none; }
 .rail::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-radius: 3px; background: var(--rule); }
@@ -499,7 +499,7 @@ svg text { font-family: var(--font-sans); }
 
           <!-- 终端骨架 -->
           <g data-cue="overview-01">
-            <rect class="n" x="16" y="96" width="440" height="336" rx="6"/>
+            <rect class="n" x="16" y="96" width="440" height="352" rx="6"/>
             <text class="t-sub" x="440" y="114" text-anchor="end">示例画面</text>
             <line class="w" x1="24" y1="304" x2="448" y2="304" style="stroke:var(--rule-solid);stroke-width:1"/>
             <line class="w" x1="24" y1="336" x2="448" y2="336" style="stroke:var(--rule-solid);stroke-width:1"/>
@@ -558,7 +558,7 @@ svg text { font-family: var(--font-sans); }
             <text class="t-cap" x="32" y="414">编写中文讲解文档 ·</text>
             <path class="w" d="M184 410 H194 Q202 410 202 402 V356 Q202 348 210 348 H456 Q464 348 464 340 V260 Q464 252 472 252 H488"/>
             <rect class="n" x="488" y="216" width="144" height="72" rx="6"/>
-            <text class="t" x="500" y="238">状态栏会话名</text>
+            <text class="t" x="500" y="238">会话名</text>
             <text class="t-sub" x="620" y="238" text-anchor="end">第 5 章</text>
             <text class="t-cap" x="500" y="260">状态栏会话标题</text>
             <text class="t-cap" x="500" y="278">自动会话命名</text>

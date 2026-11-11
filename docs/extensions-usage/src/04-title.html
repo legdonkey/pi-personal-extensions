@@ -3,7 +3,7 @@
     <h2 id="ch-title-h">会话名：自动起名，手动改名优先</h2>
     <p class="chapter-sum">会话名显示在哪，「自动会话命名」什么时候起名、起出来什么样，怎么暂停、预览、换命名模型，要注意什么。</p>
     <dl class="meta">
-      <dt>功能</dt><dd>「右下角会话标题」显示会话名；「自动会话命名」起会话名</dd>
+      <dt>功能</dt><dd>「状态栏会话标题」显示会话名；「自动会话命名」起会话名</dd>
       <dt>入口</dt><dd><code>/personal</code> → 自动会话命名：查看状态、选择命名模型、选择命名思考强度、预览建议标题、暂停当前会话命名、恢复当前会话命名</dd>
       <dt>适用场景</dt><dd>在 Pi 终端界面里自动起名。用 <code>pi -p</code> 等非交互方式运行时，不起名。</dd>
     </dl>
@@ -14,14 +14,15 @@
     <div class="beat-text">
       <h3>会话名在哪里</h3>
       <p>
-        <span class="seg" data-seg="title-01">会话名显示在输入框正下方，是靠右的一行暗色小字。还没有会话名时，这里显示「未命名会话」。</span>
+        <span class="seg" data-seg="title-01">会话名合入状态栏，不再单独占行，也不强制右对齐。还没有会话名时，这里显示「未命名会话」。</span>
       </p>
+      <p><span class="seg" data-seg="title-migration">会话标题是状态栏独立功能开关中的第五项，配置为 sessionTitleEnabled。新字段优先；缺失时沿用旧 session-title 布尔值，旧显式关闭只关闭标题。新旧项都校验，读取不写文件；总开关关闭不删除独立设置。</span></p>
     </div>
     <figure class="beat-fig" id="fig-title-1">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 236" width="100%" role="img" aria-labelledby="fig-title-1-title fig-title-1-desc">
           <title id="fig-title-1-title">会话名显示的位置</title>
-          <desc id="fig-title-1-desc">Pi 终端从上到下是消息区、输入框、会话名和状态栏；会话名在输入框正下方靠右显示，没有会话名时显示「未命名会话」，终端太窄时末尾显示成省略号。</desc>
+          <desc id="fig-title-1-desc">会话标题是状态栏的一段；空名显示「未命名会话」，截断与位置由当前 footer 决定。</desc>
 
           <rect x="120" y="12" width="504" height="152" rx="6" class="n is-ghost"/>
           <text x="16" y="38" class="t">消息区</text>
@@ -36,9 +37,9 @@
 
           <g data-cue="title-01">
             <text x="16" y="119" class="t">会话名</text>
-            <rect x="136" y="104" width="472" height="20" rx="2" style="fill:var(--accent-tint)"/>
-            <text x="144" y="118" class="t-cap">示例</text>
-            <text x="600" y="118" class="t-sub" text-anchor="end">🧩 通知服务｜排查重复推送</text>
+            <rect x="136" y="132" width="472" height="20" rx="2" style="fill:var(--accent-tint)"/>
+            <text x="144" y="146" class="t-cap">示例</text>
+            <text x="190" y="146" class="t-sub">🧩 通知服务｜排查重复推送</text>
             <text x="16" y="190" class="t-cap">还没有会话名</text>
             <rect x="120" y="176" width="504" height="20" rx="2" class="n is-ghost"/>
             <text x="600" y="190" class="t-sub" text-anchor="end">未命名会话</text>
@@ -48,7 +49,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>示例会话名。终端太窄时，会话名末尾显示成省略号。</figcaption>
+      <figcaption>示例会话名。位置、宽度和截断由当前 footer 决定。</figcaption>
     </figure>
   </div>
 
@@ -228,7 +229,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 选择命名模型，在列表里上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
+      <figcaption>历史录屏：会话标题原为独立一行，现已合入状态栏；菜单位置以当前页面说明为准。录屏：<code>/personal</code> → 自动会话命名 → 选择命名模型，在列表里上下移动，按 <kbd>Esc</kbd> 键不保存。列表和「当前：openai-codex/gpt-6-luna」是录制时的示例环境，不是默认值；默认命名模型是 <code>gpt-5.6-luna</code>。</figcaption>
     </figure>
   </div>
 
@@ -242,7 +243,7 @@
     </div>
     <figure class="beat-fig capture" data-capture="auto-name-status" id="fig-title-6">
       <div class="capture-frame"><video data-cue="title-08" src="media/auto-name-status.mp4" poster="media/auto-name-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里进入自动会话命名，选「查看状态」，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明"></video></div>
-      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 查看状态，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
+      <figcaption>历史录屏：会话标题原为独立一行，现已合入状态栏；菜单位置以当前页面说明为准。录屏：<code>/personal</code> → 自动会话命名 → 查看状态，输出一条状态提示：开启状态、命名模型、命名用的思考强度和菜单路径说明。画面里的模型 gpt-6-luna 和命名用的思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
     </figure>
   </div>
 

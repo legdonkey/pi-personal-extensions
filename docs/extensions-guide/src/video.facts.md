@@ -1,6 +1,6 @@
 # video 事实清单
 
-- 工具名、参数、顺序执行、菜单内状态说明及严格目录/大小限制 —— extensions/understand-video.ts:69-94；extensions/pi-personal-extensions.ts:55-60、69-71。
+- 工具名、参数、顺序执行、菜单内状态说明及严格目录/大小限制 —— extensions/understand-video.ts:69-94；extensions/pi-personal-extensions.ts:48-53、62-64。
 - 父子双检：工作目录真实路径、非隐藏路径、MP4 后缀与 ftyp、普通文件、无符号/硬链接、50 MiB、有限读取、读取期间变更及 SHA-256 摘要 —— extensions/understand-video-worker.mjs:7-43、67-71；tests/understand-video.test.mjs「合法 MP4、相对路径和 @ 前缀；拒绝越界、隐藏、类型和链接」「权限不足不读取文件」「文件类型、空文件、超限和目录均拒绝」「API 异常、空响应和授权后文件替换安全失败且不泄漏鉴权」。 大小边界另见 tests/understand-video.test.mjs「50 MiB 上限：超过旧上限及恰好新上限可读，多一个字节拒绝」；仅验证本地文件校验，未实测上游 50 MiB 上传。
 - worker 只加载指定 provider，无 ambient 扩展、技能或上下文；内存设置/会话，由 SDK 自行处理既有账号，使用宿主 getPackageDir() —— extensions/understand-video.ts:93；extensions/understand-video-worker.mjs:72-83。
 - 正常 provider 的 Argon 动态路由，medium 调用，只在独立进程适配真实 video/mp4，官方 HTTPS endpoint 和模型形状不符时不注入 —— extensions/understand-video-worker.mjs:45-54、88-98；tests/understand-video.test.mjs「只注入 Google 原生视频请求，不硬编码 medium 路由，不干预其他请求」。
@@ -10,5 +10,7 @@
 - 工具不是主会话的视频附件，视频外发并消耗额外额度；用量只放在 details 中，未设置工具顶层 usage，不汇入 Pi 主会话用量统计，也不额外查询账户额度；音轨、长视频和快速转场边界 —— extensions/understand-video.ts:10、24-29、80-82；extensions/understand-video-worker.mjs:98。
 - 两个真实调用正确识别 0–1 秒红、1–2 秒蓝、2–3 秒绿；仅使用已授权的无敏感 probe.mp4，不代表完整审片验收；此次新增的 details 元数据仅由离线 fake SDK 测试验证，不能拿之前的短视频验收当成新增字段的线上实测 —— /tmp/understand-video-entry-smoke-result.json；video-reviewer 验收 run 8c9e15ab-8363-4366-b6d9-6d4451933183；tests/understand-video.test.mjs（离线 fake SDK 测试）。
 - 角色工具需显式允许；当前后台子代理继承父会话扩展，无需额外指定扩展路径，其他权限与模型不变 —— /Users/yangguandao/.pi/agent/agents/video-reviewer.md:5-15；移除 subagentOnlyExtensions 后的验收 run 0bc41c0b-bc96-4661-aa9b-353dbfedf1dd（实际调用 understand_video 成功并识别红蓝绿）。
-- 已打开主会话需手动 /reload，启停重载沿用统一入口；无新增 UI、菜单或配置，录屏 personal-menu / personal-switches 保持不变 —— extensions/pi-personal-extensions.ts:147-272；docs/extensions-usage/tapes/personal-menu.tape、personal-switches.tape。
+- 已打开主会话需手动 /reload，启停重载沿用统一入口；无新增 UI、菜单或配置，录屏 personal-menu / personal-switches 保持不变 —— extensions/pi-personal-extensions.ts:143-267；docs/extensions-usage/tapes/personal-menu.tape、personal-switches.tape。
 - IPC 序列化预算与正文/元数据独立上限：MAX_RESULT_BYTES 设为 6 * 32 * 1024 + 8 * 1024（200 KiB），容纳 32 KiB 正文 JSON 最坏六倍转义与 8 KiB 元数据；除检查完整序列化包上限外，独立检查正文不超过 32 KiB、JSON.stringify({ ...result, text: "" }) 不超过 8 KiB，不放宽 32 KiB 正文上限 —— extensions/understand-video.ts:10、52、54；tests/understand-video.test.mjs:67-80「IPC 允许 32 KiB 正文的 JSON 转义膨胀，仍限制正文和元数据」。
+
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

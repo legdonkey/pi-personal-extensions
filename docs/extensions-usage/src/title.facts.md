@@ -1,18 +1,13 @@
 # title（使用者版）事实清单
 
-缩写：命名 = `extensions/auto-session-name.ts`；显示 = `extensions/session-title.ts`；入口 = `extensions/pi-personal-extensions.ts`；命名测试 = `tests/auto-session-name.test.mjs`；显示测试 = `tests/session-title.test.mjs`；Pi 文档 = `node_modules/@earendil-works/pi-coding-agent/docs/`。
+缩写：命名 = `extensions/auto-session-name.ts`；显示 = `extensions/statusline.ts`；入口 = `extensions/pi-personal-extensions.ts`；命名测试 = `tests/auto-session-name.test.mjs`；显示测试 = `tests/session-title.test.mjs`；Pi 文档 = `node_modules/@earendil-works/pi-coding-agent/docs/`。
 
 ## 头部 meta
 
-- 功能名「右下角会话标题」「自动会话命名」 —— 入口:19-20, 25-26
 - 入口 `/personal` → 「自动会话命名」；二级菜单：查看状态、选择命名模型、选择命名思考强度、预览建议标题、暂停当前会话命名、恢复当前会话命名 —— 菜单项见 入口:62-68（actions 表），菜单调用内部处理函数 入口:135-139（featureApi.registerCommand 只写入 commands 表，不再调用 pi.registerCommand）
-- 在 Pi 终端界面里自动起名；`pi -p` 等非交互方式运行时不自动起名 —— 显示:12；命名:269；Pi 文档 cli.md:30, 45；命名测试:424-449
 
 ## 会话名在哪里（title-01，图 1）
 
-- 显示在输入框正下方，靠右，一行暗色小字 —— 显示:22-25, 29；显示测试:29
-- 没有会话名时显示「未命名会话」 —— 显示:16；显示测试:41-43
-- 终端太窄时末尾显示成省略号（图、图注） —— 显示:21；显示测试:34
 - 示例会话名「🧩 通知服务｜排查重复推送」 —— 命名:132
 
 ## 自动起名（title-02 ～ 03，图 2）
@@ -75,3 +70,11 @@
 - 其他不起名的情况（图注）：上一轮回复出错或被中断 —— 命名:272-279；命名测试:473
 - 30 秒内没有合格结果时保留原会话名并提示一次（连续失败只提示一次） —— 命名:292, 335-341, 366-370；命名测试:396-422, 451
 - 非交互方式运行 —— 命名:269
+
+## 合并后的标题显示
+
+- 会话标题由 statusline 的 personal-session-title 状态键提供，不使用 widget、不承诺右对齐；沿用转义/控制字符消毒，空白显示未命名会话；开始、树导航、改名更新，退出清理 —— tests/session-title.test.mjs「合并标题用 setStatus，消毒、改名、树导航与退出同步，第五项独立开关及旧配置优先级」。
+- 第五项 sessionTitleEnabled 新项优先，缺失沿用旧 session-title 布尔值，旧关闭仅影响标题，新旧都须合法，读取不写，保存总开关保留旧项 —— tests/session-title.test.mjs；README.md「会话标题合并迁移」。
+- 未重录的认证/聊天片段紧邻可见标注历史录屏；无凭据环境不能复现真实模型调用，本轮不伪造 —— 本章历史录屏图注；docs/extensions-usage/tapes/。
+
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

@@ -1,4 +1,4 @@
-# /personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色 → ↓↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
+# /personal → 状态栏：额度、会话 ID 与配色 → 独立功能开关（查看后 Esc）→ 选择 pi-statusline 自定义配色 → ↓↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
 Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/statusline-style.mp4"
 Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/statusline-style.txt"
 Set Width 960
@@ -16,11 +16,18 @@ Type "/personal"
 Sleep 300ms
 Enter
 Wait+Screen /个人扩展 · 统一管理/
-Sleep 900ms
-Down@130ms 2
-Sleep 400ms
+Sleep 500ms
+Down@130ms 1
+Sleep 300ms
 Enter
-Sleep 1.1s
+Sleep 600ms
+Down@130ms 2
+Enter
+Wait+Screen /状态栏独立功能开关/
+Sleep 1.3s
+Escape
+Sleep 500ms
+Up@130ms 2
 Enter
 Wait+Screen /选择 pi-statusline 自定义配色/
 Sleep 1.2s

@@ -8,7 +8,6 @@ import { visibleWidth } from "@earendil-works/pi-tui";
 import personal from "../extensions/pi-personal-extensions.ts";
 
 const ids = [
-  "session-title",
   "auto-session-name",
   "statusline",
   "clickable-paths",
@@ -35,7 +34,7 @@ function load(overrides = {}) {
   return { commands, events, transformers, virtualModels, tools };
 }
 
-test("统一入口按开关注册七项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册六项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -69,7 +68,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
       );
       assert.equal(
         loaded.events.includes("session_info_changed"),
-        ["session-title", "auto-session-name"].includes(id),
+        ["statusline", "auto-session-name"].includes(id),
       );
       assert.equal(
         loaded.transformers.length,
@@ -80,8 +79,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
       assert.equal(
         loaded.events.includes("session_shutdown"),
         [
-          "session-title",
-          "auto-session-name",
+                  "auto-session-name",
           "statusline",
           "user-message-border",
           "inline-effort",
@@ -144,7 +142,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
     await command.handler("switches", ctx);
     assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), {
       ...off,
-      "session-title": true,
+      "auto-session-name": true,
     });
     assert.equal(reloads, 1);
     assert.ok(load().events.includes("session_info_changed"));
@@ -169,7 +167,7 @@ test("统一入口按开关注册七项功能，忽略已移除开关，菜单�
   }
 });
 
-test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写七个新键", async () => {
+test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写六个新键", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-migration-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -232,9 +230,9 @@ test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存�
     });
     assert.equal(reloads, 1);
     assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), {
-      ...off, "session-title": true, "inline-effort": true,
+      ...off, "auto-session-name": true, "inline-effort": true,
     });
-    assert.equal(load().events.includes("session_tree"), false);
+    assert.equal(load().events.includes("session_tree"), true);
     assert.equal(load().events.includes("context_with_system"), true);
   } finally {
     if (previous === undefined) delete process.env.PI_CODING_AGENT_DIR;
@@ -288,16 +286,16 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       },
     };
     await personal.handler("", ctx);
-    assert.equal(menus[0].options.length, 8);
+    assert.equal(menus[0].options.length, 7);
     assert.equal(menus[0].options.filter((label) => label.startsWith("状态栏：")).length, 1);
-    assert.equal(menus[0].options[2], "状态栏：额度、会话 ID 与配色 · 已加载");
+    assert.equal(menus[0].options[1], "状态栏：额度、会话 ID 与配色 · 已加载");
     assert.equal(readFileSync(path, "utf8"), "{}");
     const expected = {
-      1: ["查看状态", "选择命名模型", "选择命名思考强度", "预览建议标题", "暂停当前会话命名", "恢复当前会话命名"],
-      3: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
-      2: ["选择 pi-statusline 自定义配色"],
-      5: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "测试分类模型可用性"],
-      6: ["查看通路与限制"],
+      0: ["查看状态", "选择命名模型", "选择命名思考强度", "预览建议标题", "暂停当前会话命名", "恢复当前会话命名"],
+      2: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
+      1: ["选择 pi-statusline 自定义配色", "查看 token 速度口径", "独立功能开关"],
+      4: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "测试分类模型可用性"],
+      5: ["查看通路与限制"],
     };
     for (let feature = 0; feature < ids.length; feature++) {
       choices = [feature, undefined];
@@ -309,61 +307,65 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       await personal.handler("", ctx);
       assert.equal(choices.length, 0);
     };
-    await choose(1, "查看状态");
+    await choose(0, "查看状态");
     assert.match(notices.at(-1)[0], /自动命名：开启.*选择：\/personal → 自动会话命名/);
-    await choose(1, "选择命名模型");
+    await choose(0, "选择命名模型");
     assert.match(menus.at(-3).title, /^命名模型（全局）/);
-    await choose(1, "选择命名思考强度");
+    await choose(0, "选择命名思考强度");
     assert.match(menus.at(-3).title, /^命名思考强度（全局）/);
-    await choose(1, "预览建议标题");
+    await choose(0, "预览建议标题");
     assert.match(notices.at(-1)[0], /还没有可用于命名的用户文本/);
-    await choose(1, "暂停当前会话命名");
+    await choose(0, "暂停当前会话命名");
     assert.equal(entries.at(-1).data.enabled, false);
-    await choose(1, "恢复当前会话命名");
+    await choose(0, "恢复当前会话命名");
     assert.equal(entries.at(-1).data.enabled, true);
-    await choose(3, "查看路径链接设置");
+    await choose(2, "查看路径链接设置");
     assert.match(notices.at(-1)[0], /设置：\/personal → 文件路径可点击/);
     for (const [action, key, value] of [
       ["开启路径链接", "enabled", true], ["暂停路径链接", "enabled", false],
       ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((editor) => [`打开方式：${editor}`, "editor", editor]),
       ["识别裸路径", "bareText", true], ["不识别裸路径", "bareText", false],
     ]) {
-      await choose(3, action);
+      await choose(2, action);
       assert.equal(JSON.parse(readFileSync(join(dir, "clickable-paths.json"), "utf8"))[key], value);
     }
-    await choose(2, "选择 pi-statusline 自定义配色");
+    await choose(1, "独立功能开关");
+    assert.match(menus.at(-3).title, /状态栏独立功能开关/);
+    await choose(1, "查看 token 速度口径");
+    assert.match(notices.at(-1)[0], /usage.output.*隐藏推理.*不替换 footer/);
+    await choose(1, "选择 pi-statusline 自定义配色");
     assert.equal(calls.at(-1), "custom");
-    await choose(5, "查看分类模型与状态");
+    await choose(4, "查看分类模型与状态");
     assert.match(notices.at(-1)[0], /后续分类：openrouter\/~typesafe\/jev-latest/);
-    await choose(5, "选择分类模型（Jev / d1-ultra）");
+    await choose(4, "选择分类模型（Jev / d1-ultra）");
     assert.match(menus.at(-3).title, /^思考分类模型（全局）/);
     assert.equal(menus.at(-3).options.length, 2);
     for (const [index, model] of [[0, "jev"], [1, "d1-ultra"]]) {
-      choices = [5, "选择分类模型（Jev / d1-ultra）", index];
+      choices = [4, "选择分类模型（Jev / d1-ultra）", index];
       await personal.handler("", ctx);
       assert.equal(choices.length, 0);
       assert.deepEqual(JSON.parse(readFileSync(join(dir, "inline-effort.json"), "utf8")), { model });
     }
-    await choose(5, "测试分类模型可用性");
+    await choose(4, "测试分类模型可用性");
     assert.equal(classifierCalls, 1);
     assert.match(notices.at(-1)[0], /测试成功/);
     assert.equal(readFileSync(path, "utf8"), "{}");
     assert.equal(reloads, 0);
-    choices = [6];
+    choices = [5];
     await personal.handler("", ctx);
     assert.equal(calls.at(-1), "custom");
     await personal.handler("switches", ctx);
     assert.equal(calls.at(-1), "custom");
-    choices = [5, "禁用此功能并重载"];
+    choices = [4, "禁用此功能并重载"];
     await personal.handler("", ctx);
     assert.equal(reloads, 1);
     assert.equal(JSON.parse(readFileSync(path, "utf8"))["inline-effort"], false);
     const disabled = load();
     assert.deepEqual([...disabled.commands.keys()], ["personal"]);
-    choices = [5, undefined];
+    choices = [4, undefined];
     await disabled.commands.get("personal").handler("", ctx);
     assert.deepEqual(menus.at(-2).options, ["启用此功能并重载"]);
-    choices = [5, 0];
+    choices = [4, 0];
     await disabled.commands.get("personal").handler("", ctx);
     assert.equal(reloads, 2);
     assert.equal(JSON.parse(readFileSync(path, "utf8"))["inline-effort"], true);
@@ -385,7 +387,7 @@ test("TUI 和有 UI 的 RPC 均可从 personal 子菜单保存分类模型，不
     const loaded = load();
     let reloads = 0;
     for (const mode of ["tui", "rpc"]) {
-      const choices = [5, 1, 1];
+      const choices = [4, 1, 1];
       const ctx = {
         mode, hasUI: true, isIdle: () => true,
         reload: async () => { reloads++; },
@@ -431,7 +433,7 @@ test("RPC 支持逐项启停，批量开关提示替代路径；没有 UI 时提
     };
     await command.handler("", ctx);
     assert.equal(reloads, 1);
-    assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), { ...off, "session-title": true });
+    assert.deepEqual(JSON.parse(readFileSync(path, "utf8")), { ...off, "auto-session-name": true });
     const saved = readFileSync(path, "utf8");
     choices = ["批量功能开关"];
     for (const args of ["", "switches"]) {
@@ -481,7 +483,7 @@ test("RPC 从统一配色选择器应用全部 11 套自定义配色，无需 cu
       },
     };
     for (const [index, name] of styleNames.entries()) {
-      choices = [2, 0, index];
+      choices = [1, 0, index];
       await command.handler("", ctx);
       assert.equal(choices.length, 0);
       assert.deepEqual(notices.at(-1), [`已应用 pi-statusline 自定义配色：${name}（紧凑布局、圆角分隔符）`, "info"]);
@@ -492,6 +494,47 @@ test("RPC 从统一配色选择器应用全部 11 套自定义配色，无需 cu
       assert.equal(reloads, index + 1);
     }
     assert.equal(JSON.parse(readFileSync(path, "utf8")).palette.brand.fg, "#d97757");
+  } finally {
+    if (previous === undefined) delete process.env.PI_CODING_AGENT_DIR;
+    else process.env.PI_CODING_AGENT_DIR = previous;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("技术讲解页的状态栏菜单示例包含配色与 token 速度口径处理器", () => {
+  const html = readFileSync(new URL("../docs/extensions-guide/src/02-entry.html", import.meta.url), "utf8");
+  assert.match(html, /状态栏 3 项（选择 pi-statusline 自定义配色、查看 token 速度口径、独立功能开关）/);
+  const row = html.match(/\{ label: "状态栏：额度、会话 ID 与配色", command:[^\n]+/)[0].replace(/,$/, "");
+  const ac = (command, list) => list.map(([label, args]) => ({ label, cmd: `${command}${args ? ` ${args}` : ""}` }));
+  const feature = new Function("ac", `return (${row});`)(ac);
+  assert.deepEqual(feature.actions.map(({ cmd }) => cmd), ["statusline-style", "statusline-info", "statusline-settings"]);
+  const expression = html.match(/const names = (.+);/)[1];
+  const getNames = new Function("features", "on", `return (${expression});`);
+  assert.deepEqual(getNames([feature], [true]), ["statusline-style", "statusline-info", "statusline-settings"]);
+  assert.deepEqual(getNames([feature], [false]), []);
+});
+
+test("状态栏总开关保留独立设置，旧总开关兼容规则不变", () => {
+  const previous = process.env.PI_CODING_AGENT_DIR;
+  const dir = mkdtempSync(join(tmpdir(), "pi-statusline-master-test-"));
+  process.env.PI_CODING_AGENT_DIR = dir;
+  try {
+    const path = join(dir, "personal-extensions.json");
+    const settingsPath = join(dir, "personal-statusline.json");
+    const saved = JSON.stringify({ usageEnabled: false, sessionIdEnabled: false, tokenSpeedEnabled: false, styleEnabled: false });
+    writeFileSync(settingsPath, saved);
+    writeFileSync(path, JSON.stringify({ ...off, statusline: true }));
+    assert.ok(load().events.includes("message_end"), "独立开关不改变顶层功能注册");
+    writeFileSync(path, JSON.stringify(off));
+    assert.equal(load().events.length, 0);
+    assert.equal(readFileSync(settingsPath, "utf8"), saved);
+    const legacy = { ...off, substatusline: false, "statusline-style-picker": false };
+    delete legacy.statusline;
+    writeFileSync(path, JSON.stringify(legacy));
+    assert.equal(load().events.length, 0);
+    writeFileSync(path, JSON.stringify({ ...legacy, statusline: true }));
+    assert.ok(load().events.includes("message_end"), "新总开关覆盖旧总开关");
+    assert.equal(readFileSync(settingsPath, "utf8"), saved);
   } finally {
     if (previous === undefined) delete process.env.PI_CODING_AGENT_DIR;
     else process.env.PI_CODING_AGENT_DIR = previous;

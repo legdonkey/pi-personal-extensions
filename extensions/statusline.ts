@@ -3,11 +3,16 @@ import {
 	type ExtensionAPI,
 	type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
+import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { stripVTControlCharacters } from "node:util";
 
 const STATUS_KEY = "usage";
 const SESSION_STATUS_KEY = "session-id";
+const TITLE_STATUS_KEY = "personal-session-title";
+const TOKEN_SPEED_STATUS_KEY = "personal-token-speed";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const SETTLED_REFRESH_COOLDOWN_MS = 30 * 1000;
 const REQUEST_TIMEOUT_MS = 15 * 1000;
@@ -32,14 +37,61 @@ interface ZaiLimit {
 // UUIDv7 的开头是时间戳，相近时间新建的会话前缀相同；末尾是随机位，取末 8 位才能区分。
 export const shortSessionId = (id: string) => id.slice(-8);
 
-const showSessionId = (ctx: ExtensionContext) => {
+const showSessionId = (ctx: ExtensionContext, enabled: boolean) => {
 	ctx.ui.setStatus(
 		SESSION_STATUS_KEY,
-		shortSessionId(ctx.sessionManager.getSessionId()),
+		enabled ? shortSessionId(ctx.sessionManager.getSessionId()) : undefined,
 	);
 };
 
+const DEFAULT_SETTINGS = {
+	usageEnabled: true,
+	sessionIdEnabled: true,
+	tokenSpeedEnabled: true,
+	styleEnabled: true,
+	sessionTitleEnabled: true,
+};
+const SETTING_LABELS: Record<keyof typeof DEFAULT_SETTINGS, string> = {
+	usageEnabled: "服务商额度",
+	sessionIdEnabled: "会话 ID",
+	tokenSpeedEnabled: "token 速度",
+	styleEnabled: "pi-statusline 配色选择器",
+	sessionTitleEnabled: "会话标题",
+};
+
+function readLegacyTitleEnabled() {
+	const path = join(getAgentDir(), "personal-extensions.json");
+	let raw: unknown;
+	try { raw = JSON.parse(readFileSync(path, "utf8")); }
+	catch (error) {
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") return true;
+		throw new Error(`无法读取旧标题配置：${path}`, { cause: error });
+	}
+	if (!isRecord(raw) || (Object.hasOwn(raw, "session-title") && typeof raw["session-title"] !== "boolean"))
+		throw new Error(`旧 session-title 必须为布尔值：${path}`);
+	return raw["session-title"] !== false;
+}
+
+function readStatuslineSettings(path: string): typeof DEFAULT_SETTINGS & Record<string, unknown> {
+	const sessionTitleEnabled = readLegacyTitleEnabled();
+	let raw: unknown;
+	try {
+		raw = JSON.parse(readFileSync(path, "utf8"));
+	} catch (error) {
+		if ((error as NodeJS.ErrnoException).code === "ENOENT") return { ...DEFAULT_SETTINGS, sessionTitleEnabled };
+		throw new Error(`无法读取状态栏配置：${path}`, { cause: error });
+	}
+	if (!isRecord(raw)) throw new Error(`状态栏配置必须是 JSON 对象：${path}`);
+	for (const key of Object.keys(DEFAULT_SETTINGS)) {
+		if (Object.hasOwn(raw, key) && typeof raw[key] !== "boolean")
+			throw new Error(`状态栏配置 ${key} 必须为布尔值：${path}`);
+	}
+	return { ...DEFAULT_SETTINGS, sessionTitleEnabled, ...raw } as typeof DEFAULT_SETTINGS & Record<string, unknown>;
+}
+
 export default function statusline(pi: ExtensionAPI) {
+	const settingsPath = join(getAgentDir(), "personal-statusline.json");
+	const settings = readStatuslineSettings(settingsPath);
 	let activeSessionManager: ExtensionContext["sessionManager"] | undefined;
 	let activeProvider: string | undefined;
 	let activeModel: ExtensionContext["model"];
@@ -48,6 +100,20 @@ export default function statusline(pi: ExtensionAPI) {
 	let requestController: AbortController | undefined;
 	let lastRefreshStartedAt = 0;
 	const cache = new Map<string, string>();
+	let responseStartedAt: number | undefined;
+	let firstContentAt: number | undefined;
+
+	const showSessionTitle = (ctx: ExtensionContext) => {
+		const name = stripVTControlCharacters(ctx.sessionManager.getSessionName() ?? "")
+			.replace(/[\x00-\x1f\x7f-\x9f\u2028\u2029]/g, " ").trim() || "未命名会话";
+		ctx.ui.setStatus(TITLE_STATUS_KEY, settings.sessionTitleEnabled ? name : undefined);
+	};
+
+	const clearTokenSpeed = (ctx: ExtensionContext) => {
+		responseStartedAt = undefined;
+		firstContentAt = undefined;
+		ctx.ui.setStatus(TOKEN_SPEED_STATUS_KEY, undefined);
+	};
 
 	const ownsSession = (ctx: ExtensionContext) =>
 		ctx.sessionManager === activeSessionManager;
@@ -65,7 +131,7 @@ export default function statusline(pi: ExtensionAPI) {
 
 	const showProvider = (provider: string | undefined, ctx: ExtensionContext) => {
 		activeProvider = provider;
-		if (!provider || !SUPPORTED_PROVIDERS.has(provider)) {
+		if (!settings.usageEnabled || !provider || !SUPPORTED_PROVIDERS.has(provider)) {
 			ctx.ui.setStatus(STATUS_KEY, undefined);
 			return;
 		}
@@ -78,7 +144,7 @@ export default function statusline(pi: ExtensionAPI) {
 		ctx: ExtensionContext,
 		options: { force?: boolean } = {},
 	) => {
-		if (!ownsSession(ctx) || !provider || !SUPPORTED_PROVIDERS.has(provider))
+		if (!settings.usageEnabled || !ownsSession(ctx) || !provider || !SUPPORTED_PROVIDERS.has(provider))
 			return;
 		if (
 			!options.force &&
@@ -131,6 +197,7 @@ export default function statusline(pi: ExtensionAPI) {
 
 	const startTimer = (ctx: ExtensionContext) => {
 		clearTimer();
+		if (!settings.usageEnabled) return;
 		refreshTimer = setInterval(() => {
 			void refresh(activeProvider, ctx, { force: true });
 		}, REFRESH_INTERVAL_MS);
@@ -138,30 +205,69 @@ export default function statusline(pi: ExtensionAPI) {
 	};
 
 	pi.on("session_start", (_event, ctx) => {
+		clearTokenSpeed(ctx);
 		activeSessionManager = ctx.sessionManager;
 		activeModel = ctx.model;
 		showProvider(ctx.model?.provider, ctx);
-		showSessionId(ctx);
+		showSessionId(ctx, settings.sessionIdEnabled);
+		showSessionTitle(ctx);
 		startTimer(ctx);
 		void refresh(ctx.model?.provider, ctx, { force: true });
 	});
 
 	pi.on("session_tree", (_event, ctx) => {
+		clearTokenSpeed(ctx);
 		activeSessionManager = ctx.sessionManager;
 		activeModel = ctx.model;
 		showProvider(ctx.model?.provider, ctx);
-		showSessionId(ctx);
+		showSessionId(ctx, settings.sessionIdEnabled);
+		showSessionTitle(ctx);
 		startTimer(ctx);
 		void refresh(ctx.model?.provider, ctx, { force: true });
+	});
+
+	pi.on("session_info_changed", (_event, ctx) => {
+		if (ownsSession(ctx)) showSessionTitle(ctx);
 	});
 
 	pi.on("model_select", (event, ctx) => {
 		if (!ownsSession(ctx)) return;
 		refreshGeneration += 1;
 		cancelRequest("Provider changed");
+		clearTokenSpeed(ctx);
 		activeModel = event.model;
 		showProvider(event.model.provider, ctx);
 		void refresh(event.model.provider, ctx, { force: true });
+	});
+
+	pi.on("turn_start", (_event, ctx) => {
+		if (!ownsSession(ctx) || !settings.tokenSpeedEnabled) return;
+		clearTokenSpeed(ctx);
+		responseStartedAt = performance.now();
+	});
+
+	pi.on("message_update", (_event, ctx) => {
+		if (!ownsSession(ctx) || !settings.tokenSpeedEnabled || responseStartedAt === undefined) return;
+		// Pi 的 message_update 仅转发正文、思考和工具调用的内容块事件，不是逐 token 计数。
+		firstContentAt ??= performance.now();
+	});
+
+	pi.on("message_end", (event, ctx) => {
+		if (!ownsSession(ctx) || !settings.tokenSpeedEnabled || event.message.role !== "assistant") return;
+		const endedAt = performance.now();
+		const startedAt = responseStartedAt;
+		const contentAt = firstContentAt;
+		clearTokenSpeed(ctx);
+		const message = event.message;
+		if (
+			startedAt === undefined || contentAt === undefined || endedAt <= contentAt ||
+			!["stop", "length", "toolUse"].includes(message.stopReason) ||
+			!Number.isFinite(message.usage.output) || message.usage.output <= 0
+		) return;
+		const outputSeconds = (endedAt - contentAt) / 1000;
+		const waitSeconds = (contentAt - startedAt) / 1000;
+		ctx.ui.setStatus(TOKEN_SPEED_STATUS_KEY,
+			`${(message.usage.output / outputSeconds).toFixed(1)} tok/s · 等待 ${waitSeconds.toFixed(1)}s · 输出 ${outputSeconds.toFixed(1)}s`);
 	});
 
 	pi.on("agent_settled", (_event, ctx) => {
@@ -174,11 +280,69 @@ export default function statusline(pi: ExtensionAPI) {
 		refreshGeneration += 1;
 		clearTimer();
 		cancelRequest("Provider usage session shut down");
+		clearTokenSpeed(ctx);
 		ctx.ui.setStatus(STATUS_KEY, undefined);
 		ctx.ui.setStatus(SESSION_STATUS_KEY, undefined);
+		ctx.ui.setStatus(TITLE_STATUS_KEY, undefined);
 		activeSessionManager = undefined;
 		activeProvider = undefined;
 		activeModel = undefined;
+	});
+
+	pi.registerCommand("statusline-settings", {
+		description: "独立启停额度、会话 ID、token 速度、配色选择器和会话标题",
+		async handler(_args, ctx) {
+			const keys = Object.keys(SETTING_LABELS) as (keyof typeof DEFAULT_SETTINGS)[];
+			while (true) {
+				const choices = keys.map((key) => `${SETTING_LABELS[key]}：${settings[key] ? "开启" : "关闭"}`);
+				const choice = await ctx.ui.select("状态栏独立功能开关（总开关在上一级）", choices);
+				if (choice === undefined) return;
+				const key = keys[choices.indexOf(choice)];
+				if (!key) return;
+				const selected = await ctx.ui.select(`${SETTING_LABELS[key]}：${settings[key] ? "开启" : "关闭"}`, ["开启", "关闭"]);
+				if (selected === undefined) continue;
+				if (selected !== "开启" && selected !== "关闭") return;
+				const enabled = selected === "开启";
+				try {
+					const current = readStatuslineSettings(settingsPath);
+					await mkdir(dirname(settingsPath), { recursive: true });
+					const temporaryPath = `${settingsPath}.${randomUUID()}.tmp`;
+					await writeFile(temporaryPath, `${JSON.stringify({ ...current, [key]: enabled }, null, 2)}\n`, {
+						flag: "wx", mode: 0o600,
+					});
+					await rename(temporaryPath, settingsPath);
+				} catch (error) {
+					ctx.ui.notify(`状态栏设置保存失败，当前设置不变：${error instanceof Error ? error.message : String(error)}`, "error");
+					return;
+				}
+				settings[key] = enabled;
+				if (key === "usageEnabled") {
+					refreshGeneration += 1;
+					cancelRequest("Provider usage setting changed");
+					clearTimer();
+					ctx.ui.setStatus(STATUS_KEY, undefined);
+					if (enabled) {
+						startTimer(ctx);
+						void refresh(activeProvider, ctx, { force: true });
+					}
+				} else if (key === "sessionIdEnabled") {
+					showSessionId(ctx, enabled);
+				} else if (key === "sessionTitleEnabled") {
+					showSessionTitle(ctx);
+				} else if (key === "tokenSpeedEnabled") {
+					clearTokenSpeed(ctx);
+				}
+				ctx.ui.notify(`${SETTING_LABELS[key]}已${enabled ? "开启" : "关闭"}。设置：/personal → 状态栏：额度、会话 ID 与配色 → 独立功能开关。`, "info");
+				return;
+			}
+		},
+	});
+
+	pi.registerCommand("statusline-info", {
+		description: "说明 token 速度统计口径",
+		async handler(_args, ctx) {
+			ctx.ui.notify("每次助手回复结束后显示 usage.output ÷ 输出秒数，不按字符估算。等待：turn_start 至首个正文、思考或工具调用内容块事件；输出：该事件至 message_end（含尾部用量等待）。usage.output 包含提供方计入的隐藏推理，并非纯正文速度或服务端解码速度。失败、取消、无内容事件或无正 output 时不显示；下一次请求、切换模型、会话或分支时清空。不替换 footer，无需 pi-statusline。", "info");
+		},
 	});
 
 	pi.registerCommand("statusline-style", {
@@ -195,6 +359,10 @@ export default function statusline(pi: ExtensionAPI) {
 			}));
 		},
 		async handler(args, ctx) {
+			if (!settings.styleEnabled) {
+				ctx.ui.notify("配色选择器已关闭，已保存的第三方配色不变。启用：/personal → 状态栏：额度、会话 ID 与配色 → 独立功能开关 → pi-statusline 配色选择器。", "info");
+				return;
+			}
 			let style = args.trim() ? findStyle(args) : undefined;
 			if (!args.trim()) {
 				const title = "选择 pi-statusline 自定义配色";
@@ -347,7 +515,7 @@ async function fetchCodexUsage(
 		CODEX_PROVIDER,
 		"--min-expiry",
 		"5m",
-	]);
+	], signal);
 	const accountId = readChatGptAccountId(token);
 	const headers: Record<string, string> = {
 		Accept: "application/json",
@@ -376,7 +544,7 @@ async function fetchZaiUsage(
 		"print-api-key",
 		"--provider",
 		ZAI_PROVIDER,
-	]);
+	], signal);
 	const body = await fetchJson(
 		"https://open.bigmodel.cn/api/monitor/usage/quota/limit",
 		{
@@ -406,7 +574,7 @@ async function fetchKimiUsage(
 		KIMI_PROVIDER,
 		"--min-expiry",
 		"5m",
-	]);
+	], signal);
 	const body = await fetchJson(
 		"https://api.kimi.com/coding/v1/usages",
 		{
@@ -440,8 +608,9 @@ function readKimiUsedPercent(value: unknown): number | undefined {
 async function readCredential(
 	pi: ExtensionAPI,
 	args: string[],
+	signal: AbortSignal,
 ): Promise<string> {
-	const result = await pi.exec("pi", args, { timeout: REQUEST_TIMEOUT_MS });
+	const result = await pi.exec("pi", args, { timeout: REQUEST_TIMEOUT_MS, signal });
 	const credential = result.stdout.trim();
 	if (result.code !== 0 || !credential)
 		throw new Error("Provider credential is unavailable");

@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-start" data-chapter="start" aria-labelledby="ch-start-h">
   <header class="chapter-head">
     <h2 id="ch-start-h">上手：安装、设置、关闭功能</h2>
-    <p class="chapter-sum">七项功能能帮你什么，怎么安装，怎么用 <code>/personal</code> 开启、关闭和设置。</p>
+    <p class="chapter-sum">六项功能能帮你什么，怎么安装，怎么用 <code>/personal</code> 开启、关闭和设置。</p>
     <dl class="meta">
       <dt>运行要求</dt><dd>Pi ≥ 1.0.1，Node.js ≥ 22.19</dd>
       <dt>管理命令</dt><dd><code>/personal</code>、<code>/personal switches</code></dd>
@@ -13,12 +13,12 @@
     <div class="beat-text">
       <h3>这套扩展能帮你什么</h3>
       <p>
-        <span class="seg" data-seg="start-01">这套扩展提供七项功能，默认全部开启。</span>
+        <span class="seg" data-seg="start-01">这套扩展提供六项功能，默认全部开启。</span>
       </p>
       <ul>
         <li><span class="seg" data-seg="start-02">消息区里，你发的消息带橙色线框；回复里的文件路径可以点击打开。</span></li>
-        <li><span class="seg" data-seg="start-03">状态栏显示会话 ID 和服务商的剩余额度。状态栏的配色也能换。</span></li>
-        <li><span class="seg" data-seg="start-04">输入框下方显示会话名。一轮指你发出一条消息，到 Pi 回复完。每轮正常结束后，「自动会话命名」在后台起会话名。</span></li>
+        <li><span class="seg" data-seg="start-03">状态栏显示会话 ID、服务商剩余额度和回复结束后的 token 速度。状态栏的配色也能换。</span></li>
+        <li><span class="seg" data-seg="start-04">状态栏显示会话名。一轮指你发出一条消息，到 Pi 回复完。每轮正常结束后，「自动会话命名」在后台起会话名。</span></li>
         <li><span class="seg" data-seg="start-05" data-say="用 GPT 六 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的大脑图标段。另有接口和模型能力要求，见下方条件列表。">用 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型并开启 thinking 时，「原位思考强度」给每条新消息自动选档位，结果显示在状态栏的 🧠 段。另有接口和模型能力要求，见下方条件列表。</span></li>
         <li><span class="seg" data-seg="start-video">原视频审查在用户授权后，把本地 MP4 交给 Argon 分析；详见原视频审查章节，音轨未可靠验证。</span></li>
       </ul>
@@ -28,7 +28,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 488" width="100%" role="img" aria-labelledby="fig-start-1-title fig-start-1-desc">
           <title id="fig-start-1-title">Pi 界面功能的位置</title>
-          <desc id="fig-start-1-desc">Pi 终端从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击；输入框下方有右下角会话标题和自动会话命名；状态栏的额度、会话 ID 和配色由「状态栏：额度、会话 ID 与配色」负责；状态栏的 🧠 段来自原位思考强度。界面外的 /personal 命令统一启停。</desc>
+          <desc id="fig-start-1-desc">Pi 终端从上到下是消息区、输入框、输入框下方和两行状态栏。消息区有用户消息橙色线框和文件路径可点击；状态栏标题由 statusline 显示，自动会话命名负责起名；状态栏的额度、会话 ID 和配色由「状态栏：额度、会话 ID 与配色」负责；状态栏的 🧠 段来自原位思考强度。界面外的 /personal 命令统一启停。</desc>
           <defs>
             <marker id="fig-start-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -46,7 +46,7 @@
             <rect class="n is-focal" x="16" y="24" width="440" height="48" rx="6"/>
             <text class="t-mono" x="32" y="45">/personal</text>
             <text class="t-sub" x="440" y="45" text-anchor="end">本章</text>
-            <text class="t-cap" x="32" y="63">开启、关闭、设置七项功能</text>
+            <text class="t-cap" x="32" y="63">开启、关闭、设置六项功能</text>
             <rect class="n is-ghost" x="488" y="24" width="144" height="48" rx="6"/>
             <text class="t" x="500" y="45">常见问题</text>
             <text class="t-sub" x="620" y="45" text-anchor="end">第 6 章</text>
@@ -74,7 +74,7 @@
             <text class="t-sub" x="212" y="386" style="fill:var(--ink)">repo</text>
             <rect x="296" y="372" width="56" height="20" rx="3" style="fill:var(--paper-2);stroke:var(--rule-solid)"/>
             <text class="t-sub" x="304" y="386" style="fill:var(--ink)">main</text>
-            <text class="t-sub" x="32" y="414">7c41e0a2 · weekly 88% left</text>
+            <text class="t-sub" x="228" y="414">7c41e0a2 · weekly 88% left</text>
             <circle cx="360" cy="382" r="3" style="fill:var(--muted)"/>
             <path class="w" d="M360 382 H468 Q476 382 476 374 V356 Q476 348 484 348 H488"/>
             <rect class="n" x="488" y="312" width="144" height="72" rx="6"/>
@@ -85,19 +85,19 @@
           </g>
 
           <g data-cue="start-04">
-            <text class="t-cap" x="440" y="360" text-anchor="end">编写中文讲解文档</text>
-            <path class="w" d="M444 356 H456 Q464 356 464 348 V260 Q464 252 472 252 H488"/>
+            <text class="t-cap" x="32" y="414">编写中文讲解文档 ·</text>
+            <path class="w" d="M184 410 H194 Q202 410 202 402 V356 Q202 348 210 348 H456 Q464 348 464 340 V260 Q464 252 472 252 H488"/>
             <rect class="n" x="488" y="216" width="144" height="72" rx="6"/>
-            <text class="t" x="500" y="238">输入框下方</text>
+            <text class="t" x="500" y="238">状态栏会话名</text>
             <text class="t-sub" x="620" y="238" text-anchor="end">第 4 章</text>
-            <text class="t-cap" x="500" y="260">右下角会话标题</text>
+            <text class="t-cap" x="500" y="260">状态栏会话标题</text>
             <text class="t-cap" x="500" y="278">自动会话命名</text>
           </g>
 
           <g data-cue="start-05">
-            <text class="t-sub" x="228" y="414" style="fill:var(--ink)">🧠 low · 基线 medium · d1-ultra</text>
-            <circle cx="462" cy="410" r="3" style="fill:var(--muted)"/>
-            <path class="w" d="M462 410 H488"/>
+            <text class="t-sub" x="32" y="438" style="fill:var(--ink)">🧠 low · 基线 medium · d1-ultra</text>
+            <circle cx="462" cy="434" r="3" style="fill:var(--muted)"/>
+            <path class="w" d="M462 434 H488"/>
             <rect class="n" x="488" y="392" width="144" height="72" rx="6"/>
             <text class="t" x="500" y="414">🧠 段</text>
             <text class="t-sub" x="620" y="414" text-anchor="end">第 5 章</text>
@@ -174,14 +174,14 @@ pi remove "$(pwd)"</code></pre>
     <div class="beat-text">
       <h3>想关闭某项功能，或改它的设置</h3>
       <ol>
-        <li><span class="seg" data-seg="start-08" data-say="在 Pi 里输入斜杠 personal，打开统一管理菜单。菜单列出七项功能，并标出已加载或未加载。">在 Pi 里输入 <code>/personal</code>，打开统一管理菜单。菜单列出七项功能，并标出已加载或未加载。</span></li>
+        <li><span class="seg" data-seg="start-08" data-say="在 Pi 里输入斜杠 personal，打开统一管理菜单。菜单列出六项功能，并标出已加载或未加载。">在 Pi 里输入 <code>/personal</code>，打开统一管理菜单。菜单列出六项功能，并标出已加载或未加载。</span></li>
         <li><span class="seg" data-seg="start-09">选中一项功能，进入它的二级菜单。</span></li>
         <li><span class="seg" data-seg="start-10">如果要关闭这项功能，选二级菜单的最后一项「禁用此功能并重载」。Pi 会自动重载。</span></li>
         <li><span class="seg" data-seg="start-11" data-say="按 Esc 键逐级返回，一级菜单才退出。保存设置后仍留在二级菜单；需要重载时退出。">按 <kbd>Esc</kbd> 键逐级返回，一级菜单才退出。保存设置后仍留在二级菜单；需要重载时退出。</span></li>
       </ol>
       <ul>
         <li>Pi 正在回复或压缩时，重载会被拒绝。等它结束再操作，或结束后手动输入 <code>/reload</code>。</li>
-        <li>七项里有四项在二级菜单里有设置项。例如「自动会话命名」可以选命名模型。</li>
+        <li>六项里有五项在二级菜单里有设置项。例如「自动会话命名」可以选命名模型。</li>
         <li>「已加载」只表示功能已加载，不表示它正在工作。例如「自动会话命名」可能在当前会话里暂停。</li>
       </ul>
     </div>

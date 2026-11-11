@@ -10,12 +10,12 @@
 #   id                      y   高   起   止   poster
 #   personal-menu           88  434  0.2  5.7  3.0
 #   personal-switches       78  436  0.2  6.7  4.6   （再 pad=960:448:0:12:0x1e1e2e，顶部补 12px 底色，避开 Ponytail 行）
-#   statusline-style        0   708  0.2  8.2  5.2
+#   statusline-style        0   708  0.2  10.0  7.2
 #   auto-name-model         88  434  0.2  8.4  6.5
 #   effort-model            156 432  0.2  7.9  5.8
-#   clickable-paths-status  0   888  0.2  7.0  end
+#   clickable-paths-status  0   888  0.2  7.0  5.6
 #   auto-name-status        0   788  0.2  6.8  end
-#   effort-status           34  596  0.2  7.6  end
+#   effort-status           34  596  0.2  7.6  5.6
 Set Shell "bash"
 Set FontSize 18
 Set FontFamily "Maple Mono NF CN"

@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-faq" data-chapter="faq" aria-labelledby="ch-faq-h">
   <header class="chapter-head">
     <h2 id="ch-faq-h">速查：命令、配置和常见问题</h2>
-    <p class="chapter-sum">想做什么对应哪个菜单项；五个配置文件在哪；出问题时先查什么。</p>
+    <p class="chapter-sum">想做什么对应哪个菜单项；六个配置文件在哪；出问题时先查什么。</p>
   </header>
 
   <!-- 节拍 1：菜单路径速查 -->
@@ -31,6 +31,7 @@
           <tr><td>开启 / 暂停路径链接</td><td>文件路径可点击 → 开启路径链接 / 暂停路径链接</td></tr>
           <tr><td>换打开方式</td><td>文件路径可点击 → 打开方式：vscode、vscode-insiders、cursor、windsurf 或 file</td></tr>
           <tr><td>识别 / 不识别裸路径</td><td>文件路径可点击 → 识别裸路径 / 不识别裸路径</td></tr>
+          <tr><td>分别启停额度、会话 ID、速度、配色选择器</td><td>状态栏：额度、会话 ID 与配色 → 独立功能开关</td></tr>
           <tr><td>换状态栏配色</td><td>状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色</td></tr>
           <tr><td>手动改会话名</td><td>Pi 自带：<code>/name 新名字</code>，之后这个会话暂停自动起名</td></tr>
         </tbody>
@@ -44,33 +45,34 @@
     <div class="beat-text">
       <h3>想找配置文件</h3>
       <p>
-        <span class="seg" data-seg="faq-02" data-say="五个配置文件都在 agent 目录，默认是主目录下的点 pi 斜杠 agent。">五个配置文件都在 agent 目录，默认是 <code>~/.pi/agent/</code>。</span>
-        设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，五个文件改用它指定的目录。
+        <span class="seg" data-seg="faq-02" data-say="六个配置文件都在 agent 目录，默认是主目录下的点 pi 斜杠 agent。">六个配置文件都在 agent 目录，默认是 <code>~/.pi/agent/</code>。</span>
+        设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，六个文件改用它指定的目录。
         <span class="seg" data-seg="faq-03">平时不用手改这些文件。用 /personal 菜单改全局设置，会自动保存到对应文件。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-faq-2">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 328" width="100%" role="img" aria-labelledby="fig-faq-2-title fig-faq-2-desc">
-          <title id="fig-faq-2-title">五个配置文件的位置</title>
-          <desc id="fig-faq-2-desc">agent 目录默认是 ~/.pi/agent/，设置 PI_CODING_AGENT_DIR 后改用该目录。目录下有功能开关、命名设置、分类器设置、路径链接设置和状态栏配色五个文件。</desc>
+        <svg viewBox="0 0 640 364" width="100%" role="img" aria-labelledby="fig-faq-2-title fig-faq-2-desc">
+          <title id="fig-faq-2-title">六个配置文件的位置</title>
+          <desc id="fig-faq-2-desc">agent 目录默认是 ~/.pi/agent/，设置 PI_CODING_AGENT_DIR 后改用该目录。目录下有功能开关、命名设置、分类器设置、路径链接设置、状态栏配色和状态栏独立开关六个文件。</desc>
           <defs>
             <marker id="fig-faq-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
             </marker>
           </defs>
           <g data-cue="faq-02">
-            <path class="w" d="M40 72 V256"/>
+            <path class="w" d="M40 72 V292"/>
             <path class="w" d="M40 112 H64"/>
             <path class="w" d="M40 148 H64"/>
             <path class="w" d="M40 184 H64"/>
             <path class="w" d="M40 220 H64"/>
-            <path class="w" d="M40 248 Q40 256 48 256 H64"/>
+            <path class="w" d="M40 256 H64"/>
+            <path class="w" d="M40 284 Q40 292 48 292 H64"/>
             <rect class="n" x="16" y="24" width="248" height="48" rx="6"/>
             <text class="t" x="32" y="45">agent 目录</text>
             <text class="t-sub" x="32" y="63">默认 ~/.pi/agent/</text>
             <text class="t-mono" x="72" y="116">personal-extensions.json</text>
-            <text class="t-cap" x="624" y="116" text-anchor="end">七项功能的开关</text>
+            <text class="t-cap" x="624" y="116" text-anchor="end">六项功能的开关</text>
             <text class="t-mono" x="72" y="152">auto-session-name.json</text>
             <text class="t-cap" x="624" y="152" text-anchor="end">命名模型和思考强度</text>
             <text class="t-mono" x="72" y="188">inline-effort.json</text>
@@ -79,6 +81,8 @@
             <text class="t-cap" x="624" y="224" text-anchor="end">路径链接设置</text>
             <text class="t-mono" x="72" y="260">pi-statusline.json</text>
             <text class="t-cap" x="624" y="260" text-anchor="end">状态栏配色</text>
+            <text class="t-mono" x="72" y="296">personal-statusline.json</text>
+            <text class="t-cap" x="624" y="296" text-anchor="end">状态栏五项独立开关</text>
           </g>
           <g data-cue="faq-02">
             <path class="w is-dash" d="M392 48 H264" style="marker-end:url(#fig-faq-2-arrow)"/>
@@ -87,12 +91,12 @@
             <text class="t-sub" x="408" y="63">设置后改用它指定的目录</text>
           </g>
           <g data-cue="faq-03">
-            <rect class="n is-ghost" x="16" y="280" width="608" height="36" rx="6"/>
-            <text class="t-cap" x="32" y="303" style="fill:var(--ink)">全局设置的修改自动保存到对应文件；当前会话的命名暂停状态保存在会话记录里</text>
+            <rect class="n is-ghost" x="16" y="316" width="608" height="36" rx="6"/>
+            <text class="t-cap" x="32" y="339" style="fill:var(--ink)">全局设置的修改自动保存到对应文件；当前会话的命名暂停状态保存在会话记录里</text>
           </g>
         </svg>
       </div>
-      <figcaption>五个文件由同一个环境变量决定位置。</figcaption>
+      <figcaption>六个文件由同一个环境变量决定位置。</figcaption>
     </figure>
   </div>
 

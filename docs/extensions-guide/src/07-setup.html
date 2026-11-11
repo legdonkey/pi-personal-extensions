@@ -1,7 +1,7 @@
 <section class="chapter" id="ch-setup" data-chapter="setup" aria-labelledby="ch-setup-h">
   <header class="chapter-head">
     <h2 id="ch-setup-h">安装、配置与升级</h2>
-    <p class="chapter-sum">怎样安装和开发这个包，五个配置文件放在哪里，升级 Pi 后检查什么。</p>
+    <p class="chapter-sum">怎样安装和开发这个包，六个配置文件放在哪里，升级 Pi 后检查什么。</p>
     <dl class="meta">
       <dt>运行要求</dt><dd>Pi ≥ 1.0.1，Node.js ≥ 22.19.0</dd>
       <dt>默认配置目录</dt><dd><code>~/.pi/agent/</code></dd>
@@ -88,22 +88,22 @@ npm view &lt;包名&gt; version \
   <!-- 节拍 2：配置文件 -->
   <div class="beat">
     <div class="beat-text">
-      <h3>五个配置文件</h3>
+      <h3>六个配置文件</h3>
       <p>
-        <span class="seg" data-seg="setup-03" data-say="看图。五个配置文件默认都在主目录下的点 pi 斜杠 agent。">五个配置文件默认都在 <code>~/.pi/agent/</code>。</span>
-        <span class="seg" data-seg="setup-04" data-say="设置环境变量 PI CODING AGENT DIR 后，五个文件都改放在它指定的目录。">设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，五个文件都改放在它指定的目录。</span>
+        <span class="seg" data-seg="setup-03" data-say="六个配置文件默认都在主目录下的点 pi 斜杠 agent。">六个配置文件默认都在 <code>~/.pi/agent/</code>。</span>
+        <span class="seg" data-seg="setup-04" data-say="设置环境变量 PI CODING AGENT DIR 后，六个文件都改放在它指定的目录。">设置环境变量 <code>PI_CODING_AGENT_DIR</code> 后，六个文件都改放在它指定的目录。</span>
       </p>
       <ul>
-        <li>五个文件的路径都由 Pi 的 <code>getAgentDir()</code> 决定。</li>
+        <li>六个文件的路径都由 Pi 的 <code>getAgentDir()</code> 决定。</li>
         <li>分类器设置从旧名 <code>jev-inline-effort.json</code> 改为 <code>inline-effort.json</code>。新文件不存在时才读旧文件；旧文件不删除、不改写，保存只写新文件。</li>
-        <li><code>clickable-paths.json</code> 直接覆盖写入、失败不报错；其余四个先写临时文件再 rename。命名和分类器设置不改 Pi 的 <code>settings.json</code>。</li>
+        <li><code>clickable-paths.json</code> 直接覆盖写入、失败不报错；其余五个先写临时文件再 rename。命名和分类器设置不改 Pi 的 <code>settings.json</code>。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-setup-2">
       <div class="fig-scroll">
-        <svg viewBox="0 0 640 336" width="100%" role="img" aria-labelledby="fig-setup-2-title fig-setup-2-desc">
+        <svg viewBox="0 0 640 400" width="100%" role="img" aria-labelledby="fig-setup-2-title fig-setup-2-desc">
           <title id="fig-setup-2-title">配置文件的目录来源</title>
-          <desc id="fig-setup-2-desc">五个配置文件都放在 getAgentDir() 返回的目录：默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录。</desc>
+          <desc id="fig-setup-2-desc">六个配置文件都放在 getAgentDir() 返回的目录：默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录。</desc>
           <defs>
             <marker id="fig-setup-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -126,6 +126,9 @@ npm view &lt;包名&gt; version \
             <rect class="n" x="336" y="272" width="280" height="40" rx="6"/>
             <text class="t-mono" x="348" y="297">pi-statusline.json</text>
             <text class="t-cap" x="604" y="297" text-anchor="end">状态栏配色</text>
+            <rect class="n" x="336" y="336" width="280" height="40" rx="6"/>
+            <text class="t-mono" x="348" y="361">personal-statusline.json</text>
+            <text class="t-cap" x="604" y="361" text-anchor="end">独立开关</text>
           </g>
 
           <g data-cue="setup-04">
@@ -134,6 +137,7 @@ npm view &lt;包名&gt; version \
             <path class="w is-flow" d="M232 168 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
             <path class="w" d="M232 184 H264 Q272 184 272 192 V224 Q272 232 280 232 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
             <path class="w" d="M232 200 H248 Q256 200 256 208 V284 Q256 292 264 292 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
+            <path class="w" d="M232 208 H240 Q248 208 248 216 V348 Q248 356 256 356 H336" style="marker-end:url(#fig-setup-2-arrow)"/>
             <rect class="n is-focal" x="24" y="120" width="208" height="96" rx="6"/>
             <text class="t" x="40" y="148">agent 目录</text>
             <text class="t-mono" x="40" y="172">PI_CODING_AGENT_DIR</text>
@@ -141,7 +145,7 @@ npm view &lt;包名&gt; version \
           </g>
         </svg>
       </div>
-      <figcaption>五个文件都在 agent 目录下，由同一个环境变量决定位置。</figcaption>
+      <figcaption>六个文件都在 agent 目录下，由同一个环境变量决定位置。</figcaption>
     </figure>
   </div>
 

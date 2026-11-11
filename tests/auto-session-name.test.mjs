@@ -15,7 +15,7 @@ import autoSessionName, {
   parseSessionTitle,
   recentNamingTurns,
 } from "../extensions/auto-session-name.ts";
-import sessionTitle from "../extensions/session-title.ts";
+import statusline from "../extensions/statusline.ts";
 
 const previousAgentDir = process.env.PI_CODING_AGENT_DIR;
 const testRoot = mkdtempSync(join(tmpdir(), "pi-auto-name-test-"));
@@ -110,6 +110,7 @@ function harness({
     ui: {
       notify: (...args) => notices.push(args),
       setWidget: (key, value) => widgets.set(key, value),
+      setStatus: (key, value) => widgets.set(key, value),
       select: async (title, choices, options) => {
         dialogs.push({ title, choices, options });
         const selected = selections.shift();
@@ -218,7 +219,7 @@ test("结构化标题校验拒绝控制字符、空对象、解释文字和超�
 test("后台命名不阻塞事件、不增加对话消息，复用认证接口并同步标题组件", async () => {
   const job = deferred();
   const h = harness({ complete: () => job.promise });
-  sessionTitle(h.pi);
+  statusline(h.pi);
   await h.emit("session_start");
   h.turn();
   await h.emit("agent_settled");
@@ -244,7 +245,7 @@ test("后台命名不阻塞事件、不增加对话消息，复用认证接口�
   assert.equal(h.sm.getEntries().filter((e) => e.type === "message").length, 2);
   const widget = h.widgets.get("personal-session-title");
   assert.match(
-    widget(null, { fg: (_color, text) => text }).render(60)[0],
+    widget,
     /邮箱验证码/,
   );
   assert.equal(h.notices.length, 0, "正常自动命名不刷通知");

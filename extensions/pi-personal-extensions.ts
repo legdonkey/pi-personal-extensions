@@ -10,18 +10,11 @@ import { Container, SettingsList, Text } from "@earendil-works/pi-tui";
 import autoSessionName from "./auto-session-name.ts";
 import clickablePaths from "./clickable-paths.ts";
 import statusline from "./statusline.ts";
-import sessionTitle from "./session-title.ts";
 import userMessageBorder from "./user-message-border.ts";
 import inlineEffort from "./inline-effort.ts";
 import understandVideo from "./understand-video.ts";
 
 const features = [
-  {
-    id: "session-title",
-    label: "右下角会话标题",
-    description: "在输入框下方右对齐显示会话名，保留原有状态栏",
-    register: sessionTitle,
-  },
   {
     id: "auto-session-name",
     label: "自动会话命名",
@@ -31,7 +24,7 @@ const features = [
   {
     id: "statusline",
     label: "状态栏：额度、会话 ID 与配色",
-    description: "显示服务商剩余额度及会话 ID，预览或应用 11 套配色；配色需要另外启用 pi-statusline",
+    description: "显示会话标题、额度、会话 ID 和回复结束后的 token 速度（含推理，等待与输出分开计时）；预览或应用 11 套配色，配色需要另外启用 pi-statusline",
     register: statusline,
   },
   {
@@ -61,7 +54,7 @@ const features = [
 ] as const;
 
 type FeatureId = (typeof features)[number]["id"];
-type FeatureSettings = Record<FeatureId, boolean>;
+type FeatureSettings = Record<FeatureId, boolean> & { "session-title"?: boolean };
 type Command = Parameters<ExtensionAPI["registerCommand"]>[1];
 
 // 菜单只描述入口，设置和校验继续交给各功能已有的命令处理器。
@@ -94,6 +87,8 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
   ],
   "statusline": [
     { label: "选择 pi-statusline 自定义配色", command: "statusline-style", args: "" },
+    { label: "查看 token 速度口径", command: "statusline-info", args: "" },
+    { label: "独立功能开关", command: "statusline-settings", args: "" },
   ],
 };
 
@@ -115,12 +110,13 @@ function readSettings(path: string): FeatureSettings {
   const values = raw as Record<string, unknown>;
   for (const id of [
     ...features.map(({ id }) => id),
-    "substatusline", "statusline-style-picker", "jev-inline-effort",
+    "substatusline", "statusline-style-picker", "jev-inline-effort", "session-title",
   ]) {
     if (!Object.hasOwn(raw, id)) continue;
     if (typeof values[id] !== "boolean")
       throw new Error(`功能配置 ${id} 必须为 true 或 false：${path}`);
   }
+  if (Object.hasOwn(values, "session-title")) settings["session-title"] = values["session-title"] as boolean;
   for (const { id } of features) {
     const value = values[id];
     if (typeof value === "boolean") settings[id] = value;

@@ -1,11 +1,11 @@
 <section class="chapter" id="ch-statusbar" data-chapter="statusbar" aria-labelledby="ch-statusbar-h">
   <header class="chapter-head">
     <h2 id="ch-statusbar-h">状态栏：额度与配色</h2>
-    <p class="chapter-sum">「状态栏：额度、会话 ID 与配色」是一项功能、一个开关：往状态栏写额度和会话 ID，也给状态栏换配色。</p>
+    <p class="chapter-sum">「状态栏：额度、会话 ID 与配色」有一个总开关和五个独立开关：往状态栏写额度、会话 ID 和回复 token 速度，也给状态栏换配色。</p>
     <dl class="meta">
       <dt>功能</dt><dd>状态栏：额度、会话 ID 与配色（<code>statusline</code>，源码 <code>extensions/statusline.ts</code>）</dd>
       <dt>菜单路径</dt><dd><code>/personal</code> → 状态栏：额度、会话 ID 与配色</dd>
-      <dt>配置</dt><dd><code>pi-statusline.json</code></dd>
+      <dt>配置</dt><dd><code>personal-statusline.json</code>（开关）；<code>pi-statusline.json</code>（配色）</dd>
       <dt>依赖</dt><dd>配色生效需要另行启用 <code>npm:@narumitw/pi-statusline</code> 包；Antigravity 额度需要另行启用 <code>pi-antigravity</code></dd>
     </dl>
   </header>
@@ -15,14 +15,20 @@
     <div class="beat-text">
       <h3>额度：什么时候刷新</h3>
       <p>
-        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以开启「状态栏：额度、会话 ID 与配色」。它在状态栏写会话 ID 的末尾 8 位和服务商剩余额度，也提供 11 套配色。</span>
+        <span class="seg" data-seg="statusbar-01">想在状态栏看到服务商还剩多少额度，可以开启「状态栏：额度、会话 ID 与配色」。它在状态栏写会话标题、会话 ID 的末尾 8 位、服务商剩余额度和回复结束后的 token 速度，也提供 11 套配色。</span>
         <span class="seg" data-seg="statusbar-02">会话开始、树导航、切换模型时，扩展立即刷新额度。会话开始或树导航后，定时器每 5 分钟再刷新一次。</span>
         <span class="seg" data-seg="statusbar-03">agent 一轮运行结束时，扩展也刷新额度。如果距上次刷新开始少于 30 秒，扩展跳过这次刷新。</span>
       </p>
+      <p><span class="seg" data-seg="statusbar-19">在菜单中选择「独立功能开关」，可以看到服务商额度、会话 ID、token 速度、pi-statusline 配色选择器和会话标题的当前值，再分别开启或关闭。没有旧设置时默认全开，顶层 statusline 仍是总开关。</span></p>
+      <p><span class="seg" data-seg="statusbar-20">关闭额度立即清值、取消查询并停止轮询，重新开启强制查询；其他四项不受影响。会话标题和会话 ID 关闭立即清值，开启立即显示。速度关闭清值和计时，开启从下一次请求开始统计。关闭配色选择器不会回滚第三方已保存配色，仍可从独立功能开关重新启用。</span></p>
+      <p><span class="seg" data-seg="statusbar-21">五项布尔设置保存到 agent 目录的 personal-statusline.json，前四项缺失时默认开启，会话标题缺失时沿用旧 session-title，两者都缺失才默认开启；不修改第三方配色文件。保存成功立即生效，其他已打开会话需重载；总开关关闭不删除独立设置。配置损坏或存储失败不覆盖原文件、不应用变更，启动配置无效需修正后重载。</span></p>
+      <p><span class="seg" data-seg="statusbar-16">每次助手回复结束后，速度用最终 usage.output 除以输出秒数，不按字符估算。示例：50.0 tok/s，等待 3.0 秒，输出 2.0 秒。无需另装状态栏，也不替换 footer；第三方 footer 需要显示扩展状态。</span></p>
+      <p><span class="seg" data-seg="statusbar-17">等待从本次 turn_start 到首个正文、思考或工具调用内容块事件，不含此前输入处理；输出从该事件到 message_end，包含网络传输、扩展处理和尾部用量等待。内容块开始不等于精确首 token。usage.output 包含提供方计入的隐藏推理和工具调用输出，不能当成纯正文或服务端解码速度；隐藏推理不发事件时，无法还原真实生成过程。</span></p>
+      <p><span class="seg" data-seg="statusbar-18">工具续调每次单独计时，不含工具执行时间。下一次请求、切换模型、会话或分支后清空，不恢复历史速度。失败、取消、延后结果、无内容事件、无正输出用量或时长时不显示。所有服务商均可统计。菜单中的「查看 token 速度口径」可查看说明，独立功能开关可以单独启停速度，统计不额外请求模型。</span></p>
       <ul>
         <li>会话 ID 只显示末尾 8 位。Pi 默认用 UUIDv7 生成会话 ID，开头是时间戳，相近时间新建的会话开头相同，所以扩展取末尾。</li>
-        <li>切换模型时，扩展取消还没完成的请求。会话关闭时，扩展停止定时器、取消请求，并清空两项状态。</li>
-        <li>这一项由旧版的 <code>substatusline</code> 和 <code>statusline-style-picker</code> 合并而来，只有一个开关 <code>statusline</code>。配置里没有新开关时，由两个旧开关推出：两个都明确为 <code>false</code> 才关闭，否则开启。下次保存开关时只写新键。</li>
+        <li>切换模型时，扩展取消还没完成的请求。会话关闭时，扩展停止定时器、取消请求，并清空额度、会话 ID 和速度状态。</li>
+        <li>这一项由旧版的 <code>substatusline</code> 和 <code>statusline-style-picker</code> 合并而来，总开关是 <code>statusline</code>。配置里没有新开关时，由两个旧开关推出：两个都明确为 <code>false</code> 才关闭，否则开启。下次保存开关时只写新键。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-statusbar-1">
@@ -258,8 +264,8 @@
       </ul>
     </div>
     <figure class="beat-fig capture" data-capture="statusline-style" id="fig-statusbar-3">
-      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，打开「选择 pi-statusline 自定义配色」；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
-      <figcaption>录屏：/personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。</figcaption>
+      <div class="capture-frame"><video data-cue="statusbar-08" src="media/statusline-style.mp4" poster="media/statusline-style.png" muted loop playsinline preload="none" aria-label="录屏：输入 /personal，进入状态栏：额度、会话 ID 与配色，先查看五项独立功能开关并取消，再打开「选择 pi-statusline 自定义配色」；出现带色点的 11 套配色列表，上下移动时列表下方的预览条实时换色，按 Esc 退出不应用"></video></div>
+      <figcaption>录屏：先查看五项独立开关并取消，再进入 /personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色；上下移动时列表下方的预览条实时换色，底部状态栏不变；按 Esc 退出，不应用。</figcaption>
     </figure>
   </div>
 

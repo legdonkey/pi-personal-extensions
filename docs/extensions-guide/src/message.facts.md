@@ -6,7 +6,7 @@
 
 - Pi 默认把文件路径显示成普通文字；改写成 Markdown 链接后才可点击 —— clickable-paths.ts:4-7
 
-- 功能 label：「文件路径可点击」（clickable-paths）、「用户消息橙色线框」（user-message-border） —— pi-personal-extensions.ts:37-38, 43-44
+- 功能 label：「文件路径可点击」（clickable-paths）、「用户消息橙色线框」（user-message-border） —— pi-personal-extensions.ts:30-31, 36-37
 - 路径改写在 Markdown 渲染前进行，只影响显示，会话记录和发给模型的内容不变 —— clickable-paths.ts:9-10, 242
 - 用户消息、助手消息、思考块都把 transformer 传给 Markdown 组件 —— pi-coding-agent/dist/modes/interactive/components/user-message.js:37；assistant-message.js:86, 118；pi-coding-agent/dist/core/extensions/types.d.ts:1124
 - 用户消息默认参与改写（`userMessages` 默认 true） —— clickable-paths.ts:37, 247
@@ -35,12 +35,12 @@
 - 流式输出中的消息不改写，等最终渲染再处理；思考块不改写 —— clickable-paths.ts:244-246
 - `userMessages` 为 false 时不处理用户消息 —— clickable-paths.ts:247
 - 设置四项与默认值：enabled true、editor vscode、bareText true、userMessages true —— clickable-paths.ts:22-38
-- 前三项在 `/personal` → 文件路径可点击 的二级菜单里改（菜单项调用内部 clickable-paths 处理函数的 on/off/editor/bare），`userMessages` 只能改配置文件 —— pi-personal-extensions.ts:75-84, 176-177；clickable-paths.ts:252-299
-- 二级菜单项：查看路径链接设置、开启 / 暂停路径链接（提示「下一条消息生效」）、打开方式 ×5、识别 / 不识别裸路径 —— pi-personal-extensions.ts:75-84；clickable-paths.ts:262
-- clickable-paths 的处理函数只登记进 `/personal` 的命令表，不注册成斜杠命令 —— pi-personal-extensions.ts:130-134；clickable-paths.ts:252
+- 前三项在 `/personal` → 文件路径可点击 的二级菜单里改（菜单项调用内部 clickable-paths 处理函数的 on/off/editor/bare），`userMessages` 只能改配置文件 —— pi-personal-extensions.ts:68-77, 172-173；clickable-paths.ts:252-299
+- 二级菜单项：查看路径链接设置、开启 / 暂停路径链接（提示「下一条消息生效」）、打开方式 ×5、识别 / 不识别裸路径 —— pi-personal-extensions.ts:68-77；clickable-paths.ts:262
+- clickable-paths 的处理函数只登记进 `/personal` 的命令表，不注册成斜杠命令 —— pi-personal-extensions.ts:126-130；clickable-paths.ts:252
 - 编辑器选项：vscode / vscode-insiders / cursor / windsurf / file —— clickable-paths.ts:20, 232
-- 设置入口只有 `/personal` → 文件路径可点击；用户消息橙色线框在 actions 表里没有设置项，只有启用 / 禁用 —— pi-personal-extensions.ts:36-47, 61-88, 163-164
-- 配置文件在 agent 目录下：`path.join(getAgentDir(), "clickable-paths.json")`，默认 `~/.pi/agent/`，跟随 `PI_CODING_AGENT_DIR` —— clickable-paths.ts:16, 235；pi-coding-agent/dist/config.js:453-458；README.md:130-142
+- 设置入口只有 `/personal` → 文件路径可点击；用户消息橙色线框在 actions 表里没有设置项，只有启用 / 禁用 —— pi-personal-extensions.ts:29-40, 54-81, 159-160
+- 配置文件在 agent 目录下：`path.join(getAgentDir(), "clickable-paths.json")`，默认 `~/.pi/agent/`，跟随 `PI_CODING_AGENT_DIR` —— clickable-paths.ts:16, 235；pi-coding-agent/dist/config.js:453-458；README.md:161-174
 - 演示：presets 和工作目录、主目录均为示例；演示假定文件存在，不模拟冒号文件名回退；绝对路径原样保留 `..`，`~/` 和相对路径规范化 —— clickable-paths.ts:117, 120（path.join / path.resolve 规范化，绝对路径不处理）
 
 ## 用户消息橙色线框
@@ -60,4 +60,6 @@
 - 正文行原样保留：ANSI、链接、内边距 —— user-message-border.test.mjs:76-82
 - 退回条件：width < 8；行数 < 2；首末行缺少 width−2 个连续普通空格；任一行可见宽度 ≠ width−2 —— user-message-border.ts:21, 24-31；user-message-border.test.mjs:89-94
 - 退回时按完整宽度调用原始渲染，不画边框；功能仍是「已加载」状态（回退只发生在 render 内，不卸载功能） —— user-message-border.ts:21, 31
-- 升级 Pi 后应验证兼容性；`npm run check` 检查类型并执行全部测试 —— README.md:158
+- 升级 Pi 后应验证兼容性；`npm run check` 检查类型并执行全部测试 —— README.md:198
+
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

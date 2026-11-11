@@ -17,7 +17,7 @@
 
 - 功能 ID `inline-effort`，菜单 label「原位思考强度（Jev / d1-ultra）」 —— entry:49-50
 - 入口 `/personal` → 原位思考强度（Jev / d1-ultra）→ 菜单项；处理函数以 `effort` 名存进 commands 表，不注册成斜杠命令 —— ext:312；entry:50, entry:70-74, entry:129-134, entry:139
-- 配置文件在 agent 目录下的 `inline-effort.json`；agent 目录默认 `~/.pi/agent/`，`PI_CODING_AGENT_DIR` 可覆盖 —— ext:23-26, ext:48；config:453-458；README.md:130, README.md:142
+- 配置文件在 agent 目录下的 `inline-effort.json`；agent 目录默认 `~/.pi/agent/`，`PI_CODING_AGENT_DIR` 可覆盖 —— ext:23-26, ext:48；config:453-458；README.md:163-174
 - 默认分类器 Jev，可选 d1-ultra —— ext:11-14, ext:35, ext:40
 
 ## 1. 什么时候分类（图 1）
@@ -138,7 +138,7 @@
 - 「测试分类模型可用性」用固定样例「把 hello 转成大写。」，不读会话、不写决策、不改强度 —— ext:338-346；test:685-709
 - 配置无效时报错，不退回 Jev；在「选择分类模型」里重新保存可修复 —— ext:34-43；test:427-454
 - OpenRouter 白名单需放行实际服务商和模型；Latest 别名还需放行解析后的固定版本 —— README.md:116
-- 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无，完整输出见 docs/extensions-usage/media/effort-status.png —— ext:326；entry:71
+- 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无；在全新无凭据临时 agent 重录，仅查看示例配置，不验证模型可用性；标题合入状态栏，技术版素材与使用者版相同 —— docs/extensions-usage/tapes/effort-status.tape；两版 media/effort-status.png；ext:321-329；entry:74-78。
 
 ## 8. 子代理与代价（图 8）
 
@@ -155,11 +155,11 @@
 
 ## 改名与兼容（inline-effort）
 
-- 文件、功能 ID、配置文件名从 jev-inline-effort 改为 inline-effort —— entry:15, entry:49；ext:23, ext:48；README.md:138
-- `inline-effort.json` 读取返回 ENOENT 时才读 `jev-inline-effort.json`；新文件格式或内容无效时报错，不回退 —— ext:23-44；README.md:148
-- 保存只写 `inline-effort.json`，旧文件保留不改写 —— ext:46-59；test:383-411；README.md:148
-- 开关新键 `inline-effort` 存在时以新键为准，否则读旧键 `jev-inline-effort`；旧键仍须为布尔值 —— entry:106-113, entry:121-122；README.md:147
-- 会话决策条目类型和状态栏键仍为 `jev-inline-effort`，旧会话可直接恢复 —— ext:67-69；README.md:149
+- 文件、功能 ID、配置文件名从 jev-inline-effort 改为 inline-effort —— entry:15, entry:49；ext:23, ext:48；README.md:169
+- `inline-effort.json` 读取返回 ENOENT 时才读 `jev-inline-effort.json`；新文件格式或内容无效时报错，不回退 —— ext:23-44；README.md:180
+- 保存只写 `inline-effort.json`，旧文件保留不改写 —— ext:46-59；test:383-411；README.md:180
+- 开关新键 `inline-effort` 存在时以新键为准，否则读旧键 `jev-inline-effort`；旧键仍须为布尔值 —— entry:106-113, entry:121-122；README.md:179
+- 会话决策条目类型和状态栏键仍为 `jev-inline-effort`，旧会话可直接恢复 —— ext:67-69；README.md:181
 
 ## 自动回退与安全原因
 
@@ -172,3 +172,5 @@
 - 用户取消或生命周期切换不继续回退，不写迟到决策或显示完成通知；已经发出的切换提示保留。空白输入不调用、配置无效不尝试任何模型 —— test「取消分类时不记录决策、不提示失败」；test「Jev 回退期间取消或切换会话，不写决策、不显示迟到成功或失败」；test「配置无效时不偷用 Jev；选择器可修复配置，保存失败保留原状」。
 - 固定样例可用性测试走同一回退流程，不把 Jev 成功说成 d1-ultra 成功，不改会话决策、状态或基线 —— test「真实 Pi classifier 管线复用 models.json 的代理端点、认证及头部，404 不伪报成功」。
 - 演示区用本地固定示例模拟 Jev 返回 low，不发送 API 请求、不保证线上结果；支持回退成功、失败、直接 Jev、空输入和对齐失败 —— tests/effort-demo.test.mjs。
+
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

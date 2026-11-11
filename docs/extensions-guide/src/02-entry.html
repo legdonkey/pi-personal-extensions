@@ -16,13 +16,13 @@
       <h3>加载：只注册开启的功能</h3>
       <p>
         <span class="seg" data-seg="entry-01" data-say="看图左上角。Pi 加载入口时，入口先读 agent 目录下的 personal extensions 点 json。agent 目录默认是主目录下的点 pi 斜杠 agent。">Pi 加载入口时，入口先读 agent 目录下的 <code>personal-extensions.json</code>。agent 目录默认是 <code>~/.pi/agent/</code>。</span>
-        <span class="seg" data-seg="entry-02">如果文件不存在，七项全开。如果文件不是 JSON 对象，或某个开关不是布尔值，入口抛出错误。</span>
+        <span class="seg" data-seg="entry-02">如果文件不存在，六项全开。如果文件不是 JSON 对象，或某个开关不是布尔值，入口抛出错误。</span>
         <span class="seg" data-seg="entry-03">接着入口遍历 features，只对开启的功能调用 register。</span>
       </p>
       <ul>
         <li>设置 <code>PI_CODING_AGENT_DIR</code> 后，agent 目录改用该变量指定的目录。</li>
         <li>多出的键（例如已移除的 <code>terminal-title</code>）被忽略；加载时不改写文件。</li>
-        <li>旧开关自动映射：<code>substatusline</code> 和 <code>statusline-style-picker</code> 合成 <code>statusline</code>，两个都为 <code>false</code> 才关闭；<code>jev-inline-effort</code> 映射到 <code>inline-effort</code>。新键存在时以新键为准；下次保存只写七个新键。</li>
+        <li>旧开关自动映射：<code>substatusline</code> 和 <code>statusline-style-picker</code> 合成 <code>statusline</code>，两个都为 <code>false</code> 才关闭；<code>jev-inline-effort</code> 映射到 <code>inline-effort</code>。新键存在时以新键为准；下次保存只写六个新键（保留旧 session-title 键）。</li>
         <li>文件无法读取或 JSON 解析失败，同样抛错。抛错发生在注册之前，这次加载什么都不注册，包括 <code>/personal</code>。</li>
       </ul>
     </div>
@@ -30,7 +30,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 448" width="100%" role="img" aria-labelledby="fig-entry-1-title fig-entry-1-desc">
           <title id="fig-entry-1-title">入口加载流程</title>
-          <desc id="fig-entry-1-desc">入口读取开关文件，格式错误时抛出错误；合成七个开关后遍历功能，关闭的跳过，开启的调用 register 并传入 featureApi；最后注册 /personal。</desc>
+          <desc id="fig-entry-1-desc">入口读取开关文件，格式错误时抛出错误；合成六个开关后遍历功能，关闭的跳过，开启的调用 register 并传入 featureApi；最后注册 /personal。</desc>
           <defs>
             <marker id="fig-entry-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -56,7 +56,7 @@
             <text class="t-sub" x="376" y="62">非 JSON 对象 / 非布尔值</text>
             <path class="w is-flow" d="M152 160 V200" style="marker-end:url(#fig-entry-1-arrow)"/>
             <rect class="n" x="24" y="112" width="256" height="48" rx="6"/>
-            <text class="t" x="40" y="132">合成七个开关</text>
+            <text class="t" x="40" y="132">合成六个开关</text>
             <text class="t-sub" x="40" y="150">先继承旧键，无可继承才为 true</text>
           </g>
 
@@ -195,12 +195,12 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>菜单：一级选功能，二级选操作</h3>
       <p>
-        <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出七项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出七项功能和加载状态，最后一行是「批量功能开关」。</span>
+        <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出六项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出六项功能和加载状态，最后一行是「批量功能开关」。</span>
         <span class="seg" data-seg="entry-09">如果选中已加载的功能，二级菜单列出 actions 表里的设置项，最后一项是「禁用此功能并重载」。</span>
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。三级菜单按 Esc 返回二级，二级返回一级，一级才退出。保存设置或查看状态后留在二级菜单；需要重载时退出。</span>
       </p>
       <ul>
-        <li>五项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 1 项（选择 pi-statusline 自定义配色）、原视频审查 1 项（查看通路与限制）。其余两项的二级菜单只有启停。</li>
+        <li>五项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 3 项（选择 pi-statusline 自定义配色、查看 token 速度口径、独立功能开关）、原视频审查 1 项（查看通路与限制）。其余一项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -215,7 +215,6 @@ const featureApi = Object.assign(Object.create(pi), {
         <div>
           <p><strong>一级菜单</strong>　个人扩展 · 统一管理</p>
           <ol data-role="l1">
-            <li>右下角会话标题 · 已加载</li>
             <li>自动会话命名 · 已加载</li>
             <li>状态栏：额度、会话 ID 与配色 · 已加载</li>
             <li>文件路径可点击 · 已加载</li>
@@ -238,7 +237,7 @@ const featureApi = Object.assign(Object.create(pi), {
         </div>
         </div>
         <p><strong>未加载的功能</strong>　二级菜单只有「启用此功能并重载」。</p>
-        <p>commands 表里的处理器：<span data-role="commands"><code>auto-name</code>、<code>clickable-paths</code>、<code>statusline-style</code>、<code>effort</code></span>。Pi 里注册的命令只有 <code>/personal</code>。</p>
+        <p>commands 表里的处理器：<span data-role="commands"><code>auto-name</code>、<code>clickable-paths</code>、<code>statusline-style</code>、<code>statusline-info</code>、<code>statusline-settings</code>、<code>effort</code></span>。Pi 里注册的命令只有 <code>/personal</code>。</p>
       </div>
       </details>
     </figure>
@@ -370,15 +369,14 @@ const featureApi = Object.assign(Object.create(pi), {
       // 数据照抄 extensions/pi-personal-extensions.ts 的 features 与 actions
       const ac = (command, list) => list.map(([label, args]) => ({ label, cmd: `${command}${args ? ` ${args}` : ""}` }));
       const features = [
-        { label: "右下角会话标题", command: null, actions: [] },
         { label: "自动会话命名", command: "auto-name", actions: ac("auto-name", [["查看状态", "status"], ["选择命名模型", "model"], ["选择命名思考强度", "thinking"], ["预览建议标题", "preview"], ["暂停当前会话命名", "off"], ["恢复当前会话命名", "on"]]) },
-        { label: "状态栏：额度、会话 ID 与配色", command: "statusline-style", actions: ac("statusline-style", [["选择 pi-statusline 自定义配色", ""]]) },
+        { label: "状态栏：额度、会话 ID 与配色", command: "statusline-style", actions: [...ac("statusline-style", [["选择 pi-statusline 自定义配色", ""]]), ...ac("statusline-info", [["查看 token 速度口径", ""]]), ...ac("statusline-settings", [["独立功能开关", ""]])] },
         { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
         { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["测试分类模型可用性", "test"]]) },
       ];
       const on = features.map(() => true);
-      let picked = 1;
+      let picked = 0;
       const $ = (sel) => root.querySelector(sel);
       const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); n.append(...kids); return n; };
       const render = () => {
@@ -398,7 +396,7 @@ const featureApi = Object.assign(Object.create(pi), {
           ? [...f.actions.map((a) => el("li", {}, `${a.label} → `, el("code", { textContent: a.cmd }))), el("li", { textContent: "禁用此功能并重载" })]
           : [el("li", { textContent: "启用此功能并重载" })];
         $('[data-role="l2"]').replaceChildren(...rows);
-        const names = features.filter((x, i) => on[i] && x.command).map((x) => x.command);
+        const names = [...new Set(features.flatMap((x, i) => on[i] ? x.actions.map((a) => a.cmd.split(" ")[0]) : []))];
         $('[data-role="commands"]').replaceChildren(...(names.length ? names.flatMap((n, i) => [...(i ? ["、"] : []), el("code", { textContent: n })]) : ["（空）"]));
       };
       render();

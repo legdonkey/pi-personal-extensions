@@ -1,40 +1,21 @@
 # title 章节事实清单
 
-缩写：命名 = `extensions/auto-session-name.ts`；显示 = `extensions/session-title.ts`；入口 = `extensions/pi-personal-extensions.ts`；命名测试 = `tests/auto-session-name.test.mjs`；显示测试 = `tests/session-title.test.mjs`。
+缩写：命名 = `extensions/auto-session-name.ts`；显示 = `extensions/statusline.ts`；入口 = `extensions/pi-personal-extensions.ts`；命名测试 = `tests/auto-session-name.test.mjs`；显示测试 = `tests/session-title.test.mjs`。
 
 ## 头部 meta
 
-- 两项功能的 label 是「右下角会话标题」「自动会话命名」，ID 是 `session-title`、`auto-session-name` —— 入口:19-20, 25-26
-- 入口 `/personal` → 自动会话命名；本包只注册 `/personal` 一个斜杠命令；功能内部仍注册 `auto-name` 处理函数，只进入口的 commands 表 —— 命名:462；菜单项见 入口:62-68（actions 表），菜单调用内部处理函数 入口:135-139（featureApi.registerCommand 只写入 commands 表，不再调用 pi.registerCommand）；右下角会话标题不注册命令 —— 显示:10-38
 - `/personal` 有 UI 就能用（TUI、RPC），没有 UI 时提示并返回 —— 入口:147-150
 - 全局配置是 agent 目录下的 `auto-session-name.json` —— 命名:37, 62
 - agent 目录默认 `~/.pi/agent`，`PI_CODING_AGENT_DIR` 可覆盖 —— node_modules/@earendil-works/pi-coding-agent/dist/config.js:437-438, 453-458；命名测试:22-24（测试用该变量切换目录）
 - 会话状态键 `personal-auto-session-name` —— 命名:127
 
-## 显示：右下角会话标题（title-01 ～ 03，图 1）
+## 显示：状态栏会话标题（title-01 ～ 03，图 1）
 
-- 只在 TUI 模式更新 —— 显示:12, 36；显示测试:52-57（rpc / print / json 不调用 setWidget）
-- 在输入框下方挂 widget（`placement: "belowEditor"`），键名 `personal-session-title` —— 显示:8, 17-30；显示测试:18-20
-- 暗色小字：主题 `dim` 色 —— 显示:24
-- 右对齐：左侧补空格到满宽 —— 显示:22-26；显示测试:29
-- `session_start`、`session_info_changed` 时重画 —— 显示:33-34；显示测试:28, 36-37
-- `session_shutdown` 时移除（setWidget 传 undefined） —— 显示:35-37；显示测试:44-45
-- 图中示例会话名「实现会话标题 🐱」来自测试 —— 显示测试:10
-- 界面从上到下：输入框、belowEditor widget、状态栏 —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:685-693
+- 图中的「实现会话标题 🐱」是页面示例文本，不是测试夹具；显示机制依据 setStatus 实现及合并标题测试 —— 05-title.html:44、67；显示:106-112；显示测试「合并标题用 setStatus，消毒、改名、树导航与退出同步，第五项独立开关及旧配置优先级」。
 
-## 清洗与排版（title-04 ～ 06，demo 1）
+## 清洗与排版（title-04 ～ 06，图 2）
 
-- 先用 `stripVTControlCharacters` 删终端转义序列 —— 显示:14
-- 再把 `\x00-\x1f`、`\x7f-\x9f`、U+2028、U+2029 换成空格，并去首尾空白 —— 显示:15-16
-- 示例 `"\x1b[31m标题\x1b[0m\n\t下一行\x07"` 显示为 `标题  下一行` —— 显示测试:38-40
-- 清洗后为空显示「未命名会话」 —— 显示:16；显示测试:41-43
-- 只读会话名，不调用模型 —— 显示:1-6（没有模型相关导入）
-- 每次渲染时取色，切换主题后跟着变 —— 显示:20-25；显示测试:49-51
-- 始终输出 1 行，可见宽度等于终端宽度 —— 显示:22-26；显示测试:30-33
-- 用 `truncateToWidth(name, width, "…")` 截断 —— 显示:21；显示测试:34
-- 中文字符占两格（宽度由 `visibleWidth` 计算） —— 显示:5, 23；显示测试:29
-- demo 静态说明：40 列时「实现会话标题 🐱」占 15 列、补 25 个空格；8 列时截断为「实现会…」占 7 列、补 1 个空格 —— 显示测试:10, 29, 34；codex-a 核对：4～40 列共 148 组与 pi-tui 实际结果一致
-- demo 用简化宽度表、只去 SGR 序列，脚本里标为 shortcut；只代表现有样例 —— 05-title.html 末尾脚本（演示实现，非扩展事实）
+- 此处为静态说明，不含宽度表或清洗 demo；消毒使用 stripVTControlCharacters，再替换控制字符并 trim，空名显示未命名会话，排版交给 footer —— 显示:106-112；05-title.html:74-88；显示测试「合并标题用 setStatus，消毒、改名、树导航与退出同步，第五项独立开关及旧配置优先级」。
 
 ## 起名：触发与时序（title-07 ～ 09，图 3）
 
@@ -143,3 +124,11 @@
 - README 写「/name 手动命名后自动暂停」；源码对任何非本扩展改名都暂停，打开已有其他名字的会话也暂停 —— 命名:253, 261-266
 - README 写继承「/settings 中该模型的默认思考强度」；源码还读取受信任项目的设置，并按模型能力收窄 —— 命名:115-124
 - README 没写：相同输入跳过、连续失败只提醒一次、取消不提醒、30 秒包含准备和认证时间 —— 命名:287, 291, 368
+
+## 合并后的标题显示
+
+- 会话标题由 statusline 的 personal-session-title 状态键提供，不使用 widget、不承诺右对齐；沿用转义/控制字符消毒，空白显示未命名会话；开始、树导航、改名更新，退出清理 —— tests/session-title.test.mjs「合并标题用 setStatus，消毒、改名、树导航与退出同步，第五项独立开关及旧配置优先级」。
+- 第五项 sessionTitleEnabled 新项优先，缺失沿用旧 session-title 布尔值，旧关闭仅影响标题，新旧都须合法，读取不写，保存总开关保留旧项 —— tests/session-title.test.mjs；README.md「会话标题合并迁移」。
+- 未重录的认证/聊天片段紧邻可见标注历史录屏；无凭据环境不能复现真实模型调用，本轮不伪造 —— 本章历史录屏图注；docs/extensions-usage/tapes/。
+
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

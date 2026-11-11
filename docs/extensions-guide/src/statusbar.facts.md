@@ -1,81 +1,44 @@
 # statusbar 章节事实清单
 
-路径省略前缀 `extensions/`。`types.d.ts` 指 `node_modules/@earendil-works/pi-coding-agent/dist/core/extensions/types.d.ts`，`session-manager.js` 指同包的 `dist/core/session-manager.js`；这两个文件只用来解释 Pi 自身的行为。
+## 功能与统计口径
 
-## 功能名
+- `statusline` 保持总开关，另有五个独立开关，label 不变；actions 提供「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」，配色仍是第一项；内部处理器只进入 commands 表，唯一公开命令为 `/personal` —— extensions/pi-personal-extensions.ts:24-29、88-92、132-145；tests/personal.test.mjs「统一菜单覆盖全部功能和设置」。
+- 旧状态栏开关继续校验；只有新键缺失且两个旧键都为 false 时关闭 —— extensions/pi-personal-extensions.ts:111-128。
+- 会话 ID 取末 8 位；额度沿用 `usage`、ID 沿用 `session-id`，速度新增 `personal-token-speed`，均使用 setStatus，不调用 setFooter —— extensions/statusline.ts:12-23、37-44、112-116、132-140、243-271；tests/statusline.test.mjs「token 速度用最终 output 除以内容流时间，等待单列，工具续调逐次重算且不替换 footer」。
+- 速度只在助手 message_end 后显示：最终 usage.output / 首个 message_update 至 message_end 的本地单调时钟秒数，保留 1 位小数；等待是 turn_start 至首个内容块事件；没有字符计数或实时 token 计数 —— extensions/statusline.ts:243-271；tests/statusline.test.mjs:317-359。
+- text、thinking、toolcall 的 start/delta/end 都由 Pi 转发为 message_update，块开始事件不是精确首 token；durationMs 是请求总耗时，包含等待，不能直接作分母 —— Pi 1.5.0 安装包 `pi-agent-core/dist/agent-loop.js:284-325`、`pi-ai/dist/types.d.ts:398-406`、`pi-ai/dist/utils/event-stream.js:82-123`（位于 `/Users/yangguandao/.pi/agent/install/releases/1.5.0/node_modules/@earendil-works/`）。
+- Pi Usage.reasoning 是 output 的子集，output 已含提供方计入的隐藏推理；输出时间含流传输、扩展处理和尾部用量等待，不是纯正文或服务端解码速度，隐藏推理不发事件时无法还原真实过程 —— Pi 1.5.0 `pi-ai/dist/types.d.ts:285-296`；extensions/statusline.ts:341-346；README.md「token 速度口径」。
+- 工具续调每次单算，不含工具执行时间；下一 turn_start 清空；失败、取消、deferred、无内容、无正 output 或无正时长不显示；模型/会话/树导航/关闭后清空，不恢复历史速度，所有 provider 均可统计 —— extensions/statusline.ts:207-290；tests/statusline.test.mjs:317-399。
+- 速度不额外请求模型、可从「独立功能开关」启停、无需第三方 footer；第三方 footer 是否显示取决于它是否渲染扩展状态 —— extensions/statusline.ts:243-271、341-346；README.md「token 速度口径」；Pi 1.5.0 `pi-coding-agent/examples/extensions/custom-footer.ts:1-7`。
+- 50.0 tok/s、等待 3.0 秒、输出 2.0 秒均为示例，不是线上 benchmark —— tests/statusline.test.mjs:317-359；两版 statusbar-16 明示「示例」。
 
-- 一项功能：ID `statusline`，label「状态栏：额度、会话 ID 与配色」，源码 `extensions/statusline.ts`，一个开关 —— pi-personal-extensions.ts:30-35
-- 迁移：旧开关 `substatusline`、`statusline-style-picker` 仍做布尔校验；新键缺失时，两个旧键都为 false 才关闭，否则开启 —— pi-personal-extensions.ts:106-113, 118-120
-- 配色生效需要另行启用 `npm:@narumitw/pi-statusline` 包 —— README.md:128；pi-personal-extensions.ts:33
-- Antigravity 额度需要先安装并启用 `pi-antigravity` —— README.md:130；statusline.ts:17-18, 297-309
+## 额度与生命周期
 
-## 额度：什么时候刷新（fig-statusbar-1）
+- 支持 Codex 周窗口（6～8 天）、智谱 5 小时+周、Kimi 5 小时+周（老套餐）或月（新套餐，优先 limit_month_code，缺失取 limit_month_total）；剩余 100 − 已用，限制 0～100 后取整 —— extensions/statusline.ts:507-606、651-707；tests/statusline.test.mjs「kimi-coding 新套餐显示 5 小时和月度额度」「kimi-coding 老套餐显示 5 小时和周额度」。
+- Antigravity 只匹配当前模型/运行变体及指定别名，跳过 internal，多个变体取最低有限 remainingFraction，约束到 0～1；quota 是可能共享的模型配额，不是 5 小时/周窗口或 token 数 —— extensions/statusline.ts:445-463；tests/statusline.test.mjs「Antigravity 仅显示当前模型额度，兼容变体和 Pro 别名并校验响应」。
+- Antigravity 通过当前 provider 获取 JSON 凭据，POST 三个固定官方 endpoint 的 fetchAvailableModels，所有回退共用 15 秒网络超时；需启用 pi-antigravity —— extensions/statusline.ts:465-505；README.md「路径链接与状态栏」。
+- Codex、智谱、Kimi 通过 pi auth 读凭据；读凭据和网络请求各限 15 秒；接口分别为 chatgpt.com/backend-api/wham/usage、open.bigmodel.cn/api/monitor/usage/quota/limit、api.kimi.com/coding/v1/usages —— extensions/statusline.ts:507-598、608-633。
+- 会话开始、树导航、切换模型强制查询；5 分钟定时；agent_settled 非强制刷新，距上次开始不足 30 秒跳过；关闭停止定时器并取消查询 —— extensions/statusline.ts:16-18、142-164、198-241、273-290。
+- 前三个 provider 失败保留各自缓存；Antigravity 每次刷新先清空、重新解析账号凭据，失败或缺配额隐藏旧值；不主动监听账号切换 —— extensions/statusline.ts:132-140、155-159、176-192、233-240、470-477；tests/statusline.test.mjs「Antigravity 从当前 provider 获取凭据，切换模型和账号不复用旧额度」。
+- 图中的会话 ID、额度百分比及时间线时刻都是示例，图注已标明 —— 两版 statusbar 第一个图的 title/desc/figcaption。
 
-- 状态栏写两项：状态键 `usage`（额度）和 `session-id` —— statusline.ts:9-10, 35-40, 120
-- 会话 ID 只显示末尾 8 位（`shortSessionId = id.slice(-8)`） —— statusline.ts:33, 35-40
-- 会话 ID 在 session_start 和 session_tree 时写入 —— statusline.ts:144, 153
-- Pi 默认用 uuidv7 生成会话 ID（也允许调用方指定其他 ID），开头是毫秒时间戳，相近时间新建的会话开头相同，所以取末尾 —— session-manager.js:12-14, 691-695；node_modules/@earendil-works/pi-ai/dist/utils/uuid.js:28-31；statusline.ts:32
-- 会话开始（session_start）、树导航（session_tree）时立即强制刷新，并重启定时器 —— statusline.ts:140-156
-- session_tree 是「会话树导航之后」触发的事件 —— types.d.ts:641-642
-- 切换模型（model_select）时取消未完成的请求，并立即强制刷新 —— statusline.ts:158-165
-- 定时器每 5 分钟强制刷新一次 —— statusline.ts:11, 132-138
-- agent_settled 时刷新，不强制 —— statusline.ts:167-170
-- agent_settled 表示 agent 一次运行完全结束 —— types.d.ts:767-769
-- 非强制刷新距上次刷新**开始**少于 30 秒时跳过；强制刷新不检查冷却，但也会更新「上次刷新开始」的时间 —— statusline.ts:12, 82-88, 94
-- 会话关闭时停止定时器、取消请求、清空两项状态 —— statusline.ts:172-182
-- 图 1 状态栏片段 `7c3e9a41 • weekly 88% left` 是示例值，图上已标注
-- 时间线上的具体时刻（0:20、2:00、3:10、3:30）是示例，图注已标注
+## 配色、录屏与保存
 
-## 一次刷新（fig-statusbar-2）
+- 仅配色需要另装启用 npm:@narumitw/pi-statusline，不改变 Pi 主题；TUI 实时预览、RPC 普通列表，取消不写，无效值不写；应用后自动重载，失败提示且不重载 —— extensions/statusline.ts:348-442；tests/statusline.test.mjs「迁入的风格选择器保留 11 套配色、预览、配置和重载行为」。
+- 11 套配色、每套 6 组前景/背景，13 个字段按组共享；预览标签 M sol、T high、D pi、G main、C 42%、K 76%；68 列以下拆两行，并按宽度截断 —— extensions/statusline.ts:396-406、724-927；tests/statusline.test.mjs:25-114。
+- applyStyle 用 getAgentDir()/pi-statusline.json：保留其他顶层项，整体覆盖 palettePreset/custom、palette、density/compact、separator/round；不存在从空对象写，其他读错不覆盖；临时文件 0600 后 rename —— extensions/statusline.ts:930-953；tests/statusline.test.mjs:25-114。
+- 因菜单新增口径项和功能说明变化，重新录制 statusline-style 与 personal-switches；全新临时 agent，仅显式加载本仓库与 pi-statusline，无凭据、不发模型消息；直接运行 Pi 1.5.0 安装目录中的 pi。配色录屏先查看五项独立开关并取消，再预览配色、Esc 不应用，底部无速度值（没有请求模型） —— docs/extensions-usage/media/statusline-style.mp4、personal-switches.mp4；对应 tapes；tests/personal.test.mjs「统一菜单覆盖全部功能和设置」。
 
-- Codex、智谱和 Kimi 的额度窗口 = 按时间段统计的限额（5 小时、周、月） —— statusline.ts:390-391, 420-426
-- 前三个服务商缺少所需窗口时抛错，与请求失败走同一分支（保留上次成功值） —— statusline.ts:364-365, 392-393, 421-422, 121-126
+## 五项独立开关
 
-- 只支持 `openai-codex`、`zai-coding-cn`、`kimi-coding` 和 `antigravity` —— statusline.ts:14-18
-- 当前服务商不在支持列表里时，额度状态为空 —— statusline.ts:66-71
-- Codex、智谱和 Kimi 的凭据通过 `pi auth` 读取：Codex 用 `print-bearer-token --provider openai-codex --min-expiry 5m`，智谱用 `print-api-key --provider zai-coding-cn`，Kimi 用 `print-bearer-token --provider kimi-coding --min-expiry 5m` —— statusline.ts:343-350, 374-379, 402-409, 440-449
-- 前三个服务商读凭据和请求接口各有 15 秒超时（两步分别计时，整次刷新可能超过 15 秒） —— statusline.ts:13, 444, 451-463
-- Antigravity 通过 `ctx.modelRegistry.getApiKeyForProvider('antigravity')` 获取当前 provider 的 JSON 凭据，解析非空 `token` 和 `projectId`；不调用 `pi auth` 子进程 —— statusline.ts:297-309；tests/statusline.test.mjs:163-180
-- Antigravity 向三个固定官方 endpoint 依次 POST `/v1internal:fetchAvailableModels`，所有回退共用 15 秒网络超时 —— statusline.ts:310-336；tests/statusline.test.mjs:182-193
-- Antigravity 只取当前模型精确 ID，或去掉 `-extra-low`、`-extra-high`、`-minimal`、`-medium`、`-high`、`-low`、`-thinking`、`-tiered` 后缀后匹配当前模型的运行变体；`gemini-3.1-pro` 另匹配 `gemini-pro-agent`，`gemini-3.5-flash` 另匹配 `gemini-3-flash-agent`；跳过 `isInternal === true` —— statusline.ts:278-287；tests/statusline.test.mjs:146-161
-- Antigravity 只接受有限数值 `quotaInfo.remainingFraction`，约束到 0～1；多个同模型变体取最低值，乘 100 并四舍五入，显示 `quota N% left` —— statusline.ts:288-294；tests/statusline.test.mjs:146-161
-- `quota 60% left` 是当前模型在服务端对应的配额示例，可能使用共享池；它不是独立的 5 小时或周窗口，也不是 token 计数 —— statusline.ts:278-294；tests/statusline.test.mjs:146-154
-- Antigravity 每次刷新重新解析当前账号凭据，账号变化在下一刷新生效，不主动监听账号切换；每次刷新先清除旧值，找不到配额或失败时保持为空。其他 provider 保留各自缓存；切换模型会强制查询，不显示旧模型缓存 —— statusline.ts:66-73, 89-93, 121-126, 158-165, 303-306；tests/statusline.test.mjs:163-228
-- Codex 接口 `https://chatgpt.com/backend-api/wham/usage`，带 `Bearer` 令牌；能解析出账号 ID 时加 `ChatGPT-Account-ID` —— statusline.ts:351-362, 466-480
-- 智谱接口 `https://open.bigmodel.cn/api/monitor/usage/quota/limit`，`Authorization` 直接放 API Key，不加 Bearer —— statusline.ts:379-388
-- Kimi 接口 `https://api.kimi.com/coding/v1/usages`，带 `Bearer` 令牌 —— statusline.ts:409-417
-- Codex 取 `rate_limit`、`additional_rate_limits` 中 `primary_window`/`secondary_window` 里第一个长度 6～8 天的窗口，显示 `weekly N% left` —— statusline.ts:364-365, 482-505
-- 智谱只读 `TOKENS_LIMIT`、`CREDIT_LIMIT`；`unit 3/number 5` 为 5 小时，`unit 6/number 1` 为周；缺一个就算失败；显示 `5h N% left · weekly N% left` —— statusline.ts:390-395, 507-531
-- Kimi 读 `usages`：`limit_5h` 必需，缺失算失败；老套餐有 `limit_7d` 时显示 `5h N% left · weekly N% left`，否则取 `limit_month_code`（缺失回退 `limit_month_total`）显示 `5h N% left · monthly N% left`；`used_ratio` 乘 100 得已用百分比 —— statusline.ts:398-436；真实响应已用本机订阅验证（新套餐返回 limit_5h、limit_month_total、limit_month_code）
-- Codex、智谱和 Kimi 的剩余 = 100 − 已用百分比，限制在 0～100，四舍五入 —— statusline.ts:533-538
-- 前三个服务商请求失败时保留该服务商上次成功的结果；没有缓存时状态为空 —— statusline.ts:121-126
-- 图中 `weekly 63% left`、`5h 82% left · weekly 47% left`、`5h 86% left · monthly 99% left`、`quota 60% left` 是示例值，图头已标注
+- 面板路径 `/personal → 状态栏：额度、会话 ID 与配色 → 独立功能开关`；列五项当前值后选择开启/关闭，TUI 与 RPC 都用 select；取消或非法选择不保存 —— extensions/pi-personal-extensions.ts:88-92；extensions/statusline.ts:292-338；tests/statusline.test.mjs「四项开关保持可管理，配色禁用不回滚第三方配置，取消及损坏配置不写入」。
+- getAgentDir()/personal-statusline.json 保存 usageEnabled、sessionIdEnabled、tokenSpeedEnabled、styleEnabled、sessionTitleEnabled；前四项缺失时默认 true，sessionTitleEnabled 缺失时沿用旧 session-title，两者都缺失才默认 true，已存在的新旧字段必须布尔；非对象、坏 JSON、读取失败报错，启动配置无效会中止本次加载，不改文件 —— extensions/statusline.ts:47-94；tests/statusline.test.mjs「四项开关保持可管理，配色禁用不回滚第三方配置，取消及损坏配置不写入」。
+- 保存前重读校验，保留未知项，临时文件 wx/0600 后 rename；写入或 rename 失败不覆盖原配置、不改变运行时值；不写 pi-statusline.json —— extensions/statusline.ts:304-338；tests/statusline.test.mjs「独立开关写入或 rename 失败时不覆盖配置、不应用运行时变更」。
+- 额度关闭清 usage、停定时器、取消查询且迟到结果无效；开启强制刷新绕过冷却；凭据子进程也收到取消信号 —— extensions/statusline.ts:132-153、199-205、338-338、608-618；tests/statusline.test.mjs「独立额度开关持久化：关闭清 usage、取消查询并停轮询，迟到结果无效，开启强制刷新且保留其他状态」「关闭额度也向读取凭据的子进程传递取消信号」。
+- ID 关闭即清 session-id，开启即显示；速度关闭清值和计时，开启从下一 turn_start 生效，不接续半途响应 —— extensions/statusline.ts:40-45、243-271、338-338；tests/statusline.test.mjs「ID 与 token 速度独立启停：立即清值，ID 开启即显示，速度开启从下个 turn_start 计时」。
+- 配色禁用只阻止本包选择器，不回滚第三方已保存配色，独立开关面板仍可使用 —— extensions/statusline.ts:292-339、361-365；tests/statusline.test.mjs「四项开关保持可管理，配色禁用不回滚第三方配置，取消及损坏配置不写入」。
+- 顶层 statusline 总开关及旧配置映射不变；关闭总开关不删独立配置，重开仍读取它；设置只即时改变当前会话，其他会话重载后读取 —— extensions/pi-personal-extensions.ts:110-143；extensions/statusline.ts:92-94、338-338；tests/personal.test.mjs「状态栏总开关保留独立设置，旧总开关兼容规则不变」。
 
-## 换配色：选择器（fig-statusbar-3 录屏）
+- 会话标题合入 statusline，第五项独立开关 sessionTitleEnabled，新项优先、缺失沿用旧 session-title，空名仍显示未命名会话 —— tests/session-title.test.mjs；README.md「会话标题合并迁移」。
 
-- 功能注册的 `statusline-style` 处理函数只进 `/personal` 的 commands 表，不再注册成斜杠命令；入口是 `/personal` →「状态栏：额度、会话 ID 与配色」 —— pi-personal-extensions.ts:129-134, 31-32；statusline.ts:184-185
-- 状态栏二级菜单只提供「选择 pi-statusline 自定义配色」和功能启停 —— tests/personal.test.mjs「统一菜单覆盖全部功能和设置」
-- 不带参数时打开选择器：上下键切换（循环）并实时预览，Enter 应用，Esc 取消 —— statusline.ts:198-253
-- TUI 显示实时预览，带 UI 的 RPC 使用普通列表；取消不保存，无效值不写配置，无 UI 时提示 —— tests/statusline.test.mjs「迁入的风格选择器保留 11 套配色、预览、配置和重载行为」
-- 选择前告知需启用 pi-statusline、不改变 Pi 主题；应用会覆盖自定义配色，设置 compact 密度和 round 分隔符；RPC 支持选择、取消和无效值校验 —— tests/statusline.test.mjs「迁入的风格选择器保留 11 套配色、预览、配置和重载行为」；tests/personal.test.mjs「RPC 从统一配色选择器应用全部 11 套自定义配色，无需 custom」
-- 新录屏底部状态栏显示会话 ID 末尾 8 位；其中 ponytail 是本机另一个扩展，extensions/ 下没有相关代码 —— media/statusline-style.png
-- 录屏画面（video 的 data-cue 挂在 beat 第一句 statusbar-08）：打开配色选择器，上下移动预览，Esc 退出（录屏：/personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色） —— docs/extensions-usage/tapes/statusline-style.tape:15-33（技术版共用使用者版的录屏）；statusline.ts:242-247, 253
-
-## 11 套配色怎么分组（fig-statusbar-4）
-
-- 每套 6 组前景色/背景色；色值照抄 STYLES —— statusline.ts:555-688, 787-790
-- 13 个字段分 6 组：brand/provider/model、thinking/tools、cwd、branch、context/tokens/cost、cache/time/turn —— statusline.ts:690-713, 791-792
-- 预览标签 `M sol`、`T high`、`D pi`、`G main`、`C 42%`、`K 76%` —— statusline.ts:723
-- 宽度小于 68 列时预览拆成两行 —— statusline.ts:739-749, 794-797
-- 每行按终端宽度截断 —— statusline.ts:238；tests/statusline.test.mjs:44-50
-
-## 应用配色时写什么（fig-statusbar-5）
-
-- 文件写到 `getAgentDir()/pi-statusline.json`，与 pi-statusline 读取的位置一致 —— statusline.ts:762-763
-- `getAgentDir()` 默认 `~/.pi/agent`，设置 `PI_CODING_AGENT_DIR` 时用该目录 —— node_modules/@earendil-works/pi-coding-agent/dist/config.js:433, 438, 453-459
-- 读出原文件，展开原有顶层字段，再覆盖 `palettePreset: "custom"`、`palette`（整个对象替换为 13 字段配色）、`density: "compact"`、`separator: "round"` —— statusline.ts:764-777；tests/statusline.test.mjs:64-68
-- 文件不存在（ENOENT）时从空对象开始；其他读取错误或 JSON 解析错误抛出，算作失败 —— statusline.ts:764-769
-- 先写 `.tmp`（权限 0600），再 rename 替换正式文件（页面只一句带过，说「同第 2 章」） —— statusline.ts:778-783
-- 写完后自动重载（`ctx.reload()`） —— statusline.ts:263-266；tests/statusline.test.mjs:69
-- 写文件失败时提示「应用失败：<原因>」，不执行重载 —— statusline.ts:263-272
-- 图中原文件的字段是示例，图注已标注
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

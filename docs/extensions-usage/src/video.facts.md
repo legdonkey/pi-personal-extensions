@@ -1,6 +1,6 @@
 # video 使用事实清单
 
-- 管理路径为 /personal → 原视频审查 → 查看通路与限制，统一启停，无新增 UI、菜单或配置；工具名 understand_video，要求用户明确授权视频外发 —— extensions/pi-personal-extensions.ts:55-60、69-71；extensions/understand-video.ts:69-83。
+- 管理路径为 /personal → 原视频审查 → 查看通路与限制，统一启停，无新增 UI、菜单或配置；工具名 understand_video，要求用户明确授权视频外发 —— extensions/pi-personal-extensions.ts:48-53、62-64；extensions/understand-video.ts:69-83。
 - 只读 cwd 内非隐藏且无符号/硬链接的 MP4，24 bytes–50 MiB；非 URL、不遍历目录；问题 8000 字符、120 秒超时、正文最多 32 KiB —— extensions/understand-video-worker.mjs:7-43、67-71、110-116；extensions/understand-video.ts:8-9、31-67、80-92；tests/understand-video.test.mjs「合法 MP4、相对路径和 @ 前缀；拒绝越界、隐藏、类型和链接」「文件类型、空文件、超限和目录均拒绝」「取消和超时终止隔离进程；预取消不启动」「输出限制与工具非法参数错误，不向外发送非法文件」。 大小边界另见 tests/understand-video.test.mjs「50 MiB 上限：超过旧上限及恰好新上限可读，多一个字节拒绝」；仅验证本地文件校验，未实测上游 50 MiB 上传。
 - 调用现有 Antigravity OAuth 和 Argon medium，真实 video/mp4 由工具内部发送，不是主会话视频附件；没有其他模型/提供方/浏览器回退 —— extensions/understand-video-worker.mjs:45-54、72-109；extensions/understand-video.ts:10、93-101。
 - details 返回 bytes、provider、model（逻辑模型名，非已确认服务端路由）、inputMode（native-video/mp4）及 durationMs（从 execute 进入计时到结果格式化，含主进程文件校验、worker 启动、模型调用与等待子进程关闭）；usage 按数值白名单只保留有限非负数且不补缺失零，附带 usageSource: "provider-normalized"，有 cost 时附带 costSource: "local-estimate"（cost 是本地估算而非账单，底层可能将未返回统计归一化为零，零值不代表免费）；用量只放在 details 中，未设置工具顶层 usage，不汇入 Pi 会话用量统计，也不额外查询账户额度 —— extensions/understand-video.ts:12-17、24-29、84-101；extensions/understand-video-worker.mjs:57-64、100-105；tests/understand-video.test.mjs「用量只保留有限非负数值，缺失字段不补零」「模型长度限制和本地截断独立警告，用量缺失保持缺失」「真实隔离进程成功返回，宿主 fetch 不变，返回时已确认子进程关闭」。
@@ -9,3 +9,5 @@
 - 依赖布局固定为 getAgentDir()/npm/node_modules/pi-antigravity，实测 Pi 1.5.0 与插件 0.11.0；已有主会话手动 /reload，角色缺少工具或失败应报告阻塞 —— extensions/understand-video.ts:72、93；README.md「原视频审查」；/Users/yangguandao/.pi/agent/agents/video-reviewer.md:24。
 - demo.mp4 和示例问题是示例，不是自动获取的业务数据 —— docs/extensions-usage/src/07-video.html:12、26。
 - IPC 序列化预算与正文/元数据独立上限：MAX_RESULT_BYTES 设为 6 * 32 * 1024 + 8 * 1024（200 KiB），容纳 32 KiB 正文 JSON 最坏六倍转义与 8 KiB 元数据；除检查完整序列化包上限外，独立检查正文不超过 32 KiB、JSON.stringify({ ...result, text: "" }) 不超过 8 KiB，不放宽 32 KiB 正文上限 —— extensions/understand-video.ts:10、52、54；tests/understand-video.test.mjs:67-80「IPC 允许 32 KiB 正文的 JSON 转义膨胀，仍限制正文和元数据」。
+
+- 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。

@@ -1,30 +1,31 @@
 <section class="chapter" id="ch-title" data-chapter="title" aria-labelledby="ch-title-h">
   <header class="chapter-head">
     <h2 id="ch-title-h">会话名：显示与自动起名</h2>
-    <p class="chapter-sum">会话名怎么显示在输入框下方；自动会话命名怎么在后台起名、校验结果，并保护手动起的名字。</p>
+    <p class="chapter-sum">会话名怎么合入状态栏；自动会话命名怎么在后台起名、校验结果，并保护手动起的名字。</p>
     <dl class="meta">
-      <dt>功能</dt><dd>右下角会话标题 <code>session-title</code>（显示）；自动会话命名 <code>auto-session-name</code>（起名）</dd>
+      <dt>功能</dt><dd>状态栏会话标题 <code>statusline</code>（显示）；自动会话命名 <code>auto-session-name</code>（起名）</dd>
       <dt>入口</dt><dd><code>/personal</code> → 自动会话命名（二级菜单）；本包只注册 <code>/personal</code> 一个斜杠命令</dd>
       <dt>全局配置</dt><dd>agent 目录下的 <code>auto-session-name.json</code>（agent 目录默认 <code>~/.pi/agent</code>，可用 <code>PI_CODING_AGENT_DIR</code> 改）</dd>
       <dt>会话里的状态</dt><dd>自定义条目 <code>personal-auto-session-name</code></dd>
     </dl>
   </header>
 
-  <!-- ===== 显示：右下角会话标题 ===== -->
+  <!-- ===== 显示：状态栏会话标题 ===== -->
   <div class="beat">
     <div class="beat-text">
-      <h3>显示：右下角会话标题</h3>
+      <h3>显示：状态栏会话标题</h3>
       <p>
-        <span class="seg" data-seg="title-01">会话多了以后，要靠会话名找回会话。右下角会话标题负责显示会话名，自动会话命名负责起名。</span>
-        <span class="seg" data-seg="title-02">右下角会话标题只在 TUI 模式工作。它在输入框下方添加一个 widget。widget 是扩展自定义的一块界面。这个 widget 用一行暗色小字靠右显示会话名。</span>
-        <span class="seg" data-seg="title-03">会话开始或会话信息变化时，扩展重画这一行；会话关闭时，扩展移除这一行。</span>
+        <span class="seg" data-seg="title-01">会话多了以后，要靠会话名找回会话。状态栏会话标题负责显示会话名，自动会话命名负责起名。</span>
+        <span class="seg" data-seg="title-02">会话标题通过 setStatus 合入现有状态栏，不添加 belowEditor widget，不再单独占行，也不强制右对齐。第三方 footer 需要显示扩展状态。</span>
+        <span class="seg" data-seg="title-03">会话开始、树导航或改名时更新标题状态；会话关闭时清空状态。独立功能开关中的第五项可单独关闭标题。</span>
       </p>
+      <p><span class="seg" data-seg="title-migration">会话标题是状态栏独立功能开关中的第五项，配置为 sessionTitleEnabled。新字段优先；缺失时沿用旧 session-title 布尔值，旧显式关闭只关闭标题。新旧项都校验，读取不写文件；总开关关闭不删除独立设置。</span></p>
     </div>
     <figure class="beat-fig" id="fig-title-1">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 344" width="100%" role="img" aria-labelledby="fig-title-1-title fig-title-1-desc">
           <title id="fig-title-1-title">会话名显示在哪里、什么时候更新</title>
-          <desc id="fig-title-1-desc">会话名显示在输入框正下方、状态栏上方的一行，靠右对齐；session_start 和 session_info_changed 时重画这一行，session_shutdown 时移除。</desc>
+          <desc id="fig-title-1-desc">标题是状态栏的一段；会话开始、树导航、改名时更新，关闭时清除。</desc>
           <defs>
             <marker id="fig-title-1-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -40,14 +41,9 @@
             <text x="164" y="93" class="t-mono">&gt;</text>
             <text x="16" y="155" class="t">状态栏</text>
             <rect x="152" y="140" width="456" height="20" rx="2" class="n"/>
-            <text x="164" y="154" class="t-cap">Pi 原有状态栏，不改动</text>
+            <text x="164" y="154" class="t-cap">实现会话标题 🐱（示例）</text>
           </g>
-          <g data-cue="title-02">
-            <text x="16" y="127" class="t">会话名</text>
-            <rect x="152" y="112" width="456" height="20" rx="2" style="fill:var(--accent-tint)"/>
-            <text x="160" y="126" class="t-cap">示例</text>
-            <text x="600" y="126" class="t-sub" text-anchor="end">实现会话标题 🐱</text>
-          </g>
+          <g data-cue="title-02"><text x="164" y="126" class="t-cap">setStatus：不新增标题行</text></g>
 
           <g data-cue="title-03">
             <line x1="224" y1="208" x2="316" y2="208" class="w" marker-end="url(#fig-title-1-ah)"/>
@@ -60,19 +56,19 @@
             <rect x="16" y="272" width="208" height="32" rx="6" class="n is-ghost"/>
             <text x="120" y="292" class="t-sub" text-anchor="middle">session_shutdown</text>
             <rect x="320" y="192" width="288" height="72" rx="6" class="n"/>
-            <text x="464" y="222" class="t" text-anchor="middle">重画这一行</text>
+            <text x="464" y="222" class="t" text-anchor="middle">更新标题状态</text>
             <text x="464" y="244" class="t-sub" text-anchor="middle">personal-session-title</text>
             <rect x="320" y="272" width="288" height="32" rx="6" class="n"/>
-            <text x="464" y="293" class="t" text-anchor="middle">移除这一行</text>
+            <text x="464" y="293" class="t" text-anchor="middle">清空标题状态</text>
           </g>
-          <text x="16" y="332" class="t-cap">在 RPC、Print、JSON 模式下，扩展不处理这三个事件</text>
+          <text x="16" y="332" class="t-cap">显示位置和截断由当前 footer 决定</text>
         </svg>
       </div>
-      <figcaption>示例会话名来自测试用例。</figcaption>
+      <figcaption>会话名为示例文本，显示机制依据状态栏源码和测试。</figcaption>
     </figure>
   </div>
 
-  <!-- ===== 清洗与排版 demo ===== -->
+  <!-- ===== 清洗与排版说明 ===== -->
   <div class="beat">
     <div class="beat-text">
       <h3>清洗与排版</h3>
@@ -82,38 +78,12 @@
       </p>
       <ul>
         <li>换成空格的范围：<code>\x00-\x1f</code>、<code>\x7f-\x9f</code>、U+2028、U+2029；最后去首尾空白。</li>
-        <li>颜色取主题的 <code>dim</code> 色，切换主题后跟着变。</li>
+        <li>排版、颜色与截断交给当前 footer，本包只提供消毒后的文本。</li>
       </ul>
     </div>
     <figure class="beat-fig" id="fig-title-2">
-      <div class="demo" id="title-demo-width">
-        <p class="title-demo-fallback">示例：终端宽 40 列时，「实现会话标题 🐱」占 15 列，左侧补 25 个空格后靠右显示。终端宽 8 列时，会话名截断成「实现会…」，占 7 列，左侧补 1 个空格。</p>
-        <div class="title-demo-ui" hidden>
-          <div class="title-demo-controls">
-            <label>会话名
-              <select data-name>
-                <option value="0">实现会话标题 🐱</option>
-                <option value="1">较长的会话名</option>
-                <option value="2">带控制字符</option>
-                <option value="3">空名</option>
-              </select>
-            </label>
-            <label>终端宽度
-              <input type="range" min="4" max="40" value="28" data-width>
-              <span data-width-out>28 列</span>
-            </label>
-          </div>
-          <div class="title-demo-row" data-cue="title-04"><span>原始会话名</span><code data-raw></code></div>
-          <div class="title-demo-row" data-cue="title-05"><span>清洗后</span><code data-clean></code></div>
-          <div data-cue="title-06">
-            <div class="fig-scroll"><div class="title-demo-term" data-term aria-hidden="true"></div></div>
-            <div class="title-demo-row" aria-live="polite"><span>排版</span><span data-layout></span></div>
-          </div>
-        </div>
-      </div>
-      <figcaption>
-        <span class="seg" data-seg="title-06" data-say="看演示。一个中文字符占两列。一行放不下时，扩展用 truncate to width 截断，末尾加省略号。">一个中文字符占两列。一行放不下时，扩展用 <code>truncateToWidth</code> 截断，末尾加省略号。</span>
-      </figcaption>
+      <div class="note">示例：原始标题含换行与转义颜色时，只保留消毒后的单行文本；空白标题显示「未命名会话」。</div>
+      <figcaption><span class="seg" data-seg="title-06">本包不补空格或截断标题。标题通过 setStatus 交给当前 footer 排版。</span></figcaption>
     </figure>
   </div>
 
@@ -650,7 +620,7 @@
           <tr><td>禁用此功能并重载</td><td>关闭整个「自动会话命名」功能（入口统一提供）</td></tr>
         </tbody>
       </table>
-      <figcaption>录屏：<code>/personal</code> → 自动会话命名 → 查看状态。画面里的模型 gpt-6-luna 和思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
+      <figcaption>历史录屏：会话标题原为独立一行，现已合入状态栏；菜单位置以当前页面说明为准。录屏：<code>/personal</code> → 自动会话命名 → 查看状态。画面里的模型 gpt-6-luna 和思考强度 medium 是录制时的示例环境，不是默认值。</figcaption>
     </figure>
   </div>
 
@@ -667,77 +637,6 @@
   </style>
 
   <script type="module">
-    // 演示 1：会话名清洗与右对齐排版（右下角会话标题）
-    {
-      const demo = document.querySelector("#ch-title #title-demo-width");
-      const ui = demo?.querySelector(".title-demo-ui");
-      if (demo && ui) {
-        const names = [
-          "实现会话标题 🐱",
-          "统一扩展管理入口并接入 d1-ultra 分类器",
-          "\x1b[31m标题\x1b[0m\n\t下一行\x07",
-          "",
-        ];
-        const $ = (s) => ui.querySelector(s);
-        const term = $("[data-term]");
-        const slider = $("[data-width]");
-        const select = $("[data-name]");
-        // shortcut: 演示只去掉 SGR 颜色序列；扩展用 stripVTControlCharacters 去掉全部终端转义序列。
-        const clean = (s) =>
-          s.replace(/\x1b\[[0-9;]*m/g, "").replace(/[\x00-\x1f\x7f-\x9f\u2028\u2029]/g, " ").trim() || "未命名会话";
-        // shortcut: 只按常见 CJK、全角与 emoji 区段算 2 列，真实宽度由 pi-tui 的 visibleWidth 计算。
-        const cw = (ch) => {
-          const c = ch.codePointAt(0);
-          return (c >= 0x1100 && c <= 0x115f) || (c >= 0x2e80 && c <= 0xa4cf) || (c >= 0xac00 && c <= 0xd7a3) ||
-            (c >= 0xf900 && c <= 0xfaff) || (c >= 0xfe30 && c <= 0xfe4f) || (c >= 0xff00 && c <= 0xff60) ||
-            (c >= 0xffe0 && c <= 0xffe6) || (c >= 0x1f300 && c <= 0x1faff) ? 2 : 1;
-        };
-        const truncate = (chars, w) => {
-          const total = chars.reduce((n, ch) => n + cw(ch), 0);
-          if (total <= w) return chars;
-          if (w < 1) return [];
-          const out = [];
-          let used = 0;
-          for (const ch of chars) {
-            if (used + cw(ch) > w - 1) break;
-            out.push(ch);
-            used += cw(ch);
-          }
-          return [...out, "…"];
-        };
-        const cell = (cls, text = "", span = 1) => {
-          const d = document.createElement("div");
-          d.className = `c ${cls}`;
-          d.textContent = text;
-          if (span > 1) d.style.gridColumn = `span ${span}`;
-          return d;
-        };
-        const draw = () => {
-          const w = Number(slider.value);
-          const raw = names[Number(select.value)];
-          const name = clean(raw);
-          const title = truncate([...name], w);
-          const tw = title.reduce((n, ch) => n + cw(ch), 0);
-          term.style.setProperty("--cols", w);
-          term.replaceChildren(
-            cell("c-edit", "> "),
-            ...Array.from({ length: w - tw }, () => cell("c-pad")),
-            ...title.map((ch) => cell("c-ch", ch === " " ? "" : ch, cw(ch))),
-          );
-          $("[data-width-out]").textContent = `${w} 列`;
-          $("[data-raw]").textContent = JSON.stringify(raw);
-          $("[data-clean]").textContent = JSON.stringify(name);
-          $("[data-layout]").textContent =
-            `会话名占 ${tw} 列，左侧补 ${w - tw} 个空格` + (title.at(-1) === "…" ? "，已截断" : "");
-        };
-        slider.addEventListener("input", draw);
-        select.addEventListener("change", draw);
-        demo.querySelector(".title-demo-fallback").hidden = true;
-        ui.hidden = false;
-        draw();
-      }
-    }
-
     // 演示 2：标题格式校验（自动会话命名）
     {
       const demo = document.querySelector("#ch-title #title-demo-check");

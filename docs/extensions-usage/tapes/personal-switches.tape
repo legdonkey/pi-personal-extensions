@@ -18,8 +18,6 @@ Enter
 Wait+Screen /个人扩展 · 功能开关/
 Sleep 1.2s
 Down
-Sleep 700ms
-Down
 Sleep 1s
 Space
 Sleep 2s

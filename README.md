@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理七项功能。每项功能各用一个实现文件。
+个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理六项功能。每项功能各用一个实现文件。
 
 ## 功能演示
 
@@ -36,9 +36,8 @@ pi install "$(pwd)"
 | 功能 | 作用 |
 | --- | --- |
 | `understand-video` | 提供 `understand_video`，通过现有 Antigravity OAuth 把获授权的本地 MP4 原视频交给 Argon 审查 |
-| `session-title` | 输入框下方右对齐显示会话名，长标题自动省略，不调用模型 |
 | `auto-session-name` | 工作完成后后台命名，保护手动标题 |
-| `statusline` | 显示服务商剩余额度和会话 ID（末尾 8 位），预览并应用 11 套配色 |
+| `statusline` | 显示会话标题、服务商剩余额度、会话 ID（末尾 8 位）和单次回复 token 速度，预览并应用 11 套配色 |
 | `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
 | `user-message-border` | 为 TUI 普通用户消息添加橙色圆角边框，不修改上下文 |
 | `inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型和 Antigravity 分支的指定 Claude 模型的思考强度 |
@@ -128,11 +127,36 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 
 在 `/personal → 文件路径可点击` 中查看设置、开启或暂停路径链接。通过「打开方式：vscode」等菜单项选择 `vscode`、`vscode-insiders`、`cursor`、`windsurf` 或 `file`。通过「识别裸路径」或「不识别裸路径」控制不带反引号的路径识别。
 
-在 `/personal → 状态栏：额度、会话 ID 与配色` 中统一启停额度、会话 ID 和配色选择功能。通过「选择 pi-statusline 自定义配色」选择 11 套配色：TUI 支持实时预览，RPC 使用普通列表。应用后覆盖 `pi-statusline.json` 中的自定义配色（`palettePreset: "custom"`），并设为紧凑布局、圆角分隔符，再自动重载；不改变 Pi 主题。需另行安装并启用 pi-statusline。
+在 `/personal → 状态栏：额度、会话 ID 与配色` 中保留状态栏总开关；「独立功能开关」分别控制服务商额度、会话 ID、token 速度、pi-statusline 配色选择器和会话标题；没有旧设置时默认全开。通过「选择 pi-statusline 自定义配色」选择 11 套配色：TUI 支持实时预览，RPC 使用普通列表。应用后覆盖 `pi-statusline.json` 中的自定义配色（`palettePreset: "custom"`），并设为紧凑布局、圆角分隔符，再自动重载；不改变 Pi 主题。需另行安装并启用 pi-statusline。
 
-额度与会话 ID 由本包提供。配色需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含该状态栏本体。额度显示支持 `openai-codex` 周额度、`zai-coding-cn` 的 5 小时和周额度、`kimi-coding` 的 5 小时额度（老套餐另显示周额度，新套餐另显示月度额度），以及 `antigravity` 的当前模型配额（例如 `quota 60% left`）。
+额度、会话 ID、token 速度与会话标题由本包通过 `ctx.ui.setStatus` 提供，不替换 footer；默认状态栏即可显示，第三方 footer 需显示扩展状态。配色需要另行启用 `npm:@narumitw/pi-statusline`，本包不包含该状态栏本体。额度显示支持 `openai-codex` 周额度、`zai-coding-cn` 的 5 小时和周额度、`kimi-coding` 的 5 小时额度（老套餐另显示周额度，新套餐另显示月度额度），以及 `antigravity` 的当前模型配额（例如 `quota 60% left`）。
 
 Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前 provider 获取 JSON 凭据，请求 Google `fetchAvailableModels`，再按当前模型 ID、运行变体或指定别名匹配配额；多个同模型变体取最低剩余值。`quota` 是当前模型在服务端对应的配额，可能使用共享池，不是独立的 5 小时或周窗口，也不是 token 计数。找不到配额或查询失败时隐藏 Antigravity 旧值，其他服务商仍保留各自缓存。每次刷新都会重新解析当前账号凭据，账号变化在下一刷新生效；扩展不主动监听账号切换。切换模型会强制查询，不显示旧模型缓存。刷新时机和冷却不变。
+
+### 状态栏独立功能开关
+
+路径：`/personal → 状态栏：额度、会话 ID 与配色 → 独立功能开关`。面板列出五项当前值，选择一项后开启或关闭，保存成功立即生效，不重载：
+
+| 项目 | 关闭与重新开启 |
+| --- | --- |
+| 服务商额度 | 关闭立即清空 `usage`，取消未完成查询并停止轮询；重新开启立即强制查询，不影响 ID 或 token 计时 |
+| 会话标题 | 通过 `personal-session-title` 写入状态栏，不另占行、不强制右对齐；空名为「未命名会话」 |
+| 会话 ID | 关闭立即清空 `session-id`；开启立即显示当前会话 ID |
+| token 速度 | 关闭立即清空速度和计时；开启从下一次 `turn_start` 开始统计 |
+| pi-statusline 配色选择器 | 关闭只阻止本包选择器，不回滚第三方已保存配色；「独立功能开关」仍可重新启用它 |
+
+五项保存到 `getAgentDir()/personal-statusline.json`：`usageEnabled`、`sessionIdEnabled`、`tokenSpeedEnabled`、`styleEnabled`、`sessionTitleEnabled`，均为布尔值；前四项缺失时默认 `true`，`sessionTitleEnabled` 缺失时沿用旧 `session-title`，两者都缺失才默认 `true`。读取不写文件；保存前重新校验，先写权限 `0600` 的临时文件再 `rename`，保留未知字段。损坏配置或存储失败不覆盖原文件、不应用运行时变更；启动时配置无效会报告加载错误，需修正后重载。设置只立即作用于当前会话，其他已打开会话需各自 `/reload`。
+
+顶层 `personal-extensions.json` 的 `statusline` 仍是总开关：关闭后整项不加载，不删除上述独立设置；重新启用总开关仍使用它们。旧版状态栏总开关的兼容关系不变。此设置不修改第三方 `pi-statusline.json`。
+
+### token 速度口径
+
+每次主会话助手回复结束后显示，例如 `50.0 tok/s · 等待 3.0s · 输出 2.0s`（示例）。速度 = 最终 `usage.output` ÷ 输出秒数，不按字符数估算，不做实时 token 计数。通过 `/personal → 状态栏：额度、会话 ID 与配色 → 查看 token 速度口径` 查看说明；独立开关见上节，统计不额外请求模型或额度接口。
+
+- 等待：本次 `turn_start` 至首个 `message_update` 内容块事件，包含请求准备、网络和首内容等待，但不包含此前的输入处理。正文、思考和工具调用内容块都计入；内容块开始事件不等于精确首 token。
+- 输出：首个内容块事件至 `message_end`，使用本地单调时钟，包含流传输、扩展处理和尾部用量等待。Pi 1.5.0 的 `durationMs` 包含请求等待，因此不用它直接当输出时间。
+- `usage.output` 是 Pi 归一化的提供方用量，包含提供方计入的隐藏推理和工具调用输出；它不是纯正文速度，也不是服务端解码速度。提供方不返回用量或隐藏推理不发流事件时，无法据此还原真实生成过程。
+- 工具续调每次回复单独统计，不累计整轮工具执行时间；下一次 `turn_start` 清空旧值。失败、取消、延后结果、无内容事件、无正 `output` 或无正输出时长时不显示。切换模型、会话、分支或重载后清空，不恢复历史速度。所有服务商均可统计，不受额度支持列表限制。
 
 ## 配置文件
 
@@ -140,18 +164,19 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 
 | 文件 | 内容 |
 | --- | --- |
-| `personal-extensions.json` | 七项功能的布尔开关 |
+| `personal-extensions.json` | 六项功能的布尔开关 |
 | `auto-session-name.json` | 命名模型 `model` 和思考设置 `thinking` |
 | `inline-effort.json` | 分类模型：`{"model":"jev"}` 或 `{"model":"d1-ultra"}`；新文件缺失时兼容读取 `jev-inline-effort.json` |
 | `clickable-paths.json` | 路径链接设置 |
-| `pi-statusline.json` | 状态栏配色 |
+| `personal-statusline.json` | 状态栏五项独立开关：`usageEnabled`、`sessionIdEnabled`、`tokenSpeedEnabled`、`styleEnabled`、`sessionTitleEnabled` |
+| `pi-statusline.json` | 第三方状态栏配色 |
 
 设置 `PI_CODING_AGENT_DIR` 后，以上文件都改用该目录。配置选择器取消不保存；命名和分类设置不修改 Pi 的 `settings.json`。
 
 旧配置自动兼容：
 
 - `personal-extensions.json` 中的 `substatusline` 和 `statusline-style-picker` 合并为 `statusline`。缺失的旧键按默认开启处理；任一旧键为 `true` 即开启，两个旧键都为 `false` 才关闭。
-- `jev-inline-effort` 开关映射到 `inline-effort`。新键存在时以新键为准；旧键仍须为布尔值。读取不改写配置，下次保存功能开关时只写七个新键。
+- `jev-inline-effort` 开关映射到 `inline-effort`。新键存在时以新键为准；旧键仍须为布尔值。读取不改写配置，下次保存功能开关时只写六个新键（保留旧 session-title 键）。
 - 仅在 `inline-effort.json` 缺失时读取 `jev-inline-effort.json`；保存只写新文件，保留旧文件。新文件格式或权限有误时提示错误。
 - 会话中的思考决策条目类型和状态栏键仍为 `jev-inline-effort`；自动命名会话状态仍为 `personal-auto-session-name`。状态栏继续使用 `usage` 和 `session-id`，旧会话可直接恢复。
 
@@ -171,3 +196,7 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 - `CHANGELOG.md`：更新记录。
 
 运行 `npm run check` 检查类型并执行全部测试。用户消息边框依赖 Pi 组件渲染方法，升级 Pi 后应验证兼容性。
+
+### 会话标题合并迁移
+
+标题已合入 `statusline.ts`，不再注册独立 `session-title` 功能或 belowEditor widget。`personal-statusline.json` 的 `sessionTitleEnabled` 优先；缺失时沿用 `personal-extensions.json` 的旧 `session-title` 布尔值，旧显式关闭只关闭标题；两者都缺失默认开启。新旧字段都必须格式合法，即使新字段存在也校验旧项。读取不写入、不删除旧文件；保存独立设置时写入解析后的标题值，保存总开关时保留旧项，避免丢失关闭意图。顶层 `statusline` 是合并后的总开关，关闭其他四项不会影响标题。

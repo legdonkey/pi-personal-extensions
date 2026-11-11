@@ -1,45 +1,47 @@
 # entry 事实清单
 
-- features 数组按固定顺序列出六项功能，每项有 id、label、description、register —— extensions/pi-personal-extensions.ts:17-54
-- 开关文件为 getAgentDir() 下的 personal-extensions.json；默认 ~/.pi/agent，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:133；tests/personal.test.mjs:39-42
-- 文件不存在（ENOENT）时六项全开 —— extensions/pi-personal-extensions.ts:96-104
-- 文件无法读取或 JSON 解析失败时抛错 —— extensions/pi-personal-extensions.ts:105；tests/personal.test.mjs:151-155
-- 不是 JSON 对象（null、数组）时抛错 —— extensions/pi-personal-extensions.ts:107-109
-- 开关值（含三个旧键）不是布尔值时抛错 —— extensions/pi-personal-extensions.ts:110-119；tests/personal.test.mjs:151-155
-- 新键缺失时先继承旧键（两个状态栏旧键都为 false，或 jev-inline-effort 为 false，结果仍为 false），没有可继承的设置才按 true 处理 —— extensions/pi-personal-extensions.ts:96-98、120-128
-- 多出的键被忽略（只检查七个功能键和三个旧键）—— extensions/pi-personal-extensions.ts:110-123；tests/personal.test.mjs:54-56
-- 加载时不改写文件 —— tests/personal.test.mjs:57-61、154
-- 先读配置再注册，抛错时什么都不注册 —— extensions/pi-personal-extensions.ts:134、141-145
-- 只对开启的功能调用 register；关闭的不注册命令和事件 —— extensions/pi-personal-extensions.ts:141-143；tests/personal.test.mjs:62-95
-- /personal 最后注册，与开关无关；全关时只剩 /personal —— extensions/pi-personal-extensions.ts:145；tests/personal.test.mjs:95
-- featureApi = Object.assign(Object.create(pi), { registerCommand })，registerCommand 只做 commands.set —— extensions/pi-personal-extensions.ts:136-140
-- featureApi 的原型是 pi；自身没有的属性（如 on）沿原型取 pi 的 —— extensions/pi-personal-extensions.ts:136（JavaScript 原型链语义）
-- 功能的 registerCommand 只存入 commands Map，不调用 pi.registerCommand；Pi 里只注册 /personal —— extensions/pi-personal-extensions.ts:135-140、145；tests/personal.test.mjs:52、65、95、364
-- 二级菜单从 commands 表取处理器并传入参数调用 —— extensions/pi-personal-extensions.ts:175-184；tests/personal.test.mjs:312-351
-- 一级菜单：六项「label · 已加载/未加载」加「批量功能开关」 —— extensions/pi-personal-extensions.ts:160-162；tests/personal.test.mjs:291
-- 已加载功能的二级菜单：actions 设置项 + 「禁用此功能并重载」 —— extensions/pi-personal-extensions.ts:168-175；tests/personal.test.mjs:302-306
-- 未加载功能的二级菜单只有「启用此功能并重载」 —— extensions/pi-personal-extensions.ts:169-170；tests/personal.test.mjs:365-367
-- 六项顶层功能中，actions 为五项功能定义设置项，其余一项只有启停；设置项数量 6 / 3 / 10 / 3 / 1（原位思考强度只保留状态查看、模型选择和可用性测试；状态栏提供「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:61-94；extensions/statusline.ts:341-348、724-857（口径处理器与 STYLES）
-- 默认全开时 commands 表里有 auto-name、clickable-paths、statusline-style、statusline-info、statusline-settings、effort、understand-video-status 七个处理器；Pi 只注册 personal —— extensions/pi-personal-extensions.ts:61-94、136-145；tests/personal.test.mjs:52
+- features 数组按固定顺序列出五项功能，每项有 id、label、description、register —— extensions/pi-personal-extensions.ts:16-47
+- 开关文件为 getAgentDir() 下的 personal-extensions.json；默认 ~/.pi/agent，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:125；tests/personal.test.mjs:38-41
+- 文件不存在（ENOENT）时五项全开 —— extensions/pi-personal-extensions.ts:86-94
+- 文件无法读取或 JSON 解析失败时抛错 —— extensions/pi-personal-extensions.ts:95；tests/personal.test.mjs:150-154
+- 不是 JSON 对象（null、数组）时抛错 —— extensions/pi-personal-extensions.ts:97-99
+- 开关值（含三个旧键、旧 session-title 键和已删除功能的 understand-video 键）不是布尔值时抛错 —— extensions/pi-personal-extensions.ts:101-110；tests/personal.test.mjs:150-154
+- 新键缺失时先继承旧键（两个状态栏旧键都为 false，或 jev-inline-effort 为 false，结果仍为 false），没有可继承的设置才按 true 处理 —— extensions/pi-personal-extensions.ts:86-88、112-120
+- 多出的键被忽略（只检查五个功能键、三个旧键、旧 session-title 键和已删除功能的 understand-video 键）—— extensions/pi-personal-extensions.ts:100-115；tests/personal.test.mjs:53-55
+- 加载时不改写文件 —— tests/personal.test.mjs:56-60、153
+- 先读配置再注册，抛错时什么都不注册 —— extensions/pi-personal-extensions.ts:126、133-137
+- 只对开启的功能调用 register；关闭的不注册命令和事件 —— extensions/pi-personal-extensions.ts:133-135；tests/personal.test.mjs:61-94
+- /personal 最后注册，与开关无关；全关时只剩 /personal —— extensions/pi-personal-extensions.ts:137；tests/personal.test.mjs:94
+- featureApi = Object.assign(Object.create(pi), { registerCommand })，registerCommand 只做 commands.set —— extensions/pi-personal-extensions.ts:128-132
+- featureApi 的原型是 pi；自身没有的属性（如 on）沿原型取 pi 的 —— extensions/pi-personal-extensions.ts:128（JavaScript 原型链语义）
+- 功能的 registerCommand 只存入 commands Map，不调用 pi.registerCommand；Pi 里只注册 /personal —— extensions/pi-personal-extensions.ts:127-132、137；tests/personal.test.mjs:51、64、94、395
+- 二级菜单从 commands 表取处理器并传入参数调用 —— extensions/pi-personal-extensions.ts:167-176；tests/personal.test.mjs:343-382
+- 一级菜单：五项「label · 已加载/未加载」加「批量功能开关」 —— extensions/pi-personal-extensions.ts:152-154；tests/personal.test.mjs:323
+- 已加载功能的二级菜单：actions 设置项 + 「禁用此功能并重载」 —— extensions/pi-personal-extensions.ts:160-167；tests/personal.test.mjs:333-337
+- 未加载功能的二级菜单只有「启用此功能并重载」 —— extensions/pi-personal-extensions.ts:161-162；tests/personal.test.mjs:396-398
+- 五项顶层功能中，actions 为四项功能定义设置项，其余一项只有启停；设置项数量 6 / 3 / 10 / 3（原位思考强度只保留状态查看、模型选择和可用性测试；状态栏提供「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-84；extensions/statusline.ts:341-348、724-857（口径处理器与 STYLES）
+- 默认全开时 commands 表里有 auto-name、clickable-paths、statusline-style、statusline-info、statusline-settings、effort 六个处理器；Pi 只注册 personal —— extensions/pi-personal-extensions.ts:54-84、128-137；tests/personal.test.mjs:51
 - 「已加载/未加载」表示是否注册；各功能自身状态用「查看状态」确认 —— README.md:28
 - 启停不清除功能自己的配置 —— README.md:42
-- 录屏 personal-menu（挂在本节拍第一句）：/personal → 自动会话命名二级菜单 → Esc —— docs/extensions-usage/tapes/personal-menu.tape；extensions/pi-personal-extensions.ts:160-184
-- 新旧开关全部相同时不重载：直接执行 switches 时退出，从一级菜单进入时返回一级菜单 —— extensions/pi-personal-extensions.ts:243-244；tests/personal.test.mjs:140-142
-- 临时文件名 `${configPath}.${randomUUID()}.tmp` —— extensions/pi-personal-extensions.ts:249
-- flag "wx"、mode 0o600 —— extensions/pi-personal-extensions.ts:250-253；wx / 0600 的含义是 Node.js fs 与 POSIX 语义
-- renameSync 换成正式配置；临时文件与正式文件同目录 —— extensions/pi-personal-extensions.ts:249、254；原子性来自 POSIX rename（同一文件系统内），源码未注释
-- 写入或 rename 失败：提示保存失败，不重载 —— extensions/pi-personal-extensions.ts:255-261；tests/personal.test.mjs:156-163
-- 保存成功后 ctx.reload() —— extensions/pi-personal-extensions.ts:262；tests/personal.test.mjs:143-150
+- 录屏 personal-menu（挂在本节拍第一句）：/personal → 自动会话命名二级菜单 → Esc —— docs/extensions-usage/tapes/personal-menu.tape；extensions/pi-personal-extensions.ts:152-176
+- 新旧开关全部相同时不重载：直接执行 switches 时退出，从一级菜单进入时返回一级菜单 —— extensions/pi-personal-extensions.ts:235-236；tests/personal.test.mjs:139-141
+- 临时文件名 `${configPath}.${randomUUID()}.tmp` —— extensions/pi-personal-extensions.ts:241
+- flag "wx"、mode 0o600 —— extensions/pi-personal-extensions.ts:242-245；wx / 0600 的含义是 Node.js fs 与 POSIX 语义
+- renameSync 换成正式配置；临时文件与正式文件同目录 —— extensions/pi-personal-extensions.ts:241、246；原子性来自 POSIX rename（同一文件系统内），源码未注释
+- 写入或 rename 失败：提示保存失败，不重载 —— extensions/pi-personal-extensions.ts:247-253；tests/personal.test.mjs:155-162
+- 保存成功后 ctx.reload() —— extensions/pi-personal-extensions.ts:254；tests/personal.test.mjs:142-149
 - 其他已打开会话需各自 /reload —— README.md:28
-- /personal 只要 ctx.hasUI 就可用（TUI、RPC 客户端）；没有 UI（Print/JSON）时提示并返回 —— extensions/pi-personal-extensions.ts:148-151；tests/personal.test.mjs:382-409、446-455
-- 批量功能开关只在 TUI 可用；RPC 下选它时提示改用各功能的启用 / 禁用重载项 —— extensions/pi-personal-extensions.ts:195-199
-- 参数只接受空或 switches —— extensions/pi-personal-extensions.ts:152-155；tests/personal.test.mjs:372-373
-- /personal switches 与「批量功能开关」打开同一列表 —— extensions/pi-personal-extensions.ts:158-164、200；tests/personal.test.mjs:354-358、438-443
-- 按键：空格切换、Enter 保存、Esc 取消 —— README.md:30；确认键由 keybindings "tui.select.confirm" 判断 —— extensions/pi-personal-extensions.ts:235-236；列表提示文字 —— extensions/pi-personal-extensions.ts:225
-- 批量保存与单项启停共用写入代码 —— extensions/pi-personal-extensions.ts:243-262
-- 录屏 personal-switches：/personal switches，下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃 —— 本次用无凭据临时 agent 重录；docs/extensions-usage/tapes/personal-switches.tape；extensions/pi-personal-extensions.ts:200-242
-- 旧开关迁移：substatusline、statusline-style-picker 合成 statusline（新键缺失时任一旧键不为 false 即开启）；jev-inline-effort 映射到 inline-effort；新键存在时以新键为准 —— extensions/pi-personal-extensions.ts:124-128；tests/personal.test.mjs:172-244；scratchpad/restructure-report.md 第 3 节
-- 加载不改写文件，下次保存只写六个新键（保留旧 session-title 键） —— extensions/pi-personal-extensions.ts:243-254；tests/personal.test.mjs:204-233
-- Esc 逐级返回，取消不保存；设置保存后回到二级菜单，重载后结束导航；批量开关从一级进入时取消返回一级，直接 switches 取消退出 —— tests/personal-navigation.test.mjs；tests/personal.test.mjs「统一入口按开关注册六项功能」
+- /personal 只要 ctx.hasUI 就可用（TUI、RPC 客户端）；没有 UI（Print/JSON）时提示并返回 —— extensions/pi-personal-extensions.ts:140-143；tests/personal.test.mjs:413-440、477-486
+- 批量功能开关只在 TUI 可用；RPC 下选它时提示改用各功能的启用 / 禁用重载项 —— extensions/pi-personal-extensions.ts:187-191
+- 参数只接受空或 switches —— extensions/pi-personal-extensions.ts:144-147；tests/personal.test.mjs:403-404
+- /personal switches 与「批量功能开关」打开同一列表 —— extensions/pi-personal-extensions.ts:150-156、192；tests/personal.test.mjs:385-389、469-474
+- 按键：空格切换、Enter 保存、Esc 取消 —— README.md:30；确认键由 keybindings "tui.select.confirm" 判断 —— extensions/pi-personal-extensions.ts:227-228；列表提示文字 —— extensions/pi-personal-extensions.ts:217
+- 批量保存与单项启停共用写入代码 —— extensions/pi-personal-extensions.ts:235-254
+- 录屏 personal-switches：/personal switches，下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃 —— 本次用无凭据临时 agent 重录；docs/extensions-usage/tapes/personal-switches.tape；extensions/pi-personal-extensions.ts:192-234
+- 旧开关迁移：substatusline、statusline-style-picker 合成 statusline（新键缺失时任一旧键不为 false 即开启）；jev-inline-effort 映射到 inline-effort；新键存在时以新键为准 —— extensions/pi-personal-extensions.ts:116-120；tests/personal.test.mjs:204-276；scratchpad/restructure-report.md 第 3 节
+- 加载不改写文件，下次保存只写五个新键（保留旧 session-title 键） —— extensions/pi-personal-extensions.ts:235-246；tests/personal.test.mjs:236-265
+- Esc 逐级返回，取消不保存；设置保存后回到二级菜单，重载后结束导航；批量开关从一级进入时取消返回一级，直接 switches 取消退出 —— tests/personal-navigation.test.mjs；tests/personal.test.mjs「统一入口按开关注册五项功能」
+- 已删除的原视频审查：旧配置里的 understand-video 键（true 或 false）可正常读取，不注册工具，菜单不出现该项，加载不改写文件；值不是布尔值时抛错 —— extensions/pi-personal-extensions.ts:104-105、107-109；tests/personal.test.mjs「已删除的原视频审查开关仍可读取并检查格式，不注册工具和菜单项」
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
+- 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；auto-name-model、auto-name-status 的画面早于原视频审查，不含该项，未重录 —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

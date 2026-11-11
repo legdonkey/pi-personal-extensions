@@ -42,8 +42,9 @@
 - `terminal.hyperlinks` 写在 agent 目录或项目 `.pi/` 下的 `settings.json` —— pi-coding-agent/dist/core/settings-manager.js:99-100；pi-coding-agent/dist/config.js:435；pi-coding-agent/docs/settings.md:107
 - 自动检测时启用超链接的终端：iTerm2、kitty、Ghostty、WezTerm、Warp、Windows Terminal、Alacritty、VS Code 和 Zed 的终端；其他终端（含未识别的终端）不启用 —— pi-tui/dist/terminal-image.js:36-89
 - 自动检测时，在 tmux 里只有 tmux 转发超链接才启用（设置或环境变量会覆盖这一检测） —— pi-tui/dist/terminal-image.js:20-30, 45-47, 92-94
-- 录屏 clickable-paths-status 画面（已按新版录屏核对）：`/personal` → 文件路径可点击 →「查看路径链接设置」，输出「状态：开启」「编辑器：vscode」「裸路径：识别」「工作目录」四行，最后一行「设置：/personal → 文件路径可点击，可选择开关、打开方式和裸路径识别。」；本轮在全新无凭据临时 agent 重录，只加载本仓库与 pi-statusline，不发送模型消息；底部标题合入状态栏，无 ponytail 字样 —— docs/extensions-usage/media/clickable-paths-status.png；docs/extensions-usage/tapes/clickable-paths-status.tape；clickable-paths.ts:284-296
+- 录屏 clickable-paths-status 画面（已按新版录屏核对）：`/personal` → 文件路径可点击 →「查看路径链接设置」，输出「状态：开启」「编辑器：vscode」「裸路径：识别」「工作目录」四行，最后一行「设置：/personal → 文件路径可点击，可选择开关、打开方式和裸路径识别。」；本轮在临时 agent 目录重录，只加载本仓库与 pi-statusline，不发送模型消息；底部标题合入状态栏，无 ponytail 字样 —— docs/extensions-usage/media/clickable-paths-status.png；docs/extensions-usage/tapes/clickable-paths-status.tape；clickable-paths.ts:284-296
 
 - 「点了没反应」检查清单（不朗读）：确认修饰键（终端行为，未核实）；「查看路径链接设置」看「编辑器」是否已安装；「打开方式：file」交给系统默认程序；菜单项只改配置、不刷新已显示的消息，要让 Pi 重新输出路径后点新链接测试 —— clickable-paths.ts:20, 59-62, 68-70, 232, 266-275, 284-296（editor 分支只改 config 并保存、提示，不触发重渲染）。只写检查动作，不断言「编辑器没装时点击没反应」
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
+- 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；auto-name-model、auto-name-status 的画面早于原视频审查，不含该项，未重录 —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

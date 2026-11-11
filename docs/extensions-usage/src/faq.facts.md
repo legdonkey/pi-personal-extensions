@@ -1,16 +1,16 @@
 # faq 事实清单
 
-- 只注册 /personal 一个斜杠命令；各功能设置都在 /personal → 功能 → 二级菜单 —— extensions/pi-personal-extensions.ts:136-145；tests/personal.test.mjs:52、95；README.md（单一入口说明）
-- 菜单路径与设置项 label（自动会话命名 6 项、原位思考强度 3 项：状态查看、模型选择、可用性测试、文件路径可点击 10 项、状态栏：额度、会话 ID 与配色「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:61-94
-- 设置项只在功能已加载时出现；未加载只有「启用此功能并重载」—— extensions/pi-personal-extensions.ts:169-175
-- /personal switches 或一级菜单「批量功能开关」—— extensions/pi-personal-extensions.ts:158-164、200
+- 只注册 /personal 一个斜杠命令；各功能设置都在 /personal → 功能 → 二级菜单 —— extensions/pi-personal-extensions.ts:128-137；tests/personal.test.mjs:51、94；README.md（单一入口说明）
+- 菜单路径与设置项 label（自动会话命名 6 项、原位思考强度 3 项：状态查看、模型选择、可用性测试、文件路径可点击 10 项、状态栏：额度、会话 ID 与配色「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-84
+- 设置项只在功能已加载时出现；未加载只有「启用此功能并重载」—— extensions/pi-personal-extensions.ts:161-167
+- /personal switches 或一级菜单「批量功能开关」—— extensions/pi-personal-extensions.ts:150-156、192
 - /reload、/name 是 Pi 自带命令，不受影响 —— README.md:15；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25、49
-- 排查表「怎么做」列改为菜单项：恢复当前会话命名、预览建议标题、查看路径链接设置、打开方式：编辑器名 / file —— extensions/pi-personal-extensions.ts:61-89
+- 排查表「怎么做」列改为菜单项：恢复当前会话命名、预览建议标题、查看路径链接设置、打开方式：编辑器名 / file —— extensions/pi-personal-extensions.ts:54-79
 - /name 手动改名后自动命名暂停 —— extensions/auto-session-name.ts:261-266；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25
 - /reload、/name 为 Pi 自带命令 —— README.md:15；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25、49
-- 六个配置文件都在 getAgentDir()：默认 ~/.pi/agent/，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:133；extensions/auto-session-name.ts:61-62；extensions/inline-effort.ts:48；extensions/clickable-paths.ts:235；extensions/statusline.ts:932；README.md:161-174
+- 六个配置文件都在 getAgentDir()：默认 ~/.pi/agent/，PI_CODING_AGENT_DIR 可改 —— extensions/pi-personal-extensions.ts:125；extensions/auto-session-name.ts:61-62；extensions/inline-effort.ts:48；extensions/clickable-paths.ts:235；extensions/statusline.ts:932；README.md:161-174
 - 六个文件的内容 —— README.md:165-172
-- 用 /personal 菜单修改全局设置后自动保存 —— extensions/pi-personal-extensions.ts:248-254；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/clickable-paths.ts:48-55；extensions/statusline.ts:947-952
+- 用 /personal 菜单修改全局设置后自动保存 —— extensions/pi-personal-extensions.ts:240-246；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/clickable-paths.ts:48-55；extensions/statusline.ts:947-952
 - 会话名没变：「查看状态」显示「暂停（保护当前名称）」时，选「恢复当前会话命名」 —— extensions/auto-session-name.ts:469-479、492
 - 打开的会话已有别的名字时自动命名暂停 —— extensions/auto-session-name.ts:234-235、253
 - 命名失败或超时（30 秒）保留原名，连续失败只提示一次，preview 可重试 —— extensions/auto-session-name.ts:292、335-336、366-371；README.md:66
@@ -36,8 +36,8 @@
 - 排查表六行；「路径没变成链接」查文件存在和代码块 —— clickable-paths.ts:85-105、205-226
 - 图中「全局设置的修改自动保存到对应文件；当前会话的命名暂停状态保存在会话记录里」：暂停 / 恢复当前会话命名用 pi.appendEntry 写进会话记录，不写配置文件 —— extensions/auto-session-name.ts:233、469-478；其余全局设置的保存见「自动保存」条
 - 配置树里分类器设置文件为 inline-effort.json（旧 jev-inline-effort.json 仍可读）—— extensions/inline-effort.ts:21-35、48
-- 「升级后设置自动迁移」：两个旧状态栏开关合成 statusline，只有两者都为 false 才关闭（一开一关时合并为开启）；jev-inline-effort 映射到 inline-effort；旧分类器配置文件仍可读 —— extensions/pi-personal-extensions.ts:110-128；extensions/inline-effort.ts:21-35
-- 常用设置从 /personal 进入；userMessages 没有菜单项，只能改 clickable-paths.json —— extensions/clickable-paths.ts:30、247；extensions/pi-personal-extensions.ts:78-87
+- 「升级后设置自动迁移」：两个旧状态栏开关合成 statusline，只有两者都为 false 才关闭（一开一关时合并为开启）；jev-inline-effort 映射到 inline-effort；旧分类器配置文件仍可读 —— extensions/pi-personal-extensions.ts:100-120；extensions/inline-effort.ts:21-35
+- 常用设置从 /personal 进入；userMessages 没有菜单项，只能改 clickable-paths.json —— extensions/clickable-paths.ts:30、247；extensions/pi-personal-extensions.ts:68-77
 
 - personal-statusline.json 五个独立开关默认全开；独立开关当前会话保存即生效，其他会话需重载 —— extensions/statusline.ts:47-94、292-339；tests/statusline.test.mjs「四项开关保持可管理，配色禁用不回滚第三方配置，取消及损坏配置不写入」。
 

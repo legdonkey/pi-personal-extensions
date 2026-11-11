@@ -76,8 +76,8 @@
 
 - 本项目只注册 `/personal`；原位思考强度的操作都在 `/personal` → 原位思考强度（Jev / d1-ultra）的菜单项里 —— entry:50, entry:70-74, entry:129-139
 - 菜单项：查看分类模型与状态、选择分类模型（Jev / d1-ultra）、测试分类模型可用性 —— entry:71-73
-- 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无；在全新无凭据临时 agent 重录，仅查看示例配置，不验证模型可用性；标题合入状态栏，技术版素材与使用者版相同 —— docs/extensions-usage/tapes/effort-status.tape；两版 media/effort-status.png；ext:321-329；entry:74-78。
-- 录屏 effort-model：选择器标题当前 d1-ultra，光标 Jev → d1-ultra → Jev，Esc 退出；二级菜单含三个设置项，加上「禁用此功能并重载」共四项；在全新无凭据临时 agent 重录，只操作选择器，不发模型消息 —— docs/extensions-usage/tapes/effort-model.tape；media/effort-model.png；entry:74-78、165-173；ext:360-363。
+- 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无；在临时 agent 目录重录，仅查看示例配置，不验证模型可用性；标题合入状态栏，技术版素材与使用者版相同 —— docs/extensions-usage/tapes/effort-status.tape；两版 media/effort-status.png；ext:321-329；entry:74-78。
+- 录屏 effort-model：选择器标题当前 d1-ultra，光标 Jev → d1-ultra → Jev，Esc 退出；二级菜单含三个设置项，加上「禁用此功能并重载」共四项；在临时 agent 目录重录，只操作选择器，不发模型消息 —— docs/extensions-usage/tapes/effort-model.tape；media/effort-model.png；entry:74-78、165-173；ext:360-363。
 
 ## 按推理结构选档
 
@@ -89,7 +89,7 @@
 ## 改名与兼容
 
 - 配置文件为 agent 目录下的 `inline-effort.json`；升级后原有设置自动保留（旧 `jev-inline-effort.json` 和旧开关仍能读取） —— ext:23-33, ext:48；entry:121-122；README.md:169、179-180
-- Esc 逐级返回，取消不保存；设置保存后回到二级菜单，重载后结束导航；批量开关从一级进入时取消返回一级，直接 switches 取消退出 —— tests/personal-navigation.test.mjs；tests/personal.test.mjs「统一入口按开关注册六项功能」
+- Esc 逐级返回，取消不保存；设置保存后回到二级菜单，重载后结束导航；批量开关从一级进入时取消返回一级，直接 switches 取消退出 —— tests/personal-navigation.test.mjs；tests/personal.test.mjs「统一入口按开关注册五项功能」
 
 ## 自动回退与安全原因
 
@@ -104,3 +104,4 @@
 - 演示区用本地固定示例模拟 Jev 返回 low，不发送 API 请求、不保证线上结果；支持回退成功、失败、直接 Jev、空输入和对齐失败 —— tests/effort-demo.test.mjs。
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
+- 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；auto-name-model、auto-name-status 的画面早于原视频审查，不含该项，未重录 —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

@@ -13,7 +13,6 @@ const ids = [
   "clickable-paths",
   "user-message-border",
   "inline-effort",
-  "understand-video",
 ];
 const off = Object.fromEntries(ids.map((id) => [id, false]));
 const styleNames = ["茶墨渐层", "冰川蓝阶", "靛夜层云", "琥珀余温", "紫藤暮色", "松林雾径", "陶火晚照", "玫瑰尘光", "石墨银阶", "潮汐青绿", "Claude 暖纸"];
@@ -34,7 +33,7 @@ function load(overrides = {}) {
   return { commands, events, transformers, virtualModels, tools };
 }
 
-test("统一入口按开关注册六项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
+test("统一入口按开关注册五项功能，忽略已移除开关，菜单保存后重载，取消不落盘", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-test-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -74,7 +73,7 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
         loaded.transformers.length,
         id === "clickable-paths" ? 1 : 0,
       );
-      assert.deepEqual(loaded.tools.map((tool) => tool.name), id === "understand-video" ? ["understand_video"] : []);
+      assert.deepEqual(loaded.tools, [], "不注册任何工具");
       assert.deepEqual(loaded.virtualModels, [], "不注册任何虚拟模型");
       assert.equal(
         loaded.events.includes("session_shutdown"),
@@ -167,7 +166,40 @@ test("统一入口按开关注册六项功能，忽略已移除开关，菜单�
   }
 });
 
-test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写六个新键", async () => {
+test("已删除的原视频审查开关仍可读取并检查格式，不注册工具和菜单项", async () => {
+  const previous = process.env.PI_CODING_AGENT_DIR;
+  const dir = mkdtempSync(join(tmpdir(), "pi-personal-removed-"));
+  process.env.PI_CODING_AGENT_DIR = dir;
+  const path = join(dir, "personal-extensions.json");
+  try {
+    for (const value of [true, false]) {
+      const source = JSON.stringify({ ...off, "user-message-border": true, "understand-video": value });
+      writeFileSync(path, source);
+      const loaded = load();
+      assert.deepEqual([...loaded.commands.keys()], ["personal"]);
+      assert.deepEqual(loaded.tools, []);
+      assert.ok(loaded.events.includes("session_shutdown"), "其余开关照常生效");
+      assert.equal(readFileSync(path, "utf8"), source, "加载不改写旧配置");
+      let options;
+      await loaded.commands.get("personal").handler("", {
+        mode: "rpc", hasUI: true,
+        ui: { select: async (_title, items) => { options = items; }, notify: (message) => assert.fail(message) },
+      });
+      assert.equal(options.length, ids.length + 1);
+      assert.ok(options.every((label) => !label.includes("视频")));
+    }
+    for (const value of [null, "false", 0, [], {}]) {
+      writeFileSync(path, JSON.stringify({ ...off, "understand-video": value }));
+      assert.throws(load, /understand-video 必须为 true 或 false/, JSON.stringify(value));
+    }
+  } finally {
+    if (previous === undefined) delete process.env.PI_CODING_AGENT_DIR;
+    else process.env.PI_CODING_AGENT_DIR = previous;
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("旧开关键兼容缺省值和全部布尔组合，新键优先，保存只写五个新键", async () => {
   const previous = process.env.PI_CODING_AGENT_DIR;
   const dir = mkdtempSync(join(tmpdir(), "pi-personal-migration-"));
   process.env.PI_CODING_AGENT_DIR = dir;
@@ -286,7 +318,7 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       },
     };
     await personal.handler("", ctx);
-    assert.equal(menus[0].options.length, 7);
+    assert.equal(menus[0].options.length, 6);
     assert.equal(menus[0].options.filter((label) => label.startsWith("状态栏：")).length, 1);
     assert.equal(menus[0].options[1], "状态栏：额度、会话 ID 与配色 · 已加载");
     assert.equal(readFileSync(path, "utf8"), "{}");
@@ -295,7 +327,6 @@ test("统一菜单覆盖全部功能和设置，调用内部处理器，取消�
       2: ["查看路径链接设置", "开启路径链接", "暂停路径链接", "打开方式：vscode", "打开方式：vscode-insiders", "打开方式：cursor", "打开方式：windsurf", "打开方式：file", "识别裸路径", "不识别裸路径"],
       1: ["选择 pi-statusline 自定义配色", "查看 token 速度口径", "独立功能开关"],
       4: ["查看分类模型与状态", "选择分类模型（Jev / d1-ultra）", "测试分类模型可用性"],
-      5: ["查看通路与限制"],
     };
     for (let feature = 0; feature < ids.length; feature++) {
       choices = [feature, undefined];

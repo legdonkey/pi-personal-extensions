@@ -1,6 +1,6 @@
 # /personal → 文件路径可点击 → 查看路径链接设置。只查看、预览或取消，不保存、不重载、不发送模型消息。
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/clickable-paths-status.mp4"
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/clickable-paths-status.txt"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/clickable-paths-status.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/clickable-paths-status.txt"
 Set Width 960
 Set Height 900
 Source "docs/extensions-usage/tapes/_settings.tape"

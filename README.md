@@ -1,6 +1,6 @@
 # pi-personal-extensions
 
-个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理六项功能。每项功能各用一个实现文件。
+个人维护的 [Pi](https://pi.dev) 扩展合集。通过单一入口 `extensions/pi-personal-extensions.ts` 加载，只向 Pi 注册 `/personal`，管理五项功能。每项功能各用一个实现文件。
 
 ## 功能演示
 
@@ -35,7 +35,6 @@ pi install "$(pwd)"
 
 | 功能 | 作用 |
 | --- | --- |
-| `understand-video` | 提供 `understand_video`，通过现有 Antigravity OAuth 把获授权的本地 MP4 原视频交给 Argon 审查 |
 | `auto-session-name` | 工作完成后后台命名，保护手动标题 |
 | `statusline` | 显示会话标题、服务商剩余额度、会话 ID（末尾 8 位）和单次回复 token 速度，预览并应用 11 套配色 |
 | `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
@@ -43,18 +42,6 @@ pi install "$(pwd)"
 | `inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型和 Antigravity 分支的指定 Claude 模型的思考强度 |
 
 `pi config` 管理整个扩展包。各功能设置均从 `/personal` 进入（例外：路径链接的 `userMessages` 只能在 `clickable-paths.json` 里改）；启停功能不会清除其独立配置。
-
-## 原视频审查
-
-原视频审查提供 `understand_video` 工具，将用户明确授权的本地 MP4 按原始 `video/mp4` 发给 Antigravity 的 `gemini-4-argon`（`medium`）分析。通过 `/personal → 原视频审查` 启停，或在 `/personal → 原视频审查 → 查看通路与限制` 查看说明。
-
-- 仅支持当前工作目录内非隐藏、无符号链接或硬链接的 MP4（24 bytes–50 MiB）；不接受 URL，不自动遍历文件。问题最多 8000 字符，单次 120 秒超时，分析正文最多 32 KiB（超过时标记截断）。IPC 序列化预留 200 KiB 转义预算（按 32 KiB 正文最坏 6 倍 JSON 转义加 8 KiB 元数据计算），并独立校验正文不超过 32 KiB、元数据不超过 8 KiB，不改变正文上限。`stopReason === "length"`（模型达到输出 token 上限）与 `outputTruncated`（工具本地 32 KiB 截断）是两种独立状态，都会在正文末尾附加警告；调用成功不保证输出完整。
-- 父进程与独立 worker 分别校验文件，并比对 SHA-256；worker 自行通过 SDK 获取现有 OAuth，只加载必要 provider，使用正常 Argon 动态路由。只在 worker 内适配原视频请求，主宿主 `fetch` 不变；取消或超时终止 worker，并等进程关闭后返回。同会话按顺序执行视频工具，避免并发堆积。
-- 工具在 `details` 中返回 `bytes`、`provider`（`antigravity`）、`model`（`gemini-4-argon`，为逻辑模型名而非已确认的服务端路由）、`inputMode`（`native-video/mp4`）与 `durationMs`（从 `execute` 进入计时到结果格式化，包含主进程文件校验、worker 启动、模型调用和等待子进程关闭）。若底层返回用量，`details` 透传 `usage`（数值白名单只保留有限非负数，缺失字段不补零）、`usageSource: "provider-normalized"`，存在 `cost` 时附带 `costSource: "local-estimate"`。`cost` 是本地估算而非账单；底层可能把未返回统计归一化为零，因此零值不代表免费。
-- 视频由工具内部外发并消耗模型额度，不是主会话视频附件。用量只放在 `details` 中，未设置工具顶层 `usage`，不汇入 Pi 会话用量统计，也不额外查询账户额度；失败不回退其他提供方、模型或浏览器。失败或取消时，`details` 只返回安全的 `errorCode` 与 `failurePhase`，不转发原始错误，也不猜测登录或额度原因；不发送完整会话历史，不把视频 base64 或原始 provider 错误写入日志。
-- 已实测 Pi 1.5.0 与常规 npm 安装的 `pi-antigravity` 0.11.0（位置为 `getAgentDir()/npm/node_modules/pi-antigravity`）。其他安装布局不自动扫描，缺失或接口不兼容时安全失败；适配依赖该插件请求结构，不修改 Pi 或插件源码。
-- 统一入口真实 OAuth 冒烟与 `video-reviewer` 实际工具调用均正确识别三秒测试视频的红、蓝、绿时间顺序。这只验证短视频视觉通路；音轨未可靠验证，长视频、快速转场不保证完整覆盖。此次新增的 `details` 元数据仅由离线 fake SDK 测试验证，不能把之前的短视频实测当成新增字段的线上验收。
-- 全局注册不等于角色获权：`video-reviewer` 必须在工具白名单加入 `understand_video`，并确保子代理已加载本包。当前后台子代理已实测可继承父会话扩展，无需配置 `subagentOnlyExtensions`；只有未继承扩展的启动方式才需显式加载统一入口；仍保持只读权限、全新上下文和原模型覆盖。已打开的主会话需要手动 `/reload`，本次不会替用户重载。
 
 ## 自动会话命名
 
@@ -164,7 +151,7 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 
 | 文件 | 内容 |
 | --- | --- |
-| `personal-extensions.json` | 六项功能的布尔开关 |
+| `personal-extensions.json` | 五项功能的布尔开关 |
 | `auto-session-name.json` | 命名模型 `model` 和思考设置 `thinking` |
 | `inline-effort.json` | 分类模型：`{"model":"jev"}` 或 `{"model":"d1-ultra"}`；新文件缺失时兼容读取 `jev-inline-effort.json` |
 | `clickable-paths.json` | 路径链接设置 |
@@ -176,7 +163,8 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 旧配置自动兼容：
 
 - `personal-extensions.json` 中的 `substatusline` 和 `statusline-style-picker` 合并为 `statusline`。缺失的旧键按默认开启处理；任一旧键为 `true` 即开启，两个旧键都为 `false` 才关闭。
-- `jev-inline-effort` 开关映射到 `inline-effort`。新键存在时以新键为准；旧键仍须为布尔值。读取不改写配置，下次保存功能开关时只写六个新键（保留旧 session-title 键）。
+- `jev-inline-effort` 开关映射到 `inline-effort`。新键存在时以新键为准；旧键仍须为布尔值。读取不改写配置，下次保存功能开关时只写五个新键（保留旧 session-title 键）。
+- 已删除的「原视频审查」留下的 `understand-video` 开关仍可读取：值须为布尔值，但不再生效，下次保存功能开关时不再写入。
 - 仅在 `inline-effort.json` 缺失时读取 `jev-inline-effort.json`；保存只写新文件，保留旧文件。新文件格式或权限有误时提示错误。
 - 会话中的思考决策条目类型和状态栏键仍为 `jev-inline-effort`；自动命名会话状态仍为 `personal-auto-session-name`。状态栏继续使用 `usage` 和 `session-id`，旧会话可直接恢复。
 

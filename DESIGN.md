@@ -1,6 +1,6 @@
 ---
 name: pi-personal-extensions 讲解页
-description: 一个入口七项功能的图解与朗读讲解，Stripe Docs 式左文右图双栏
+description: 一个入口五项功能的图解与朗读讲解，Stripe Docs 式左文右图双栏
 colors:
   paper: "#ffffff"
   paper-2: "#f6f9fc"

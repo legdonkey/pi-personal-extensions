@@ -23,4 +23,4 @@ Set Padding 24
 Set TypingSpeed 60ms
 Set Theme "Catppuccin Mocha"
 Set WaitTimeout 60s
-Env PI_CODING_AGENT_DIR "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/pi-agent-sandbox4"
+Env PI_CODING_AGENT_DIR "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/pi-agent-sandbox"

@@ -138,7 +138,7 @@
 - 「测试分类模型可用性」用固定样例「把 hello 转成大写。」，不读会话、不写决策、不改强度 —— ext:338-346；test:685-709
 - 配置无效时报错，不退回 Jev；在「选择分类模型」里重新保存可修复 —— ext:34-43；test:427-454
 - OpenRouter 白名单需放行实际服务商和模型；Latest 别名还需放行解析后的固定版本 —— README.md:116
-- 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无；在全新无凭据临时 agent 重录，仅查看示例配置，不验证模型可用性；标题合入状态栏，技术版素材与使用者版相同 —— docs/extensions-usage/tapes/effort-status.tape；两版 media/effort-status.png；ext:321-329；entry:74-78。
+- 录屏 effort-status：/personal → 原位思考强度 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无；在临时 agent 目录重录，仅查看示例配置，不验证模型可用性；标题合入状态栏，技术版素材与使用者版相同 —— docs/extensions-usage/tapes/effort-status.tape；两版 media/effort-status.png；ext:321-329；entry:74-78。
 
 ## 8. 子代理与代价（图 8）
 
@@ -174,3 +174,4 @@
 - 演示区用本地固定示例模拟 Jev 返回 low，不发送 API 请求、不保证线上结果；支持回退成功、失败、直接 Jev、空输入和对齐失败 —— tests/effort-demo.test.mjs。
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
+- 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；auto-name-model、auto-name-status 的画面早于原视频审查，不含该项，未重录 —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

@@ -1,6 +1,6 @@
 # /personal → 状态栏：额度、会话 ID 与配色 → 独立功能开关（查看后 Esc）→ 选择 pi-statusline 自定义配色 → ↓↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/statusline-style.mp4"
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/446cc168-f46d-47aa-9300-0cee8a1ae535/scratchpad/raw4/statusline-style.txt"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/statusline-style.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/statusline-style.txt"
 Set Width 960
 Set Height 720
 Source "docs/extensions-usage/tapes/_settings.tape"

@@ -12,11 +12,11 @@ web
 
 ## Product Purpose
 
-`pi-personal-extensions` 是个人维护的 Pi 扩展合集。它通过一个入口文件加载六项功能，用 `/personal` 统一启停和设置。讲解页的目标是让同事读完或听完后，能说清每项功能的作用和关键机制，并能自己安装和配置。
+`pi-personal-extensions` 是个人维护的 Pi 扩展合集。它通过一个入口文件加载五项功能，用 `/personal` 统一启停和设置。讲解页的目标是让同事读完或听完后，能说清每项功能的作用和关键机制，并能自己安装和配置。
 
 ## Positioning
 
-一个入口管理六项功能：禁用的功能不注册命令和事件；各功能的内部处理器由 `/personal` 子菜单调用，并共用同一套配置。
+一个入口管理五项功能：禁用的功能不注册命令和事件；各功能的内部处理器由 `/personal` 子菜单调用，并共用同一套配置。
 
 ## Operating Context
 
@@ -26,7 +26,7 @@ web
 
 ## Capabilities and Constraints
 
-六项功能：`auto-session-name`、`statusline`、`clickable-paths`、`user-message-border`、`inline-effort`、`understand-video`。原视频审查通过工具内部调用发送获授权的 MP4，不改变主会话模型；音轨未可靠验证。事实以 `README.md` 和 `extensions/` 源码为准。
+五项功能：`auto-session-name`、`statusline`、`clickable-paths`、`user-message-border`、`inline-effort`。事实以 `README.md` 和 `extensions/` 源码为准。
 
 ## Evidence on Hand
 

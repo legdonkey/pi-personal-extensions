@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pi 个人扩展讲解</title>
-<meta name="description" content="pi-personal-extensions 六项功能的图解与朗读讲解">
+<meta name="description" content="pi-personal-extensions 五项功能的图解与朗读讲解">
 <script>try{var m=localStorage.getItem("guide-theme");if(m==="light"||m==="dark")document.documentElement.dataset.theme=m}catch(e){}</script>
 <style>
 /* 讲解页样式：Stripe Docs 式的双栏阅读（左文右图），全宽，跟随系统深浅色并可手动切换。 */
@@ -413,14 +413,13 @@ svg text { font-family: var(--font-sans); }
   </a>
   <span class="spacer"></span>
   <details class="mtoc"><summary>章节</summary><ol>
-    <li><a href="#ch-overview">总览：六项功能分别做什么</a></li>
+    <li><a href="#ch-overview">总览：五项功能分别做什么</a></li>
     <li><a href="#ch-entry">统一入口：按开关加载，一个菜单管理</a></li>
     <li><a href="#ch-message">消息区：路径链接和橙色线框</a></li>
     <li><a href="#ch-statusbar">状态栏：额度与配色</a></li>
     <li><a href="#ch-title">会话名：显示与自动起名</a></li>
     <li><a href="#ch-effort">原位思考强度：按消息选档位</a></li>
     <li><a href="#ch-setup">安装、配置与升级</a></li>
-    <li><a href="#ch-video">原视频审查：隔离调用，不改变主会话</a></li>
   </ol></details>
   <div class="theme-switch" role="group" aria-label="外观">
     <button type="button" data-mode="light" aria-label="浅色"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
@@ -433,22 +432,21 @@ svg text { font-family: var(--font-sans); }
   <nav class="sidebar" aria-label="章节">
     <h2>章节</h2>
     <ol class="toc">
-      <li><a href="#ch-overview" title="总览：六项功能分别做什么"><span>总览</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
+      <li><a href="#ch-overview" title="总览：五项功能分别做什么"><span>总览</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-entry" title="统一入口：按开关加载，一个菜单管理"><span>统一入口</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-message" title="消息区：路径链接和橙色线框"><span>消息区</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-statusbar" title="状态栏：额度与配色"><span>状态栏</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-title" title="会话名：显示与自动起名"><span>会话名</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-effort" title="原位思考强度：按消息选档位"><span>原位思考强度</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
       <li><a href="#ch-setup" title="安装、配置与升级"><span>安装、配置与升级</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
-      <li><a href="#ch-video" title="原视频审查：隔离调用，不改变主会话"><span>原视频审查</span><span class="dur"></span><span class="bar"><i></i></span></a></li>
     </ol>
     <p class="side-note">点任意句子从那里朗读。<kbd>空格</kbd> 播放或暂停，<kbd>J</kbd> / <kbd>K</kbd> 下一句、上一句。双击章节名从该章开头朗读。</p>
   </nav>
 
   <main>
-    <section class="hero" aria-labelledby="hero-h" data-brand="扩展讲解" data-title="Pi 个人扩展讲解" data-description="pi-personal-extensions 六项功能的图解与朗读讲解">
+    <section class="hero" aria-labelledby="hero-h" data-brand="扩展讲解" data-title="Pi 个人扩展讲解" data-description="pi-personal-extensions 五项功能的图解与朗读讲解">
       <div>
-        <h1 id="hero-h">一个入口，六项功能</h1>
+        <h1 id="hero-h">一个入口，五项功能</h1>
         <p>这页用图和朗读讲清 <code>pi-personal-extensions</code> 的每项功能：它做什么、怎么触发、靠什么机制、有哪些边界和代价。朗读时，正在读的句子会高亮，图表跟着逐步点亮。</p>
         <div class="actions">
           <button class="btn is-primary" type="button" id="hero-play"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5l9 5.5-9 5.5z" fill="currentColor"/></svg><span>从头朗读全文</span></button>
@@ -463,8 +461,8 @@ svg text { font-family: var(--font-sans); }
     </section>
 <section class="chapter" id="ch-overview" data-chapter="overview" aria-labelledby="ch-overview-h">
   <header class="chapter-head">
-    <h2 id="ch-overview-h"><span class="seg" data-seg="overview-00">总览：六项功能分别做什么</span></h2>
-    <p class="chapter-sum">界面功能各改哪一块，以及原视频审查的工具通路。</p>
+    <h2 id="ch-overview-h"><span class="seg" data-seg="overview-00">总览：五项功能分别做什么</span></h2>
+    <p class="chapter-sum">五项功能各改界面的哪一块。</p>
     <dl class="meta">
       <dt>入口文件</dt><dd><code>extensions/pi-personal-extensions.ts</code></dd>
       <dt>管理命令</dt><dd><code>/personal</code></dd>
@@ -475,18 +473,17 @@ svg text { font-family: var(--font-sans); }
   <div class="beat">
     <div class="beat-text">
       <p>
-        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共六项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共六项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
-        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载六项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载六项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
+        <span class="seg" data-seg="overview-01" data-say="pi personal extensions 是一个 Pi 扩展合集，共五项功能。后文单说扩展，指正在讲的那项功能的代码。"><code>pi-personal-extensions</code> 是一个 Pi 扩展合集，共五项功能。后文单说「扩展」，指正在讲的那项功能的代码。</span>
+        <span class="seg" data-seg="overview-02" data-say="入口是 Pi 加载的那个文件。入口按 personal extensions 点 json 里的开关加载五项功能，还注册斜杠 personal 命令，用来启停和设置。">入口是 Pi 加载的那个文件。入口按 <code>personal-extensions.json</code> 里的开关加载五项功能，还注册 <code>/personal</code> 命令，用来启停和设置。</span>
       </p>
       <ul>
         <li><span class="seg" data-seg="overview-03" data-say="看图。消息区有两项：用户消息橙色线框，和文件路径可点击。">消息区有两项：用户消息橙色线框，和文件路径可点击。</span></li>
         <li><span class="seg" data-seg="overview-04" data-say="状态栏由一项功能负责：它把额度、会话 ID 和回复结束后的 token 速度写进扩展状态行，还给 pi statusline 那一行换配色。">状态栏由一项功能负责：它把额度、会话 ID 和回复结束后的 token 速度写进扩展状态行，还给 pi-statusline 那一行换配色。</span></li>
         <li><span class="seg" data-seg="overview-05">状态栏中的会话名由合并后的 statusline 显示；自动会话命名在一轮正常结束后，用命名模型在后台起名。</span></li>
         <li><span class="seg" data-seg="overview-06" data-say="状态栏里带大脑图标的那一段来自原位思考强度。它支持 GPT 六 Codex、Anthropic 协议分支的三个指定 Claude 模型和 Antigravity 分支的两个指定 Claude 模型，为新用户消息选择思考强度。">状态栏里的 🧠 段来自原位思考强度。它支持 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型和 Antigravity 分支的两个指定 Claude 模型，为新用户消息选择思考强度。</span></li>
-        <li><span class="seg" data-seg="overview-08">原视频审查新增 understand_video 工具，把明确获授权的本地 MP4 交给 Argon 分析；它不改变主会话模型，详见原视频审查章节。</span></li>
       </ul>
       <p>
-        <span class="seg" data-seg="overview-07">六项功能默认全部开启，每一项都能单独关闭。</span>
+        <span class="seg" data-seg="overview-07">五项功能默认全部开启，每一项都能单独关闭。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-overview-1">
@@ -520,7 +517,7 @@ svg text { font-family: var(--font-sans); }
             <rect class="n is-focal" x="16" y="24" width="440" height="48" rx="6"/>
             <text class="t-mono" x="32" y="45">/personal</text>
             <text class="t-sub" x="440" y="45" text-anchor="end">第 2 章</text>
-            <text class="t-cap" x="32" y="63">按开关加载六项功能，统一启停和设置</text>
+            <text class="t-cap" x="32" y="63">按开关加载五项功能，统一启停和设置</text>
           </g>
 
           <!-- 消息区 -->
@@ -603,13 +600,13 @@ svg text { font-family: var(--font-sans); }
       <h3>加载：只注册开启的功能</h3>
       <p>
         <span class="seg" data-seg="entry-01" data-say="看图左上角。Pi 加载入口时，入口先读 agent 目录下的 personal extensions 点 json。agent 目录默认是主目录下的点 pi 斜杠 agent。">Pi 加载入口时，入口先读 agent 目录下的 <code>personal-extensions.json</code>。agent 目录默认是 <code>~/.pi/agent/</code>。</span>
-        <span class="seg" data-seg="entry-02">如果文件不存在，六项全开。如果文件不是 JSON 对象，或某个开关不是布尔值，入口抛出错误。</span>
+        <span class="seg" data-seg="entry-02">如果文件不存在，五项全开。如果文件不是 JSON 对象，或某个开关不是布尔值，入口抛出错误。</span>
         <span class="seg" data-seg="entry-03">接着入口遍历 features，只对开启的功能调用 register。</span>
       </p>
       <ul>
         <li>设置 <code>PI_CODING_AGENT_DIR</code> 后，agent 目录改用该变量指定的目录。</li>
         <li>多出的键（例如已移除的 <code>terminal-title</code>）被忽略；加载时不改写文件。</li>
-        <li>旧开关自动映射：<code>substatusline</code> 和 <code>statusline-style-picker</code> 合成 <code>statusline</code>，两个都为 <code>false</code> 才关闭；<code>jev-inline-effort</code> 映射到 <code>inline-effort</code>。新键存在时以新键为准；下次保存只写六个新键（保留旧 session-title 键）。</li>
+        <li>旧开关自动映射：<code>substatusline</code> 和 <code>statusline-style-picker</code> 合成 <code>statusline</code>，两个都为 <code>false</code> 才关闭；<code>jev-inline-effort</code> 映射到 <code>inline-effort</code>。新键存在时以新键为准；下次保存只写五个新键（保留旧 session-title 键）。已删除的原视频审查留下的 <code>understand-video</code> 键仍须为布尔值，但不再生效。</li>
         <li>文件无法读取或 JSON 解析失败，同样抛错。抛错发生在注册之前，这次加载什么都不注册，包括 <code>/personal</code>。</li>
       </ul>
     </div>
@@ -617,7 +614,7 @@ svg text { font-family: var(--font-sans); }
       <div class="fig-scroll">
         <svg viewBox="0 0 640 448" width="100%" role="img" aria-labelledby="fig-entry-1-title fig-entry-1-desc">
           <title id="fig-entry-1-title">入口加载流程</title>
-          <desc id="fig-entry-1-desc">入口读取开关文件，格式错误时抛出错误；合成六个开关后遍历功能，关闭的跳过，开启的调用 register 并传入 featureApi；最后注册 /personal。</desc>
+          <desc id="fig-entry-1-desc">入口读取开关文件，格式错误时抛出错误；合成五个开关后遍历功能，关闭的跳过，开启的调用 register 并传入 featureApi；最后注册 /personal。</desc>
           <defs>
             <marker id="fig-entry-1-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
               <polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/>
@@ -643,7 +640,7 @@ svg text { font-family: var(--font-sans); }
             <text class="t-sub" x="376" y="62">非 JSON 对象 / 非布尔值</text>
             <path class="w is-flow" d="M152 160 V200" style="marker-end:url(#fig-entry-1-arrow)"/>
             <rect class="n" x="24" y="112" width="256" height="48" rx="6"/>
-            <text class="t" x="40" y="132">合成六个开关</text>
+            <text class="t" x="40" y="132">合成五个开关</text>
             <text class="t-sub" x="40" y="150">先继承旧键，无可继承才为 true</text>
           </g>
 
@@ -782,12 +779,12 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>菜单：一级选功能，二级选操作</h3>
       <p>
-        <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出六项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出六项功能和加载状态，最后一行是「批量功能开关」。</span>
+        <span class="seg" data-seg="entry-08" data-say="斜杠 personal 的一级菜单列出五项功能和加载状态，最后一行是批量功能开关。"><code>/personal</code> 的一级菜单列出五项功能和加载状态，最后一行是「批量功能开关」。</span>
         <span class="seg" data-seg="entry-09">如果选中已加载的功能，二级菜单列出 actions 表里的设置项，最后一项是「禁用此功能并重载」。</span>
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。三级菜单按 Esc 返回二级，二级返回一级，一级才退出。保存设置或查看状态后留在二级菜单；需要重载时退出。</span>
       </p>
       <ul>
-        <li>五项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 3 项（选择 pi-statusline 自定义配色、查看 token 速度口径、独立功能开关）、原视频审查 1 项（查看通路与限制）。其余一项的二级菜单只有启停。</li>
+        <li>四项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 3 项（选择 pi-statusline 自定义配色、查看 token 速度口径、独立功能开关）。其余一项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -3171,7 +3168,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <li>兼容规则：<code>inline-effort.json</code> 不存在时才读 <code>jev-inline-effort.json</code>；新文件格式错误时报错，不回退旧文件；旧文件保留不改写。开关新键 <code>inline-effort</code> 存在时以新键为准，否则读旧键 <code>jev-inline-effort</code>。</li>
         <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
       </ul>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」在无凭据临时目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -3497,34 +3494,6 @@ npm view &lt;包名&gt; version \
     </figure>
   </div>
 </section>
-
-<section class="chapter" id="ch-video" data-chapter="video" aria-labelledby="ch-video-h">
-  <header class="chapter-head">
-    <h2 id="ch-video-h"><span class="seg" data-seg="video-00">原视频审查：隔离调用，不改变主会话</span></h2>
-    <p class="chapter-sum">把原视频交给工具内部的模型调用，并保留输入、权限和验证边界。</p>
-    <dl class="meta"><dt>工具</dt><dd><code>understand_video</code></dd><dt>管理路径</dt><dd><code>/personal → 原视频审查 → 查看通路与限制</code></dd><dt>实测环境</dt><dd>Pi 1.5.0、pi-antigravity 0.11.0，常规 npm 安装位置</dd></dl>
-  </header>
-  <div class="beat">
-    <div class="beat-text">
-      <p><span class="seg" data-seg="video-01">原视频审查将用户明确授权的本地 MP4 按原始视频格式发送给 Antigravity 的 Argon 模型，以 medium 思考强度分析。这是工具内部调用，不是主会话直接获得视频附件。</span></p>
-      <p><span class="seg" data-seg="video-02">父进程和独立 worker 分别检查文件，并比对 SHA-256 摘要。worker 只加载必要的提供方，自行通过 SDK 获取现有 OAuth，按正常动态路由调用 Argon；仅在子进程内注入视频数据，主宿主的 fetch 不变。</span></p>
-      <p><span class="seg" data-seg="video-03">只允许当前工作目录内非隐藏、无符号链接或硬链接的 MP4，大小从 24 bytes 到 50 MiB；问题最多 8000 字符，分析正文最多 32 KiB。取消或满 120 秒即终止隔离进程，等待进程关闭后返回；失败不切换提供方、模型或浏览器。</span></p>
-      <p><span class="seg" data-seg="video-04">视频会外发并消耗额度，当前不汇入主会话用量统计。统一入口和 video-reviewer 的真实工具调用，均正确识别三秒测试视频的红、蓝、绿顺序；这只验证短视频视觉通路，音轨未可靠验证，长视频和快速转场不保证完整覆盖。</span></p>
-      <p><span class="seg" data-seg="video-05">全局注册不等于角色获权。video-reviewer 需要显式允许这个工具。当前后台子代理已实测可继承父会话扩展，无需额外指定扩展路径；其余只读权限、全新上下文和模型覆盖保持不变。已打开的主会话需自行重载，再从原视频审查菜单查看通路与限制。</span></p>
-      <p><span class="seg" data-seg="video-06">工具在 details 中返回字节数、提供方、逻辑模型名、输入模式，以及从进入执行到子进程关闭的总耗时；逻辑模型名不代表已确认的服务端路由。若底层返回统计，还会透传有限非负的归一化用量与本地估算费用，缺失字段不补零；估算费不是账单，零值也不代表免费，且只放在 details 中，不计入 Pi 会话用量或额外查询额度。模型达到长度上限与本地 32 KiB 截断相互独立，都会在正文告警，调用成功不保证输出完整；失败只返回安全的阶段和错误码，不转发原始错误或猜测原因。新增元数据仅由离线假 SDK 验证，不能把之前的短视频实测当成新增字段的线上验收。</span></p>
-    </div>
-    <figure class="beat-fig" id="fig-video-route">
-      <div class="fig-scroll"><svg viewBox="0 0 640 330" width="100%" role="img" aria-labelledby="video-route-title video-route-desc">
-        <title id="video-route-title">原视频审查的隔离调用链</title><desc id="video-route-desc">用户授权后，父工具验证工作目录内的 MP4；独立 worker 再次检查文件，以现有 OAuth 调用 Argon；返回分析文本与调用元数据。</desc>
-        <g data-cue="video-01"><rect class="n" x="20" y="24" width="270" height="68" rx="8"/><text class="t" x="36" y="50">获授权的本地 MP4</text><text class="t-cap" x="36" y="74">不发送完整会话历史</text></g>
-        <g data-cue="video-02"><path class="w is-flow" d="M290 58H350"/><rect class="n is-focal" x="350" y="24" width="270" height="68" rx="8"/><text class="t" x="366" y="50">父工具：路径与摘要检查</text><text class="t-cap" x="366" y="74">主宿主 fetch 不变</text><path class="w is-flow" d="M485 92V140"/><rect class="n" x="350" y="140" width="270" height="76" rx="8"/><text class="t" x="366" y="166">独立 worker 再次检查</text><text class="t-cap" x="366" y="192">SDK OAuth → Argon → 分析文本</text></g>
-        <g data-cue="video-03"><rect class="n" x="20" y="140" width="270" height="76" rx="8"/><text class="t" x="36" y="166">50 MiB · 120 秒</text><text class="t-cap" x="36" y="192">取消后等待进程退出</text></g>
-        <g data-cue="video-04"><rect class="n is-ghost" x="20" y="256" width="600" height="52" rx="8"/><text class="t-cap" x="36" y="287">仅短视频视觉已验证；音轨、长视频、快速转场仍有限制</text></g>
-      </svg></div>
-      <figcaption>实现流程示意，不是用户视频内容。没有 Cookie、浏览器或独立 Gemini API 回退。</figcaption>
-    </figure>
-  </div>
-</section>
   </main>
 </div>
 
@@ -3546,7 +3515,7 @@ npm view &lt;包名&gt; version \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=317c1c72","duration":1804.62,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":3.36},{"id":"overview-01","ch":"overview","start":3.68,"end":12.48},{"id":"overview-02","ch":"overview","start":12.8,"end":24.56},{"id":"overview-03","ch":"overview","start":24.88,"end":31.68},{"id":"overview-04","ch":"overview","start":32,"end":44.4},{"id":"overview-05","ch":"overview","start":44.72,"end":54.24},{"id":"overview-06","ch":"overview","start":54.56,"end":72},{"id":"overview-08","ch":"overview","start":72.32,"end":84.96},{"id":"overview-07","ch":"overview","start":85.28,"end":90.16},{"id":"entry-00","ch":"entry","start":91.06,"end":94.34},{"id":"entry-01","ch":"entry","start":94.66,"end":107.22},{"id":"entry-02","ch":"entry","start":107.54,"end":116.18},{"id":"entry-03","ch":"entry","start":116.5,"end":121.3},{"id":"entry-04","ch":"entry","start":121.62,"end":126.18},{"id":"entry-05","ch":"entry","start":126.5,"end":132.5},{"id":"entry-06","ch":"entry","start":132.82,"end":138.82},{"id":"entry-07","ch":"entry","start":139.14,"end":146.98},{"id":"entry-08","ch":"entry","start":147.3,"end":154.5},{"id":"entry-09","ch":"entry","start":154.82,"end":163.78},{"id":"entry-10","ch":"entry","start":164.1,"end":182.42},{"id":"entry-11","ch":"entry","start":182.74,"end":189.22},{"id":"entry-12","ch":"entry","start":189.54,"end":193.86},{"id":"entry-13","ch":"entry","start":194.18,"end":201.38},{"id":"entry-14","ch":"entry","start":201.7,"end":208.1},{"id":"entry-15","ch":"entry","start":208.42,"end":216.34},{"id":"entry-16","ch":"entry","start":216.66,"end":225.62},{"id":"entry-17","ch":"entry","start":225.94,"end":237.38},{"id":"message-00","ch":"message","start":238.28,"end":241.32},{"id":"message-01","ch":"message","start":241.64,"end":252.92},{"id":"message-02","ch":"message","start":253.24,"end":261.72},{"id":"message-03","ch":"message","start":262.04,"end":269.64},{"id":"message-04","ch":"message","start":269.96,"end":281.8},{"id":"message-05","ch":"message","start":282.12,"end":289.96},{"id":"message-06","ch":"message","start":290.28,"end":298.76},{"id":"message-07","ch":"message","start":299.08,"end":307.88},{"id":"message-08","ch":"message","start":308.2,"end":322.52},{"id":"message-09","ch":"message","start":322.84,"end":333.32},{"id":"message-10","ch":"message","start":333.64,"end":341.8},{"id":"message-11","ch":"message","start":342.12,"end":350.92},{"id":"message-12","ch":"message","start":351.24,"end":365.88},{"id":"message-13","ch":"message","start":366.2,"end":374.2},{"id":"message-14","ch":"message","start":374.52,"end":385.32},{"id":"message-15","ch":"message","start":385.64,"end":392.2},{"id":"message-16","ch":"message","start":392.52,"end":400.68},{"id":"message-17","ch":"message","start":401,"end":407.4},{"id":"message-18","ch":"message","start":407.72,"end":411.32},{"id":"message-19","ch":"message","start":411.64,"end":419},{"id":"message-20","ch":"message","start":419.32,"end":425.24},{"id":"statusbar-00","ch":"statusbar","start":426.14,"end":428.62},{"id":"statusbar-01","ch":"statusbar","start":428.94,"end":446.62},{"id":"statusbar-02","ch":"statusbar","start":446.94,"end":457.5},{"id":"statusbar-03","ch":"statusbar","start":457.82,"end":466.3},{"id":"statusbar-19","ch":"statusbar","start":466.62,"end":485.18},{"id":"statusbar-20","ch":"statusbar","start":485.5,"end":510.78},{"id":"statusbar-21","ch":"statusbar","start":511.1,"end":541.42},{"id":"statusbar-16","ch":"statusbar","start":541.74,"end":566.3},{"id":"statusbar-17","ch":"statusbar","start":566.62,"end":598.46},{"id":"statusbar-18","ch":"statusbar","start":598.78,"end":626.38},{"id":"statusbar-04","ch":"statusbar","start":626.7,"end":639.9},{"id":"statusbar-05","ch":"statusbar","start":640.22,"end":655.74},{"id":"statusbar-06","ch":"statusbar","start":656.06,"end":691.66},{"id":"statusbar-07","ch":"statusbar","start":691.98,"end":706.46},{"id":"statusbar-08","ch":"statusbar","start":706.78,"end":721.26},{"id":"statusbar-09","ch":"statusbar","start":721.58,"end":734.38},{"id":"statusbar-10","ch":"statusbar","start":734.7,"end":742.86},{"id":"statusbar-11","ch":"statusbar","start":743.18,"end":749.5},{"id":"statusbar-12","ch":"statusbar","start":749.82,"end":756.3},{"id":"statusbar-13","ch":"statusbar","start":756.62,"end":761.82},{"id":"statusbar-14","ch":"statusbar","start":762.14,"end":769.98},{"id":"statusbar-15","ch":"statusbar","start":770.3,"end":778.38},{"id":"title-00","ch":"title","start":779.28,"end":782.72},{"id":"title-01","ch":"title","start":783.04,"end":792.32},{"id":"title-02","ch":"title","start":792.64,"end":805.36},{"id":"title-03","ch":"title","start":805.68,"end":815.68},{"id":"title-migration","ch":"title","start":816,"end":836.48},{"id":"title-04","ch":"title","start":836.8,"end":846.8},{"id":"title-05","ch":"title","start":847.12,"end":855.28},{"id":"title-06","ch":"title","start":855.6,"end":863.12},{"id":"title-07","ch":"title","start":863.44,"end":873.84},{"id":"title-08","ch":"title","start":874.16,"end":885.84},{"id":"title-09","ch":"title","start":886.16,"end":897.04},{"id":"title-10","ch":"title","start":897.36,"end":902.48},{"id":"title-11","ch":"title","start":902.8,"end":910.48},{"id":"title-12","ch":"title","start":910.8,"end":918.64},{"id":"title-13","ch":"title","start":918.96,"end":926.4},{"id":"title-14","ch":"title","start":926.72,"end":937.04},{"id":"title-15","ch":"title","start":937.36,"end":946.96},{"id":"title-16","ch":"title","start":947.28,"end":959.52},{"id":"title-17","ch":"title","start":959.84,"end":964.72},{"id":"title-18","ch":"title","start":965.04,"end":970.56},{"id":"title-19","ch":"title","start":970.88,"end":977.52},{"id":"title-20","ch":"title","start":977.84,"end":987.2},{"id":"title-21","ch":"title","start":987.52,"end":993.28},{"id":"title-22","ch":"title","start":993.6,"end":1005.12},{"id":"title-23","ch":"title","start":1005.44,"end":1013.68},{"id":"title-24","ch":"title","start":1014,"end":1022},{"id":"title-25","ch":"title","start":1022.32,"end":1034.64},{"id":"title-26","ch":"title","start":1034.96,"end":1045.52},{"id":"title-27","ch":"title","start":1045.84,"end":1054.16},{"id":"effort-00","ch":"effort","start":1055.06,"end":1058.66},{"id":"effort-01","ch":"effort","start":1058.98,"end":1076.5},{"id":"effort-02","ch":"effort","start":1076.82,"end":1105.94},{"id":"effort-01a","ch":"effort","start":1106.26,"end":1120.58},{"id":"effort-01b","ch":"effort","start":1120.9,"end":1140.58},{"id":"effort-01c","ch":"effort","start":1140.9,"end":1162.42},{"id":"effort-03","ch":"effort","start":1162.74,"end":1175.06},{"id":"effort-04","ch":"effort","start":1175.38,"end":1185.06},{"id":"effort-05","ch":"effort","start":1185.38,"end":1195.38},{"id":"effort-06","ch":"effort","start":1195.7,"end":1224.18},{"id":"effort-07","ch":"effort","start":1224.5,"end":1235.14},{"id":"effort-08","ch":"effort","start":1235.46,"end":1239.46},{"id":"effort-09","ch":"effort","start":1239.78,"end":1251.38},{"id":"effort-10","ch":"effort","start":1251.7,"end":1266.02},{"id":"effort-11","ch":"effort","start":1266.34,"end":1282.34},{"id":"effort-12","ch":"effort","start":1282.66,"end":1297.22},{"id":"effort-13","ch":"effort","start":1297.54,"end":1308.74},{"id":"effort-14","ch":"effort","start":1309.06,"end":1318.98},{"id":"effort-14a","ch":"effort","start":1319.3,"end":1343.54},{"id":"effort-14b","ch":"effort","start":1343.86,"end":1371.78},{"id":"effort-14c","ch":"effort","start":1372.1,"end":1405.78},{"id":"effort-14d","ch":"effort","start":1406.1,"end":1426.34},{"id":"effort-15","ch":"effort","start":1426.66,"end":1440.66},{"id":"effort-16","ch":"effort","start":1440.98,"end":1453.54},{"id":"effort-17","ch":"effort","start":1453.86,"end":1461.62},{"id":"effort-18","ch":"effort","start":1461.94,"end":1475.62},{"id":"effort-18a","ch":"effort","start":1475.94,"end":1488.58},{"id":"effort-19","ch":"effort","start":1488.9,"end":1501.06},{"id":"effort-20","ch":"effort","start":1501.38,"end":1516.74},{"id":"effort-21","ch":"effort","start":1517.06,"end":1530.5},{"id":"effort-22","ch":"effort","start":1530.82,"end":1544.26},{"id":"effort-23","ch":"effort","start":1544.58,"end":1560.02},{"id":"effort-24","ch":"effort","start":1560.34,"end":1569.94},{"id":"effort-25","ch":"effort","start":1570.26,"end":1588.66},{"id":"setup-00","ch":"setup","start":1589.56,"end":1591.64},{"id":"setup-01","ch":"setup","start":1591.96,"end":1601.4},{"id":"setup-02","ch":"setup","start":1601.72,"end":1608.44},{"id":"setup-03","ch":"setup","start":1608.76,"end":1613.72},{"id":"setup-04","ch":"setup","start":1614.04,"end":1620.84},{"id":"setup-05","ch":"setup","start":1621.16,"end":1625.56},{"id":"setup-06","ch":"setup","start":1625.88,"end":1636.2},{"id":"setup-07","ch":"setup","start":1636.52,"end":1641.4},{"id":"video-00","ch":"video","start":1642.3,"end":1646.3},{"id":"video-01","ch":"video","start":1646.62,"end":1663.02},{"id":"video-02","ch":"video","start":1663.34,"end":1682.62},{"id":"video-03","ch":"video","start":1682.94,"end":1707.18},{"id":"video-04","ch":"video","start":1707.5,"end":1728.14},{"id":"video-05","ch":"video","start":1728.46,"end":1750.7},{"id":"video-06","ch":"video","start":1751.02,"end":1804.62}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=47c1b43b","duration":1626.6,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":2.88},{"id":"overview-01","ch":"overview","start":3.2,"end":12.08},{"id":"overview-02","ch":"overview","start":12.4,"end":23.12},{"id":"overview-03","ch":"overview","start":23.44,"end":30.24},{"id":"overview-04","ch":"overview","start":30.56,"end":42.96},{"id":"overview-05","ch":"overview","start":43.28,"end":52.8},{"id":"overview-06","ch":"overview","start":53.12,"end":70.56},{"id":"overview-07","ch":"overview","start":70.88,"end":75.2},{"id":"entry-00","ch":"entry","start":76.1,"end":79.38},{"id":"entry-01","ch":"entry","start":79.7,"end":92.26},{"id":"entry-02","ch":"entry","start":92.58,"end":101.3},{"id":"entry-03","ch":"entry","start":101.62,"end":106.42},{"id":"entry-04","ch":"entry","start":106.74,"end":111.3},{"id":"entry-05","ch":"entry","start":111.62,"end":117.62},{"id":"entry-06","ch":"entry","start":117.94,"end":123.94},{"id":"entry-07","ch":"entry","start":124.26,"end":132.1},{"id":"entry-08","ch":"entry","start":132.42,"end":139.7},{"id":"entry-09","ch":"entry","start":140.02,"end":148.98},{"id":"entry-10","ch":"entry","start":149.3,"end":167.62},{"id":"entry-11","ch":"entry","start":167.94,"end":174.42},{"id":"entry-12","ch":"entry","start":174.74,"end":179.06},{"id":"entry-13","ch":"entry","start":179.38,"end":186.58},{"id":"entry-14","ch":"entry","start":186.9,"end":193.3},{"id":"entry-15","ch":"entry","start":193.62,"end":201.54},{"id":"entry-16","ch":"entry","start":201.86,"end":210.82},{"id":"entry-17","ch":"entry","start":211.14,"end":222.58},{"id":"message-00","ch":"message","start":223.48,"end":226.52},{"id":"message-01","ch":"message","start":226.84,"end":238.12},{"id":"message-02","ch":"message","start":238.44,"end":246.92},{"id":"message-03","ch":"message","start":247.24,"end":254.84},{"id":"message-04","ch":"message","start":255.16,"end":267},{"id":"message-05","ch":"message","start":267.32,"end":275.16},{"id":"message-06","ch":"message","start":275.48,"end":283.96},{"id":"message-07","ch":"message","start":284.28,"end":293.08},{"id":"message-08","ch":"message","start":293.4,"end":307.72},{"id":"message-09","ch":"message","start":308.04,"end":318.52},{"id":"message-10","ch":"message","start":318.84,"end":327},{"id":"message-11","ch":"message","start":327.32,"end":336.12},{"id":"message-12","ch":"message","start":336.44,"end":351.08},{"id":"message-13","ch":"message","start":351.4,"end":359.4},{"id":"message-14","ch":"message","start":359.72,"end":370.52},{"id":"message-15","ch":"message","start":370.84,"end":377.4},{"id":"message-16","ch":"message","start":377.72,"end":385.88},{"id":"message-17","ch":"message","start":386.2,"end":392.6},{"id":"message-18","ch":"message","start":392.92,"end":396.52},{"id":"message-19","ch":"message","start":396.84,"end":404.2},{"id":"message-20","ch":"message","start":404.52,"end":410.44},{"id":"statusbar-00","ch":"statusbar","start":411.34,"end":413.82},{"id":"statusbar-01","ch":"statusbar","start":414.14,"end":431.82},{"id":"statusbar-02","ch":"statusbar","start":432.14,"end":442.7},{"id":"statusbar-03","ch":"statusbar","start":443.02,"end":451.5},{"id":"statusbar-19","ch":"statusbar","start":451.82,"end":470.38},{"id":"statusbar-20","ch":"statusbar","start":470.7,"end":495.98},{"id":"statusbar-21","ch":"statusbar","start":496.3,"end":526.62},{"id":"statusbar-16","ch":"statusbar","start":526.94,"end":551.5},{"id":"statusbar-17","ch":"statusbar","start":551.82,"end":583.66},{"id":"statusbar-18","ch":"statusbar","start":583.98,"end":611.58},{"id":"statusbar-04","ch":"statusbar","start":611.9,"end":625.1},{"id":"statusbar-05","ch":"statusbar","start":625.42,"end":640.94},{"id":"statusbar-06","ch":"statusbar","start":641.26,"end":676.86},{"id":"statusbar-07","ch":"statusbar","start":677.18,"end":691.66},{"id":"statusbar-08","ch":"statusbar","start":691.98,"end":706.46},{"id":"statusbar-09","ch":"statusbar","start":706.78,"end":719.58},{"id":"statusbar-10","ch":"statusbar","start":719.9,"end":728.06},{"id":"statusbar-11","ch":"statusbar","start":728.38,"end":734.7},{"id":"statusbar-12","ch":"statusbar","start":735.02,"end":741.5},{"id":"statusbar-13","ch":"statusbar","start":741.82,"end":747.02},{"id":"statusbar-14","ch":"statusbar","start":747.34,"end":755.18},{"id":"statusbar-15","ch":"statusbar","start":755.5,"end":763.58},{"id":"title-00","ch":"title","start":764.48,"end":767.92},{"id":"title-01","ch":"title","start":768.24,"end":777.52},{"id":"title-02","ch":"title","start":777.84,"end":790.56},{"id":"title-03","ch":"title","start":790.88,"end":800.88},{"id":"title-migration","ch":"title","start":801.2,"end":821.68},{"id":"title-04","ch":"title","start":822,"end":832},{"id":"title-05","ch":"title","start":832.32,"end":840.48},{"id":"title-06","ch":"title","start":840.8,"end":848.32},{"id":"title-07","ch":"title","start":848.64,"end":859.04},{"id":"title-08","ch":"title","start":859.36,"end":871.04},{"id":"title-09","ch":"title","start":871.36,"end":882.24},{"id":"title-10","ch":"title","start":882.56,"end":887.68},{"id":"title-11","ch":"title","start":888,"end":895.68},{"id":"title-12","ch":"title","start":896,"end":903.84},{"id":"title-13","ch":"title","start":904.16,"end":911.6},{"id":"title-14","ch":"title","start":911.92,"end":922.24},{"id":"title-15","ch":"title","start":922.56,"end":932.16},{"id":"title-16","ch":"title","start":932.48,"end":944.72},{"id":"title-17","ch":"title","start":945.04,"end":949.92},{"id":"title-18","ch":"title","start":950.24,"end":955.76},{"id":"title-19","ch":"title","start":956.08,"end":962.72},{"id":"title-20","ch":"title","start":963.04,"end":972.4},{"id":"title-21","ch":"title","start":972.72,"end":978.48},{"id":"title-22","ch":"title","start":978.8,"end":990.32},{"id":"title-23","ch":"title","start":990.64,"end":998.88},{"id":"title-24","ch":"title","start":999.2,"end":1007.2},{"id":"title-25","ch":"title","start":1007.52,"end":1019.84},{"id":"title-26","ch":"title","start":1020.16,"end":1030.72},{"id":"title-27","ch":"title","start":1031.04,"end":1039.36},{"id":"effort-00","ch":"effort","start":1040.26,"end":1043.86},{"id":"effort-01","ch":"effort","start":1044.18,"end":1061.7},{"id":"effort-02","ch":"effort","start":1062.02,"end":1091.14},{"id":"effort-01a","ch":"effort","start":1091.46,"end":1105.78},{"id":"effort-01b","ch":"effort","start":1106.1,"end":1125.78},{"id":"effort-01c","ch":"effort","start":1126.1,"end":1147.62},{"id":"effort-03","ch":"effort","start":1147.94,"end":1160.26},{"id":"effort-04","ch":"effort","start":1160.58,"end":1170.26},{"id":"effort-05","ch":"effort","start":1170.58,"end":1180.58},{"id":"effort-06","ch":"effort","start":1180.9,"end":1209.38},{"id":"effort-07","ch":"effort","start":1209.7,"end":1220.34},{"id":"effort-08","ch":"effort","start":1220.66,"end":1224.66},{"id":"effort-09","ch":"effort","start":1224.98,"end":1236.58},{"id":"effort-10","ch":"effort","start":1236.9,"end":1251.22},{"id":"effort-11","ch":"effort","start":1251.54,"end":1267.54},{"id":"effort-12","ch":"effort","start":1267.86,"end":1282.42},{"id":"effort-13","ch":"effort","start":1282.74,"end":1293.94},{"id":"effort-14","ch":"effort","start":1294.26,"end":1304.18},{"id":"effort-14a","ch":"effort","start":1304.5,"end":1328.74},{"id":"effort-14b","ch":"effort","start":1329.06,"end":1356.98},{"id":"effort-14c","ch":"effort","start":1357.3,"end":1390.98},{"id":"effort-14d","ch":"effort","start":1391.3,"end":1411.54},{"id":"effort-15","ch":"effort","start":1411.86,"end":1425.86},{"id":"effort-16","ch":"effort","start":1426.18,"end":1438.74},{"id":"effort-17","ch":"effort","start":1439.06,"end":1446.82},{"id":"effort-18","ch":"effort","start":1447.14,"end":1460.82},{"id":"effort-18a","ch":"effort","start":1461.14,"end":1473.78},{"id":"effort-19","ch":"effort","start":1474.1,"end":1486.26},{"id":"effort-20","ch":"effort","start":1486.58,"end":1501.94},{"id":"effort-21","ch":"effort","start":1502.26,"end":1515.7},{"id":"effort-22","ch":"effort","start":1516.02,"end":1529.46},{"id":"effort-23","ch":"effort","start":1529.78,"end":1545.22},{"id":"effort-24","ch":"effort","start":1545.54,"end":1555.14},{"id":"effort-25","ch":"effort","start":1555.46,"end":1573.86},{"id":"setup-00","ch":"setup","start":1574.76,"end":1576.84},{"id":"setup-01","ch":"setup","start":1577.16,"end":1586.6},{"id":"setup-02","ch":"setup","start":1586.92,"end":1593.64},{"id":"setup-03","ch":"setup","start":1593.96,"end":1598.92},{"id":"setup-04","ch":"setup","start":1599.24,"end":1606.04},{"id":"setup-05","ch":"setup","start":1606.36,"end":1610.76},{"id":"setup-06","ch":"setup","start":1611.08,"end":1621.4},{"id":"setup-07","ch":"setup","start":1621.72,"end":1626.6}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

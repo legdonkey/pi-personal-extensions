@@ -39,12 +39,12 @@
 - 「选择命名思考强度」选命名用的思考强度；默认跟随 Pi 对这个模型的设置，没设置时用 low（列表） —— 命名:419-432；命名:115-121；命名测试:556
 - 实际强度受命名模型支持范围限制，不支持思考的模型用 off（列表） —— 命名:124；node_modules/@earendil-works/pi-ai/dist/models.js:693-699
 - 换成另一个命名模型后，命名用的思考强度恢复默认值（列表） —— 命名:404-415；命名测试:579-600
-- 录屏画面（/personal → 自动会话命名 → 选择命名模型 → ↓↓↑ → Esc）：列表为录制者的 scoped models，当前 openai-codex/gpt-6-luna（示例环境，非默认值） —— docs/extensions-usage/tapes/auto-name-model.tape；命名:396-400（标题格式「命名模型（全局） · 当前：…」）
+- 录屏画面（/personal → 自动会话命名 → 选择命名模型 → ↓↓↑ → Esc）：列表为录制者的 scoped models，当前 openai-codex/gpt-6.1-terra，列表七个模型（示例环境，非默认值） —— docs/extensions-usage/tapes/auto-name-model.tape；命名:396-400（标题格式「命名模型（全局） · 当前：…」）
 
 ## 查看状态（title-08，录屏 auto-name-status）
 
 - 「查看状态」输出一条状态提示：开启状态、命名模型、命名用的思考强度，以及指向菜单路径的说明（录屏：/personal → 自动会话命名 → 查看状态） —— 命名:466, 486-494；docs/extensions-usage/media/auto-name-status.png
-- 录屏画面：一条状态提示，含开启状态、模型 gpt-6-luna、思考 medium 和菜单路径说明（示例环境，非默认值） —— docs/extensions-usage/tapes/auto-name-status.tape；命名:491-494
+- 录屏画面：一条状态提示，含开启状态、模型 openai-codex/gpt-6.1-terra、思考「继承 → low」和菜单路径说明（示例环境，非默认值） —— docs/extensions-usage/tapes/auto-name-status.tape；命名:491-494
 
 ## 额度和隐私（title-09 ～ 10，图 7）
 
@@ -78,3 +78,4 @@
 - 未重录的认证/聊天片段紧邻可见标注历史录屏；无凭据环境不能复现真实模型调用，本轮不伪造 —— 本章历史录屏图注；docs/extensions-usage/tapes/。
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
+- 删除原视频审查后重录 auto-name-model、auto-name-status：一级菜单为五项功能加「批量功能开关」，命名模型显示 openai-codex/gpt-6.1-terra，思考显示「继承 → low」；在按 _settings.tape 创建的临时 agent 目录录制，保留凭据文件但不发送模型消息；本章不再有历史录屏图注 —— docs/extensions-usage/tapes/auto-name-model.tape、auto-name-status.tape；docs/extensions-usage/media/auto-name-model.png、auto-name-status.png

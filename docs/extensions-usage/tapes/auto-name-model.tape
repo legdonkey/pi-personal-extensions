@@ -17,7 +17,6 @@ Sleep 300ms
 Enter
 Wait+Screen /个人扩展 · 统一管理/
 Sleep 900ms
-Down@130ms 1
 Sleep 400ms
 Enter
 Sleep 1.1s

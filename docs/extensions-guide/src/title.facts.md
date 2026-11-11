@@ -132,3 +132,4 @@
 - 未重录的认证/聊天片段紧邻可见标注历史录屏；无凭据环境不能复现真实模型调用，本轮不伪造 —— 本章历史录屏图注；docs/extensions-usage/tapes/。
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
+- 删除原视频审查后重录 auto-name-model、auto-name-status：一级菜单为五项功能加「批量功能开关」，命名模型显示 openai-codex/gpt-6.1-terra，思考显示「继承 → low」；在按 _settings.tape 创建的临时 agent 目录录制，保留凭据文件但不发送模型消息；本章不再有历史录屏图注 —— docs/extensions-usage/tapes/auto-name-model.tape、auto-name-status.tape；docs/extensions-usage/media/auto-name-model.png、auto-name-status.png

@@ -219,7 +219,7 @@ const featureApi = Object.assign(Object.create(pi), {
             <li>状态栏：额度、会话 ID 与配色 · 已加载</li>
             <li>文件路径可点击 · 已加载</li>
             <li>用户消息橙色线框 · 已加载</li>
-            <li>原位思考强度（Jev / d1-ultra） · 已加载</li>
+            <li>原位思考强度 · 已加载</li>
             <li>批量功能开关</li>
           </ol>
         </div>
@@ -373,7 +373,7 @@ const featureApi = Object.assign(Object.create(pi), {
         { label: "状态栏：额度、会话 ID 与配色", command: "statusline-style", actions: [...ac("statusline-style", [["选择 pi-statusline 自定义配色", ""]]), ...ac("statusline-info", [["查看 token 速度口径", ""]]), ...ac("statusline-settings", [["独立功能开关", ""]])] },
         { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
-        { label: "原位思考强度（Jev / d1-ultra）", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型（Jev / d1-ultra）", "model"], ["测试分类模型可用性", "test"]]) },
+        { label: "原位思考强度", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型", "model"], ["测试分类模型可用性", "test"]]) },
       ];
       const on = features.map(() => true);
       let picked = 0;

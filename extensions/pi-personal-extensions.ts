@@ -40,8 +40,8 @@ const features = [
   },
   {
     id: "inline-effort",
-    label: "原位思考强度（Jev / d1-ultra）",
-    description: "通过 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 配置分类器，d1-ultra 失败自动回退 Jev，原位调整强度并保留缓存",
+    label: "原位思考强度",
+    description: "通过 /personal → 原位思考强度 → 选择分类模型 配置分类器（Jev / d1-ultra / Mammoth 27B / Decider v1.2），非 Jev 失败自动回退 Jev，原位调整强度并保留缓存",
     register: inlineEffort,
   },
 ] as const;
@@ -62,7 +62,7 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
   ],
   "inline-effort": [
     { label: "查看分类模型与状态", command: "effort", args: "status" },
-    { label: "选择分类模型（Jev / d1-ultra）", command: "effort", args: "model" },
+    { label: "选择分类模型", command: "effort", args: "model" },
     { label: "测试分类模型可用性", command: "effort", args: "test" },
   ],
   "clickable-paths": [

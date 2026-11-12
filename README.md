@@ -23,7 +23,7 @@ pi install "$(pwd)"
 `/personal` 是所有功能的管理入口：选择功能后，可启停或进入其设置。上下选择、Enter 确认。三级菜单按 Esc 返回二级，二级返回一级，一级才退出；取消不保存。保存设置或查看状态后留在二级菜单，启停功能和应用配色则退出并重载。例如：
 
 ```text
-/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）
+/personal → 原位思考强度 → 选择分类模型
 /personal → 自动会话命名 → 选择命名模型
 /personal → 文件路径可点击 → 打开方式：cursor
 /personal → 状态栏：额度、会话 ID 与配色 → 选择 pi-statusline 自定义配色
@@ -39,7 +39,7 @@ pi install "$(pwd)"
 | `statusline` | 显示会话标题、服务商剩余额度、会话 ID（末尾 8 位）和单次回复 token 速度，预览并应用 11 套配色 |
 | `clickable-paths` | 将本地文件路径转换为可点击链接，支持行列定位 |
 | `user-message-border` | 为 TUI 普通用户消息添加橙色圆角边框，不修改上下文 |
-| `inline-effort` | 用 Jev 或 d1-ultra 自动调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型和 Antigravity 分支的指定 Claude 模型的思考强度 |
+| `inline-effort` | 用 Jev、d1-ultra、Mammoth 27B 或 Decider v1.2 自动调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型和 Antigravity 分支的指定 Claude 模型的思考强度 |
 
 `pi config` 管理整个扩展包。各功能设置均从 `/personal` 进入（例外：路径链接的 `userMessages` 只能在 `clickable-paths.json` 里改）；启停功能不会清除其独立配置。
 
@@ -72,18 +72,20 @@ TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话�
 pi --model openai-codex/gpt-6.1-sol --thinking medium
 ```
 
-在 `/personal → 原位思考强度（Jev / d1-ultra）` 中选择：
+在 `/personal → 原位思考强度` 中选择：
 
 - 「查看分类模型与状态」：查看首选分类模型、失败回退策略和当前分支的最近决策。
-- 「选择分类模型（Jev / d1-ultra）」：选择并保存；取消不保存。
+- 「选择分类模型」：选择并保存；取消不保存。
 - 「测试分类模型可用性」：用固定公开样例测试首选模型及其回退流程，明确显示实际成功的模型，不改强度或会话决策。
 
-| 选择 | OpenRouter 模型 ID |
-| --- | --- |
-| `jev` | `~typesafe/jev-latest` |
-| `d1-ultra` | `liquid/d1-ultra` |
+| 选择 | 显示名称 | OpenRouter 模型 ID |
+| --- | --- | --- |
+| `jev` | Jev | `typesafe/jev-1.14` |
+| `d1-ultra` | d1-ultra | `liquid/d1-ultra` |
+| `mammoth-27b` | Mammoth 27B | `baseten/mammoth-1` |
+| `decider` | Decider v1.2 | `perplexity/pplx-decider-v1.2` |
 
-分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及本次成功的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；d1-ultra 回退成功时标注 `Jev（d1-ultra 回退）`。全部失败时仍标注首选模型，表示最近尝试而非分类成功。Pi 自带的 thinking 显示仅反映基线。
+分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及本次成功的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；非 Jev 模型回退成功时标注回退来源，例如 `Jev（d1-ultra 回退）`、`Jev（Mammoth 27B 回退）`、`Jev（Decider v1.2 回退）`。全部失败时仍标注首选模型，表示最近尝试而非分类成功。Pi 自带的 thinking 显示仅反映基线。
 
 `pi-antigravity` 不触发 `onPayload`。因此，Antigravity 分支在 `context_with_system` 分类后，临时包装插件的原生 `streamSimple`。包装保留原 `oauth`、`headers`、`images` 和 `refreshModels`。注册和恢复 wrapper 时，扩展携带 `provider.getAllModels` 的当前动态目录，包括 chat、image 和 classifier 模型，并按 `type + id` 补回 registered model 的 `headers`。只有 `sessionId`、末条消息 `timestamp` 和模型都匹配当前主请求时，扩展才修改 `options.reasoning`，再交给插件按 `-low`、`-medium`、`-high` runtime ID 路由。`max` 和 `xhigh` 夹到 `high`。会话 thinking 和历史上下文不变。
 
@@ -102,11 +104,11 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 - 切换从下一条尚未分类的用户消息生效，无需重载；其他会话和子代理的后续分类也读取全局选择。工作中不能切换或测试。
 - 每条新用户消息分类一次，包括 steer 和 follow-up；工具续调和重试不重复分类。决策跟随分支，恢复、fork、树导航和压缩后保持原结果。
 - 发送当前请求和近期对话文本，内容预算合计 16,000 字符；不发送系统规则、工具结果、思考或图片数据。文本可能包含业务信息，分类会增加等待时间并消耗服务额度。
-- 选择 d1-ultra 后，超时、服务报错或结果无效时，警告显示安全归类的原因（例如 `HTTP 429：服务限流`）并提示「正在切换到 Jev」，随后只对本次请求尝试 Jev。回退成功后提示实际模型和档位，状态栏及会话决策记录 `Jev（d1-ultra 回退）`；不改全局配置，下一条新消息仍先尝试 d1-ultra。直接选择 Jev 时不反向回退。有效结果的所选概率低于 0.5 时不发 warning：d1-ultra 仍尝试 Jev，只有低置信度、没有实际错误时静默沿用当前档位；概率缺失、非有限数或超出 [0, 1]、档位非法仍属于无效结果。
+- 选择非 Jev 分类模型（`d1-ultra`、`Mammoth 27B` 或 `Decider v1.2`）后，请求超时或服务报错时，警告显示安全归类的原因（例如 `HTTP 429：服务限流`、`HTTP 404：OpenRouter 策略或白名单限制`）并提示「正在切换到 openrouter/typesafe/jev-1.14」，随后只对本次请求尝试一次 Jev。回退成功后提示实际模型和档位，状态栏及会话决策记录 `Jev（〈首选模型〉 回退）`；不改全局配置，下一条新消息仍先尝试首选模型。直接选择 Jev 时不反向回退。结果无效（如缺答案、档位非法、截断，或概率缺失、非有限数、超出 [0, 1]）或有效结果的所选概率低于 0.5 时均不触发回退，直接沿用当前生效强度：结果无效发一次警告，概率低于 0.5 静默沿用。
 - 每个分类模型独立限时 15 秒；含回退的分类等待最多约 30 秒，并可能额外消耗 Jev 的 OpenRouter 额度。最终没有可采用的结果时沿用原档位；若有实际错误，警告只列出出错模型的安全原因，不把低置信度列为错误。沿用当前分支最近一次档位（没有决策时用基线）。HTTP 状态码和常见错误按白名单转成中文，不显示服务端原文、端点或凭据；无法识别时明确提示原因未知。
-- 用户取消、切换会话或模型时停止分类和回退，不记录迟到决策；空白输入不调用。配置无效时不尝试任何模型，可在 `/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）` 中重新保存。
-- 复用 Pi 原生 classifier、OpenRouter 认证及代理。d1-ultra 是付费模型，价格以 [OpenRouter 端点信息](https://openrouter.ai/api/v1/models/liquid/d1-ultra/endpoints)为准。
-- OpenRouter 白名单需放行实际服务商及模型。`Latest` 别名还需放行解析后的固定版本，否则可能被 Guardrail 拦截。
+- 用户取消、切换会话或模型时停止分类和回退，不记录迟到决策；空白输入不调用。配置无效时不尝试任何模型，可在 `/personal → 原位思考强度 → 选择分类模型` 中重新保存。
+- 复用 Pi 原生 classifier、OpenRouter 认证及代理；宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 `~typesafe/jev-latest` 模板补充公开元数据，不修改服务商目录。四个分类模型均消耗 OpenRouter 额度，价格以 OpenRouter 公开端点信息为准。
+- OpenRouter 白名单需放行实际服务商（如 `typesafe`、`liquid`、`baseten`、`perplexity`）及对应模型，否则会被 Guardrail 拦截（常见表现为 HTTP 404）。
 - 子代理需加载本扩展，角色 thinking 作为基线；外部 CLI 代理不经过本扩展。
 - 仅 GPT-6 Codex：`configuration_update` 不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响。Codex 请求无法与上下文对齐时不注入，并显示「未调整」。
 
@@ -153,7 +155,7 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 | --- | --- |
 | `personal-extensions.json` | 五项功能的布尔开关 |
 | `auto-session-name.json` | 命名模型 `model` 和思考设置 `thinking` |
-| `inline-effort.json` | 分类模型：`{"model":"jev"}` 或 `{"model":"d1-ultra"}`；新文件缺失时兼容读取 `jev-inline-effort.json` |
+| `inline-effort.json` | 分类模型：`{"model":"jev"}`、`{"model":"d1-ultra"}`、`{"model":"mammoth-27b"}` 或 `{"model":"decider"}`；新文件缺失时兼容读取 `jev-inline-effort.json` |
 | `clickable-paths.json` | 路径链接设置 |
 | `personal-statusline.json` | 状态栏五项独立开关：`usageEnabled`、`sessionIdEnabled`、`tokenSpeedEnabled`、`styleEnabled`、`sessionTitleEnabled` |
 | `pi-statusline.json` | 第三方状态栏配色 |

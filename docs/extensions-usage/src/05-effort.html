@@ -4,7 +4,7 @@
     <p class="chapter-sum">用 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型时，按每条新消息的难度自动选档位，你不用手动切换。不用这些模型可以跳过本章。</p>
     <dl class="meta">
       <dt>功能</dt><dd>原位思考强度</dd>
-      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
+      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度</dd>
       <dt>配置文件</dt><dd>agent 目录下的 <code>inline-effort.json</code>（默认 <code>~/.pi/agent/</code>）；升级后原有设置自动保留</dd>
     </dl>
   </header>
@@ -74,7 +74,7 @@
         <li><span class="seg" data-seg="effort-04" data-say="用支持的模型启动 Pi，thinking 设为 medium。下面用 GPT 六 Codex 举例。">用支持的模型启动 Pi，thinking 设为 <code>medium</code>。下面用 GPT-6 Codex 举例。</span></li>
         <li><span class="seg" data-seg="effort-05" data-say="输入斜杠 personal，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。">输入 <code>/personal</code>，选原位思考强度，再选「查看分类模型与状态」。看到「适用」，说明主模型和 thinking 符合条件。</span></li>
         <li><span class="seg" data-seg="effort-06">在同一个菜单里选「测试分类模型可用性」，确认分类器能用。</span></li>
-        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。切换警告只表示首选失败，Jev 回退成功后会显示实际档位；全部失败才沿用当前档位。Codex 出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。切换警告只表示首选失败，Jev 回退成功后会显示实际档位；全部失败才沿用当前档位。Codex 出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
+        <li><span class="seg" data-seg="effort-07" data-say="发一条消息，看大脑图标段的档位。切换警告只表示首选报错，Jev 回退成功后会显示实际档位；未获合格结果才沿用当前档位。Codex 出现「未调整」，表示这次没有调整档位，按基线发出。">发一条消息，看 🧠 段的档位。切换警告只表示首选报错，Jev 回退成功后会显示实际档位；未获合格结果才沿用当前档位。Codex 出现「未调整」，表示这次没有调整档位，按基线发出。</span></li>
       </ol>
       <p>
         <span class="seg" data-seg="effort-07a" data-say="三个分支的写入方式不同。Codex 在当前用户消息前插入 configuration update。Anthropic 协议分支只修改 Pi 已生成的末尾空 system 消息中的 output config 点 effort，不改顶层配置、历史消息或 thinking block。">三个分支的写入方式不同。Codex 在当前用户消息前插入 <code>configuration_update</code>。Anthropic 协议分支只修改 Pi 已生成的末尾空 <code>system</code> 消息中的 <code>output_config.effort</code>，不改顶层配置、历史消息或 thinking block。</span>
@@ -85,7 +85,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 600 316" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">生效条件和确认步骤</title>
-          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex；Antigravity 还需安装并启用 pi-antigravity。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：先看回退结果，只有全部失败才沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
+          <desc id="fig-effort-2-desc">条件：主模型在支持范围内，接口和模型能力符合要求，thinking 不是 off，配置 OpenRouter 认证；Codex 还需登录 openai-codex；Antigravity 还需安装并启用 pi-antigravity。确认分四步：启动 Pi，在 /personal 的原位思考强度菜单里选「查看分类模型与状态」看到「适用」，选「测试分类模型可用性」确认分类器能用，发消息后看 🧠 段的档位：先看回退结果，未获合格结果才沿用当前档位；Codex 出现「未调整」表示这次没有调整档位、按基线发出。</desc>
           <g data-cue="effort-03">
             <text class="t-cap" x="16" y="16">条件</text>
             <rect class="n" x="16" y="28" width="20" height="20" rx="4"/>
@@ -125,7 +125,7 @@
             <text class="t-mono" x="16" y="286">4</text>
             <text class="t-mono" x="40" y="286">发一条消息</text>
             <text class="t-cap" x="232" y="286">看 🧠 段的档位</text>
-            <text class="t-cap" x="232" y="306">先看回退结果 · 全失败沿用 · 未调整按基线</text>
+            <text class="t-cap" x="232" y="306">先看回退结果 · 未合格沿用 · 未调整按基线</text>
           </g>
         </svg>
       </div>
@@ -190,7 +190,7 @@
           <text class="t-cap" x="232" y="270">满足条件的下一次请求后显示</text>
         </svg>
       </div>
-      <figcaption>示例。🧠 段显示最近一次选档位用的分类器，回退成功显示「Jev（d1-ultra 回退）」；全部失败时仍标注首选模型，表示最近尝试。空白消息不分类，显示「未分类」。</figcaption>
+      <figcaption>示例。🧠 段显示最近一次选档位用的分类器，非 Jev 模型回退成功时标注来源（例如「Jev（d1-ultra 回退）」「Jev（Mammoth 27B 回退）」）；全部失败时仍标注首选模型，表示最近尝试。空白消息不分类，显示「未分类」。</figcaption>
     </figure>
   </div>
 
@@ -204,7 +204,7 @@
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-4">
       <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、失败回退 Jev、最近决策尚无，以及切换和测试的菜单路径"></video></div>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。」在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -215,7 +215,7 @@
       <ol>
         <li><span class="seg" data-seg="effort-11" data-say="输入斜杠 personal，选原位思考强度。">输入 <code>/personal</code>，选原位思考强度。</span></li>
         <li><span class="seg" data-seg="effort-12">选「选择分类模型」。</span></li>
-        <li><span class="seg" data-seg="effort-13" data-say="用上下键选 Jev 或 D1 Ultra。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选 Jev 或 d1-ultra。</span></li>
+        <li><span class="seg" data-seg="effort-13" data-say="用上下键选 Jev、D1 Ultra、Mammoth 二十七 B 或 Decider v 一点二。">用 <kbd>↑</kbd> <kbd>↓</kbd> 键选 Jev、d1-ultra、Mammoth 27B 或 Decider v1.2。</span></li>
         <li><span class="seg" data-seg="effort-14" data-say="按 Enter 键保存；按 Esc 键放弃。两种操作都会返回二级菜单。">按 <kbd>Enter</kbd> 键保存；按 <kbd>Esc</kbd> 键放弃。两种操作都会返回二级菜单。</span></li>
       </ol>
       <p>
@@ -223,11 +223,11 @@
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-model" id="fig-effort-5">
-      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度的二级菜单，选「选择分类模型」，选择器标题显示当前 d1-ultra，光标在 Jev 和 d1-ultra 之间移动后按 Esc 键退出，不保存"></video></div>
+      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度的二级菜单，选「选择分类模型」，选择器标题显示当前 d1-ultra，光标在四个分类模型之间浏览后按 Esc 键退出，不保存"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 600 104" role="img" aria-labelledby="fig-effort-5-title fig-effort-5-desc">
           <title id="fig-effort-5-title">换分类器的按键步骤</title>
-          <desc id="fig-effort-5-desc">五步：输入 /personal 并选原位思考强度；选「选择分类模型」；用上下键选 Jev 或 d1-ultra；按 Enter 键保存或 Esc 键放弃；新分类器对所有会话生效。</desc>
+          <desc id="fig-effort-5-desc">五步：输入 /personal 并选原位思考强度；选「选择分类模型」；用上下键从 Jev、d1-ultra、Mammoth 27B、Decider v1.2 中选择；按 Enter 键保存或 Esc 键放弃；新分类器对所有会话生效。</desc>
           <defs>
             <marker id="fig-effort-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -252,7 +252,7 @@
             <rect class="n" x="304" y="26" width="32" height="34" rx="4"/>
             <line x1="306" y1="60" x2="334" y2="60" style="stroke:var(--rule-solid);stroke-width:2"/>
             <text class="t-mono" x="320" y="48" text-anchor="middle">↓</text>
-            <text class="t-cap" x="301" y="88" text-anchor="middle">选 Jev 或 d1-ultra</text>
+            <text class="t-cap" x="301" y="88" text-anchor="middle">选四个模型之一</text>
           </g>
           <g data-cue="effort-14">
             <rect class="n" x="356" y="26" width="60" height="34" rx="4"/>
@@ -278,7 +278,7 @@
       <ul class="fig-notes">
         <li>新分类器从下一条还没分类的消息开始用，已有消息的档位不变。</li>
       </ul>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 选择分类模型。在临时 agent 目录录制，只操作选择器，不发送模型消息。选择器标题显示当前 d1-ultra（录制环境的配置，默认是 Jev）；光标从 Jev 移到 d1-ultra 再回到 Jev，按 Esc 键退出，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。二级菜单只保留状态查看、模型选择和可用性测试三个设置项。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 选择分类模型。在临时 agent 目录录制，只操作选择器，不发送模型消息。选择器标题显示当前 d1-ultra（录制环境的示例配置，默认是 Jev），列出 Jev、d1-ultra、Mammoth 27B、Decider v1.2 四项；光标下移浏览到 Mammoth 27B 后回到 Jev，按 Esc 键退出，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。二级菜单只保留状态查看、模型选择和可用性测试三个设置项。</figcaption>
     </figure>
   </div>
 
@@ -287,31 +287,31 @@
     <div class="beat-text">
       <h3>分类失败怎么办</h3>
       <p>
-        <span class="seg" data-seg="effort-16">d1-ultra 超时、出错或结果无效时，警告会说明原因并提示「正在切换到 Jev」。有效结果的概率低于 0.5 时也尝试 Jev，但不发警告。Jev 成功后，提示实际档位，状态栏显示「Jev（d1-ultra 回退）」。</span>
-        <span class="seg" data-seg="effort-17" data-say="最终没有合格结果时沿用当前档位，只报告实际错误；仅有低置信度时不发警告。可在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」检查。">最终没有合格结果时沿用当前档位，只报告实际错误；仅有低置信度时不发警告。可在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」检查。</span>
-        <span class="seg" data-seg="effort-17a">自动回退只影响本次，不改全局选择，下一条新消息仍先尝试 d1-ultra。直接选择 Jev 时不反向回退。用户取消时停止分类，不回退，也不写决策。</span>
+        <span class="seg" data-seg="effort-16" data-say="首选非 Jev 模型请求超时或服务出错时，警告会说明原因并提示正在切换到 Jev。Jev 成功后，提示实际档位，状态栏显示如「Jev（D1 Ultra 回退）」。">首选非 Jev 模型请求超时或服务出错时，警告会说明原因并提示正在切换到 Jev。Jev 成功后，提示实际档位，状态栏显示如「Jev（d1-ultra 回退）」。</span>
+        <span class="seg" data-seg="effort-17" data-say="如果返回结果无效或所选概率低于 0.5，不触发回退，直接保持当前思考强度不变：结果无效发一次警告，概率低于 0.5 不发警告。可在斜杠 personal 的原位思考强度菜单里选「测试分类模型可用性」检查。">如果返回结果无效或所选概率低于 0.5，不触发回退，直接保持当前思考强度不变：结果无效发一次警告，概率低于 0.5 不发警告。可在 <code>/personal</code> 的原位思考强度菜单里选「测试分类模型可用性」检查。</span>
+        <span class="seg" data-seg="effort-17a">自动回退只影响本次，不改全局选择，下一条新消息仍先尝试首选模型。直接选择 Jev 时不反向回退。用户取消时停止分类，不回退，也不写决策。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="fig-scroll">
         <svg viewBox="0 0 600 212" role="img" aria-labelledby="fig-effort-6-title fig-effort-6-desc">
           <title id="fig-effort-6-title">分类失败时会怎样</title>
-          <desc id="fig-effort-6-desc">d1-ultra 超时、出错或结果无效时，警告显示安全原因并尝试 Jev；有效结果的概率低于 0.5 时也尝试 Jev，但不发警告。Jev 成功就采用新档位；全部失败才沿用上次档位，没有决策时用基线。可在 /personal 的原位思考强度菜单里测试分类模型可用性。</desc>
+          <desc id="fig-effort-6-desc">首选非 Jev 模型超时或服务出错时，警告显示安全原因并尝试一次 Jev；Jev 成功就采用新档位，仍失败则沿用当前档位。结果无效或概率低于 0.5 时不回退 Jev，直接沿用当前档位（概率低于 0.5 不发警告）。可在 /personal 的原位思考强度菜单里测试分类模型可用性。</desc>
           <defs>
             <marker id="fig-effort-6-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
           <g data-cue="effort-16">
             <line class="w" x1="264" y1="40" x2="294" y2="40" marker-end="url(#fig-effort-6-arrow)"/>
             <rect class="n" x="16" y="20" width="248" height="40" rx="6"/>
-            <text class="t" x="140" y="45" text-anchor="middle">d1-ultra 超时、出错或无效</text>
+            <text class="t" x="140" y="45" text-anchor="middle">非 Jev 模型超时或服务出错</text>
             <rect class="n" x="296" y="20" width="288" height="40" rx="6"/>
             <text class="t" x="440" y="45" text-anchor="middle">说明原因 → Jev 自动回退</text>
           </g>
           <line class="w" x1="264" y1="96" x2="294" y2="96" marker-end="url(#fig-effort-6-arrow)"/>
           <rect class="n" x="16" y="76" width="248" height="40" rx="6"/>
-          <text class="t" x="140" y="101" text-anchor="middle">Jev 成功 / 所有尝试失败</text>
+          <text class="t" x="140" y="101" text-anchor="middle">结果无效 / 概率低于 0.5</text>
           <rect class="n" x="296" y="76" width="288" height="40" rx="6"/>
-          <text class="t" x="440" y="101" text-anchor="middle">采用 / 沿用，仅错误警告</text>
+          <text class="t" x="440" y="101" text-anchor="middle">不回退 · 保持当前档位</text>
           <text class="t-cap" x="16" y="140">当前档位：上一条消息的档位；没有上一条消息时，用基线。对话照常进行。</text>
           <g data-cue="effort-17">
             <line class="w" x1="264" y1="180" x2="294" y2="180" marker-end="url(#fig-effort-6-arrow)"/>
@@ -322,7 +322,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>「把握不足」指有效结果的所选档位概率低于 0.5，不发警告；缺答案、非法档位、概率缺失或超出范围仍是无效结果，要发警告。切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code>原因只显示安全分类和 HTTP 状态码，不显示服务端原文或凭据；无法识别时明确提示原因未知。所有尝试都失败才沿用当前分支最近档位，没有决策时用基线。</figcaption>
+      <figcaption>「把握不足」指有效结果的所选档位概率低于 0.5，不发警告也不回退；缺答案、非法档位、概率缺失或超出范围属于结果无效，发一次警告但不回退。只有请求超时或服务报错才触发切换警告，示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/typesafe/jev-1.14。仅本次回退，全局选择不变。</code>原因只显示安全分类和 HTTP 状态码，不显示服务端原文或凭据；无法识别时明确提示原因未知。未获得合格档位时沿用当前分支最近档位，没有决策时用基线。</figcaption>
     </figure>
   </div>
 
@@ -331,7 +331,7 @@
     <div class="beat-text">
       <h3>要注意什么：额度和隐私</h3>
       <p>
-        <span class="seg" data-seg="effort-18" data-say="每个分类模型最多等 15 秒，含回退最多约 30 秒。分类和回退都消耗 OpenRouter 额度；D1 Ultra 是付费模型。">每个分类模型最多等 15 秒，含回退最多约 30 秒。分类和回退都消耗 OpenRouter 额度；d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-18">每个分类模型最多等 15 秒，含回退最多约 30 秒。分类和回退都消耗 OpenRouter 额度，四个分类模型均按输入计费。</span>
         <span class="seg" data-seg="effort-19">「原位思考强度」把当前消息和之前最多 6 条对话消息的文本发给分类器，可能含业务信息。工具输出、思考内容和图片不发送。</span>
       </p>
     </div>
@@ -355,7 +355,7 @@
           <g data-cue="effort-18">
             <path d="M192 84 V88 H392 V84" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
             <text class="t-cap" x="292" y="108" text-anchor="middle">每模型 15 秒 · 回退共约 30 秒</text>
-            <text class="t-cap" x="292" y="128" text-anchor="middle">消耗 OpenRouter 额度（d1-ultra 付费）</text>
+            <text class="t-cap" x="292" y="128" text-anchor="middle">消耗 OpenRouter 额度（按输入计费）</text>
           </g>
           <g data-cue="effort-19">
             <line x1="16" y1="146" x2="584" y2="146" style="stroke:var(--rule);stroke-width:1"/>
@@ -364,7 +364,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>虚线框是外部服务。d1-ultra 的价格以 OpenRouter 公布的为准。</figcaption>
+      <figcaption>虚线框是外部服务。四个分类模型的价格均以 OpenRouter 公布的为准。</figcaption>
     </figure>
   </div>
 

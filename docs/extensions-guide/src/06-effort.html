@@ -4,9 +4,9 @@
     <p class="chapter-sum">按每条新用户消息调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型或 Antigravity 分支的指定 Claude 模型的思考档位。三个分支分别用 <code>configuration_update</code>、Anthropic 原生逐消息标记或插件 runtime ID 路由写入档位。</p>
     <dl class="meta">
       <dt>功能 ID</dt><dd><code>inline-effort</code></dd>
-      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度（Jev / d1-ultra）</dd>
+      <dt>入口</dt><dd><code>/personal</code> → 原位思考强度</dd>
       <dt>配置</dt><dd>默认 <code>~/.pi/agent/inline-effort.json</code>，目录跟随 <code>PI_CODING_AGENT_DIR</code>；兼容读取旧的 <code>jev-inline-effort.json</code></dd>
-      <dt>分类器</dt><dd>Jev（默认）· d1-ultra</dd>
+      <dt>分类器</dt><dd>Jev（默认）· d1-ultra · Mammoth 27B · Decider v1.2</dd>
     </dl>
   </header>
 
@@ -21,7 +21,7 @@
         <span class="seg" data-seg="effort-01b">近期对话只补全同一任务的信息，不继承旧难度。示例：修改位置和方式明确的字号调整可用 low，改做图示设计可用 high；按成熟口径查数画图可用 medium，排查混杂原因可用 xhigh。示例不是线上分类保证。</span>
         <span class="seg" data-seg="effort-01c">不因专业主题、成片精美、代理多或反复报错自动提档；只有无法识别任务要求时才以 high 保守兜底。思考强度不替代模型专长、授权和实测。分类器只读有限文本，看不到图片和工具结果，同轮工具续调不重新分类，历史决策不变。</span>
         <span class="seg" data-seg="effort-03">空白输入不调用分类器，沿用当前强度。当前强度是当前分支最近一次决策；没有决策就用基线，也就是 Pi 的 thinking 设置。</span>
-        <span class="seg" data-seg="effort-04">非空才调用分类器。每个分类模型最多等 15 秒；d1-ultra 失败后尝试 Jev，合计最多约 30 秒。</span>
+        <span class="seg" data-seg="effort-04">非空才调用分类器。每个分类模型最多等 15 秒；首选非 Jev 模型超时或报错后尝试一次 Jev，合计最多约 30 秒。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-1">
@@ -78,7 +78,7 @@
       </div>
       <ul class="fig-notes">
         <li>不再分类：工具续调、重试、自定义消息、bash 命令输出。steer 和 follow-up 追加的用户消息算新消息。</li>
-        <li>分类器：Jev（<code>~typesafe/jev-latest</code>，默认）或 d1-ultra（<code>liquid/d1-ultra</code>，付费），只回答 <code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。</li>
+        <li>分类器：Jev（<code>typesafe/jev-1.14</code>，默认）、d1-ultra（<code>liquid/d1-ultra</code>）、Mammoth 27B（<code>baseten/mammoth-1</code>）或 Decider v1.2（<code>perplexity/pplx-decider-v1.2</code>），均只回答 <code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 <code>~typesafe/jev-latest</code> 模板补充元数据，不覆盖服务商目录。</li>
         <li>只发对话文本，不发系统提示词、工具结果、思考块和图片数据（图片换成「[附有图片]」）。</li>
         <li>对话内容预算按 UTF-16 单元计：当前请求最多 12000，近期最多 6 条用户或助手消息、最多 8000，合计不超过 16000；另加固定提示语和分类规则。</li>
         <li>GPT-6 Codex：接口是 <code>openai-codex-responses</code>，模型 ID 以 <code>gpt-6</code> 开头，thinking 不是 <code>off</code>。</li>
@@ -96,7 +96,7 @@
       <h3>分类结果怎么用</h3>
       <p>
         <span class="seg" data-seg="effort-05">分类正常完成、档位有效，且概率是 0.5 到 1 之间的有限数，这叫结果合格。结果合格，扩展就采用这个档位。</span>
-        <span class="seg" data-seg="effort-06">d1-ultra 超时、出错或结果无效时，警告先显示安全原因和「正在切换到 Jev」。有效结果的概率低于 0.5 时也尝试 Jev，但不发警告。Jev 成功就采用新档位；最终没有合格结果则沿用当前强度，只报告实际错误。仅有低置信度时静默沿用。直接选择 Jev 时不反向回退。</span>
+        <span class="seg" data-seg="effort-06">首选非 Jev 模型超时或服务出错时，警告先显示安全原因和「正在切换到」提示，再尝试一次 Jev。Jev 成功就采用新档位；仍无合格结果则沿用当前强度。结果无效或有效结果的概率低于 0.5 时均不触发回退，直接沿用当前强度：结果无效发一次警告，低置信度静默沿用。直接选择 Jev 时不反向回退。</span>
         <span class="seg" data-seg="effort-07">采用和最终沿用都写入决策。回退成功时记录实际分类器和回退来源；用户取消时不回退、不写入。</span>
         <span class="seg" data-seg="effort-08">多条新消息只分类一次，结果写给每一条。</span>
       </p>
@@ -105,7 +105,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 320" role="img" aria-labelledby="fig-effort-2-title fig-effort-2-desc">
           <title id="fig-effort-2-title">分类结果的去向</title>
-          <desc id="fig-effort-2-desc">d1-ultra 失败先尝试 Jev；最终结果合格就采用该档位，最终没有合格结果则沿用当前强度，只有实际错误才警告，低置信度不警告。两条路都写入决策，用户取消不回退、不写；同批新消息共用结果。</desc>
+          <desc id="fig-effort-2-desc">首选非 Jev 模型超时或出错时先尝试一次 Jev；结果合格就采用该档位，结果无效或概率低于 0.5 时不回退、直接沿用当前强度，只有实际错误或结果无效才警告，低置信度不警告。两条路都写入决策，用户取消不回退、不写；同批新消息共用结果。</desc>
           <defs>
             <marker id="fig-effort-2-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
             <marker id="fig-effort-2-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--accent)"/></marker>
@@ -134,8 +134,8 @@
             <text class="t-cap" x="434" y="100" text-anchor="middle">否</text>
             <rect class="n" x="464" y="84" width="160" height="56" rx="6"/>
             <text class="t" x="544" y="108" text-anchor="middle">沿用当前强度</text>
-            <text class="t-cap" x="544" y="126" text-anchor="middle">所有尝试均失败</text>
-            <text class="t-cap" x="464" y="172">仅实际错误警告</text>
+            <text class="t-cap" x="544" y="126" text-anchor="middle">未获合格结果</text>
+            <text class="t-cap" x="464" y="172">仅错误或无效警告</text>
           </g>
 
           <g data-cue="effort-07">
@@ -159,9 +159,9 @@
       <ul class="fig-notes">
         <li>「合格」：分类正常完成，档位在五档之内，所选档位的概率是 0.5 到 1 之间的有限数。</li>
         <li>多条新消息时，扩展按最后一条用户消息分类。</li>
-        <li>d1-ultra 失败先尝试 Jev；只有最终仍无合格结果，才走「沿用当前强度」分支。不会改全局选择，下一条新消息重新尝试首选模型。</li>
-        <li>切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。</code></li>
-        <li>原因只显示 HTTP 状态码及白名单中文分类；不显示服务端原文、端点或凭据。无法识别时明确提示原因未知。最终没有合格结果时，仅列出实际错误及沿用档位，低置信度不警告，并提示通过 <code>/personal</code> 检查。</li>
+        <li>首选非 Jev 模型（<code>d1-ultra</code>、<code>Mammoth 27B</code>、<code>Decider v1.2</code>）请求超时或服务报错时先尝试一次 Jev；结果无效或概率低于 <code>0.5</code> 时不触发回退，直接沿用当前强度。回退不会改全局选择，下一条新消息重新尝试首选模型。</li>
+        <li>切换警告示例：<code>openrouter/liquid/d1-ultra 分类失败（HTTP 429：服务限流），正在切换到 openrouter/typesafe/jev-1.14。仅本次回退，全局选择不变。</code></li>
+        <li>原因只显示 HTTP 状态码及白名单中文分类（携带 Guardrail 或数据策略关键词时优先归类为「OpenRouter 策略或白名单限制」）；不显示服务端原文、端点或凭据。无法识别时明确提示原因未知。最终没有合格结果时，仅列出实际错误及沿用档位，低置信度不警告，并提示通过 <code>/personal</code> 检查。</li>
         <li>分类进行中如果切换了会话或模型，迟到的结果不写入。</li>
       </ul>
     </figure>
@@ -386,13 +386,13 @@
       <h3>状态栏</h3>
       <p>
         <span class="seg" data-seg="effort-18" data-say="状态栏的思考强度段显示当前强度、基线和最近一次决策的分类器，例如：x high，基线 medium，Jev。当前强度等于基线时，只显示一个档位。">状态栏的 🧠 段显示当前强度、基线和最近一次决策的分类器，例如 <code>🧠 xhigh · 基线 medium · Jev</code>。当前强度等于基线时，只显示一个档位。</span>
-        <span class="seg" data-seg="effort-18a">d1-ultra 回退成功时，分类器显示「Jev（d1-ultra 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。</span>
+        <span class="seg" data-seg="effort-18a" data-say="非 Jev 模型回退成功时，分类器标注回退来源，例如「Jev（D1 Ultra 回退）」或「Jev（Mammoth 二十七 B 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。">非 Jev 模型回退成功时，分类器标注回退来源，例如「Jev（d1-ultra 回退）」或「Jev（Mammoth 27B 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。</span>
         <span class="seg" data-seg="effort-19">对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="demo" id="effort-demo">
-        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；d1-ultra 失败先回退 Jev，最终仍失败才沿用当前强度。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
+        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；非 Jev 模型服务报错时先回退一次 Jev，结果无效或概率低于 0.5 时不回退、直接沿用当前强度。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
         <form class="effort-demo-form" hidden>
           <div class="effort-demo-grid">
             <label>基线 thinking
@@ -402,7 +402,7 @@
             </label>
             <label>分类器
               <select name="model">
-                <option value="Jev" selected>Jev</option><option value="d1-ultra">d1-ultra</option>
+                <option value="Jev" selected>Jev</option><option value="d1-ultra">d1-ultra</option><option value="Mammoth 27B">Mammoth 27B</option><option value="Decider v1.2">Decider v1.2</option>
               </select>
             </label>
             <label>分类结果
@@ -453,18 +453,18 @@
         <thead><tr><th>菜单项</th><th>处理函数参数</th><th>作用</th><th>Pi 运行 agent 时</th></tr></thead>
         <tbody>
           <tr><td>查看分类模型与状态</td><td><code>status</code></td><td>是否适用、后续分类器、失败回退策略、当前分支最近决策</td><td>可用</td></tr>
-          <tr data-cue="effort-21"><td>选择分类模型（Jev / d1-ultra）</td><td><code>model</code></td><td>选择器，<kbd>Esc</kbd> 键取消不保存</td><td>不可用</td></tr>
+          <tr data-cue="effort-21"><td>选择分类模型</td><td><code>model</code></td><td>选择器（4 个模型），<kbd>Esc</kbd> 键取消不保存</td><td>不可用</td></tr>
           <tr data-cue="effort-22"><td>测试分类模型可用性</td><td><code>test</code></td><td>样例「把 hello 转成大写。」；不读会话，不改强度，不写决策</td><td>不可用</td></tr>
         </tbody>
       </table>
       <ul class="fig-notes">
-        <li>菜单路径：<code>/personal</code> → 原位思考强度（Jev / d1-ultra）→ 菜单项。<code>/personal</code> 有 UI 就能用（TUI、RPC）。</li>
+        <li>菜单路径：<code>/personal</code> → 原位思考强度 → 菜单项。<code>/personal</code> 有 UI 就能用（TUI、RPC）。</li>
         <li>这些菜单项调用功能自己的处理函数。处理函数只存在 <code>/personal</code> 的 commands 表里，不再注册成斜杠命令，所以没有 <code>/effort</code>。</li>
         <li>配置文件格式错误时，扩展报错，不退回 Jev；在「选择分类模型」里重新保存即可修复。</li>
         <li>兼容规则：<code>inline-effort.json</code> 不存在时才读 <code>jev-inline-effort.json</code>；新文件格式错误时报错，不回退旧文件；旧文件保留不改写。开关新键 <code>inline-effort</code> 存在时以新键为准，否则读旧键 <code>jev-inline-effort</code>。</li>
-        <li>OpenRouter 白名单要放行实际服务商和模型；<code>Latest</code> 别名还要放行解析后的固定版本。</li>
+        <li>四个分类器均绑定固定模型 ID，OpenRouter 白名单只需放行实际服务商和对应模型。</li>
       </ul>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。」在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。」在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；新会话没有决策，显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -474,7 +474,7 @@
       <h3>子代理与代价</h3>
       <p>
         <span class="seg" data-seg="effort-24">子代理要加载本扩展才会分类，基线取子代理自己的 thinking 设置。外部 CLI 代理不经过本扩展。</span>
-        <span class="seg" data-seg="effort-25" data-say="代价有三项：每条新消息等待分类，每个模型最多 15 秒，含回退最多约 30 秒；分类及回退消耗 OpenRouter 的额度；发出的文本可能含业务信息。D1 Ultra 是付费模型。">代价有三项：每条新消息等待分类，每个模型最多 15 秒，含回退最多约 30 秒；分类及回退消耗 OpenRouter 的额度；发出的文本可能含业务信息。d1-ultra 是付费模型。</span>
+        <span class="seg" data-seg="effort-25">代价有三项：每条新消息等待分类，每个模型最多 15 秒，含回退最多约 30 秒；分类及回退消耗 OpenRouter 的额度；发出的文本可能含业务信息。四个分类模型均按输入计费。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-8">
@@ -498,13 +498,13 @@
           <g data-cue="effort-25">
             <path d="M200 96 V100 H400 V96" style="fill:none;stroke:var(--warn);stroke-width:1.5"/>
             <text class="t-cap" x="300" y="122" text-anchor="middle">等待：每模型 15 秒，回退共约 30 秒</text>
-            <text class="t-cap" x="300" y="142" text-anchor="middle">额度：消耗 OpenRouter 额度，d1-ultra 付费</text>
+            <text class="t-cap" x="300" y="142" text-anchor="middle">额度：消耗 OpenRouter 额度，按输入计费</text>
             <text class="t-cap" x="300" y="162" text-anchor="middle">外发：对话文本可能含业务信息</text>
           </g>
         </svg>
       </div>
       <ul class="fig-notes">
-        <li>d1-ultra 的价格以 OpenRouter 端点信息为准。</li>
+        <li>四个分类模型的价格均以 OpenRouter 端点信息为准。</li>
       </ul>
       <figcaption>虚线框是外部服务（OpenRouter）。</figcaption>
     </figure>
@@ -535,7 +535,12 @@
         form.hidden = false;
         const out = (key) => form.querySelector(`[data-out="${key}"]`);
         const LEVELS = ["low", "medium", "high", "xhigh", "max"];
-        const IDS = { "Jev": "~typesafe/jev-latest", "d1-ultra": "liquid/d1-ultra" };
+        const IDS = {
+          "Jev": "typesafe/jev-1.14",
+          "d1-ultra": "liquid/d1-ultra",
+          "Mammoth 27B": "baseten/mammoth-1",
+          "Decider v1.2": "perplexity/pplx-decider-v1.2",
+        };
         // 本地示例计算；实际回退会重新调用 Jev，不保证得到 low。
         const render = () => {
           const base = form.base.value;
@@ -549,18 +554,19 @@
           let warn = "无";
           const lowConfidence = LEVELS.includes(result) && Number.isFinite(p) && p >= 0 && p < 0.5;
           const failed = result !== "empty" && !(LEVELS.includes(result) && p >= 0.5 && p <= 1);
-          form.fallbackOk.disabled = name !== "d1-ultra" || !failed;
+          const serviceError = result === "error";
+          form.fallbackOk.disabled = name === "Jev" || !serviceError;
           if (result === "empty") label = "未分类";
           else if (!failed) level = result;
-          else {
-            const reason = result === "error" ? "HTTP 429：服务限流" : "结果无效";
-            if (name === "d1-ultra") {
-              warn = lowConfidence ? "" : `openrouter/${IDS[name]} 分类失败（${reason}），正在切换到 openrouter/~typesafe/jev-latest。仅本次回退，全局选择不变。`;
-              if (form.fallbackOk.checked) {
-                level = "low"; label = "Jev（d1-ultra 回退）";
-                warn += " 已回退到 Jev，本次分类：low（示例，普通提示）。";
-              } else warn += ` Jev 也失败（示例：HTTP 503：上游服务异常），思考强度沿用 ${base}。`;
-            } else if (!lowConfidence) warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${base}。`;
+          else if (serviceError && name !== "Jev") {
+            warn = `openrouter/${IDS[name]} 分类失败（HTTP 429：服务限流），正在切换到 openrouter/typesafe/jev-1.14。仅本次回退，全局选择不变。`;
+            if (form.fallbackOk.checked) {
+              level = "low"; label = `Jev（${name} 回退）`;
+              warn += " 已回退到 Jev，本次分类：low（示例，普通提示）。";
+            } else warn += ` Jev 也失败（示例：HTTP 503：上游服务异常），思考强度沿用 ${base}。`;
+          } else if (!lowConfidence) {
+            const reason = serviceError ? "HTTP 429：服务限流" : "结果无效";
+            warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${base}。`;
           }
           if (form.misaligned.checked) {
             out("level").textContent = `${level}（本次请求未生效）`;

@@ -8,11 +8,11 @@
 - npm run check = tsc --noEmit + node --test --experimental-strip-types tests/*.test.mjs —— package.json:15-19
 - 包是 private —— package.json:6
 - 改代码后 /reload；卸载 pi remove "$(pwd)" —— README.md:15
-- 六个配置文件默认在 ~/.pi/agent/ —— README.md:161-172
-- 六个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:125；extensions/auto-session-name.ts:37、61-62；extensions/inline-effort.ts:25、48；extensions/clickable-paths.ts:235；extensions/statusline.ts:930-932；README.md:161-174；tests/personal.test.mjs:38-41
+- 六个配置文件默认在 ~/.pi/agent/ —— README.md:150-162
+- 六个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:125；extensions/auto-session-name.ts:37、61-62；extensions/inline-effort.ts:49、70；extensions/clickable-paths.ts:235；extensions/statusline.ts:930-932；README.md:150-164；tests/personal.test.mjs:38-41
 - clickable-paths.json 直接覆盖写入，失败静默 —— extensions/clickable-paths.ts:48-55
-- 其余五个文件先写临时文件再 rename —— extensions/pi-personal-extensions.ts:240-246；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:47-58；extensions/statusline.ts:947-952
-- 命名和分类器设置不修改 Pi 的 settings.json —— README.md:174
+- 其余五个文件先写临时文件再 rename —— extensions/pi-personal-extensions.ts:240-246；extensions/auto-session-name.ts:60-75；extensions/inline-effort.ts:68-80；extensions/statusline.ts:947-952
+- 命名和分类器设置不修改 Pi 的 settings.json —— README.md:163
 - Pi 没有普通用户消息的边框钩子 —— extensions/user-message-border.ts:15
 - 替换 UserMessageComponent.prototype.render，只在 TUI 模式 —— extensions/user-message-border.ts:13、16-17、43
 - 会话关闭时停用本层；当前 render 仍是本层时才恢复原方法 —— extensions/user-message-border.ts:44-48、51-54
@@ -23,7 +23,7 @@
 - 「没有边框时先查 Pi 是否改了消息行结构」：依据回退条件 —— extensions/user-message-border.ts:25-31
 - 开发循环「改代码 → npm run check → /reload」：/reload 来自 README.md:15，check 来自 README.md:198（「运行 npm run check 检查类型并执行全部测试」）；三步的顺序是讲解的组织方式
 - 「边框测试加载真实 Pi 组件，新版 Pi 改了这个组件时测试可能先报错」—— tests/user-message-border.test.mjs:4-10、33-64（测试直接调用真实组件的 render）
-- 分类器设置文件改名为 inline-effort.json；新文件 ENOENT 时才读旧 jev-inline-effort.json；旧文件不删不改，保存只写新文件 —— extensions/inline-effort.ts:21-35、46-48；scratchpad/restructure-report.md 第 3 节
+- 分类器设置文件改名为 inline-effort.json；新文件 ENOENT 时才读旧 jev-inline-effort.json；旧文件不删不改，保存只写新文件 —— extensions/inline-effort.ts:43-57、68-70；scratchpad/restructure-report.md 第 3 节
 
 - 第六个配置 personal-statusline.json 只存五项独立布尔开关，默认全开，独立配置也用临时文件加 rename —— extensions/statusline.ts:47-94、304-338；tests/statusline.test.mjs「独立开关写入或 rename 失败时不覆盖配置、不应用运行时变更」。
 

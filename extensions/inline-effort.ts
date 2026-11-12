@@ -9,8 +9,30 @@ import type {
   ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
 const DECISION_MODELS = {
-  jev: { name: "Jev", id: "~typesafe/jev-latest" },
-  "d1-ultra": { name: "d1-ultra", id: "liquid/d1-ultra" },
+  jev: {
+    name: "Jev",
+    id: "typesafe/jev-1.14",
+    contextWindow: 262_144,
+    cost: { input: 0.042, output: 0, cacheRead: 0, cacheWrite: 0 },
+  },
+  "d1-ultra": {
+    name: "d1-ultra",
+    id: "liquid/d1-ultra",
+    contextWindow: 32_768,
+    cost: { input: 0.042, output: 0, cacheRead: 0.042, cacheWrite: 0 },
+  },
+  "mammoth-27b": {
+    name: "Mammoth 27B",
+    id: "baseten/mammoth-1",
+    contextWindow: 16_384,
+    cost: { input: 0.1, output: 0, cacheRead: 0, cacheWrite: 0 },
+  },
+  decider: {
+    name: "Decider v1.2",
+    id: "perplexity/pplx-decider-v1.2",
+    contextWindow: 262_144,
+    cost: { input: 0.02, output: 0, cacheRead: 0, cacheWrite: 0 },
+  },
 } as const;
 type DecisionModel = keyof typeof DECISION_MODELS;
 
@@ -33,18 +55,18 @@ export function readEffortSettings(): { model: DecisionModel } {
     raw = JSON.parse(text);
   } catch (cause) {
     if (cause instanceof Error && "code" in cause && cause.code === "ENOENT") return { model: "jev" };
-    throw new Error(`无法读取 ${filename}，请检查格式和权限，或在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。`, { cause });
+    throw new Error(`无法读取 ${filename}，请检查格式和权限，或在 /personal → 原位思考强度 → 选择分类模型 中重新保存。`, { cause });
   }
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
-    throw new Error(`${filename} 必须是 JSON 对象。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。`);
+    throw new Error(`${filename} 必须是 JSON 对象。请在 /personal → 原位思考强度 → 选择分类模型 中重新保存。`);
   const { model = "jev" } = raw as { model?: unknown };
   if (!isDecisionModel(model))
-    throw new Error("思考分类模型配置无效，只支持 jev 或 d1-ultra。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 中重新保存。");
+    throw new Error("思考分类模型配置无效，只支持 jev、d1-ultra、mammoth-27b 或 decider。请在 /personal → 原位思考强度 → 选择分类模型 中重新保存。");
   return { model };
 }
 
 export function saveEffortSettings(model: DecisionModel): void {
-  if (!isDecisionModel(model)) throw new Error("请选择 Jev 或 d1-ultra。");
+  if (!isDecisionModel(model)) throw new Error("请选择 Jev、d1-ultra、Mammoth 27B 或 Decider v1.2。");
   const path = join(getAgentDir(), "inline-effort.json");
   const temporaryPath = `${path}.${randomUUID()}.tmp`;
   try {
@@ -71,7 +93,9 @@ const CODEX_API = "openai-codex-responses";
 const CLASSIFIER_PROVIDER = "openrouter";
 const CLASSIFICATION_TIMEOUT_MS = 15_000;
 const modelKey = (model: DecisionModel) => `${CLASSIFIER_PROVIDER}/${DECISION_MODELS[model].id}`;
-const classifierLabel = (model: unknown, fallbackFrom?: unknown) => model === "jev" && fallbackFrom === "d1-ultra" ? "Jev（d1-ultra 回退）"
+const classifierLabel = (model: unknown, fallbackFrom?: unknown) =>
+  model === "jev" && isDecisionModel(fallbackFrom) && fallbackFrom !== "jev"
+    ? `Jev（${DECISION_MODELS[fallbackFrom].name} 回退）`
   : model === undefined ? "Jev" // 旧决策均来自 Jev。
   : model === "elephant" ? "Elephant（历史）"
   : isDecisionModel(model) ? DECISION_MODELS[model].name : "未分类";
@@ -120,19 +144,18 @@ function classificationPrompt(messages: readonly Message[]): string {
   return `${history ? `近期对话（用于补全当前请求省略的目标、约束和交付要求；新任务不继承）:\n${history}\n\n` : ""}当前用户请求:\n${current}`;
 }
 
-/** 只补充 d1-ultra 的模型元数据，复用 OpenRouter 原生 classifier、端点和认证，不覆盖服务商目录。 */
+/** 只补充目录未收录的分类模型元数据，复用 OpenRouter 原生 classifier、端点和认证，不覆盖服务商目录。 */
 function resolveClassifier(ctx: ExtensionContext, selected: DecisionModel): ClassifierModel<any> {
-  const known = ctx.modelRegistry.findOfType("classifier", CLASSIFIER_PROVIDER, DECISION_MODELS[selected].id);
+  const entry = DECISION_MODELS[selected];
+  const known = ctx.modelRegistry.findOfType("classifier", CLASSIFIER_PROVIDER, entry.id);
   if (known) return known;
-  const template = selected === "d1-ultra"
-    ? ctx.modelRegistry.findOfType("classifier", CLASSIFIER_PROVIDER, DECISION_MODELS.jev.id) : undefined;
+  const template = ctx.modelRegistry.findOfType("classifier", CLASSIFIER_PROVIDER, "~typesafe/jev-latest");
   if (!template || template.api !== "typesafe-system-one")
     throw new Error("Pi 中没有可用的 OpenRouter System One classifier。");
-  // 价格来自 OpenRouter 公开端点元数据；不改服务商的模型目录。
   return {
-    ...template, id: DECISION_MODELS["d1-ultra"].id, name: DECISION_MODELS["d1-ultra"].name,
-    input: ["text"], contextWindow: 32_768,
-    cost: { input: 0.042, output: 0, cacheRead: 0.042, cacheWrite: 0 },
+    ...template, id: entry.id, name: entry.name,
+    input: ["text"], contextWindow: entry.contextWindow,
+    cost: { ...entry.cost },
   };
 }
 
@@ -144,9 +167,9 @@ function classificationFailure(error: unknown): string {
     "400": "分类请求被拒绝", "401": "认证失败", "402": "额度不足", "403": "权限或策略限制",
     "404": "模型或端点不可用", "408": "服务请求超时", "413": "分类输入过大", "429": "服务限流",
   };
-  const reason = status ? reasons[status] ?? "上游服务异常"
+  const reason = /guardrail|privacy|data policy/i.test(message) ? "OpenRouter 策略或白名单限制"
+    : status ? reasons[status] ?? "上游服务异常"
     : /没有可用的.*classifier/.test(message) ? "Pi 中找不到可用的分类模型"
-    : /guardrail|privacy|data policy/i.test(message) ? "OpenRouter 策略或白名单限制"
     : /no (?:available )?endpoints/i.test(message) ? "没有可用的模型端点"
     : /rate.?limit|too many requests/i.test(message) ? "服务限流"
     : /api.?key|credential|unauthori[sz]ed/i.test(message) ? "认证不可用"
@@ -282,7 +305,7 @@ export default function (pi: ExtensionAPI) {
     const controller = new AbortController();
     pendingRequest = controller;
     const requestSignal = AbortSignal.any([controller.signal, ...(ctx.signal ? [ctx.signal] : [])]);
-    const candidates: DecisionModel[] = selected === "d1-ultra" ? [selected, "jev"] : [selected];
+    const candidates: DecisionModel[] = selected === "jev" ? [selected] : [selected, "jev"];
     const failures: string[] = [];
     try {
       for (const classifier of candidates) {
@@ -291,16 +314,17 @@ export default function (pi: ExtensionAPI) {
         let reason: string;
         try {
           const thinkingLevel = await classifyThinking(prompt, ctx, classifier, signal);
-          if (thinkingLevel === "low-confidence") continue;
+          if (thinkingLevel === "low-confidence") break;
           if (thinkingLevel) return { thinkingLevel, classifier, ...(classifier !== selected ? { fallbackFrom: selected } : {}) };
-          reason = "结果无效";
+          failures.push(`${modelKey(classifier)}：结果无效`);
+          break;
         } catch (error) {
           if (requestSignal.aborted || (!signal.aborted && error instanceof Error && error.name === "AbortError"))
             throw new DOMException("分类请求已取消", "AbortError");
           reason = signal.aborted ? "分类请求超时（15 秒）" : classificationFailure(error);
         }
         failures.push(`${modelKey(classifier)}：${reason}`);
-        if (classifier === "d1-ultra")
+        if (classifier !== "jev")
           ctx.ui.notify(`${modelKey(classifier)} 分类失败（${reason}），正在切换到 ${modelKey("jev")}。仅本次回退，全局选择不变。`, "warning");
       }
       if (failures.length) throw new Error(`${failures.join("；")}。`);
@@ -310,11 +334,11 @@ export default function (pi: ExtensionAPI) {
   }
 
   pi.registerCommand("effort", {
-    description: "自动思考强度：status 查看分类模型、model [jev|d1-ultra] 选择并保存、test 测试可用性",
+    description: "自动思考强度：status 查看分类模型、model [jev|d1-ultra|mammoth-27b|decider] 选择并保存、test 测试可用性",
     async handler(args, ctx) {
       const [action = "status", value, ...extra] = args.trim().split(/\s+/).filter(Boolean);
       if (extra.length || !["status", "model", "test"].includes(action) || (value && action !== "model")) {
-        ctx.ui.notify("请在 /personal → 原位思考强度（Jev / d1-ultra） 中选择操作。", "warning");
+        ctx.ui.notify("请在 /personal → 原位思考强度 中选择操作。", "warning");
         return;
       }
       try {
@@ -322,7 +346,7 @@ export default function (pi: ExtensionAPI) {
           const selected = readEffortSettings().model;
           const last = decisions(ctx).at(-1);
           ctx.ui.notify(
-            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；失败回退：${selected === "d1-ultra" ? "Jev（仅本次）" : "无"}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier, last.fallbackFrom)}` : "尚无"}。切换：/personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）；可用性：/personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性。`,
+            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；失败回退：${selected === "jev" ? "无" : "Jev（仅本次）"}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier, last.fallbackFrom)}` : "尚无"}。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。`,
             "info",
           );
           return;
@@ -347,7 +371,7 @@ export default function (pi: ExtensionAPI) {
         let selected: unknown = value;
         if (value === undefined) {
           if (!ctx.hasUI) {
-            ctx.ui.notify("当前模式没有交互界面，请在支持 UI 的客户端中打开 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra）。", "warning");
+            ctx.ui.notify("当前模式没有交互界面，请在支持 UI 的客户端中打开 /personal → 原位思考强度 → 选择分类模型。", "warning");
             return;
           }
           picker?.abort();
@@ -369,7 +393,7 @@ export default function (pi: ExtensionAPI) {
           }
         }
         if (!isDecisionModel(selected)) {
-          ctx.ui.notify("请选择 jev 或 d1-ultra；配置未修改。", "warning");
+          ctx.ui.notify("请选择 jev、d1-ultra、mammoth-27b 或 decider；配置未修改。", "warning");
           return;
         }
         if (!ctx.isIdle()) {
@@ -377,7 +401,7 @@ export default function (pi: ExtensionAPI) {
           return;
         }
         saveEffortSettings(selected);
-        ctx.ui.notify(`已保存分类模型：${modelKey(selected)}。下一条尚未分类的用户消息生效，历史决策不变；其他会话的后续分类也会读取此配置。选择不代表可用，请在 /personal → 原位思考强度（Jev / d1-ultra） → 测试分类模型可用性 中验证。`, "info");
+        ctx.ui.notify(`已保存分类模型：${modelKey(selected)}。下一条尚未分类的用户消息生效，历史决策不变；其他会话的后续分类也会读取此配置。选择不代表可用，请在 /personal → 原位思考强度 → 测试分类模型可用性 中验证。`, "info");
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") return;
         // 仅报告本地固定错误，不透出服务响应、文件内容或认证信息。
@@ -450,7 +474,7 @@ export default function (pi: ExtensionAPI) {
       } catch (error) {
         ctx.signal?.throwIfAborted();
         if (error instanceof Error && error.name === "AbortError") throw error;
-        ctx.ui.notify(`${error instanceof Error ? error.message : "分类失败。"} 思考强度沿用 ${current}。请在 /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） 或「测试分类模型可用性」中检查。`, "warning");
+        ctx.ui.notify(`${error instanceof Error ? error.message : "分类失败。"} 思考强度沿用 ${current}。请在 /personal → 原位思考强度 → 选择分类模型 或「测试分类模型可用性」中检查。`, "warning");
       }
       ctx.signal?.throwIfAborted();
       if (generation !== started) return;

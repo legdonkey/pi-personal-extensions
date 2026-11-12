@@ -4,6 +4,8 @@
 
 ## 未发布
 
+- 原位思考强度新增 `Mammoth 27B`（`baseten/mammoth-1`）和 `Decider v1.2`（`perplexity/pplx-decider-v1.2`）两个 OpenRouter 分类模型，并将 `Jev` 模型 ID 从 `~typesafe/jev-latest` 固定为 `typesafe/jev-1.14`；菜单标题精简为 `/personal → 原位思考强度 → 选择分类模型`。选择任意非 Jev 模型（`d1-ultra`、`Mammoth 27B`、`Decider v1.2`）遇到请求超时或服务报错时，统一单跳回退一次 `Jev`（最多约 30 秒），状态栏与可恢复决策记录具体回退来源；返回结果无效或所选概率低于 `0.5` 时均不回退，直接沿用当前思考强度（结果无效发一次警告，低置信度静默沿用）。宿主目录未收录固定 ID 时复用原生 `~typesafe/jev-latest` 模板补充元数据，不覆盖服务商目录。携带 Guardrail 或数据策略关键词的 HTTP 错误优先归类为「OpenRouter 策略或白名单限制」。同步更新测试、两份讲解页及菜单与选择器录屏。
+
 - 删除「原视频审查」功能：移除 `understand_video` 工具、`/personal → 原视频审查` 菜单项、对应源码、测试和两份讲解页的章节，功能数从六项减为五项。替代方案是 legdonkey-plugins 里的 `gemini-video` 技能。旧 `personal-extensions.json` 中的 `understand-video` 键仍可读取并检查是否为布尔值，但不再生效，下次保存功能开关时不再写入。重录 `/personal` 菜单相关录屏。
 
 - 将会话标题合入状态栏，删除独立 session-title 扩展，顶层功能由七项减为六项；标题通过 setStatus 显示，不再占输入框下方独立一行，也不接管 footer。新增第五项独立开关 sessionTitleEnabled，新项优先，缺失时沿用旧 session-title 布尔项；保留旧关闭意图、格式校验和旧文件。

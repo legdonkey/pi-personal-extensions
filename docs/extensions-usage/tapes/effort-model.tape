@@ -1,8 +1,8 @@
-# /personal → 原位思考强度（Jev / d1-ultra） → 选择分类模型（Jev / d1-ultra） → ↓↑ → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
+# /personal → 原位思考强度 → 选择分类模型 → 浏览四项 → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
 Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/effort-model.mp4"
 Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/effort-model.txt"
 Set Width 960
-Set Height 600
+Set Height 648
 Source "docs/extensions-usage/tapes/_settings.tape"
 
 Hide
@@ -27,8 +27,10 @@ Enter
 Wait+Screen /思考分类模型（全局）/
 Sleep 1.2s
 Down
-Sleep 1s
-Up
+Sleep 600ms
+Down
+Sleep 600ms
+Up@130ms 3
 Sleep 1.1s
 Escape
 Sleep 900ms

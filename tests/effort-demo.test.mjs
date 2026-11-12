@@ -19,26 +19,36 @@ function demo({ model = "d1-ultra", result = "error", probability = 0.8, fallbac
   return { outputs, form };
 }
 
-test("讲解页演示区分回退成功、全部失败、直接 Jev、空输入及请求对齐失败", () => {
-  const success = demo();
-  assert.match(success.outputs.warn.textContent, /HTTP 429：服务限流.*正在切换.*已回退/);
-  assert.equal(success.outputs.status.textContent, "🧠 low · 基线 medium · Jev（d1-ultra 回退）");
-  assert.match(demo({ fallbackOk: false }).outputs.warn.textContent, /Jev 也失败.*沿用 medium/);
+test("讲解页演示仅在服务报错时回退 Jev；结果无效或低置信度不回退且沿用当前强度", () => {
+  for (const [model, id] of [
+    ["d1-ultra", "liquid/d1-ultra"],
+    ["Mammoth 27B", "baseten/mammoth-1"],
+    ["Decider v1.2", "perplexity/pplx-decider-v1.2"],
+  ]) {
+    const success = demo({ model });
+    assert.equal(success.form.fallbackOk.disabled, false);
+    assert.match(success.outputs.warn.textContent, new RegExp(`openrouter/${id.replace(/\./g, "\\.")}.*HTTP 429：服务限流.*openrouter/typesafe/jev-1\\.14.*已回退`));
+    assert.equal(success.outputs.status.textContent, `🧠 low · 基线 medium · Jev（${model} 回退）`);
+    assert.match(demo({ model, fallbackOk: false }).outputs.warn.textContent, /Jev 也失败.*沿用 medium/);
+    assert.equal(demo({ model, result: "xhigh", probability: 0.8 }).outputs.status.textContent, `🧠 xhigh · 基线 medium · ${model}`);
+    const lowConfidence = demo({ model, result: "high", probability: 0.49 });
+    assert.equal(lowConfidence.form.fallbackOk.disabled, true);
+    assert.equal(lowConfidence.outputs.warn.textContent, "无");
+    assert.equal(lowConfidence.outputs.status.textContent, `🧠 medium · ${model}`);
+    const invalid = demo({ model, result: "invalid", probability: 0.8 });
+    assert.equal(invalid.form.fallbackOk.disabled, true);
+    assert.match(invalid.outputs.warn.textContent, new RegExp(`^openrouter/${id.replace(/\./g, "\\.")}：结果无效。思考强度沿用 medium。$`));
+    assert.equal(invalid.outputs.status.textContent, `🧠 medium · ${model}`);
+  }
   const jev = demo({ model: "Jev" });
-  assert.match(jev.outputs.warn.textContent, /HTTP 429：服务限流.*沿用 medium/);
+  assert.match(jev.outputs.warn.textContent, /openrouter\/typesafe\/jev-1\.14：HTTP 429：服务限流.*沿用 medium/);
   assert.doesNotMatch(jev.outputs.warn.textContent, /切换/);
   assert.equal(jev.form.fallbackOk.disabled, true);
-  const lowConfidence = demo({ result: "high", probability: 0.49 });
-  assert.match(lowConfidence.outputs.warn.textContent, /已回退.*普通提示/);
-  assert.doesNotMatch(lowConfidence.outputs.warn.textContent, /分类失败|结果无效|正在切换/);
   assert.equal(demo({ model: "Jev", result: "high", probability: 0.49 }).outputs.warn.textContent, "无");
   assert.equal(demo({ model: "Jev", result: "high", probability: 0 }).outputs.warn.textContent, "无");
   assert.match(demo({ model: "Jev", result: "high", probability: -0.1 }).outputs.warn.textContent, /结果无效/);
   assert.match(demo({ model: "Jev", result: "invalid", probability: 0.1 }).outputs.warn.textContent, /结果无效/);
   assert.equal(demo({ model: "Jev", result: "high", probability: 0.5 }).outputs.status.textContent, "🧠 high · 基线 medium · Jev");
-  const mixed = demo({ result: "high", probability: 0.49, fallbackOk: false }).outputs.warn.textContent;
-  assert.match(mixed, /HTTP 503/);
-  assert.doesNotMatch(mixed, /结果无效|正在切换/);
   assert.equal(demo({ result: "empty" }).outputs.status.textContent, "🧠 medium · 未分类");
   assert.equal(demo({ misaligned: true }).outputs.status.textContent, "🧠 medium · 未调整 · Jev（d1-ultra 回退）");
 });

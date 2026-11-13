@@ -553,7 +553,7 @@
       <h3>代价：额度与外发文本</h3>
       <p>
         <span class="seg" data-seg="title-25">命名和预览都额外消耗命名模型的额度，这部分消耗不计入 Pi 自带的会话用量统计。发送的对话文本可能包含业务信息。</span>
-        <span class="seg" data-seg="title-26">和下一章对照：原位思考强度要先等分类器，每个模型最多 15 秒，含回退最多约 30 秒；自动命名在后台跑，用户不用等。</span>
+        <span class="seg" data-seg="title-26">和下一章对照：原位思考强度在用户提交时后台分类，发请求前最多再等 5 秒；自动命名在一轮结束后后台跑，用户不用等。</span>
       </p>
       <ul>
         <li>命名请求使用新的随机 <code>sessionId</code>，<code>cacheRetention</code> 为 <code>none</code>，不带工具；认证、请求头、API 端点 <code>baseUrl</code> 和环境变量复用 Pi 为该模型解析的结果。</li>
@@ -563,7 +563,7 @@
       <div class="fig-scroll">
         <svg viewBox="0 0 640 220" width="100%" role="img" aria-labelledby="fig-title-10-title fig-title-10-desc">
           <title id="fig-title-10-title">一轮结束后多出的命名请求</title>
-          <desc id="fig-title-10-desc">一轮结束后，自动会话命名在后台请求命名模型，30 秒后触发取消，成功时再改会话名；用户不用等待。代价是额度消耗和对外发送对话文本。对照：原位思考强度要先等分类器，每个模型最多 15 秒，含回退最多约 30 秒。</desc>
+          <desc id="fig-title-10-desc">一轮结束后，自动会话命名在后台请求命名模型，30 秒后触发取消，成功时再改会话名；用户不用等待。代价是额度消耗和对外发送对话文本。对照：原位思考强度在提交时后台分类，发请求前最多再等 5 秒。</desc>
           <defs>
             <marker id="fig-title-10-ah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--muted)"/></marker>
           </defs>
@@ -586,7 +586,7 @@
           <g data-cue="title-26">
             <line x1="16" y1="168" x2="624" y2="168" style="stroke:var(--rule)"/>
             <text class="t-cap" x="16" y="190">用户：一轮结束后直接输入下一条，不等命名结果</text>
-            <text class="t-cap" x="16" y="210">对照第 6 章：每模型等 15 秒，含回退共约 30 秒</text>
+            <text class="t-cap" x="16" y="210">对照第 6 章：发请求前最多再等 5 秒</text>
           </g>
         </svg>
       </div>

@@ -1,6 +1,8 @@
 # 公共画面设置。必须在 Source 之前设置 Width/Height；在仓库根目录执行 vhs。
 # PI_CODING_AGENT_DIR 指向会话 scratchpad 里的临时 sandbox，录完已删除；重录前必须重建：
 #   rsync -a ~/.pi/agent/ <sandbox>/，排除 sessions、install、session-archive、tmp、audit、backups、missions、缓存等目录；
+#   --exclude 要写成 /sessions 这样带前导斜杠，否则会误删 npm 包里的同名子目录（如 pi-antigravity 的 src/diagnostics）；
+#   不需要模型认证的录屏可以不复制 auth.json 等凭据文件，models-store.json 只保留 openai-codex 与 openrouter 的模型目录；
 #   settings.json 移除 npm:pi-alibaba-models（它会写真实 agent 目录），相对包路径改为绝对路径，设 quietStartup: true。
 #   不读取、不打印 sandbox 里的 auth.json 等凭据；录完删除整个 sandbox。
 # 各 tape 直接调用 install/releases/<current-version> 里的 pi，不经 ~/.local/bin/pi 启动器：
@@ -13,10 +15,10 @@
 #   personal-switches       78  436  0.2  6.7  4.6   （再 pad=960:448:0:12:0x1e1e2e，顶部补 12px 底色，避开 Ponytail 行）
 #   statusline-style        0   708  0.2  10.0  7.2
 #   auto-name-model         88  434  0.4  8.4  6.3   （0.4 起，避开输入 /per 时补全列表里其他包的命令）
-#   effort-model            156 480  0.2  8.0  5.9
+#   effort-model            156 480  0.4  9.0  5.9   （0.4 起避开补全列表里其他包的命令；9.0 止，含 Esc 返回二级菜单）
 #   clickable-paths-status  0   888  0.2  7.0  5.6
 #   auto-name-status        0   788  0.2  6.8  end
-#   effort-status           34  596  0.2  7.6  5.6
+#   effort-status           150 570  0.3  7.6  5.6   （tape 高 740，二级菜单五项时不滚动）
 Set Shell "bash"
 Set FontSize 18
 Set FontFamily "Maple Mono NF CN"
@@ -24,5 +26,5 @@ Set Padding 24
 Set TypingSpeed 60ms
 Set Theme "Catppuccin Mocha"
 Set WaitTimeout 60s
-Env PI_CODING_AGENT_DIR "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/pi-agent-sandbox"
+Env PI_CODING_AGENT_DIR "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/739c1906-4a81-4bd5-9fe7-05e8177ecafc/scratchpad/pi-agent-sandbox"
 Env PI_MANAGED_INSTALL_ROOT ""

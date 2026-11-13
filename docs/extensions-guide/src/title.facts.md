@@ -4,7 +4,7 @@
 
 ## 头部 meta
 
-- `/personal` 有 UI 就能用（TUI、RPC），没有 UI 时提示并返回 —— 入口:147-150
+- `/personal` 有 UI 就能用（TUI、RPC），没有 UI 时提示并返回 —— 入口:149-152
 - 全局配置是 agent 目录下的 `auto-session-name.json` —— 命名:37, 62
 - agent 目录默认 `~/.pi/agent`，`PI_CODING_AGENT_DIR` 可覆盖 —— node_modules/@earendil-works/pi-coding-agent/dist/config.js:437-438, 453-458；命名测试:22-24（测试用该变量切换目录）
 - 会话状态键 `personal-auto-session-name` —— 命名:127
@@ -74,7 +74,7 @@
 
 - 只在「没有会话名」或「会话名等于 lastAutoName」时改名 —— 命名:234-235, 270, 356
 - 非本扩展的改名（`session_info_changed`，名字 ≠ lastAutoName）取消请求、暂停并写入条目 —— 命名:261-266；命名测试:290-320
-- 菜单项「暂停当前会话命名」（参数 off）暂停 —— 命名:469-478；入口:67
+- 菜单项「暂停当前会话命名」（参数 off）暂停 —— 命名:469-478；入口:69
 - 会话开始时先恢复最后一条格式有效的状态条目（没有就开启），再检查归属；不归属时暂停，但不写条目 —— 命名:237-253
 - 菜单项「恢复当前会话命名」（参数 on）把当前会话名记为 lastAutoName 并开启，提示「下轮结束后生效」 —— 命名:469-479；命名测试:300-303
 - 写入条目的时机：改名暂停、on/off、自动改名成功 —— 命名:233, 265, 360, 473
@@ -98,7 +98,7 @@
 
 ## 代价（title-25 ～ 26，图 10）与命令（title-27，录屏 auto-name-status）
 
-- 对照：原位思考强度每个模型限时 15 秒，含回退最多约 30 秒 —— extensions/inline-effort.ts:94, extensions/inline-effort.ts:303-334；tests/inline-effort.test.mjs:761-780
+- 对照：原位思考强度在用户提交时后台分类，发请求前最多再等 5 秒 —— extensions/inline-effort.ts:96, extensions/inline-effort.ts:844-853, extensions/inline-effort.ts:894-913；tests/inline-effort.test.mjs:1415-1479
 - 命名请求在后台、最多 30 秒，用户不用等 —— 命名:292, 459-460
 
 - 命名和预览额外消耗模型额度，不计入 Pi 自带会话用量统计 —— README.md:65；命名:313-365（结果不写入会话用量），codex-b 核对 agent-session.js:3345-3378
@@ -108,7 +108,7 @@
 - `cacheRetention: "none"` —— 命名:329
 - 不带工具 —— 命名:316-319；命名测试:234
 - 复用 Pi 解析的 apiKey、headers、env 和 API 端点 baseUrl —— 命名:309, 315, 322-324；命名测试:658-675；node_modules/@earendil-works/pi-ai types.d.ts:69
-- 菜单项与内部参数：查看状态 status、选择命名模型 model、选择命名思考强度 thinking、预览建议标题 preview、暂停当前会话命名 off、恢复当前会话命名 on；另有入口统一提供的「禁用此功能并重载」 —— 入口:62-68, 168-171
+- 菜单项与内部参数：查看状态 status、选择命名模型 model、选择命名思考强度 thinking、预览建议标题 preview、暂停当前会话命名 off、恢复当前会话命名 on；另有入口统一提供的「禁用此功能并重载」 —— 入口:62-70, 170-173
 - 查看状态显示 on/off 状态、模型、实际思考强度，并指向菜单路径 —— 命名:466, 486-494
 - 失败提示「自动命名失败，已保留原名；可在 /personal → 自动会话命名 → 预览建议标题 中重试。」 —— 命名:294；模型不可用提示指向 /scoped-models 与「选择命名模型」 —— 命名:98
 - model：换成另一个模型时 thinking 恢复 inherit —— 命名:404-415；命名测试:579-600

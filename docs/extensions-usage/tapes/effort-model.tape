@@ -1,6 +1,6 @@
 # /personal → 原位思考强度 → 选择分类模型 → 浏览四项 → Esc。只查看、预览或取消，不保存、不重载、不发送模型消息。
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/effort-model.mp4"
-Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/ef62fe0d-740b-45b2-b2c3-d3c976c4b808/scratchpad/raw/effort-model.txt"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/739c1906-4a81-4bd5-9fe7-05e8177ecafc/scratchpad/raw/effort-model.mp4"
+Output "/private/tmp/claude-501/-Users-yangguandao-Projects-pi-personal-extensions/739c1906-4a81-4bd5-9fe7-05e8177ecafc/scratchpad/raw/effort-model.txt"
 Set Width 960
 Set Height 648
 Source "docs/extensions-usage/tapes/_settings.tape"

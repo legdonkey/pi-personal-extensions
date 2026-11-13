@@ -7,7 +7,7 @@ import { ModelRegistry, ModelRuntime } from "@earendil-works/pi-coding-agent";
 import { streamSimple as streamClaude } from "@earendil-works/pi-ai/api/anthropic-messages";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readEffortSettings, saveEffortSettings } from "../extensions/inline-effort.ts";
+import { readEffortSettings, saveEffortSettings, CLASSIFICATION_WAIT_MS, DEFAULT_CACHE_TTL_MS, MODEL_RULES, COMMON_INSTRUCTIONS, readBenchmarkCases, benchmarkPrompt, runEffortBenchmark } from "../extensions/inline-effort.ts";
 
 let previousDir;
 let dir;
@@ -24,7 +24,8 @@ afterEach(() => {
 });
 import register from "../extensions/inline-effort.ts";
 
-const codexModel = (id = "gpt-6.1-sol") => ({
+// 默认用通用规则的 GPT-6 模型；gpt-6-astra、gpt-6.1-sol 有按模型规则，由专门的测试覆盖。
+const codexModel = (id = "gpt-6-sol") => ({
   provider: "openai-codex", id, api: "openai-codex-responses",
   thinkingLevelMap: { off: null, minimal: "low", low: "low", medium: "medium", high: "high", xhigh: "xhigh", max: "max" },
 });
@@ -47,6 +48,7 @@ function setup({ thinking = "medium", model = codexModel(), catalogIds = [legacy
     error: undefined, abortDuringClassification: undefined, inputs: [],
     classifierAvailable: true, stopReason: "stop", confidence: 1,
     classifierModels: [], selections: [], selectResult: undefined, selectHook: undefined,
+    mode: "tui", confirmResult: true, confirmations: [], confirmHook: undefined, customHook: undefined,
     idle: true, classifyHook: undefined, catalogIds,
   };
   register({
@@ -59,11 +61,19 @@ function setup({ thinking = "medium", model = codexModel(), catalogIds = [legacy
     get model() { return h.model; },
     signal: undefined,
     hasUI: true,
+    get mode() { return h.mode; },
     isIdle: () => h.idle,
     sessionManager: { getBranch: () => branch, getSessionId: () => "test-session" },
     ui: {
       setStatus(key, value) { assert.equal(key, "jev-inline-effort"); h.status = value; },
       notify(message, type) { h.warnings.push({ message, type }); },
+      async confirm(title, text) { h.confirmations.push({ title, text }); h.confirmHook?.(); return h.confirmResult; },
+      async custom(factory) {
+        return new Promise((resolve) => {
+          const component = factory({ requestRender() {} }, {}, { matches: (data) => data === "escape" }, resolve);
+          h.customHook?.(component);
+        });
+      },
       async select(title, choices, options) {
         h.selections.push({ title, choices, options });
         await h.selectHook?.(options.signal);
@@ -1399,4 +1409,404 @@ test("四种分类器共用按推理结构分档的提示契约，不验证线�
     assert.doesNotMatch(question.criteria.high, /适合多数调研与 Skill\/MCP 开发/);
   }
   for (const question of questions) assert.deepEqual(question, questions[0]);
+});
+
+
+test("提交时后台判档，完成结果直接复用；steer 和 follow-up 不阻塞 input", async () => {
+  for (const streamingBehavior of [undefined, "steer", "followUp"]) {
+    const h = setup();
+    h.choices = ["low"];
+    let release;
+    h.classifyHook = () => new Promise((resolve) => { release = resolve; });
+    assert.equal(h.events.get("input")({ text: "改成小写", streamingBehavior }, h.ctx), undefined);
+    assert.equal(h.calls, 1);
+    release();
+    await new Promise((resolve) => setImmediate(resolve));
+    const result = await h.request([user(1, "改成小写")]);
+    assert.equal(h.calls, 1);
+    assert.deepEqual(updates(result), [[0, "low"]]);
+  }
+});
+
+test("后台输入被改写或近期对话变化时丢弃旧任务，使用最终上下文", async () => {
+  const h = setup();
+  let oldSignal;
+  h.classifyHook = (signal) => { oldSignal ??= signal; };
+  h.events.get("input")({ text: "/template" }, h.ctx);
+  await h.request([user(1, "展开后的请求")]);
+  assert.equal(h.calls, 2);
+  assert.equal(oldSignal.aborted, true);
+  assert.match(h.inputs[1].state.prompt, /展开后的请求/);
+});
+
+test("请求最多等 5 秒，超时沿用并丢弃迟到结果，每个会话只提示一次", async (t) => {
+  assert.equal(CLASSIFICATION_WAIT_MS, 5000);
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const h = setup({ thinking: "high" });
+  const releases = [];
+  const signals = [];
+  h.classifyHook = (signal) => { signals.push(signal); return new Promise((resolve) => releases.push(resolve)); };
+  h.choices = ["max", "low"];
+  const messages = [user(1, "第一个请求")];
+  h.events.get("input")({ text: "第一个请求" }, h.ctx);
+  const first = h.request(messages);
+  t.mock.timers.tick(4999);
+  await Promise.resolve();
+  assert.equal(h.branch.length, 0);
+  t.mock.timers.tick(1);
+  const original = await first;
+  assert.equal(h.branch[0].data.thinkingLevel, "high");
+  assert.equal(signals[0].aborted, true);
+  releases[0]();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(h.branch.length, 1);
+  assert.deepEqual((await h.request(messages)).input, original.input);
+  assert.equal(h.calls, 1, "同轮续调不重新分类");
+  messages.push(assistant(2), user(3));
+  const second = h.request(messages);
+  t.mock.timers.tick(5000);
+  await second;
+  releases[1]();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(h.branch[1].data.thinkingLevel, "high");
+  assert.equal(h.warnings.filter((w) => /超过 5 秒/.test(w.message)).length, 1);
+  h.events.get("session_start")({ type: "session_start" }, h.ctx);
+  const third = h.request([user(4)]);
+  t.mock.timers.tick(5000);
+  await third;
+  releases[2]();
+  assert.equal(h.warnings.filter((w) => /超过 5 秒/.test(w.message)).length, 2);
+});
+
+test("Fable 5.2 使用 Pi 1.5.2 目录快照与真实序列化器，保留两轮历史前缀", async () => {
+  // 来源：Pi 1.5.2 的 providers/data/anthropic.json（不含凭据）。
+  const model = JSON.parse(readFileSync(new URL("./fixtures/fable-5-2.pi-1.5.2.json", import.meta.url), "utf8"));
+  assert.equal(model.compat.supportsMidConvoEffort, true);
+  const h = setup({ model });
+  h.choices = ["high", "low"];
+  const messages = [system, user(1, [{ type: "text", text: "问题 1" }])];
+  const first = await serializeClaude(h, messages);
+  assert.equal(first.payload.thinking.type, "adaptive");
+  assert.deepEqual(first.payload.messages.at(-1), { role: "system", content: [], output_config: { effort: "high" } });
+  assert.equal(first.reply.providerThinkingLevel, "high");
+  messages.push(first.reply, user(3));
+  const second = await serializeClaude(h, messages);
+  assert.deepEqual(claudeMarkers(second.payload), ["high", "low"]);
+  assert.deepEqual(withoutCacheHints(second.payload.messages.slice(0, first.payload.messages.length)), withoutCacheHints(first.payload.messages));
+  const antigravity = antigravitySetup({ model: antigravityModel("claude-fable-5-2") });
+  await antigravity.context([user(1)]);
+  assert.equal(antigravity.calls, 0, "Antigravity 不加 Fable");
+});
+
+test("三个 Claude 模型与 GPT-6 Astra、GPT-6.1 Sol 各用按模型规则，其他 GPT-6 和 Opus 5 保留通用规则", async () => {
+  const ids = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-2", "gpt-6-astra", "gpt-6.1-sol"];
+  assert.deepEqual(Object.keys(MODEL_RULES).sort(), [...ids].sort());
+  const questions = [];
+  for (const id of ids) {
+    const h = setup({ model: id.startsWith("gpt-") ? codexModel(id) : claudeModel(id) });
+    await h.request([user(1)]);
+    const question = h.inputs[0].questions.thinking;
+    assert.equal(question.instructions, `${COMMON_INSTRUCTIONS}\n\n当前模型：${MODEL_RULES[id].name}。${MODEL_RULES[id].notes}`);
+    assert.deepEqual(question.criteria, MODEL_RULES[id].levels);
+    assert.equal(h.inputs[0].state.currentEffort, "medium");
+    questions.push(question);
+    if (id === "claude-opus-5-5" || id === "claude-sonnet-5-5") {
+      const ag = antigravitySetup({ model: antigravityModel(id) });
+      await ag.context([user(1)]);
+      assert.deepEqual(ag.inputs[0].questions.thinking, question);
+    }
+  }
+  assert.equal(new Set(questions.map((q) => q.instructions)).size, ids.length);
+  // 默认档字段统一为 defaultEffort：Claude 取 Claude Code 默认，GPT 取 Codex 内置目录默认。
+  assert.deepEqual(Object.fromEntries(ids.map((id) => [id, MODEL_RULES[id].defaultEffort])), {
+    "claude-opus-5-5": "medium", "claude-sonnet-5-5": "medium", "claude-fable-5-2": "medium",
+    "gpt-6-astra": "low", "gpt-6.1-sol": "low",
+  });
+  assert.ok(ids.every((id) => !Object.hasOwn(MODEL_RULES[id], "claudeCodeDefault")));
+  // 共用原则不再写死 Claude Code，对所有按模型规则生效。
+  assert.match(COMMON_INSTRUCTIONS, /^你为当前主会话的下一轮选择推理强度（effort）。effort 只控制这一轮的思考深度/);
+  assert.doesNotMatch(COMMON_INSTRUCTIONS, /Claude Code/);
+  // GPT 规则去掉来源编号和推断句，保留官方事实。
+  assert.doesNotMatch(JSON.stringify(MODEL_RULES), /［|］|推断|suggestModel/);
+  assert.match(MODEL_RULES["gpt-6.1-sol"].notes, /质量优先时，迁移、精修应用、复杂交付等任务官方直接换成 Astra xhigh 而不是把 Sol 升到 max。官方说 Sol/);
+  assert.match(MODEL_RULES["gpt-6-astra"].levels.max, /官方推荐器从不推荐/);
+
+  const generic = setup();
+  await generic.request([user(1)]);
+  const genericQuestion = generic.inputs[0].questions.thinking;
+  assert.match(genericQuestion.instructions, /按推理结构而非工作领域选档/);
+  assert.equal(generic.inputs[0].state.currentEffort, undefined, "通用规则不继承上一轮档位");
+  for (const model of [codexModel("gpt-6.1-terra"), codexModel("gpt-6-luna"), claudeModel("claude-opus-5")]) {
+    const h = setup({ model });
+    await h.request([user(1)]);
+    assert.deepEqual(h.inputs[0].questions.thinking, genericQuestion, model.id);
+    assert.equal(h.inputs[0].state.currentEffort, undefined, model.id);
+  }
+});
+
+function finishWithUsage(h, cacheRead, cacheWrite, patch = {}) {
+  return h.events.get("message_end")({ message: { ...assistant(Date.now()), api: h.model.api,
+    provider: h.model.provider, model: h.model.id, stopReason: "stop", usage: { cacheRead, cacheWrite }, ...patch } }, h.ctx);
+}
+
+const rebuilds = (h) => h.warnings.filter((w) => w.message.startsWith("检测到缓存重建")).length;
+
+test("缓存读取少于上一次时告警并说明可能原因，两次后暂停，菜单恢复清零", async () => {
+  const h = setup();
+  h.choices = ["high", "high", "high", "low"];
+  await h.request([user(1)]);
+  finishWithUsage(h, 100, 0);
+  await h.request([user(2)]);
+  finishWithUsage(h, 80, 0);
+  assert.equal(rebuilds(h), 1);
+  assert.equal(h.warnings.at(-1).type, "warning");
+  assert.match(h.warnings.at(-1).message, /^检测到缓存重建：本次缓存读取 80，少于上一次的 100。可能是调整思考强度改变了请求前缀.*缓存过期、压缩、树导航和切换模型已排除。$/);
+  await h.request([user(3)]);
+  finishWithUsage(h, 100, 0);
+  await h.request([user(4)]);
+  finishWithUsage(h, 0, 0);
+  assert.equal(rebuilds(h), 2);
+  assert.match(h.status, /自动调整暂停.*检测到两次缓存重建/);
+  const calls = h.calls;
+  h.events.get("input")({ text: "暂停中" }, h.ctx);
+  await h.request([user(5)]);
+  assert.equal(h.calls, calls);
+  assert.equal(h.branch.at(-1).data.thinkingLevel, "low");
+  assert.match(h.status, /恢复自动调整/);
+  h.events.get("model_select")({ type: "model_select" }, h.ctx);
+  await h.command("status");
+  assert.match(h.warnings.at(-1).message, /暂停/);
+  await h.command("resume");
+  assert.equal(h.status, undefined);
+  await h.request([user(6)]);
+  assert.equal(h.calls, calls + 1);
+  finishWithUsage(h, 100, 0);
+  await h.request([user(7)]);
+  finishWithUsage(h, 0, 0);
+  assert.equal(rebuilds(h), 3);
+  assert.doesNotMatch(h.status, /暂停/);
+  h.events.get("session_start")({ type: "session_start" }, h.ctx);
+  await h.command("status");
+  assert.doesNotMatch(h.warnings.at(-1).message, /暂停/);
+});
+
+test("同一用户轮次的多次工具续调最多计一次缓存重建", async () => {
+  const h = setup();
+  h.choices = ["high", "high"];
+  const messages = [user(1)];
+  await h.request(messages);
+  finishWithUsage(h, 100, 0);
+  messages.push(assistant(2), user(3));
+  await h.request(messages);
+  finishWithUsage(h, 0, 0);
+  messages.push(assistant(4), { role: "toolResult", content: [], timestamp: 5 });
+  await h.request(messages);
+  finishWithUsage(h, 100, 0);
+  await h.request(messages);
+  finishWithUsage(h, 0, 0);
+  assert.equal(rebuilds(h), 1);
+  assert.doesNotMatch(h.status ?? "", /暂停/);
+});
+
+test("写入变大但读取不减时不告警；也不计辅助回复、失败回复、无基线缓存和未调整的请求", async () => {
+  const h = setup();
+  h.choices = ["high", "high", "high", "high", "high", "medium"];
+  await h.request([user(1)]);
+  finishWithUsage(h, 0, 99999);
+  await h.request([user(2)]);
+  finishWithUsage(h, 100, 0);
+  await h.request([user(3)]);
+  finishWithUsage(h, 0, 1000, { provider: "auxiliary" });
+  // 一次读入很长的工具结果：写入远超上一次读取，但读取没有变少。
+  finishWithUsage(h, 100, 99999);
+  await h.request([user(4)]);
+  finishWithUsage(h, 150, 5000);
+  await h.request([user(5)]);
+  finishWithUsage(h, 0, 99999, { stopReason: "error" });
+  // 分类为 medium 等于基线，请求没有调整档位。
+  assert.deepEqual(updates(await h.request([user(6)])), []);
+  finishWithUsage(h, 0, 99999);
+  assert.equal(h.warnings.length, 0);
+});
+
+test("超过缓存保留时间、压缩、树导航或换模型后，读取变少不算缓存重建", async (t) => {
+  let now = 1_000_000;
+  t.mock.method(Date, "now", () => now);
+  const run = async (model, steps) => {
+    const h = setup({ model });
+    h.choices = Array(steps.length).fill("high");
+    for (const [index, { gap = 1000, read, before }] of steps.entries()) {
+      now += gap;
+      before?.(h);
+      await h.request([user(index + 1)]);
+      finishWithUsage(h, read, 0);
+    }
+    return rebuilds(h);
+  };
+  // 目录没有 promptCache 时按 5 分钟：间隔等于保留时间仍判断，超过就跳过。
+  assert.equal(DEFAULT_CACHE_TTL_MS, 300_000);
+  assert.equal(await run(codexModel(), [{ read: 100 }, { read: 50, gap: DEFAULT_CACHE_TTL_MS + 1 }]), 0);
+  assert.equal(await run(codexModel(), [{ read: 100 }, { read: 50, gap: DEFAULT_CACHE_TTL_MS }]), 1);
+  // 有目录值时用 promptCache.short（Pi 1.5.2 的 Anthropic 模型为 300 秒）。
+  const shortCache = { ...codexModel(), promptCache: { short: 60, long: 3600 } };
+  assert.equal(await run(shortCache, [{ read: 100 }, { read: 50, gap: 60_001 }]), 0);
+  assert.equal(await run(shortCache, [{ read: 100 }, { read: 50, gap: 60_000 }]), 1);
+  // 按请求开始时刻比较：上一轮回复持续 6 分钟、刚结束就发下一次请求，也跳过。
+  {
+    const h = setup();
+    h.choices = ["high", "high"];
+    await h.request([user(1)]);
+    now += 6 * 60_000;
+    finishWithUsage(h, 100, 0);
+    await h.request([user(2)]);
+    finishWithUsage(h, 50, 0);
+    assert.equal(rebuilds(h), 0);
+  }
+  // 压缩或树导航后跳过下一次判断，之后恢复判断。
+  for (const event of ["session_compact", "session_tree"]) {
+    assert.equal(await run(codexModel(), [{ read: 100 }, { read: 50, before: (h) => h.events.get(event)({ type: event }, h.ctx) }]), 0, event);
+    assert.equal(await run(codexModel(), [{ read: 100 }, { read: 80, before: (h) => h.events.get(event)({ type: event }, h.ctx) }, { read: 40 }]), 1, event);
+  }
+  // 换模型：Pi 发出 model_select，或请求模型与上一次不同。
+  assert.equal(await run(codexModel(), [{ read: 100 }, { read: 50, before: (h) => h.events.get("model_select")({ type: "model_select" }, h.ctx) }]), 0);
+  assert.equal(await run(codexModel(), [{ read: 100 }, { read: 50, before: (h) => { h.model = codexModel("gpt-6-luna"); } }]), 0);
+});
+
+test("Claude 与 Antigravity 的助手用量也触发缓存守护，并保留实际 effort 元数据", async () => {
+  for (const kind of ["claude", "antigravity"]) {
+    const h = kind === "claude" ? setup({ model: claudeModel() }) : antigravitySetup();
+    h.choices = ["high", "high", "high"];
+    for (const [timestamp, read, write] of [[1, 100, 0], [2, 80, 0], [3, 0, 0]]) {
+      const messages = [user(timestamp)];
+      await h.events.get("context_with_system")({ messages }, h.ctx);
+      if (kind === "claude") h.events.get("before_provider_request")({ payload: { model: h.model.id, thinking: { type: "adaptive" },
+        messages: [{ role: "system", content: [], output_config: { effort: "medium" } }] } }, h.ctx);
+      else h.send(messages);
+      assert.equal(finishWithUsage(h, read, write).message.providerThinkingLevel, "high");
+    }
+    assert.match(h.status, /暂停/);
+  }
+});
+
+test("测评统计覆盖全部、holdout、偏低、偏高、无效和中位耗时，报告不含原文", async (t) => {
+  const models = Object.keys(MODEL_RULES);
+  const cases = ["a", "b", "c", "d"].map((id, i) => ({ id, message: `secret message ${id}`, currentEffort: "medium", holdout: i < 2,
+    context: "user: secret old\nassistant: secret answer", ok: Object.fromEntries(models.map((model) => [model, ["medium"]])) }));
+  let time = 0;
+  t.mock.method(performance, "now", () => time);
+  let index = 0;
+  const report = await runEffortBenchmark(cases, async ({ prompt, currentEffort, onFallback }) => {
+    assert.equal(currentEffort, "medium");
+    assert.match(prompt, /用户: secret old\n助手: secret answer/);
+    const choice = ["medium", "low", "high", undefined][index++ % 4];
+    time += [10, 20, 30, 40][(index - 1) % 4];
+    // 第 2 个用例回退后 Jev 成功，第 4 个回退后 Jev 也失败；两者都计入回退。
+    if (index % 4 === 2) onFallback("分类请求超时（15 秒）");
+    if (index % 4 === 0) onFallback("HTTP 429：服务限流");
+    return choice ? { thinkingLevel: choice, classifier: "jev", ...(index % 4 === 2 ? { fallbackFrom: "d1-ultra" } : {}) } : undefined;
+  }, new AbortController().signal);
+  assert.deepEqual(report.summary.map((row) => row.model), ["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-2"]);
+  for (const row of report.summary) assert.deepEqual({ ...row, model: undefined }, {
+    model: undefined, total: 4, hits: 1, holdoutTotal: 2, holdoutHits: 1, low: 1, high: 1, invalid: 1, medianMs: 25,
+  });
+  assert.deepEqual(report.fallbacks, { total: 6, reasons: { "分类请求超时（15 秒）": 3, "HTTP 429：服务限流": 3 } });
+  assert.deepEqual(report.details.slice(0, 4).map((row) => row.fallbackReason), [undefined, "分类请求超时（15 秒）", undefined, "HTTP 429：服务限流"]);
+  assert.doesNotMatch(JSON.stringify(report), /secret/);
+  assert.equal(readBenchmarkCases().length, 75);
+  assert.match(benchmarkPrompt(cases[0]), /当前用户请求:\nsecret message a/);
+});
+
+test("测评逐条检查取消，服务错误计无效；菜单忙碌或拒绝确认不运行", async () => {
+  const cases = readBenchmarkCases().slice(0, 2);
+  const controller = new AbortController();
+  let calls = 0;
+  await assert.rejects(runEffortBenchmark(cases, async () => { calls++; controller.abort(); return undefined; }, controller.signal), { name: "AbortError" });
+  assert.equal(calls, 1);
+  const report = await runEffortBenchmark(cases, async () => { throw new Error("service secret"); }, new AbortController().signal);
+  assert.ok(report.summary.every((row) => row.invalid === 2));
+  assert.doesNotMatch(JSON.stringify(report), /secret/);
+  const h = setup();
+  h.idle = false;
+  await h.command("bench");
+  assert.equal(h.confirmations.length, 0);
+  h.idle = true;
+  h.confirmResult = false;
+  await h.command("bench");
+  assert.equal(h.confirmations.length, 1);
+  assert.match(h.confirmations[0].text, /OpenRouter 额度/);
+  assert.equal(h.calls, 0);
+  h.confirmResult = true;
+  h.customHook = (component) => component.handleInput("escape");
+  await h.command("bench");
+  assert.equal(h.calls, 1);
+  assert.equal(existsSync(join(dir, "inline-effort-bench")), false);
+});
+
+
+test("菜单测评按当前分类器的相同回退规则运行，不逐条弹回退警告，汇总写明回退次数和原因分布", async () => {
+  saveEffortSettings("d1-ultra");
+  const h = setup();
+  let preferred = 0;
+  h.classifyHook = (_signal, model) => {
+    if (model.id !== decisionModels["d1-ultra"].id) return;
+    throw new Error(++preferred <= 100 ? "HTTP 429 secret" : "HTTP 503 secret");
+  };
+  await h.command("bench");
+  const directory = join(dir, "inline-effort-bench");
+  const files = readdirSync(directory);
+  assert.equal(files.length, 1);
+  const path = join(directory, files[0]);
+  const report = JSON.parse(readFileSync(path, "utf8"));
+  assert.equal(report.classifier, "d1-ultra");
+  assert.equal(report.details.length, 225);
+  assert.ok(report.details.every((row) => row.classifier === "jev" && row.fallbackFrom === "d1-ultra"));
+  assert.deepEqual(report.fallbacks, { total: 225, reasons: { "HTTP 429：服务限流": 100, "HTTP 503：上游服务异常": 125 } });
+  assert.equal(h.calls, 450);
+  assert.equal(h.branch.length, 0);
+  assert.equal(h.status, undefined);
+  assert.equal(statSync(path).mode & 0o777, 0o600);
+  // 测评期间只在结束时提示一次汇总，没有逐条的「正在切换」警告。
+  assert.equal(h.warnings.length, 1);
+  assert.equal(h.warnings[0].type, "info");
+  assert.ok(h.warnings[0].message.includes("holdout"));
+  assert.ok(h.warnings[0].message.includes("中位"));
+  assert.match(h.warnings[0].message, /\n回退到 Jev：225 次；原因：HTTP 503：上游服务异常 ×125，HTTP 429：服务限流 ×100\n明细：/);
+  assert.doesNotMatch(readFileSync(path, "utf8"), /secret|当前用户请求|what does the -r flag/);
+
+  // 正常对话中的回退提示不变。
+  await h.request([user(1)]);
+  assert.deepEqual(h.warnings.slice(1).map((w) => w.type), ["warning", "info"]);
+  assert.match(h.warnings[1].message, /^openrouter\/liquid\/d1-ultra 分类失败（HTTP 503：上游服务异常），正在切换到 openrouter\/typesafe\/jev-1\.14。/);
+
+  // 直接选择 Jev 时不会回退，汇总不写回退行。
+  saveEffortSettings("jev");
+  const jev = setup();
+  await jev.command("bench");
+  assert.equal(jev.warnings.length, 1);
+  assert.doesNotMatch(jev.warnings[0].message, /回退/);
+});
+
+
+test("测评确认期间开始工作或切换会话后不调用分类器", async () => {
+  for (const change of [(h) => { h.idle = false; }, (h) => { h.events.get("session_start")({ type: "session_start" }, h.ctx); }]) {
+    const h = setup();
+    h.confirmHook = () => change(h);
+    await h.command("bench");
+    assert.equal(h.calls, 0);
+    assert.equal(existsSync(join(dir, "inline-effort-bench")), false);
+  }
+});
+
+
+test("恢复到基线的 configuration_update 仍接受缓存守护", async () => {
+  const h = setup();
+  h.choices = ["high", "medium"];
+  const messages = [user(1)];
+  await h.request(messages);
+  finishWithUsage(h, 100, 0);
+  messages.push(assistant(2), user(3));
+  const request = await h.request(messages);
+  assert.deepEqual(updates(request), [[0, "high"], [3, "medium"]]);
+  finishWithUsage(h, 0, 0);
+  assert.equal(rebuilds(h), 1);
 });

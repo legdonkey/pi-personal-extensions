@@ -64,6 +64,8 @@ const actions: Partial<Record<FeatureId, { label: string; command: string; args:
     { label: "查看分类模型与状态", command: "effort", args: "status" },
     { label: "选择分类模型", command: "effort", args: "model" },
     { label: "测试分类模型可用性", command: "effort", args: "test" },
+    { label: "恢复自动调整", command: "effort", args: "resume" },
+    { label: "运行判档测评", command: "effort", args: "bench" },
   ],
   "clickable-paths": [
     { label: "查看路径链接设置", command: "clickable-paths", args: "" },

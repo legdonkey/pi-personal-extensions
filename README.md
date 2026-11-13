@@ -58,12 +58,12 @@ TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话�
 
 ## 自动思考强度
 
-支持 GPT-6 Codex、Anthropic 协议分支的三个指定 Claude 模型，以及 Antigravity 分支的两个指定 Claude 模型。三个分支都要求 thinking 不为 `off`，并使用 OpenRouter 上的分类器。GPT-6 Codex 还需要 `openai-codex` 登录。Antigravity 还需要先安装并启用 `pi-antigravity`，由插件注册带 legacy `streamSimple` 的 `antigravity` provider；本机使用 `pi-antigravity` 0.11.0。
+支持 GPT-6 Codex、Anthropic 协议分支的四个指定 Claude 模型，以及 Antigravity 分支的两个指定 Claude 模型。三个分支都要求 thinking 不为 `off`，并使用 OpenRouter 上的分类器。GPT-6 Codex 还需要 `openai-codex` 登录。Antigravity 还需要先安装并启用 `pi-antigravity`，由插件注册带 legacy `streamSimple` 的 `antigravity` provider；本机使用 `pi-antigravity` 0.11.0。
 
 | 主模型分支 | provider / 接口 | 模型条件 | 调整方式 |
 | --- | --- | --- | --- |
 | GPT-6 Codex | `openai-codex-responses` | 模型 ID 以 `gpt-6` 开头 | 在当前用户消息前插入 `configuration_update` |
-| Claude（Anthropic 协议） | `anthropic-messages` | 模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5` 或 `claude-sonnet-5-5`；`compat.supportsMidConvoEffort === true` | 只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort` |
+| Claude（Anthropic 协议） | `anthropic-messages` | 模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5`、`claude-sonnet-5-5` 或 `claude-fable-5-2`；`compat.supportsMidConvoEffort === true` | 只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort` |
 | Claude（Antigravity） | provider `antigravity`；接口 `antigravity-api` | 模型 ID 精确等于 `claude-opus-5-5` 或 `claude-sonnet-5-5` | 临时包装 `pi-antigravity` 的原生 `streamSimple`，只修改匹配请求的 `options.reasoning` |
 
 不新增其他模型。GPT-6 Codex 启动示例：
@@ -77,6 +77,8 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 - 「查看分类模型与状态」：查看首选分类模型、失败回退策略和当前分支的最近决策。
 - 「选择分类模型」：选择并保存；取消不保存。
 - 「测试分类模型可用性」：用固定公开样例测试首选模型及其回退流程，明确显示实际成功的模型，不改强度或会话决策。
+- 「恢复自动调整」：仅当前会话因缓存重建暂停时有效，恢复后清零重建计数。
+- 「运行判档测评」：在空闲的 Pi 终端界面确认 OpenRouter 额度消耗后运行；Esc 取消即停止。用当前分类模型和实际运行时相同的回退规则，分别测评 Opus 5.5、Sonnet 5.5、Fable 5.2 的 75 个用例。显示全部 / holdout 命中率、偏低、偏高、无效数和中位耗时；明细保存在 `getAgentDir()/inline-effort-bench/`，不含用例消息原文。测评期间首选的非 Jev 分类模型失败时不逐条弹出「正在切换」警告；结束时的汇总写明回退到 Jev 的次数和按原因的分布（例如 `回退到 Jev：225 次；原因：HTTP 429：服务限流 ×225`），明细每条也记录回退原因。正常对话中的回退提示不变。
 
 | 选择 | 显示名称 | OpenRouter 模型 ID |
 | --- | --- | --- |
@@ -95,17 +97,29 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 
 三个分支都以保留缓存前缀为目标，但不保证缓存 100% 命中。缓存命中仍受 TTL、最小 token 数和其他提示变更影响。
 
+缓存守护读取主会话助手消息的 `usage.cacheRead`。如果请求调整了生效强度，前一次读取大于 0，且本次读取少于前一次读取，就 warning「检测到缓存重建」，写明两次读取量和可能原因，每个用户轮次最多计一次。只是写入变大不算：Pi 把缓存断点放在最后一条 user 消息上（Pi 1.5.2 `anthropic-messages.js`），一次读入很长的工具结果会让 `cacheWrite` 很大，但读取不会变少。
+
+以下正常失效跳过本次判断，并以本次读取作为下一次比较的基准：
+
+- 两次主会话请求的开始时刻相隔超过缓存保留时间。缓存在请求开始时读写并重新计时，Pi 的缓存预热也从请求开始计时，所以按开始时刻比较；上一轮回复很长时也不会误报。
+- 上一次判断以来发生过压缩或树导航。
+- 请求模型变了，包括切换主模型。
+
+缓存保留时间取 Pi 模型目录的 `promptCache.short`。Pi 1.5.2 对 Anthropic 请求默认使用 short 保留，`cache_control` 不带 `ttl`，目录值为 300 秒；目录没有该字段（Codex、Antigravity 或旧版 Pi）时按 5 分钟。设置 `PI_CACHE_RETENTION=long` 后实际保留更久，扩展仍按 short 计算，只会多跳过判断，不会多报。
+
+同一会话累计两次后暂停后续自动判档，继续沿用当前生效强度，状态栏显示原因。暂停不写入全局配置；切换主模型不解除暂停，新会话清零。通过 `/personal → 原位思考强度 → 恢复自动调整` 恢复。缓存守护仍是异常信号检测：服务端提前清除缓存，或其他扩展改了系统提示词或工具，也会让读取变少。
+
 本次扩展 wrapper 真实通道短时实测使用固定分类夹具，强制 `low → high → medium → low`，避免分类波动。主模型使用真实 Antigravity。`cacheRead` 分别为：`claude-opus-5-5` 的 `0 / 13981 / 13994 / 14014`，`claude-sonnet-5-5` 的 `0 / 13978 / 13991 / 14011`。请求基线始终为 `medium`，实际 runtime 后缀依次为 `low / high / medium / low`，`message_end` 保存的实际字段与之一致。Opus 在完整成功序列前另有若干次 `SAFETY` 零输出尝试，这些尝试未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证，也不保证 TTL 到期或提示词变化后仍命中。
 
-[Anthropic 官方文档](https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta)明确 Anthropic 协议分支的上述三个 Claude 模型支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta `mid-conversation-output-config-2026-07-01`，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持，本扩展不扩大模型范围。Pi v1.5.0 的 [Anthropic 序列化实现](https://github.com/earendil-works/pi/blob/v1.5.0/packages/ai/src/api/anthropic-messages.ts)已有原生标记；本仓库依赖的 1.0.1 也有此能力，无需升级依赖。
+[Anthropic 官方文档](https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta)明确 Anthropic 协议分支的 Opus 5、Opus 5.5 和 Sonnet 5.5 支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta `mid-conversation-output-config-2026-07-01`，由 Pi 负责发送。Fable 5.2 额外依据 Pi 1.5.2 目录的 `supportsMidConvoEffort: true` 和真实序列化请求形状纳入支持；Pi 仍为它发送 `thinking.type: "adaptive"` 与末尾空 `system` effort 标记。Antigravity 不增加 Fable。其他 Opus、Sonnet 版本并非全部支持，本扩展不扩大到上述四个模型之外。Pi v1.5.0 的 [Anthropic 序列化实现](https://github.com/earendil-works/pi/blob/v1.5.0/packages/ai/src/api/anthropic-messages.ts)已有原生标记；本仓库依赖的 1.0.1 也有此能力，无需升级依赖。
 
 [Gemini 4 Argon](https://ai.google.dev/gemini-api/docs/latest-model) 已存在，但官方资料只明确 implicit cache。本次未找到「改变 `thinking_level` 仍保留缓存」的明确官方承诺，因此不支持 Gemini 4 Argon。这是缺少证据，不是证明切换档位一定丢失缓存。
 
 - 切换从下一条尚未分类的用户消息生效，无需重载；其他会话和子代理的后续分类也读取全局选择。工作中不能切换或测试。
-- 每条新用户消息分类一次，包括 steer 和 follow-up；工具续调和重试不重复分类。决策跟随分支，恢复、fork、树导航和压缩后保持原结果。
+- 用户提交时在 `input` 事件后台启动判档，steer 和 follow-up 同样经过此入口。发请求的 `context_with_system` 直接复用完成结果；若输入扩展或近期对话变化，就丢弃旧任务并按最终上下文重判。每条新用户消息只采用一次决策；工具续调和重试不重复分类。决策跟随分支，恢复、fork、树导航和压缩后保持原结果。
 - 发送当前请求和近期对话文本，内容预算合计 16,000 字符；不发送系统规则、工具结果、思考或图片数据。文本可能包含业务信息，分类会增加等待时间并消耗服务额度。
 - 选择非 Jev 分类模型（`d1-ultra`、`Mammoth 27B` 或 `Decider v1.2`）后，请求超时或服务报错时，警告显示安全归类的原因（例如 `HTTP 429：服务限流`、`HTTP 404：OpenRouter 策略或白名单限制`）并提示「正在切换到 openrouter/typesafe/jev-1.14」，随后只对本次请求尝试一次 Jev。回退成功后提示实际模型和档位，状态栏及会话决策记录 `Jev（〈首选模型〉 回退）`；不改全局配置，下一条新消息仍先尝试首选模型。直接选择 Jev 时不反向回退。结果无效（如缺答案、档位非法、截断，或概率缺失、非有限数、超出 [0, 1]）或有效结果的所选概率低于 0.5 时均不触发回退，直接沿用当前生效强度：结果无效发一次警告，概率低于 0.5 静默沿用。
-- 每个分类模型独立限时 15 秒；含回退的分类等待最多约 30 秒，并可能额外消耗 Jev 的 OpenRouter 额度。最终没有可采用的结果时沿用原档位；若有实际错误，警告只列出出错模型的安全原因，不把低置信度列为错误。沿用当前分支最近一次档位（没有决策时用基线）。HTTP 状态码和常见错误按白名单转成中文，不显示服务端原文、端点或凭据；无法识别时明确提示原因未知。
+- 发请求时最多再等 5 秒。超时后本次沿用当前生效强度，中止分类并丢弃迟到结果，同轮不再改档；每个会话第一次超时 warning 一次。后台分类及可用性测试、判档测评仍保留每个模型独立 15 秒的限时与 Jev 单跳回退，并可能额外消耗 Jev 的 OpenRouter 额度。最终没有可采用的结果时沿用原档位；若有实际错误，警告只列出出错模型的安全原因，不把低置信度列为错误。沿用当前分支最近一次档位（没有决策时用基线）。HTTP 状态码和常见错误按白名单转成中文，不显示服务端原文、端点或凭据；无法识别时明确提示原因未知。
 - 用户取消、切换会话或模型时停止分类和回退，不记录迟到决策；空白输入不调用。配置无效时不尝试任何模型，可在 `/personal → 原位思考强度 → 选择分类模型` 中重新保存。
 - 复用 Pi 原生 classifier、OpenRouter 认证及代理；宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 `~typesafe/jev-latest` 模板补充公开元数据，不修改服务商目录。四个分类模型均消耗 OpenRouter 额度，价格以 OpenRouter 公开端点信息为准。
 - OpenRouter 白名单需放行实际服务商（如 `typesafe`、`liquid`、`baseten`、`perplexity`）及对应模型，否则会被 Guardrail 拦截（常见表现为 HTTP 404）。
@@ -172,7 +186,21 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 
 ## 自动思考强度的选档规则
 
-自动选档按本轮交付的推理结构分为五档：`low` 直接执行明确操作；`medium` 做局部可判的成熟查询或排错；`high` 综合多项约束完成常规设计、联动修改或表达；`xhigh` 处理冲突证据、混杂因素或跨边界耦合推理；`max` 为例外攻坚档，要求系统反证、严格推导与失效分析，或有具体证据表明排除数据、权限、工具等外部阻碍后，深入分析仍不足。
+Opus 5.5、Sonnet 5.5、Fable 5.2、GPT-6 Astra 和 GPT-6.1 Sol 使用按模型规则：共用原则 `COMMON_INSTRUCTIONS`，加该模型的 `notes` 和五档 `levels`，按 `systemOneQuestion` 组成 choice 题。分类同时传入当前生效强度，供判断继续任务和上一轮投入。共用原则的首句是「你为当前主会话的下一轮选择推理强度（effort）」，不再写「Claude Code 主会话」，对五个模型都生效。每个模型的默认档统一记在 `defaultEffort` 字段，Claude 三个模型取 Claude Code 的默认档 `medium`。
+
+Claude 三个模型的规则从 Claude Code mod `auto-effort` 的 `hooks/policy-text.ts` 移植；除上面的字段名和共用原则首句外，其余文字与来源相同。Anthropic 与 Antigravity 的同名模型共用对应规则；Antigravity 仍将 `xhigh`、`max` 夹到 `high`。规则依据 Anthropic 的 Opus 5.5 / Fable 5.2 prompting、effort、Sonnet 5.5 migration、Claude Code model configuration 及官方博客；完整来源链接保留在 `extensions/inline-effort.ts` 注释中。
+
+GPT-6 Astra（`gpt-6-astra`）和 GPT-6.1 Sol（`gpt-6.1-sol`）的规则依据 OpenAI 官方资料整理，2026-11-14 核对：[Using GPT-6](https://developers.openai.com/api/docs/guides/latest-model)、[Reasoning models](https://developers.openai.com/api/docs/guides/reasoning)、[Model selection](https://developers.openai.com/api/docs/guides/model-selection)（含「模型×档位」刻度和交互式推荐器）、两个模型页、[Codex 文档 · Models](https://learn.chatgpt.com/docs/models) 与 Subagents、GPT-6.1 Sol 发布文、GPT-6 Astra System Card，以及 openai/codex 仓库的[内置模型目录](https://github.com/openai/codex/blob/69231e119bfca0b14453515e97d99688ce1c47c9/codex-rs/models-manager/models.json)；完整链接列在 `extensions/inline-effort.ts` 注释中。
+
+- 两者的 `defaultEffort` 都是 Codex 内置目录的 `low`；Sol 的 API 默认档是 `medium`，Astra 的 API 默认档官方未写明。
+- Astra 的档位刻度偏强，官方推荐器从不推荐 `max`；Astra 爱提问、测试偏宽等行为官方用提示词处理，与档位无关。
+- Sol 在质量优先时，官方直接换用 Astra `xhigh`，而不是把 Sol 升到 `max`。
+- 两者的 API 档位就是 `low` 到 `max` 五档，与分类结果一一对应，不需要映射；Codex 分支按 `thinkingLevelMap` 映射和插入 `configuration_update` 的做法不变。
+- 只匹配这两个精确 ID，也就是 Pi 1.5.2 `openai-codex` 目录里的 ID。
+
+测评用例原样复制自 `claude-auto-effort/bench/judge-cases.json`，是 HeyCubit/effortless 用例的按模型标注派生版；75 个用例包含 20 个 holdout，不用于调整提示词。原始数据使用 MIT 许可，版权和完整许可见 `extensions/inline-effort-data/THIRD_PARTY.md`。测评只调用分类器，不调用这三个主模型，命中率不代表主模型完成任务的质量保证。
+
+其他 GPT-6 Codex 模型（如 `gpt-6-sol`、`gpt-6.1-terra`、`gpt-6-luna`）和 Opus 5 保留原有通用规则，也不传当前强度。通用规则按本轮交付的推理结构分为五档：`low` 直接执行明确操作；`medium` 做局部可判的成熟查询或排错；`high` 综合多项约束完成常规设计、联动修改或表达；`xhigh` 处理冲突证据、混杂因素或跨边界耦合推理；`max` 为例外攻坚档，要求系统反证、严格推导与失效分析，或有具体证据表明排除数据、权限、工具等外部阻碍后，深入分析仍不足。
 
 近期对话只补全同一任务省略的目标、约束与交付要求，不继承旧档位。示例：修改位置和方式明确的字号调整可用 `low`，改做讲解图示设计可用 `high`；按成熟口径查数画图可用 `medium`，排查多因素混杂原因可用 `xhigh`。这些是判据示例，不是线上分类保证。
 

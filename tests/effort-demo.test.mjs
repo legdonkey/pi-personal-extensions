@@ -51,4 +51,9 @@ test("讲解页演示仅在服务报错时回退 Jev；结果无效或低置信�
   assert.equal(demo({ model: "Jev", result: "high", probability: 0.5 }).outputs.status.textContent, "🧠 high · 基线 medium · Jev");
   assert.equal(demo({ result: "empty" }).outputs.status.textContent, "🧠 medium · 未分类");
   assert.equal(demo({ misaligned: true }).outputs.status.textContent, "🧠 medium · 未调整 · Jev（d1-ultra 回退）");
+  const timeout = demo({ result: "timeout" });
+  assert.equal(timeout.form.fallbackOk.disabled, true);
+  assert.equal(timeout.outputs.update.textContent, "不插入");
+  assert.equal(timeout.outputs.status.textContent, "🧠 medium · 未分类");
+  assert.match(timeout.outputs.warn.textContent, /^分类等待超过 5 秒，本次沿用 medium；分类已中止，迟到结果不再采用。/);
 });

@@ -35,12 +35,12 @@
 - 流式输出中的消息不改写，等最终渲染再处理；思考块不改写 —— clickable-paths.ts:244-246
 - `userMessages` 为 false 时不处理用户消息 —— clickable-paths.ts:247
 - 设置四项与默认值：enabled true、editor vscode、bareText true、userMessages true —— clickable-paths.ts:22-38
-- 前三项在 `/personal` → 文件路径可点击 的二级菜单里改（菜单项调用内部 clickable-paths 处理函数的 on/off/editor/bare），`userMessages` 只能改配置文件 —— pi-personal-extensions.ts:68-77, 172-173；clickable-paths.ts:252-299
-- 二级菜单项：查看路径链接设置、开启 / 暂停路径链接（提示「下一条消息生效」）、打开方式 ×5、识别 / 不识别裸路径 —— pi-personal-extensions.ts:68-77；clickable-paths.ts:262
-- clickable-paths 的处理函数只登记进 `/personal` 的命令表，不注册成斜杠命令 —— pi-personal-extensions.ts:126-130；clickable-paths.ts:252
+- 前三项在 `/personal` → 文件路径可点击 的二级菜单里改（菜单项调用内部 clickable-paths 处理函数的 on/off/editor/bare），`userMessages` 只能改配置文件 —— pi-personal-extensions.ts:70-79, 175-184；clickable-paths.ts:252-299
+- 二级菜单项：查看路径链接设置、开启 / 暂停路径链接（提示「下一条消息生效」）、打开方式 ×5、识别 / 不识别裸路径 —— pi-personal-extensions.ts:70-79；clickable-paths.ts:262
+- clickable-paths 的处理函数只登记进 `/personal` 的命令表，不注册成斜杠命令 —— pi-personal-extensions.ts:130-134；clickable-paths.ts:252
 - 编辑器选项：vscode / vscode-insiders / cursor / windsurf / file —— clickable-paths.ts:20, 232
-- 设置入口只有 `/personal` → 文件路径可点击；用户消息橙色线框在 actions 表里没有设置项，只有启用 / 禁用 —— pi-personal-extensions.ts:29-40, 54-81, 159-160
-- 配置文件在 agent 目录下：`path.join(getAgentDir(), "clickable-paths.json")`，默认 `~/.pi/agent/`，跟随 `PI_CODING_AGENT_DIR` —— clickable-paths.ts:16, 235；pi-coding-agent/dist/config.js:453-458；README.md:161-174
+- 设置入口只有 `/personal` → 文件路径可点击；用户消息橙色线框在 actions 表里没有设置项，只有启用 / 禁用 —— pi-personal-extensions.ts:29-40, 54-85, 162-169
+- 配置文件在 agent 目录下：`path.join(getAgentDir(), "clickable-paths.json")`，默认 `~/.pi/agent/`，跟随 `PI_CODING_AGENT_DIR` —— clickable-paths.ts:16, 235；pi-coding-agent/dist/config.js:453-458；README.md:175-188
 - 演示：presets 和工作目录、主目录均为示例；演示假定文件存在，不模拟冒号文件名回退；绝对路径原样保留 `..`，`~/` 和相对路径规范化 —— clickable-paths.ts:117, 120（path.join / path.resolve 规范化，绝对路径不处理）
 
 ## 用户消息橙色线框
@@ -60,7 +60,7 @@
 - 正文行原样保留：ANSI、链接、内边距 —— user-message-border.test.mjs:76-82
 - 退回条件：width < 8；行数 < 2；首末行缺少 width−2 个连续普通空格；任一行可见宽度 ≠ width−2 —— user-message-border.ts:21, 24-31；user-message-border.test.mjs:89-94
 - 退回时按完整宽度调用原始渲染，不画边框；功能仍是「已加载」状态（回退只发生在 render 内，不卸载功能） —— user-message-border.ts:21, 31
-- 升级 Pi 后应验证兼容性；`npm run check` 检查类型并执行全部测试 —— README.md:198
+- 升级 Pi 后应验证兼容性；`npm run check` 检查类型并执行全部测试 —— README.md:216
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
 - 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；随后重录 auto-name-model、auto-name-status（旧画面的一级菜单还有已合并的「右下角会话标题」），保留凭据文件但不发送模型消息，两个 tape 去掉一级菜单里多余的一次下移；未重录的只剩 chat-turn —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

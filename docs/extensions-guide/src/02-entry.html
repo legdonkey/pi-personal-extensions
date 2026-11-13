@@ -200,7 +200,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <span class="seg" data-seg="entry-10">如果选中未加载的功能，二级菜单只有一项：「启用此功能并重载」。三级菜单按 Esc 返回二级，二级返回一级，一级才退出。保存设置或查看状态后留在二级菜单；需要重载时退出。</span>
       </p>
       <ul>
-        <li>四项功能有设置项：自动会话命名 6 项、原位思考强度 3 项、文件路径可点击 10 项、状态栏 3 项（选择 pi-statusline 自定义配色、查看 token 速度口径、独立功能开关）。其余一项的二级菜单只有启停。</li>
+        <li>四项功能有设置项：自动会话命名 6 项、原位思考强度 5 项、文件路径可点击 10 项、状态栏 3 项（选择 pi-statusline 自定义配色、查看 token 速度口径、独立功能开关）。其余一项的二级菜单只有启停。</li>
         <li>「已加载 / 未加载」表示功能是否注册。功能自身的状态，用「查看状态」这类设置项确认。启停不清除功能自己的配置文件。</li>
       </ul>
     </div>
@@ -373,7 +373,7 @@ const featureApi = Object.assign(Object.create(pi), {
         { label: "状态栏：额度、会话 ID 与配色", command: "statusline-style", actions: [...ac("statusline-style", [["选择 pi-statusline 自定义配色", ""]]), ...ac("statusline-info", [["查看 token 速度口径", ""]]), ...ac("statusline-settings", [["独立功能开关", ""]])] },
         { label: "文件路径可点击", command: "clickable-paths", actions: ac("clickable-paths", [["查看路径链接设置", ""], ["开启路径链接", "on"], ["暂停路径链接", "off"], ...["vscode", "vscode-insiders", "cursor", "windsurf", "file"].map((e) => [`打开方式：${e}`, `editor ${e}`]), ["识别裸路径", "bare on"], ["不识别裸路径", "bare off"]]) },
         { label: "用户消息橙色线框", command: null, actions: [] },
-        { label: "原位思考强度", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型", "model"], ["测试分类模型可用性", "test"]]) },
+        { label: "原位思考强度", command: "effort", actions: ac("effort", [["查看分类模型与状态", "status"], ["选择分类模型", "model"], ["测试分类模型可用性", "test"], ["恢复自动调整", "resume"], ["运行判档测评", "bench"]]) },
       ];
       const on = features.map(() => true);
       let picked = 0;

@@ -17,7 +17,7 @@ const ROOT = resolve(process.argv.slice(2).find((a) => !a.startsWith("--")) ?? H
 const SRC = join(ROOT, "src");
 const CACHE = join(HERE, ".cache"); // 各指南共用语音缓存
 const TTS = "/Users/yangguandao/Projects/legdonkey-plugins/plugins/bailian-tts/skills/bailian-tts/scripts/run.py";
-const VOICE = "wenhuaizhi_v3.1";
+const VOICE = "longanhuan_v3.1";
 const INSTRUCT = "稳重成熟的女声，语速适中，像技术分享的讲解，吐字清晰";
 const GAP = 0.32; // 段间停顿（秒）
 const CH_GAP = 0.9; // 章间停顿（秒）

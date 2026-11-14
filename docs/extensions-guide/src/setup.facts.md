@@ -1,13 +1,13 @@
 # setup 事实清单
 
-- 需要 Pi ≥ 1.0.1、Node.js ≥ 22.19（页首 meta） —— README.md:7；package.json:25-29、38
-- 安装命令三条 —— README.md:9-13
-- 依赖镜像使用 npmmirror —— README.md:15
+- 需要 Pi ≥ 1.0.1、Node.js ≥ 22.19（页首 meta） —— README.md:11；package.json:25-29、38
+- 安装命令三条 —— README.md:14-16
+- 依赖镜像使用 npmmirror —— README.md:19
 - npmmirror 由 cnpm 团队维护、原淘宝镜像、同步有延迟 —— 外部常识，未联网核实
 - --ignore-scripts 不运行依赖安装脚本 —— npm 通用语义
 - npm run check = tsc --noEmit + node --test --experimental-strip-types tests/*.test.mjs —— package.json:15-19
 - 包是 private —— package.json:6
-- 改代码后 /reload；卸载 pi remove "$(pwd)" —— README.md:15
+- 改代码后 /reload；卸载 pi remove "$(pwd)" —— README.md:19
 - 六个配置文件默认在 ~/.pi/agent/ —— README.md:164-176
 - 六个配置文件都在 getAgentDir() 下（默认 ~/.pi/agent，设置 PI_CODING_AGENT_DIR 后改用该目录） —— extensions/pi-personal-extensions.ts:127；extensions/auto-session-name.ts:37、61-62；extensions/inline-effort.ts:50、71；extensions/clickable-paths.ts:235；extensions/statusline.ts:930-932；README.md:164-178；tests/personal.test.mjs:38-41
 - clickable-paths.json 直接覆盖写入，失败静默 —— extensions/clickable-paths.ts:48-55
@@ -21,7 +21,7 @@
 - 升级 Pi 后应验证用户消息边框兼容性 —— README.md:216
 - 「把开发依赖升到同一版本再跑 check、再发消息确认」是讲解给出的操作顺序，依据是测试使用 devDependencies 中的 Pi —— package.json:30-33；tests/user-message-border.test.mjs:4-10
 - 「没有边框时先查 Pi 是否改了消息行结构」：依据回退条件 —— extensions/user-message-border.ts:25-31
-- 开发循环「改代码 → npm run check → /reload」：/reload 来自 README.md:15，check 来自 README.md:216（「运行 npm run check 检查类型并执行全部测试」）；三步的顺序是讲解的组织方式
+- 开发循环「改代码 → npm run check → /reload」：/reload 来自 README.md:19，check 来自 README.md:216（「运行 npm run check 检查类型并执行全部测试」）；三步的顺序是讲解的组织方式
 - 「边框测试加载真实 Pi 组件，新版 Pi 改了这个组件时测试可能先报错」—— tests/user-message-border.test.mjs:4-10、33-64（测试直接调用真实组件的 render）
 - 分类器设置文件改名为 inline-effort.json；新文件 ENOENT 时才读旧 jev-inline-effort.json；旧文件不删不改，保存只写新文件 —— extensions/inline-effort.ts:44-58、69-71；scratchpad/restructure-report.md 第 3 节
 

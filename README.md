@@ -76,7 +76,7 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 
 - 「查看分类模型与状态」：查看首选分类模型、失败回退策略和当前分支的最近决策。
 - 「选择分类模型」：选择并保存；取消不保存。
-- 「测试分类模型可用性」：用固定公开样例测试首选模型及其回退流程，明确显示实际成功的模型，不改强度或会话决策。
+- 「测试分类模型可用性」：固定使用通用规则与公开样例测试首选模型及其回退流程，隔离当前主模型与会话历史，明确显示实际成功的模型，不改强度或会话决策。
 - 「恢复自动调整」：仅当前会话因缓存重建暂停时有效，恢复后清零重建计数。
 - 「运行判档测评」：在空闲的 Pi 终端界面确认 OpenRouter 额度消耗后运行；Esc 取消即停止。用当前分类模型和实际运行时相同的回退规则，分别测评 Opus 5.5、Sonnet 5.5、Fable 5.2 的 75 个用例。显示全部 / holdout 命中率、偏低、偏高、无效数和中位耗时；明细保存在 `getAgentDir()/inline-effort-bench/`，不含用例消息原文。测评期间首选的非 Jev 分类模型失败时不逐条弹出「正在切换」警告；结束时的汇总写明回退到 Jev 的次数和按原因的分布（例如 `回退到 Jev：225 次；原因：HTTP 429：服务限流 ×225`），明细每条也记录回退原因。正常对话中的回退提示不变。
 
@@ -118,7 +118,7 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 - 切换从下一条尚未分类的用户消息生效，无需重载；其他会话和子代理的后续分类也读取全局选择。工作中不能切换或测试。
 - 用户提交时在 `input` 事件后台启动判档，steer 和 follow-up 同样经过此入口。发请求的 `context_with_system` 直接复用完成结果；若输入扩展或近期对话变化，就丢弃旧任务并按最终上下文重判。每条新用户消息只采用一次决策；工具续调和重试不重复分类。决策跟随分支，恢复、fork、树导航和压缩后保持原结果。
 - 发送当前请求和近期对话文本，内容预算合计 16,000 字符；不发送系统规则、工具结果、思考或图片数据。文本可能包含业务信息，分类会增加等待时间并消耗服务额度。
-- 选择非 Jev 分类模型（`d1-ultra`、`Mammoth 27B` 或 `Decider v1.2`）后，请求超时或服务报错时，警告显示安全归类的原因（例如 `HTTP 429：服务限流`、`HTTP 404：OpenRouter 策略或白名单限制`）并提示「正在切换到 openrouter/typesafe/jev-1.14」，随后只对本次请求尝试一次 Jev。回退成功后提示实际模型和档位，状态栏及会话决策记录 `Jev（〈首选模型〉 回退）`；不改全局配置，下一条新消息仍先尝试首选模型。直接选择 Jev 时不反向回退。结果无效（如缺答案、档位非法、截断，或概率缺失、非有限数、超出 [0, 1]）或有效结果的所选概率低于 0.5 时均不触发回退，直接沿用当前生效强度：结果无效发一次警告，概率低于 0.5 静默沿用。
+- 选择非 Jev 分类模型（`d1-ultra`、`Mammoth 27B` 或 `Decider v1.2`）后，请求超时或服务报错时，警告显示安全归类的原因（例如 `HTTP 429：服务限流`、`HTTP 404：OpenRouter 策略或白名单限制`）并提示「正在切换到 openrouter/typesafe/jev-1.14」，随后只对本次请求尝试一次 Jev。回退成功后提示实际模型和档位，状态栏及会话决策记录 `Jev（〈首选模型〉 回退）`；不改全局配置，下一条新消息仍先尝试首选模型。直接选择 Jev 时不反向回退。结果无效（如缺答案、档位非法、截断，或概率缺失、非有限数、超出 [0, 1]）或有效结果的概率未达 0.5（若当前主模型将多个候选档位映射到同一执行档位，如 Antigravity 将 `high`、`xhigh`、`max` 夹到 `high`，则按合并概率比较 0.5）时均不触发回退，直接沿用当前生效强度：结果无效发一次警告，概率低于 0.5 静默沿用。
 - 发请求时最多再等 5 秒。超时后本次沿用当前生效强度，中止分类并丢弃迟到结果，同轮不再改档；每个会话第一次超时 warning 一次。后台分类及可用性测试、判档测评仍保留每个模型独立 15 秒的限时与 Jev 单跳回退，并可能额外消耗 Jev 的 OpenRouter 额度。最终没有可采用的结果时沿用原档位；若有实际错误，警告只列出出错模型的安全原因，不把低置信度列为错误。沿用当前分支最近一次档位（没有决策时用基线）。HTTP 状态码和常见错误按白名单转成中文，不显示服务端原文、端点或凭据；无法识别时明确提示原因未知。
 - 用户取消、切换会话或模型时停止分类和回退，不记录迟到决策；空白输入不调用。配置无效时不尝试任何模型，可在 `/personal → 原位思考强度 → 选择分类模型` 中重新保存。
 - 复用 Pi 原生 classifier、OpenRouter 认证及代理；宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 `~typesafe/jev-latest` 模板补充公开元数据，不修改服务商目录。四个分类模型均消耗 OpenRouter 额度，价格以 OpenRouter 公开端点信息为准。
@@ -186,15 +186,15 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 
 ## 自动思考强度的选档规则
 
-Opus 5.5、Sonnet 5.5、Fable 5.2、GPT-6 Astra 和 GPT-6.1 Sol 使用按模型规则：共用原则 `COMMON_INSTRUCTIONS`，加该模型的 `notes` 和五档 `levels`，按 `systemOneQuestion` 组成 choice 题。分类同时传入当前生效强度，供判断继续任务和上一轮投入。共用原则的首句是「你为当前主会话的下一轮选择推理强度（effort）」，不再写「Claude Code 主会话」，对五个模型都生效。每个模型的默认档统一记在 `defaultEffort` 字段，Claude 三个模型取 Claude Code 的默认档 `medium`。
+Opus 5.5、Sonnet 5.5、Fable 5.2、GPT-6 Astra 和 GPT-6.1 Sol 使用按模型规则：共用原则 `COMMON_INSTRUCTIONS`，加该模型的 `notes` 和五档 `levels`，组成 System One 的单题 choice 请求。当前分支已有上一轮助手回复时，请求同时传入上一轮主模型实际生效的五档强度 `currentEffort`（Antigravity 的 `xhigh`、`max` 按生效值 `high` 传入，`minimal` 归一为 `low`；首轮尚无历史回复时不传），供判断继续任务和上一轮投入。每个模型的默认档统一记在 `defaultEffort` 字段，Claude 三个模型取 Claude Code 的默认档 `medium`。
 
-Claude 三个模型的规则从 Claude Code mod `auto-effort` 的 `hooks/policy-text.ts` 移植；除上面的字段名和共用原则首句外，其余文字与来源相同。Anthropic 与 Antigravity 的同名模型共用对应规则；Antigravity 仍将 `xhigh`、`max` 夹到 `high`。规则依据 Anthropic 的 Opus 5.5 / Fable 5.2 prompting、effort、Sonnet 5.5 migration、Claude Code model configuration 及官方博客；完整来源链接保留在 `extensions/inline-effort.ts` 注释中。
+Claude 三个模型的 `notes` 和五档 `levels` 移植自 Claude Code mod `auto-effort` 的 `hooks/policy-text.ts`；`COMMON_INSTRUCTIONS` 针对单题分类协议移除了上游双判档器的 `suggestModel` 残留，对齐了 `prompt`（近期对话 / 当前用户请求）与 `currentEffort` 字段语义，并区分被引用材料中的注入指令与用户本人对思考深度的真实要求。Anthropic 与 Antigravity 的同名模型共用对应五档规则；Antigravity 运行时将 `xhigh`、`max` 夹到 `high`，并在响应侧合并 `high`、`xhigh`、`max` 概率后再与 0.5 比较。规则依据 Anthropic 的 Opus 5.5 / Fable 5.2 prompting、effort、Sonnet 5.5 migration、Claude Code model configuration 及官方博客；完整来源链接保留在 `extensions/inline-effort.ts` 注释中。
 
 GPT-6 Astra（`gpt-6-astra`）和 GPT-6.1 Sol（`gpt-6.1-sol`）的规则依据 OpenAI 官方资料整理，2026-11-14 核对：[Using GPT-6](https://developers.openai.com/api/docs/guides/latest-model)、[Reasoning models](https://developers.openai.com/api/docs/guides/reasoning)、[Model selection](https://developers.openai.com/api/docs/guides/model-selection)（含「模型×档位」刻度和交互式推荐器）、两个模型页、[Codex 文档 · Models](https://learn.chatgpt.com/docs/models) 与 Subagents、GPT-6.1 Sol 发布文、GPT-6 Astra System Card，以及 openai/codex 仓库的[内置模型目录](https://github.com/openai/codex/blob/69231e119bfca0b14453515e97d99688ce1c47c9/codex-rs/models-manager/models.json)；完整链接列在 `extensions/inline-effort.ts` 注释中。
 
-- 两者的 `defaultEffort` 都是 Codex 内置目录的 `low`；Sol 的 API 默认档是 `medium`，Astra 的 API 默认档官方未写明。
-- Astra 的档位刻度偏强，官方推荐器从不推荐 `max`；Astra 爱提问、测试偏宽等行为官方用提示词处理，与档位无关。
-- Sol 在质量优先时，官方直接换用 Astra `xhigh`，而不是把 Sol 升到 `max`。
+- 两者的 `defaultEffort` 都是 Codex 内置目录的 `low`。规则提炼自官方刻度并面向单模型选档，不包含跨模型切换建议、价格或跑分对比。
+- Astra 的档位刻度偏高，从 `low` 起步，绝大多数任务不需要 `max`，也不因回复格式偏好或追问倾向调高档位。
+- Sol 在低档下的事实准确性已很高，单纯事实问答与核实用 `low`；常规功能开发与协同交付用 `medium`，迁移、协同文件生成与端到端测试用 `high`，冲突证据权衡与联动精修交付用 `xhigh`。
 - 两者的 API 档位就是 `low` 到 `max` 五档，与分类结果一一对应，不需要映射；Codex 分支按 `thinkingLevelMap` 映射和插入 `configuration_update` 的做法不变。
 - 只匹配这两个精确 ID，也就是 Pi 1.5.2 `openai-codex` 目录里的 ID。
 
@@ -202,9 +202,9 @@ GPT-6 Astra（`gpt-6-astra`）和 GPT-6.1 Sol（`gpt-6.1-sol`）的规则依据 
 
 其他 GPT-6 Codex 模型（如 `gpt-6-sol`、`gpt-6.1-terra`、`gpt-6-luna`）和 Opus 5 保留原有通用规则，也不传当前强度。通用规则按本轮交付的推理结构分为五档：`low` 直接执行明确操作；`medium` 做局部可判的成熟查询或排错；`high` 综合多项约束完成常规设计、联动修改或表达；`xhigh` 处理冲突证据、混杂因素或跨边界耦合推理；`max` 为例外攻坚档，要求系统反证、严格推导与失效分析，或有具体证据表明排除数据、权限、工具等外部阻碍后，深入分析仍不足。
 
-近期对话只补全同一任务省略的目标、约束与交付要求，不继承旧档位。示例：修改位置和方式明确的字号调整可用 `low`，改做讲解图示设计可用 `high`；按成熟口径查数画图可用 `medium`，排查多因素混杂原因可用 `xhigh`。这些是判据示例，不是线上分类保证。
+`近期对话` 按消息边界逆序裁剪并保留 `用户:` / `助手:` 角色前缀，不在 `state.prompt` 中夹带元指令；只补全同一任务省略的目标、约束与交付要求，不继承旧档位。示例：修改位置和方式明确的字号调整可用 `low`，改做讲解图示设计可用 `high`；按成熟口径查数画图可用 `medium`，排查多因素混杂原因可用 `xhigh`。这些是判据示例，不是线上分类保证。
 
-不按专业主题、长文本、多代理、精美成片、操作敏感或反复报错自动提档；仅无法识别任务要求时才以 `high` 保守兜底。思考强度不代替模型专长、语感、审美、授权与实测；分类只读有限文本，不看图片和工具结果，同轮工具续调与已有历史消息不重分类。新规则只影响后续尚未分类的消息，不改变档位映射、主模型或基线。
+不按专业主题、长文本、多代理、精美成片、操作敏感或反复报错自动提档；信息缺失时不把不可见的信息当作复杂度证据，简短确认、批准、选择、继续或修改回复按前文中将启动或延续的实际工作选档；仅无法识别任务要求时才以 `high` 保守兜底。思考强度不代替模型专长、语感、审美、授权与实测；分类只读有限文本，不看图片和工具结果，同轮工具续调与已有历史消息不重分类。新规则只影响后续尚未分类的消息，不改变档位映射、主模型或基线。
 
 ## 项目结构
 

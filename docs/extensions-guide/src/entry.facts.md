@@ -21,8 +21,8 @@
 - 未加载功能的二级菜单只有「启用此功能并重载」 —— extensions/pi-personal-extensions.ts:163-164；tests/personal.test.mjs:396-398
 - 五项顶层功能中，actions 为四项功能定义设置项，其余一项只有启停；设置项数量 6 / 5 / 10 / 3（原位思考强度：状态查看、模型选择、可用性测试、恢复自动调整、运行判档测评；状态栏提供「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-86；extensions/statusline.ts:341-348、724-857（口径处理器与 STYLES）
 - 默认全开时 commands 表里有 auto-name、clickable-paths、statusline-style、statusline-info、statusline-settings、effort 六个处理器；Pi 只注册 personal —— extensions/pi-personal-extensions.ts:54-86、130-139；tests/personal.test.mjs:51
-- 「已加载/未加载」表示是否注册；各功能自身状态用「查看状态」确认 —— README.md:28
-- 启停不清除功能自己的配置 —— README.md:42
+- 「已加载/未加载」表示是否注册；各功能自身状态用「查看状态」确认 —— README.md:32
+- 启停不清除功能自己的配置 —— README.md:44
 - 录屏 personal-menu（挂在本节拍第一句）：/personal → 自动会话命名二级菜单 → Esc —— docs/extensions-usage/tapes/personal-menu.tape；extensions/pi-personal-extensions.ts:154-178
 - 新旧开关全部相同时不重载：直接执行 switches 时退出，从一级菜单进入时返回一级菜单 —— extensions/pi-personal-extensions.ts:237-238；tests/personal.test.mjs:139-141
 - 临时文件名 `${configPath}.${randomUUID()}.tmp` —— extensions/pi-personal-extensions.ts:243
@@ -30,12 +30,12 @@
 - renameSync 换成正式配置；临时文件与正式文件同目录 —— extensions/pi-personal-extensions.ts:243、248；原子性来自 POSIX rename（同一文件系统内），源码未注释
 - 写入或 rename 失败：提示保存失败，不重载 —— extensions/pi-personal-extensions.ts:249-255；tests/personal.test.mjs:155-162
 - 保存成功后 ctx.reload() —— extensions/pi-personal-extensions.ts:256；tests/personal.test.mjs:142-149
-- 其他已打开会话需各自 /reload —— README.md:28
+- 其他已打开会话需各自 /reload —— README.md:32
 - /personal 只要 ctx.hasUI 就可用（TUI、RPC 客户端）；没有 UI（Print/JSON）时提示并返回 —— extensions/pi-personal-extensions.ts:142-145；tests/personal.test.mjs:413-440、477-486
 - 批量功能开关只在 TUI 可用；RPC 下选它时提示改用各功能的启用 / 禁用重载项 —— extensions/pi-personal-extensions.ts:189-193
 - 参数只接受空或 switches —— extensions/pi-personal-extensions.ts:146-149；tests/personal.test.mjs:403-404
 - /personal switches 与「批量功能开关」打开同一列表 —— extensions/pi-personal-extensions.ts:152-158、194；tests/personal.test.mjs:385-389、469-474
-- 按键：空格切换、Enter 保存、Esc 取消 —— README.md:30；确认键由 keybindings "tui.select.confirm" 判断 —— extensions/pi-personal-extensions.ts:229-230；列表提示文字 —— extensions/pi-personal-extensions.ts:219
+- 按键：空格切换、Enter 保存、Esc 取消 —— README.md:34；确认键由 keybindings "tui.select.confirm" 判断 —— extensions/pi-personal-extensions.ts:229-230；列表提示文字 —— extensions/pi-personal-extensions.ts:219
 - 批量保存与单项启停共用写入代码 —— extensions/pi-personal-extensions.ts:237-256
 - 录屏 personal-switches：/personal switches，下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃 —— 本次用无凭据临时 agent 重录；docs/extensions-usage/tapes/personal-switches.tape；extensions/pi-personal-extensions.ts:194-236
 - 旧开关迁移：substatusline、statusline-style-picker 合成 statusline（新键缺失时任一旧键不为 false 即开启）；jev-inline-effort 映射到 inline-effort；新键存在时以新键为准 —— extensions/pi-personal-extensions.ts:118-122；tests/personal.test.mjs:204-276；scratchpad/restructure-report.md 第 3 节

@@ -15,9 +15,9 @@
 - 同一项状态栏功能还改 pi-statusline 的配色（同时设置 compact 密度和 round 分隔符，细节在第 4 章）—— extensions/statusline.ts:930-953；extensions/pi-personal-extensions.ts:24-27、80-81
 - 状态栏会话标题：通过 setStatus 合入状态栏显示会话名 —— tests/session-title.test.mjs（合并标题回归测试）
 - 自动会话命名：agent_settled 后触发检查，满足条件（有 UI、空闲、开启、未被手动名保护等）才后台请求 —— extensions/auto-session-name.ts:269-287、458-460
-- 原位思考强度：支持 openai-codex-responses 接口的 GPT-6 Codex；Anthropic 协议分支要求 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true 且 ID 精确匹配四个 Claude 模型（claude-opus-5、claude-opus-5-5、claude-sonnet-5-5、claude-fable-5-2）；Antigravity 分支要求 provider antigravity、antigravity-api 接口且 ID 精确匹配两个 Claude 模型；三个分支都要求 thinking 不为 off。状态栏显示 `🧠 当前 · 基线 … · 分类器`，始终带分类器名；当前强度等于基线时省略基线段（图中示例 `🧠 low · 基线 medium · d1-ultra`） —— extensions/inline-effort.ts:93、117-130、787-791、613、964、974-977、1003；README.md:61-68
-- 「为新用户消息选择思考强度」：同批多条消息可共用一次分类，空白文本不调用 —— extensions/inline-effort.ts:141-157、872-929（细节在第 6 章）
-- 五项功能默认全部开启 —— extensions/pi-personal-extensions.ts:88-90；README.md:28
+- 原位思考强度：支持 openai-codex-responses 接口的 GPT-6 Codex；Anthropic 协议分支要求 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true 且 ID 精确匹配四个 Claude 模型（claude-opus-5、claude-opus-5-5、claude-sonnet-5-5、claude-fable-5-2）；Antigravity 分支要求 provider antigravity、antigravity-api 接口且 ID 精确匹配两个 Claude 模型；三个分支都要求 thinking 不为 off。状态栏显示 `🧠 当前 · 基线 … · 分类器`，始终带分类器名；当前强度等于基线时省略基线段（图中示例 `🧠 low · 基线 medium · d1-ultra`） —— extensions/inline-effort.ts:93、117-130、818-822、644、1015、1025-1028、1054；README.md:61-68
+- 「为新用户消息选择思考强度」：同批多条消息可共用一次分类，空白文本不调用 —— extensions/inline-effort.ts:141-171、921-980（细节在第 6 章）
+- 五项功能默认全部开启 —— extensions/pi-personal-extensions.ts:88-90；README.md:32
 - 每项可以单独关闭 —— extensions/pi-personal-extensions.ts:135-137、180
 - 入口是 Pi 加载的那个文件 —— package.json:20-24
 - 额度、会话 ID、速度和配色合并为一项功能、一个总开关及五个独立开关（功能 ID statusline）—— extensions/pi-personal-extensions.ts:23-28；extensions/statusline.ts（合并后的单文件）

@@ -1,6 +1,6 @@
 # 第三方内容
 
-`judge-cases.json` 原样复制自 `claude-auto-effort/bench/judge-cases.json`（2026-11-14），按模型标注的派生数据来自 [HeyCubit/effortless](https://github.com/HeyCubit/effortless) 的 `bench/judge-cases.json`。许可为 MIT。判档规则原样来自 `claude-auto-effort/hooks/policy-text.ts`，官方依据保留在 `extensions/inline-effort.ts` 注释中。
+`judge-cases.json` 原样复制自 `claude-auto-effort/bench/judge-cases.json`（2026-11-14），按模型标注的派生数据来自 [HeyCubit/effortless](https://github.com/HeyCubit/effortless) 的 `bench/judge-cases.json`。许可为 MIT。Claude 三个模型的说明与五档判据移植自 `claude-auto-effort/hooks/policy-text.ts`，官方依据保留在 `extensions/inline-effort.ts` 注释中。
 
 原许可证：
 

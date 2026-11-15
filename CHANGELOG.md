@@ -4,6 +4,9 @@
 
 ## 未发布
 
+## 0.7.0 - 2026-11-15
+
+- 修复原位思考强度在 Pi 原生只读 `ctx.ui` 上下文中发送消息时报 `Cannot set property ui of #<Object> which has only a getter`：后台通知包装改用属性描述符定义自有 `ui`，不再向继承的 getter 赋值，其余上下文属性仍委托宿主。新增 3 项使用 Pi 原生 `ExtensionRunner.createContext()` 的回归测试，覆盖后台分类、请求前分类、回退通知缓冲与取消隔离；同步 README 和两份讲解页的重载说明。
 - 修正 `inline-effort` 分类请求的提示词语义、诉说对象与策略对齐：移除 `COMMON_INSTRUCTIONS` 中移植自双判档器的 `suggestModel` 悬空指令，明确 `state.prompt`（近期对话 / 当前用户请求）与 `state.currentEffort` 字段含义，区分被引用材料中的提示注入与用户本人对思考深度的真实要求；清理 `gpt-6-astra`、`gpt-6.1-sol` 规则中的跨模型切换建议、价格跑分叙述及 `gpt-6.1-sol` 在 `low`、`medium`、`xhigh` 三档重复的任务词；移除通用规则中面向主模型的「先检索或澄清」祈使句，保留「信息缺失时不把不可见的信息当作复杂度证据」，并补齐简短确认、批准、选择回复按前文实际工作选档的规则。`classificationPrompt` 移出括号内元指令，并按消息边界逆序裁剪历史以保留 `用户:` / `助手:` 角色前缀。`currentEffort` 仅在当前分支已有上一轮助手回复时传入，并按当前模型实际生效五档规范化（Antigravity 夹为 `high`、`minimal` 归一为 `low`），会话条目仍保留原始档位以兼容跨模型恢复。`classifyThinking` 对映射到同一有效执行档位的候选标签（如 Antigravity 的 `high`、`xhigh`、`max`）合并概率后再与 0.5 比较，校验概率分布合法性。「测试分类模型可用性」固定使用通用规则探活，隔离当前主模型与会话历史。补充 7 项回归测试并同步两份讲解页。两份讲解页统一改用 Plus 音色 `longanhuan_v3.1`，重新合成全文朗读。
 - 原位思考强度在用户提交（含 steer、follow-up）时后台判档，`context_with_system` 最多再等 5 秒；超时沿用当前生效强度、中止判档并丢弃迟到结果，每会话首次超时 warning 一次。后台单模型 15 秒限时及非 Jev → Jev 单跳回退不变，输入展开或上下文变化时按最终消息重新判档。
 - Anthropic 协议分支增加 `claude-fable-5-2`，继续要求 `supportsMidConvoEffort === true`，仅改写 Pi 原生末尾空 `system` 的 `output_config.effort`。Pi 1.5.2 为 Fable 生成 `adaptive` 请求；Antigravity 不增加 Fable。Opus 5.5、Sonnet 5.5、Fable 5.2 分别使用 `claude-auto-effort/hooks/policy-text.ts` 的共用原则、模型说明与五档规则，源码注释保留官方依据。

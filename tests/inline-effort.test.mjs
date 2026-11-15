@@ -3,7 +3,7 @@ import { afterEach, beforeEach, test } from "node:test";
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { once } from "node:events";
-import { ModelRegistry, ModelRuntime } from "@earendil-works/pi-coding-agent";
+import { ExtensionRunner, ModelRegistry, ModelRuntime } from "@earendil-works/pi-coding-agent";
 import { streamSimple as streamClaude } from "@earendil-works/pi-ai/api/anthropic-messages";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -1996,4 +1996,79 @@ test("恢复到基线的 configuration_update 仍接受缓存守护", async () =
   assert.deepEqual(updates(request), [[0, "high"], [3, "medium"]]);
   finishWithUsage(h, 0, 0);
   assert.equal(rebuilds(h), 1);
+});
+
+// 使用 Pi 原生上下文，避免普通对象 mock 遗漏只有 getter 的 ui 等属性。
+function useRuntimeContext(h) {
+  const runner = new ExtensionRunner([], { getThinkingLevel: () => h.thinking }, dir, h.ctx.sessionManager, h.ctx.modelRegistry);
+  runner.getModel = () => h.model;
+  runner.setUIContext(h.ctx.ui, "tui");
+  h.ctx = runner.createContext();
+  return runner;
+}
+
+for (const entry of ["input", "context_with_system"]) {
+  test(`Pi 原生只读 ui 上下文支持 ${entry} 启动分类，原上下文不变`, async () => {
+    const h = setup();
+    useRuntimeContext(h);
+    const ui = h.ctx.ui;
+    const descriptor = Object.getOwnPropertyDescriptor(h.ctx, "ui");
+    assert.equal(typeof descriptor.get, "function");
+    assert.equal(descriptor.set, undefined);
+    h.choices = ["low"];
+    if (entry === "input") {
+      assert.equal(h.events.get("input")({ text: "改成小写" }, h.ctx), undefined);
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+    const result = await h.request([user(1, "改成小写")]);
+    assert.equal(h.calls, 1);
+    assert.deepEqual(updates(result), [[0, "low"]]);
+    assert.equal(h.branch[0].data.thinkingLevel, "low");
+    assert.equal(h.status, "🧠 low · 基线 medium · Jev");
+    assert.deepEqual(h.warnings, []);
+    assert.equal(h.ctx.ui, ui);
+    assert.deepEqual(Object.getOwnPropertyDescriptor(h.ctx, "ui"), descriptor);
+  });
+}
+
+test("Pi 原生只读上下文保留后台回退通知缓冲、激活后通知与取消隔离", async () => {
+  saveEffortSettings("mammoth-27b");
+  for (const phase of ["buffered", "active", "cancelled"]) {
+    const h = setup();
+    useRuntimeContext(h);
+    let fail;
+    h.classifyHook = (_signal, model) => {
+      if (model.id === decisionModels["mammoth-27b"].id)
+        return new Promise((_resolve, reject) => { fail = () => reject(new Error("HTTP 429")); });
+    };
+    h.events.get("input")({ text: "改成小写" }, h.ctx);
+    assert.equal(h.calls, 1);
+    assert.deepEqual(h.warnings, []);
+    if (phase === "cancelled") {
+      h.events.get("session_start")({ type: "session_start" }, h.ctx);
+      fail();
+      await new Promise((resolve) => setImmediate(resolve));
+      assert.equal(h.calls, 1);
+      assert.deepEqual(h.warnings, []);
+      assert.deepEqual(h.branch, []);
+      continue;
+    }
+    if (phase === "buffered") {
+      fail();
+      await new Promise((resolve) => setImmediate(resolve));
+      assert.equal(h.calls, 2);
+      assert.deepEqual(h.warnings, [], "请求激活前不弹回退通知");
+    }
+    const request = h.request([user(1, "改成小写")]);
+    if (phase === "active") fail();
+    await request;
+    assert.equal(h.calls, 2);
+    assert.equal(h.warnings.length, 2);
+    assert.match(h.warnings[0].message, /HTTP 429.*正在切换/);
+    assert.match(h.warnings[1].message, /已回退到.*typesafe\/jev-1\.14/);
+    assert.equal(h.branch[0].data.classifier, "jev");
+    assert.equal(h.branch[0].data.fallbackFrom, "mammoth-27b");
+    h.ctx.ui.notify("原上下文通知", "info");
+    assert.equal(h.warnings.at(-1).message, "原上下文通知");
+  }
 });

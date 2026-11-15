@@ -870,8 +870,8 @@ export default function (pi: ExtensionAPI) {
     const previous = previousEffort(priorMessages, ctx);
     const notices: { message: string; type?: "info" | "warning" | "error" }[] = [];
     let attached = false;
-    const quiet = Object.assign(Object.create(ctx), {
-      ui: { ...ctx.ui, notify(message: string, type?: "info" | "warning" | "error") {
+    const quiet = Object.defineProperty(Object.create(ctx), "ui", {
+      value: { ...ctx.ui, notify(message: string, type?: "info" | "warning" | "error") {
         if (controller.signal.aborted) return;
         if (attached) ctx.ui.notify(message, type);
         else notices.push({ message, type });

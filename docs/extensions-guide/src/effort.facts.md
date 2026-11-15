@@ -48,6 +48,7 @@
 - 发请求的 `context_with_system` 按最终上下文重算分类文本；与后台任务相同就复用，不同就中止旧任务并重新分类 —— ext:937-944；test:1580-1589
 - 发请求时最多再等 5 秒（`CLASSIFICATION_WAIT_MS`）；超时沿用当前强度、中止分类、丢弃迟到结果，决策照常写入且 classifier 为 null；每个会话第一次超时 warning 一次，session_start 清零 —— ext:96, ext:945-964, ext:980, ext:823-828；test:1591-1628
 - 后台分类期间的回退 warning 先缓存，发请求时才显示；请求已中止的任务不再提示 —— ext:871-890, ext:944
+- 通知包装在以宿主上下文为原型的新对象上，通过 `Object.defineProperty` 定义自有 `ui`，兼容 Pi 原生只有 getter 的 `ctx.ui`，不改写宿主，其余属性继续委托宿主。旧会话仍出现 `Cannot set property ui` 时，更新后 `/reload` 并重发消息 —— ext:873-879；pi152/pi-coding-agent/dist/core/extensions/runner.js:621-648；test:2001-2074（Pi 原生上下文覆盖 input、context_with_system、通知缓冲与取消）；README.md:119
 - 后台每个分类模型仍独立限时 15 秒，首选非 Jev 模型超时或报错后单跳回退一次 Jev —— ext:95, ext:479-505, ext:667-680；test「超时后 Jev 使用独立 15 秒预算，迟到结果不能当作成功」（test:802-820）
 - 图 1 底部「后台分类 · 最多再等 5 秒」即上面两条
 - 分类器只收到对话文本（用户和助手消息），不含系统提示词（role 为 system 的消息）、工具结果、思考块和图片数据 —— ext:132-139, ext:937；README.md:120；test:369-411
@@ -76,7 +77,7 @@
 
 - Pi 每次请求前按当前上下文构造完整 input —— codex:379-394
 - 基线在 Codex 请求顶层 `reasoning.effort` —— ext:1022；codex:414-424
-- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:98；CHANGELOG.md:73
+- 缓存前缀、保留缓存前缀是 README 的设计目标 —— README.md:98；CHANGELOG.md:76
 - 保留缓存前缀不保证 100% 命中；TTL、最小 token 数和其他提示变更仍会影响命中 —— README.md:98, README.md:112
 - 本次 wrapper 真实通道实测：固定分类夹具强制 low → high → medium → low，真实 Antigravity 主模型的 cacheRead 为 Opus `0 / 13981 / 13994 / 14014`、Sonnet `0 / 13978 / 13991 / 14011`；基线始终 medium，实际 runtime 后缀和 message_end 字段依次为 low / high / medium / low。Opus 完整成功序列前有若干次 SAFETY 零输出尝试，未计入成功序列；固定夹具不等于真实 Jev 端到端，短时实测不是厂商保证 —— README.md:112；主代理提供的本轮验收记录
 - Gemini 4 Argon 已存在，但官方资料只明确 implicit cache；未找到改变 thinking_level 保缓存的明确官方承诺，因此本次不支持。这是缺证，不是证明会丢缓存 —— README.md:116；https://ai.google.dev/gemini-api/docs/latest-model
@@ -121,7 +122,7 @@
 - wrapper 保留 oauth、headers、images、refreshModels；注册和恢复时携带 provider.getAllModels 当前动态目录（chat、image、classifier），按 type + id 补回 registered model.headers —— ext:648-666；test:1246-1263, test:1407-1445；README.md:92
 - message_end 保存实际 providerThinkingLevel；工具续调、同一主请求重试和恢复沿用原决策；maxTokens: 1 预热和辅助 session 不干预 —— ext:630-655, ext:1058-1097；test:1246-1405；README.md:94, README.md:96
 - session_shutdown 只恢复原 streamSimple，保留第三方后来对 headers 等字段的部分更新；第三方已替换 streamSimple 时不覆盖 —— ext:659-666, ext:823-845；test:1377-1445；README.md:96
-- 新增 4 项 Antigravity 回归测试；真实 ModelRuntime 用例覆盖动态刷新目录、图片模型、模型级头部和第三方部分注册 —— test:1246-1445；CHANGELOG.md:44
+- 新增 4 项 Antigravity 回归测试；真实 ModelRuntime 用例覆盖动态刷新目录、图片模型、模型级头部和第三方部分注册 —— test:1246-1445；CHANGELOG.md:47
 
 ## 5. 决策跟随会话分支（图 5）
 
@@ -219,7 +220,7 @@
 - 明细写到 `getAgentDir()/inline-effort-bench/`，flag wx、mode 0600，只含 ID、规则模型、holdout、当前强度、可接受档位、实际档位、分类器、回退来源、回退原因、结果和耗时，不含消息原文；报告另含 fallbacks 汇总 —— ext:538-542, ext:564-566, ext:587, ext:752-755；test:1933-1975
 - 要求空闲且在 TUI；确认框说明额度；确认期间开始工作或切换会话则不运行；Esc 或 dispose 中止 —— ext:712-760；test:1906-1986
 - 用例文件与 claude-auto-effort `bench/judge-cases.json` 逐字节一致；后者由 HeyCubit/effortless 用例按模型标注派生；MIT 许可全文随包交付 —— extensions/inline-effort-data/THIRD_PARTY.md；ref:bench/THIRD_PARTY.md；report「验证」（cmp）；package.json `files` 含 `extensions`
-- 实测（2026-11-14，Jev `typesafe/jev-1.14`，Pi 1.5.2，最新规则）：Opus 5.5 74/75（98.7%）、holdout 20/20（100%）、偏低 0、偏高 0、无效 1、中位 417ms；Sonnet 5.5 64/75（85.3%）、17/20（85.0%）、4、2、5、413ms；Fable 5.2 71/75（94.7%）、20/20（100%）、3、1、0、438ms；225 次调用均返回用量、服务错误 0、输入 388,860 tokens、按 OpenRouter 返回费用计约 0.0163 美元（正文约 0.016 美元） —— latest；docs/extensions-guide/src/06-effort.html:589-607；ext:570-578（统计口径）；test:1878-1904
+- 实测（2026-11-14，Jev `typesafe/jev-1.14`，Pi 1.5.2，最新规则）：Opus 5.5 74/75（98.7%）、holdout 20/20（100%）、偏低 0、偏高 0、无效 1、中位 417ms；Sonnet 5.5 64/75（85.3%）、17/20（85.0%）、4、2、5、413ms；Fable 5.2 71/75（94.7%）、20/20（100%）、3、1、0、438ms；225 次调用均返回用量、服务错误 0、输入 388,860 tokens、按 OpenRouter 返回费用计约 0.0163 美元（正文约 0.016 美元） —— latest；docs/extensions-guide/src/06-effort.html:590-608；ext:570-578（统计口径）；test:1878-1904
 
 ## 改名与兼容（inline-effort）
 

@@ -68,6 +68,7 @@
 - 对话照常进行（沿用后照常发出请求） —— ext:953-970, ext:980
 - 警告显示 HTTP 状态码和白名单中文原因（携带 Guardrail 关键词时优先归类为「OpenRouter 策略或白名单限制」）；首选非 Jev 模型超时或报错先提示「正在切换到 openrouter/typesafe/jev-1.14」，最终无合格结果时沿用，只列出实际错误或结果无效，不把低置信度列为错误。未知错误不透出服务原文 —— ext:189-207, ext:499-503；test:646-746, test:1447-1522
 - 警告里建议在 `/personal` → 原位思考强度 → 「选择分类模型」或「测试分类模型可用性」中检查 —— ext:966
+- 已兼容 Pi 原生只读界面上下文；旧会话仍出现 `Cannot set property ui` 时，更新扩展后执行 `/reload` 并重发消息 —— ext:873-879；test:2001-2074（原生 ExtensionRunner 上下文验证 input、context_with_system、通知缓冲及取消隔离）；README.md:119
 - 提交时就在 input 事件后台分类；发请求时最多再等 5 秒，超时沿用当前档位、丢弃迟到结果，同一会话只提醒第一次；提醒原文「分类等待超过 5 秒，本次沿用 〈当前档位〉；分类已中止，迟到结果不再采用。」（图注示例填 medium） —— ext:96, ext:893-902, ext:945-964；test:1564-1628
 
 ## 代价和隐私
@@ -116,7 +117,7 @@
 - 明细在 agent 目录的 `inline-effort-bench` 文件夹，不含用例原文 —— ext:752-755；test:1933-1975
 - 测评期间首选分类器失败也不逐条弹出切换警告；回退到 Jev 的次数和原因分布写在结束时的汇总里，首选非 Jev 分类器时多一行回退统计；图注中的「225 次 / HTTP 429」是示例 —— ext:478-482, ext:502, ext:548-551, ext:580-597, ext:735-737；test:1878-1904, test:1933-1975
 - 用例原样来自 auto-effort（HeyCubit/effortless 用例的按模型标注版），MIT 许可全文在 `extensions/inline-effort-data/THIRD_PARTY.md`；20 个 holdout 不用于调整提示词 —— extensions/inline-effort-data/THIRD_PARTY.md；README.md:201
-- 实测（2026-11-14，Jev `typesafe/jev-1.14`，Pi 1.5.2）：Opus 5.5 74/75（98.7%）、holdout 20/20（100%）、中位 417ms；Sonnet 5.5 64/75（85.3%）、17/20（85.0%）、413ms；Fable 5.2 71/75（94.7%）、20/20（100%）、438ms；225 次调用约 0.016 美元 —— latest；docs/extensions-usage/src/05-effort.html:413-423；ext:570-578（统计口径）；test:1878-1904
+- 实测（2026-11-14，Jev `typesafe/jev-1.14`，Pi 1.5.2）：Opus 5.5 74/75（98.7%）、holdout 20/20（100%）、中位 417ms；Sonnet 5.5 64/75（85.3%）、17/20（85.0%）、413ms；Fable 5.2 71/75（94.7%）、20/20（100%）、438ms；225 次调用约 0.016 美元 —— latest；docs/extensions-usage/src/05-effort.html:414-424；ext:570-578（统计口径）；test:1878-1904
 - 命中率只说明结果和标注一致，不代表主模型完成质量 —— README.md:201
 
 ## 改名与兼容

@@ -1,7 +1,8 @@
 <section class="chapter" id="ch-effort" data-chapter="effort" aria-labelledby="ch-effort-h">
   <header class="chapter-head">
     <h2 id="ch-effort-h">原位思考强度：按消息选档位</h2>
-    <p class="chapter-sum">按每条新用户消息调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型或 Antigravity 分支的指定 Claude 模型的思考档位。三个分支分别用 <code>configuration_update</code>、Anthropic 原生逐消息标记或插件 runtime ID 路由写入档位。用户提交时后台分类，发请求时最多再等 5 秒；检测到两次缓存重建会暂停自动调整；菜单里还能运行判档测评。</p>
+    <p class="chapter-sum">按每条新用户消息调整 GPT-6 Codex、Anthropic 协议分支的指定 Claude 模型或 Antigravity 分支的指定 Claude 模型的思考档位。三个分支分别用 <code>configuration_update</code>、Anthropic 原生逐消息标记或插件 runtime ID 路由写入档位。用户提交时后台分类，发请求时最多再等 5 秒；菜单里还能运行判档测评。</p>
+    <p><strong>当前版本：</strong>缓存读取下降时，每个会话最多提示一次，自动调档继续。下文录屏、配图及配音中的「两次后暂停」和「恢复自动调整」是旧版行为，当前菜单已移除恢复项。</p>
     <dl class="meta">
       <dt>功能 ID</dt><dd><code>inline-effort</code></dd>
       <dt>入口</dt><dd><code>/personal</code> → 原位思考强度</dd>

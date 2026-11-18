@@ -1,5 +1,7 @@
 # effort（使用者版）事实清单
 
+当前版本：缓存读取下降仅提示读数，每会话至多一次，不中止分类。下列暂停和恢复操作为旧版配图、录屏记录。依据：`extensions/inline-effort.ts` 的 `cacheNotified` 与 `tests/inline-effort.test.mjs` 的「缓存读取下降每个会话只提示一次，后续继续调档」。
+
 路径缩写：`ext` = `extensions/inline-effort.ts`，`entry` = `extensions/pi-personal-extensions.ts`，`test` = `tests/inline-effort.test.mjs`。技术版出处见 `docs/extensions-guide/src/effort.facts.md`。`report` = Codex worker 历史汇报 `/tmp/pi-inline-effort-worker-report.md`（用于 Fable 验证，不作为本次最新测评来源）。`latest` = 本次任务提供的 2026-11-14 最新 Jev 实测数据（`typesafe/jev-1.14`、Pi 1.5.2）；本次只同步该数据，不重新运行付费测评。
 
 ## 它能帮你什么

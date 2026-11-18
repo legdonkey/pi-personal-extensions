@@ -638,16 +638,13 @@ export default function (pi: ExtensionAPI) {
   };
   let background: ClassificationJob | undefined;
   let warnedTimeout = false;
-  let cacheWarnings = 0;
-  let cacheWarnedTurn = false;
-  let paused = false;
+  let cacheNotified = false;
   // 上一个主会话请求：缓存读取量、开始时刻和模型；为空表示没有可比较的基准。
   let previousCache: { read: number; startedAt: number; model: string } | undefined;
   // 上一次判断以来发生过压缩或树导航：历史被改写，下一次读取变少属于正常失效。
   let cacheHistoryChanged = false;
   let cacheRequest: { model: Model<any>; adjusted: boolean; startedAt: number } | undefined;
-  const showStatus = (ctx: ExtensionContext, value?: string) => ctx.ui.setStatus(STATUS_KEY,
-    paused ? "🧠 自动调整暂停：检测到两次缓存重建 · /personal → 原位思考强度 → 恢复自动调整" : value);
+  const showStatus = (ctx: ExtensionContext, value?: string) => ctx.ui.setStatus(STATUS_KEY, value);
   let picker: AbortController | undefined;
   let generation = 0;
   let claudeRequest: { model: Model<any>; effort?: string } | undefined;
@@ -715,28 +712,17 @@ export default function (pi: ExtensionAPI) {
     description: "自动思考强度：分类模型、可用性、恢复调整与判档测评",
     async handler(args, ctx) {
       const [action = "status", value, ...extra] = args.trim().split(/\s+/).filter(Boolean);
-      if (extra.length || !["status", "model", "test", "resume", "bench"].includes(action) || (value && action !== "model")) {
+      if (extra.length || !["status", "model", "test", "bench"].includes(action) || (value && action !== "model")) {
         ctx.ui.notify("请在 /personal → 原位思考强度 中选择操作。", "warning");
         return;
       }
       try {
-        if (action === "resume") {
-          if (!paused) {
-            ctx.ui.notify("当前会话未暂停自动调整。", "info");
-            return;
-          }
-          paused = false;
-          cacheWarnings = 0;
-          previousCache = undefined;
-          showStatus(ctx);
-          ctx.ui.notify("当前会话恢复自动调整；缓存重建计数清零。", "info");
-          return;
-        }
+
         if (action === "status") {
           const selected = readEffortSettings().model;
           const last = decisions(ctx).at(-1);
           ctx.ui.notify(
-            `自动思考强度：${paused ? "暂停（检测到两次缓存重建）" : active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；失败回退：${selected === "jev" ? "无" : "Jev（仅本次）"}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier, last.fallbackFrom)}` : "尚无"}。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。`,
+            `自动思考强度：${active(ctx) ? "适用" : "当前主模型或 thinking 不适用"}；后续分类：${modelKey(selected)}；失败回退：${selected === "jev" ? "无" : "Jev（仅本次）"}；最近决策：${last ? `${last.thinkingLevel} · ${classifierLabel(last.classifier, last.fallbackFrom)}` : "尚无"}。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。`,
             "info",
           );
           return;
@@ -856,8 +842,7 @@ export default function (pi: ExtensionAPI) {
     generation++;
     if (event.type !== "model_select") {
       warnedTimeout = false;
-      cacheWarnings = 0;
-      paused = false;
+      cacheNotified = false;
     }
     if (event.type !== "model_select") cacheRequest = undefined;
     previousCache = undefined;
@@ -923,7 +908,7 @@ export default function (pi: ExtensionAPI) {
   }
 
   pi.on("input", (event, ctx) => {
-    if (!active(ctx) || paused) return;
+    if (!active(ctx)) return;
     background?.controller.abort();
     const history = ctx.sessionManager.getBranch().flatMap((entry) =>
       entry.type === "message" && (entry.message.role === "user" || entry.message.role === "assistant") ? [entry.message] : []);
@@ -956,8 +941,7 @@ export default function (pi: ExtensionAPI) {
       .filter((message) => message.role === "user" && producesUserItem(message)
         && !classified.has(message.timestamp));
     if (pending.length === 0) return;
-    // 与 auto-effort 一致：每个用户轮次最多计一次缓存重建。
-    cacheWarnedTurn = false;
+
 
     const started = generation;
     const current = recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel();
@@ -968,7 +952,7 @@ export default function (pi: ExtensionAPI) {
       ctx.signal?.throwIfAborted();
       const conversation = messages.filter(({ role }) => role === "user" || role === "assistant") as Message[];
       const prompt = classificationPrompt(conversation);
-      if (prompt && !paused) {
+      if (prompt) {
         if (background && background.prompt !== prompt) background.controller.abort();
         const job = background?.prompt === prompt ? background : startClassification(prompt, ctx,
           conversation.slice(0, conversation.findLastIndex(({ role }) => role === "assistant") + 1));
@@ -1103,18 +1087,9 @@ export default function (pi: ExtensionAPI) {
         // 这个间隔不短于「上次结束到本次开始」，上一轮回复很长时也不会把正常过期当成重建。
         const comparable = previous !== undefined && previous.read > 0 && !cacheHistoryChanged
           && previous.model === model && cache.startedAt - previous.startedAt <= cacheTtlMs(cache.model);
-        if (comparable && !paused && !cacheWarnedTurn && cache.adjusted && usage.cacheRead < previous.read) {
-          cacheWarnedTurn = true;
-          cacheWarnings++;
-          ctx.ui.notify(`检测到缓存重建：本次缓存读取 ${usage.cacheRead}，少于上一次的 ${previous.read}。`
-            + "可能是调整思考强度改变了请求前缀，也可能是服务端提前清除了缓存，或其他扩展改了系统提示词或工具；"
-            + "缓存过期、压缩、树导航和切换模型已排除。", "warning");
-          if (cacheWarnings >= 2) {
-            paused = true;
-            background?.controller.abort();
-            background = undefined;
-            showStatus(ctx);
-          }
+        if (comparable && !cacheNotified && cache.adjusted && usage.cacheRead < previous.read) {
+          cacheNotified = true;
+          ctx.ui.notify(`缓存读取从 ${previous.read} 降至 ${usage.cacheRead}，原因未确认；自动调档继续。`, "info");
         }
         previousCache = { read: usage.cacheRead, startedAt: cache.startedAt, model };
         cacheHistoryChanged = false;

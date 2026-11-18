@@ -1753,45 +1753,25 @@ function finishWithUsage(h, cacheRead, cacheWrite, patch = {}) {
     provider: h.model.provider, model: h.model.id, stopReason: "stop", usage: { cacheRead, cacheWrite }, ...patch } }, h.ctx);
 }
 
-const rebuilds = (h) => h.warnings.filter((w) => w.message.startsWith("检测到缓存重建")).length;
+const rebuilds = (h) => h.warnings.filter((w) => w.message.startsWith("缓存读取从")).length;
 
-test("缓存读取少于上一次时告警并说明可能原因，两次后暂停，菜单恢复清零", async () => {
+test("缓存读取下降每个会话只提示一次，后续继续调档", async () => {
   const h = setup();
-  h.choices = ["high", "high", "high", "low"];
-  await h.request([user(1)]);
-  finishWithUsage(h, 100, 0);
-  await h.request([user(2)]);
-  finishWithUsage(h, 80, 0);
+  h.choices = ["high", "high", "high", "high", "low", "high", "high"];
+  for (const [i, read] of [20096, 2688, 21632, 0].entries()) {
+    await h.request([user(i + 1)]);
+    finishWithUsage(h, read, 0);
+  }
   assert.equal(rebuilds(h), 1);
-  assert.equal(h.warnings.at(-1).type, "warning");
-  assert.match(h.warnings.at(-1).message, /^检测到缓存重建：本次缓存读取 80，少于上一次的 100。可能是调整思考强度改变了请求前缀.*缓存过期、压缩、树导航和切换模型已排除。$/);
-  await h.request([user(3)]);
-  finishWithUsage(h, 100, 0);
-  await h.request([user(4)]);
-  finishWithUsage(h, 0, 0);
-  assert.equal(rebuilds(h), 2);
-  assert.match(h.status, /自动调整暂停.*检测到两次缓存重建/);
-  const calls = h.calls;
-  h.events.get("input")({ text: "暂停中" }, h.ctx);
-  await h.request([user(5)]);
-  assert.equal(h.calls, calls);
-  assert.equal(h.branch.at(-1).data.thinkingLevel, "low");
-  assert.match(h.status, /恢复自动调整/);
-  h.events.get("model_select")({ type: "model_select" }, h.ctx);
-  await h.command("status");
-  assert.match(h.warnings.at(-1).message, /暂停/);
-  await h.command("resume");
-  assert.equal(h.status, undefined);
+  assert.equal(h.warnings.at(-1).message, "缓存读取从 20096 降至 2688，原因未确认；自动调档继续。");
+  assert.equal(h.warnings.at(-1).type, "info");
+  assert.deepEqual(updates(await h.request([user(5)])), [[0, "low"]]);
+  h.events.get("session_start")({ type: "session_start" }, h.ctx);
   await h.request([user(6)]);
-  assert.equal(h.calls, calls + 1);
   finishWithUsage(h, 100, 0);
   await h.request([user(7)]);
   finishWithUsage(h, 0, 0);
-  assert.equal(rebuilds(h), 3);
-  assert.doesNotMatch(h.status, /暂停/);
-  h.events.get("session_start")({ type: "session_start" }, h.ctx);
-  await h.command("status");
-  assert.doesNotMatch(h.warnings.at(-1).message, /暂停/);
+  assert.equal(rebuilds(h), 2);
 });
 
 test("同一用户轮次的多次工具续调最多计一次缓存重建", async () => {
@@ -1888,7 +1868,8 @@ test("Claude 与 Antigravity 的助手用量也触发缓存守护，并保留实
       else h.send(messages);
       assert.equal(finishWithUsage(h, read, write).message.providerThinkingLevel, "high");
     }
-    assert.match(h.status, /暂停/);
+    assert.equal(rebuilds(h), 1);
+    assert.doesNotMatch(h.status ?? "", /暂停/);
   }
 });
 

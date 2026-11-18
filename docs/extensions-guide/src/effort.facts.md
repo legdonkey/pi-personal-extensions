@@ -1,5 +1,7 @@
 # effort 章节事实清单
 
+当前版本：缓存读取下降仅提示读数，每会话至多一次，不中止分类。下列暂停和恢复操作为旧版配图、录屏记录。依据：`extensions/inline-effort.ts` 的 `cacheNotified` 与 `tests/inline-effort.test.mjs` 的「缓存读取下降每个会话只提示一次，后续继续调档」。
+
 路径缩写：
 - `ext` = `extensions/inline-effort.ts`
 - `test` = `tests/inline-effort.test.mjs`

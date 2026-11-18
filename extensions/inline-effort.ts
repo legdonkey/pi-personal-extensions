@@ -224,7 +224,7 @@ function classificationFailure(error: unknown): string {
 
 export type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
 
-export type SupportedModel = 'claude-opus-5-5' | 'claude-sonnet-5-5' | 'claude-fable-5-2' | 'gpt-6-astra' | 'gpt-6.1-sol'
+export type SupportedModel = 'claude-opus-5-5' | 'claude-sonnet-5-5' | 'claude-fable-5-2' | 'gpt-6-astra' | 'gpt-6.1-sol' | 'gpt-6.2-astra' | 'gpt-6.2-sol'
 
 export type ModelRules = {
   /** 显示名 */
@@ -345,6 +345,38 @@ export const MODEL_RULES: Record<SupportedModel, ModelRules> = {
       max:
         '例外最高档：仅用于用户明确要求不计时间和成本攻克极难的科研或复杂单一难题，' +
         '或同一任务在 currentEffort 为 xhigh 时仍已证明不够。',
+    },
+  },
+  // GPT-6.2（2026-11-18 核对）：区分型号专属说明、6.2 家族共用建议与本扩展单模型判据；Ultra 涉及子代理委派，不作第六档。
+  // - 模型页（型号定位与禁 none）：https://developers.openai.com/api/docs/models/gpt-6.2-astra · https://developers.openai.com/api/docs/models/gpt-6.2-sol
+  // - Using GPT-6.2（家族共用：API 新集成起点 medium、保前缀调档、长任务完成最终检查）：https://developers.openai.com/api/docs/guides/latest-model
+  // - Codex 6.2 指南与 Models（家族共用选档阶梯；未按型号拆分五档）：https://learn.chatgpt.com/codex/learn/prompting-gpt-6-2-astra · https://learn.chatgpt.com/docs/models
+  // - Model selection（跨模型刻度：仅列 Astra 的 low/medium/xhigh 与 Sol 的 medium/xhigh，未分别规定其余档）：https://developers.openai.com/api/docs/guides/model-selection
+  // - Codex 内置目录（两者 defaultEffort 取目录值 low，仅作记录，不覆盖会话基线）：
+  //   https://github.com/openai/codex/blob/4389a526d51a5a7600e0648436a7142a304f0188/codex-rs/models-manager/models.json
+  // 官方未给两模型分别规定完整的五档表；下方将家族共用阶梯与型号刻度收敛为分类时可见的单模型条件。
+  'gpt-6.2-astra': {
+    name: 'GPT-6.2 Astra',
+    defaultEffort: 'low',
+    notes: 'Astra 单档能力刻度偏高，擅长把复杂项目做到可验收。常规明确工作优先用 low 或 medium；按跨模块验证深度和约束冲突程度升档，不因任务篇幅长、专业度高或单纯跑测试而加档。',
+    levels: {
+      low: '寒暄确认、直接问答；目标和做法明确的局部修改、格式或模板替换、文字改写，或把清晰需求直接写成短文与小脚本；不需先调查上下文或权衡方案。',
+      medium: '需要规划步骤并结合上下文的常规开发与文档项目：跨文件实现功能、修复范围局部的 bug、补充或调整测试、快速调查并概述现状，或按明确结构整合资料成稿；约束无冲突，局部验证即可验收。',
+      high: '需要跨模块或跨服务追踪验证、审查非局部边界，或在竞争约束间做权衡：跨系统故障排查与重构、代码评审与安全或兼容性审查、多方案比较选型，或对照多份来源核验关键结论并完成端到端检查。',
+      xhigh: '请求或上下文已呈现多个耦合因素、冲突证据或开放式权衡，需设计对照检查验证假设、比较竞争解释并检验结论在不同条件下是否成立；或 currentEffort 为 high 时仍未解决、用户明确要求最彻底核验。',
+      max: '例外：极难且不可拆开的单一核心问题，需完成严格论证或穷尽关键反例，且用户明确要求不计时间和用量追求最深推理，或同一任务在 currentEffort 为 xhigh 时仍已证明不够；子任务可并行或步骤多不是理由。',
+    },
+  },
+  'gpt-6.2-sol': {
+    name: 'GPT-6.2 Sol',
+    defaultEffort: 'low',
+    notes: 'Sol 面向日常编码、写作和多步骤工作。已知步骤多或单纯跑测试不等于难推理；看局部判断和检查是否足够，还是必须跨模块验证、权衡竞争约束或按中间结果反复修订。',
+    levels: {
+      low: '寒暄确认、直接问答；提取已明确的字段或行动项、润色或简短起草文字、按具体意见改名或做位置明确的局部小改；目标和改法已知，不需先调查上下文或比较方案。',
+      medium: '范围清楚的日常开发与文档工作：在现有代码中新增功能、修复现象局部的常规 bug、按明确反馈修改代码与测试，或起草文档、把纪要和资料整理成简报与计划；需要简短调查和局部判断，不涉及跨模块冲突。',
+      high: '需要跨模块或跨服务追踪验证、审查非局部边界，或在竞争约束间做权衡：跨模块故障排查与重构、代码评审与安全或兼容性审查，或核验多份来源并权衡取舍后给出方案建议；不能只检查局部结果。',
+      xhigh: '请求或上下文已呈现多个耦合机制、冲突线索或密集边界需用对照检查排除竞争解释，或后续步骤依赖中间验证结果、需在推进中反复调整方案的复杂多步任务；以及 currentEffort 为 high 仍不足或用户明确要求最彻底处理。',
+      max: '例外：极难且不可拆开的单一核心问题，需完成严格论证或穷尽关键反例，且用户明确要求不计时间和用量追求最深推理，或同一任务在 currentEffort 为 xhigh 时仍已证明不够；子任务可并行或步骤多不是理由。',
     },
   },
 }

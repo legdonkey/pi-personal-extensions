@@ -4,6 +4,10 @@
 
 ## 未发布
 
+## 0.8.0 - 2026-11-18
+
+- `inline-effort` 为 GPT-6.2 Astra（`gpt-6.2-astra`）和 GPT-6.2 Sol（`gpt-6.2-sol`）新增各自的 `notes` 与五档 `levels`：区分模型页与 Model selection 的型号刻度、Using GPT-6.2 与 Codex 6.2 指南的家族共用建议及本扩展单模型判据，按分类时可见的范围、验证深度与约束耦合度切分五档，覆盖常规开发、文档整合与方案权衡，对齐 `COMMON_INSTRUCTIONS` 的代码评审定档与 `currentEffort` 进展升级，不把具体示例、事后根因数、单纯跑测试、任务长度或多代理 `Ultra` 当作档位门槛。仅精确匹配两个新 ID，保留旧模型规则、通用规则和 Codex 保前缀逐轮调档方式，补充回归测试并同步 README 与两份讲解页。
+
 ## 0.7.0 - 2026-11-15
 
 - 修复原位思考强度在 Pi 原生只读 `ctx.ui` 上下文中发送消息时报 `Cannot set property ui of #<Object> which has only a getter`：后台通知包装改用属性描述符定义自有 `ui`，不再向继承的 getter 赋值，其余上下文属性仍委托宿主。新增 3 项使用 Pi 原生 `ExtensionRunner.createContext()` 的回归测试，覆盖后台分类、请求前分类、回退通知缓冲与取消隔离；同步 README 和两份讲解页的重载说明。

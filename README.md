@@ -186,7 +186,7 @@ Antigravity 额度需要先安装并启用 `pi-antigravity`。扩展通过当前
 
 ## 自动思考强度的选档规则
 
-Opus 5.5、Sonnet 5.5、Fable 5.2、GPT-6 Astra 和 GPT-6.1 Sol 使用按模型规则：共用原则 `COMMON_INSTRUCTIONS`，加该模型的 `notes` 和五档 `levels`，组成 System One 的单题 choice 请求。当前分支已有上一轮助手回复时，请求同时传入上一轮主模型实际生效的五档强度 `currentEffort`（Antigravity 的 `xhigh`、`max` 按生效值 `high` 传入，`minimal` 归一为 `low`；首轮尚无历史回复时不传），供判断继续任务和上一轮投入。每个模型的默认档统一记在 `defaultEffort` 字段，Claude 三个模型取 Claude Code 的默认档 `medium`。
+Opus 5.5、Sonnet 5.5、Fable 5.2、GPT-6 Astra、GPT-6.1 Sol、GPT-6.2 Astra 和 GPT-6.2 Sol 使用按模型规则：共用原则 `COMMON_INSTRUCTIONS`，加该模型的 `notes` 和五档 `levels`，组成 System One 的单题 choice 请求。当前分支已有上一轮助手回复时，请求同时传入上一轮主模型实际生效的五档强度 `currentEffort`（Antigravity 的 `xhigh`、`max` 按生效值 `high` 传入，`minimal` 归一为 `low`；首轮尚无历史回复时不传），供判断继续任务和上一轮投入。每个模型的默认档统一记在 `defaultEffort` 字段，Claude 三个模型取 Claude Code 的默认档 `medium`。
 
 Claude 三个模型的 `notes` 和五档 `levels` 移植自 Claude Code mod `auto-effort` 的 `hooks/policy-text.ts`；`COMMON_INSTRUCTIONS` 针对单题分类协议移除了上游双判档器的 `suggestModel` 残留，对齐了 `prompt`（近期对话 / 当前用户请求）与 `currentEffort` 字段语义，并区分被引用材料中的注入指令与用户本人对思考深度的真实要求。Anthropic 与 Antigravity 的同名模型共用对应五档规则；Antigravity 运行时将 `xhigh`、`max` 夹到 `high`，并在响应侧合并 `high`、`xhigh`、`max` 概率后再与 0.5 比较。规则依据 Anthropic 的 Opus 5.5 / Fable 5.2 prompting、effort、Sonnet 5.5 migration、Claude Code model configuration 及官方博客；完整来源链接保留在 `extensions/inline-effort.ts` 注释中。
 
@@ -197,6 +197,8 @@ GPT-6 Astra（`gpt-6-astra`）和 GPT-6.1 Sol（`gpt-6.1-sol`）的规则依据 
 - Sol 在低档下的事实准确性已很高，单纯事实问答与核实用 `low`；常规功能开发与协同交付用 `medium`，迁移、协同文件生成与端到端测试用 `high`，冲突证据权衡与联动精修交付用 `xhigh`。
 - 两者的 API 档位就是 `low` 到 `max` 五档，与分类结果一一对应，不需要映射；Codex 分支按 `thinkingLevelMap` 映射和插入 `configuration_update` 的做法不变。
 - 只匹配这两个精确 ID，也就是 Pi 1.5.2 `openai-codex` 目录里的 ID。
+
+[GPT-6.2 Astra](https://developers.openai.com/api/docs/models/gpt-6.2-astra) 和 [GPT-6.2 Sol](https://developers.openai.com/api/docs/models/gpt-6.2-sol) 分别精确匹配 `gpt-6.2-astra`、`gpt-6.2-sol`。两者的 [Codex 目录默认档](https://github.com/openai/codex/blob/4389a526d51a5a7600e0648436a7142a304f0188/codex-rs/models-manager/models.json) 都是 `low`（[API 新集成指南](https://developers.openai.com/api/docs/guides/latest-model)建议起点为 `medium`；扩展只作记录，不覆盖会话的实际基线）。OpenAI 未给两模型分别规定完整的五档表：[Codex 的 6.2 指南](https://learn.chatgpt.com/codex/learn/prompting-gpt-6-2-astra)与 [Models](https://learn.chatgpt.com/docs/models) 是家族共用的选档阶梯，[Model selection](https://developers.openai.com/api/docs/guides/model-selection) 仅给出跨模型刻度（Astra 的 `low`/`medium`/`xhigh` 与 Sol 的 `medium`/`xhigh`）。本扩展将家族共用阶梯与型号刻度收敛为分类时可见的单模型条件：问答与明确小改用 `low`（Astra 另含清晰需求直出短文与小脚本）；需规划的常规功能开发、局部修 bug 与资料成稿用 `medium`；跨模块排障重构、代码与安全评审、竞争约束权衡及多源核验用 `high`；已呈现耦合因素、冲突线索或（Astra）开放式假设检验、（Sol）依赖中间验证反复调整方案的复杂多步任务及 `high` 未解决时用 `xhigh`；仅极难单一核心问题且用户明确要求不计时间和用量，或 `xhigh` 已证明不够时才用 `max`。不因篇幅长、步骤多或单纯跑测试加档，也不把 Codex 的多代理 Ultra 模式当作推理档位。
 
 测评用例原样复制自 `claude-auto-effort/bench/judge-cases.json`，是 HeyCubit/effortless 用例的按模型标注派生版；75 个用例包含 20 个 holdout，不用于调整提示词。原始数据使用 MIT 许可，版权和完整许可见 `extensions/inline-effort-data/THIRD_PARTY.md`。测评只调用分类器，不调用这三个主模型，命中率不代表主模型完成任务的质量保证。
 

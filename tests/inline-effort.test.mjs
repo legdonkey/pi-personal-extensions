@@ -24,7 +24,7 @@ afterEach(() => {
 });
 import register from "../extensions/inline-effort.ts";
 
-// 默认用通用规则的 GPT-6 模型；gpt-6-astra、gpt-6.1-sol 有按模型规则，由专门的测试覆盖。
+// 默认用通用规则的 GPT-6 模型；有专属规则的 Astra 和 Sol 由单独的测试覆盖。
 const codexModel = (id = "gpt-6-sol") => ({
   provider: "openai-codex", id, api: "openai-codex-responses",
   thinkingLevelMap: { off: null, minimal: "low", low: "low", medium: "medium", high: "high", xhigh: "xhigh", max: "max" },
@@ -1679,8 +1679,8 @@ test("Fable 5.2 使用 Pi 1.5.2 目录快照与真实序列化器，保留两轮
   assert.equal(antigravity.calls, 0, "Antigravity 不加 Fable");
 });
 
-test("三个 Claude 模型与 GPT-6 Astra、GPT-6.1 Sol 各用按模型规则，其他 GPT-6 和 Opus 5 保留通用规则", async () => {
-  const ids = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-2", "gpt-6-astra", "gpt-6.1-sol"];
+test("三个 Claude 模型与四个 GPT 模型各用按模型规则，其他 GPT-6 和 Opus 5 保留通用规则", async () => {
+  const ids = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-fable-5-2", "gpt-6-astra", "gpt-6.1-sol", "gpt-6.2-astra", "gpt-6.2-sol"];
   assert.deepEqual(Object.keys(MODEL_RULES).sort(), [...ids].sort());
   const questions = [];
   for (const id of ids) {
@@ -1705,7 +1705,7 @@ test("三个 Claude 模型与 GPT-6 Astra、GPT-6.1 Sol 各用按模型规则，
   // 默认档字段统一为 defaultEffort：Claude 取 Claude Code 默认，GPT 取 Codex 内置目录默认。
   assert.deepEqual(Object.fromEntries(ids.map((id) => [id, MODEL_RULES[id].defaultEffort])), {
     "claude-opus-5-5": "medium", "claude-sonnet-5-5": "medium", "claude-fable-5-2": "medium",
-    "gpt-6-astra": "low", "gpt-6.1-sol": "low",
+    "gpt-6-astra": "low", "gpt-6.1-sol": "low", "gpt-6.2-astra": "low", "gpt-6.2-sol": "low",
   });
   assert.ok(ids.every((id) => !Object.hasOwn(MODEL_RULES[id], "claudeCodeDefault")));
   // 共用原则不再写死 Claude Code，对所有按模型规则生效。
@@ -1723,13 +1723,30 @@ test("三个 Claude 模型与 GPT-6 Astra、GPT-6.1 Sol 各用按模型规则，
   const genericQuestion = generic.inputs[0].questions.thinking;
   assert.match(genericQuestion.instructions, /按推理结构而非工作领域选档/);
   assert.equal(generic.inputs[0].state.currentEffort, undefined, "通用规则不继承上一轮档位");
-  for (const model of [codexModel("gpt-6.1-terra"), codexModel("gpt-6-luna"), claudeModel("claude-opus-5")]) {
+  for (const model of [codexModel("gpt-6.1-terra"), codexModel("gpt-6-luna"), codexModel("gpt-6.2-sol-preview"), codexModel("gpt-6.2-astra-preview"), claudeModel("claude-opus-5")]) {
     const h = setup({ model });
     await h.request([user(1)]);
     assert.deepEqual(h.inputs[0].questions.thinking, genericQuestion, model.id);
     assert.equal(h.inputs[0].state.currentEffort, undefined, model.id);
   }
 });
+
+for (const id of ["gpt-6.2-astra", "gpt-6.2-sol"]) {
+  test(`${id} 两轮调档保持历史前缀和顶层基线不变`, async () => {
+    const h = setup({ model: codexModel(id) });
+    h.choices = ["xhigh", "low"];
+    const messages = [system, user(1)];
+    const first = await h.request(messages);
+    assert.deepEqual(updates(first), [[1, "xhigh"]]);
+    messages.push(assistant(2), user(3));
+    const second = await h.request(messages);
+    assert.deepEqual(updates(second), [[1, "xhigh"], [4, "low"]]);
+    assert.ok(isPrefix(first.input, second.input));
+    assert.equal(first.reasoning.effort, "medium");
+    assert.deepEqual(second.reasoning, first.reasoning);
+    assert.equal(h.inputs[1].state.currentEffort, "xhigh");
+  });
+}
 
 function finishWithUsage(h, cacheRead, cacheWrite, patch = {}) {
   return h.events.get("message_end")({ message: { ...assistant(Date.now()), api: h.model.api,
@@ -2071,4 +2088,20 @@ test("Pi 原生只读上下文保留后台回退通知缓冲、激活后通知�
     h.ctx.ui.notify("原上下文通知", "info");
     assert.equal(h.warnings.at(-1).message, "原上下文通知");
   }
+});
+
+test("GPT-6.2 Astra 与 Sol 规则使用分类时可见条件并对齐评审与进展升级", () => {
+  for (const id of ["gpt-6.2-astra", "gpt-6.2-sol"]) {
+    const { notes, levels } = MODEL_RULES[id];
+    assert.match(notes, /单纯跑测试/);
+    assert.match(levels.low, /直接问答/);
+    assert.match(levels.medium, /(?:实现功能|新增功能).*局部/);
+    assert.doesNotMatch(levels.medium, /评审/);
+    assert.match(levels.high, /代码评审/);
+    assert.match(levels.xhigh, /currentEffort 为 high/);
+    assert.match(levels.max, /currentEffort 为 xhigh/);
+    assert.doesNotMatch(JSON.stringify({ notes, levels }), /材料一致|只有一个疑似原因|单独检查都解释不了|结果可直接比对|从评审意见追踪/);
+  }
+  assert.match(MODEL_RULES["gpt-6.2-astra"].levels.low, /短文与小脚本/);
+  assert.match(MODEL_RULES["gpt-6.2-sol"].levels.xhigh, /中间验证结果/);
 });

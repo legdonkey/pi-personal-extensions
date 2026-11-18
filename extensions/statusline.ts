@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { stripVTControlCharacters } from "node:util";
+import { isStaleContextError } from "./stale-context.ts";
 
 const STATUS_KEY = "usage";
 const SESSION_STATUS_KEY = "session-id";
@@ -116,7 +117,7 @@ export default function statusline(pi: ExtensionAPI) {
 	};
 
 	const ownsSession = (ctx: ExtensionContext) =>
-		ctx.sessionManager === activeSessionManager;
+		activeSessionManager !== undefined && ctx.sessionManager === activeSessionManager;
 
 	const clearTimer = () => {
 		if (!refreshTimer) return;
@@ -139,7 +140,7 @@ export default function statusline(pi: ExtensionAPI) {
 		ctx.ui.setStatus(STATUS_KEY, provider === ANTIGRAVITY_PROVIDER ? undefined : cache.get(provider));
 	};
 
-	const refresh = async (
+	const refreshUsage = async (
 		provider: string | undefined,
 		ctx: ExtensionContext,
 		options: { force?: boolean } = {},
@@ -184,8 +185,8 @@ export default function statusline(pi: ExtensionAPI) {
 
 			cache.set(provider, text);
 			ctx.ui.setStatus(STATUS_KEY, text);
-		} catch {
-			if (controller.signal.aborted || generation !== refreshGeneration || !ownsSession(ctx)) return;
+		} catch (error) {
+			if (controller.signal.aborted || generation !== refreshGeneration || isStaleContextError(error) || !ownsSession(ctx)) return;
 			// 查询失败时保留同一 Provider 的上次成功结果，避免短暂网络故障造成状态闪烁。
 			if (activeProvider === provider) {
 				ctx.ui.setStatus(STATUS_KEY, cache.get(provider));
@@ -195,11 +196,17 @@ export default function statusline(pi: ExtensionAPI) {
 		}
 	};
 
+	const refresh = (...args: Parameters<typeof refreshUsage>) => {
+		void refreshUsage(...args).catch((error: unknown) => {
+			if (!isStaleContextError(error)) console.error("状态栏额度刷新失败。");
+		});
+	};
+
 	const startTimer = (ctx: ExtensionContext) => {
 		clearTimer();
 		if (!settings.usageEnabled) return;
 		refreshTimer = setInterval(() => {
-			void refresh(activeProvider, ctx, { force: true });
+			refresh(activeProvider, ctx, { force: true });
 		}, REFRESH_INTERVAL_MS);
 		refreshTimer.unref?.();
 	};
@@ -212,7 +219,7 @@ export default function statusline(pi: ExtensionAPI) {
 		showSessionId(ctx, settings.sessionIdEnabled);
 		showSessionTitle(ctx);
 		startTimer(ctx);
-		void refresh(ctx.model?.provider, ctx, { force: true });
+		refresh(ctx.model?.provider, ctx, { force: true });
 	});
 
 	pi.on("session_tree", (_event, ctx) => {
@@ -223,7 +230,7 @@ export default function statusline(pi: ExtensionAPI) {
 		showSessionId(ctx, settings.sessionIdEnabled);
 		showSessionTitle(ctx);
 		startTimer(ctx);
-		void refresh(ctx.model?.provider, ctx, { force: true });
+		refresh(ctx.model?.provider, ctx, { force: true });
 	});
 
 	pi.on("session_info_changed", (_event, ctx) => {
@@ -237,7 +244,7 @@ export default function statusline(pi: ExtensionAPI) {
 		clearTokenSpeed(ctx);
 		activeModel = event.model;
 		showProvider(event.model.provider, ctx);
-		void refresh(event.model.provider, ctx, { force: true });
+		refresh(event.model.provider, ctx, { force: true });
 	});
 
 	pi.on("turn_start", (_event, ctx) => {
@@ -272,7 +279,7 @@ export default function statusline(pi: ExtensionAPI) {
 
 	pi.on("agent_settled", (_event, ctx) => {
 		if (!ownsSession(ctx)) return;
-		void refresh(activeProvider, ctx);
+		refresh(activeProvider, ctx);
 	});
 
 	pi.on("session_shutdown", (_event, ctx) => {
@@ -323,7 +330,7 @@ export default function statusline(pi: ExtensionAPI) {
 					ctx.ui.setStatus(STATUS_KEY, undefined);
 					if (enabled) {
 						startTimer(ctx);
-						void refresh(activeProvider, ctx, { force: true });
+						refresh(activeProvider, ctx, { force: true });
 					}
 				} else if (key === "sessionIdEnabled") {
 					showSessionId(ctx, enabled);

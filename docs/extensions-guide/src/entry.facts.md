@@ -19,7 +19,7 @@
 - 一级菜单：五项「label · 已加载/未加载」加「批量功能开关」 —— extensions/pi-personal-extensions.ts:154-156；tests/personal.test.mjs:323
 - 已加载功能的二级菜单：actions 设置项 + 「禁用此功能并重载」 —— extensions/pi-personal-extensions.ts:162-169；tests/personal.test.mjs:333-337
 - 未加载功能的二级菜单只有「启用此功能并重载」 —— extensions/pi-personal-extensions.ts:163-164；tests/personal.test.mjs:396-398
-- 五项顶层功能中，actions 为四项功能定义设置项，其余一项只有启停；设置项数量 6 / 5 / 10 / 3（原位思考强度：状态查看、模型选择、可用性测试、恢复自动调整、运行判档测评；状态栏提供「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-86；extensions/statusline.ts:341-348、724-857（口径处理器与 STYLES）
+- 五项顶层功能中，actions 为四项功能定义设置项，其余一项只有启停；设置项数量 6 / 5 / 10 / 3（原位思考强度：状态查看、模型选择、可用性测试、恢复自动调整、运行判档测评；状态栏提供「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-86；extensions/statusline.ts:348-355、731-864（口径处理器与 STYLES）
 - 默认全开时 commands 表里有 auto-name、clickable-paths、statusline-style、statusline-info、statusline-settings、effort 六个处理器；Pi 只注册 personal —— extensions/pi-personal-extensions.ts:54-86、130-139；tests/personal.test.mjs:51
 - 「已加载/未加载」表示是否注册；各功能自身状态用「查看状态」确认 —— README.md:32
 - 启停不清除功能自己的配置 —— README.md:44

@@ -1998,7 +1998,10 @@ test("恢复到基线的 configuration_update 仍接受缓存守护", async () =
 
 // 使用 Pi 原生上下文，避免普通对象 mock 遗漏只有 getter 的 ui 等属性。
 function useRuntimeContext(h) {
-  const runner = new ExtensionRunner([], { getThinkingLevel: () => h.thinking }, dir, h.ctx.sessionManager, h.ctx.modelRegistry);
+  const runner = new ExtensionRunner([], {
+    getThinkingLevel: () => h.thinking,
+    invalidate() {},
+  }, dir, h.ctx.sessionManager, h.ctx.modelRegistry);
   runner.getModel = () => h.model;
   runner.setUIContext(h.ctx.ui, "tui");
   h.ctx = runner.createContext();
@@ -2028,6 +2031,26 @@ for (const entry of ["input", "context_with_system"]) {
     assert.deepEqual(Object.getOwnPropertyDescriptor(h.ctx, "ui"), descriptor);
   });
 }
+
+test("会话关闭后，原位分类跳过迟到的上下文事件和分类结果", async () => {
+  const h = setup();
+  const runner = useRuntimeContext(h);
+  let finish;
+  h.classifyHook = () => new Promise((resolve) => { finish = resolve; });
+  const event = { type: "context_with_system", messages: [user(1)] };
+  const classify = h.events.get("context_with_system");
+  const pending = classify(event, h.ctx);
+  assert.equal(h.calls, 1);
+
+  h.events.get("session_shutdown")({ type: "session_shutdown" }, h.ctx);
+  runner.invalidate();
+  await classify(event, h.ctx);
+  finish();
+  await pending;
+  assert.equal(h.calls, 1);
+  assert.deepEqual(h.branch, []);
+  assert.deepEqual(h.warnings, []);
+});
 
 test("Pi 原生只读上下文保留后台回退通知缓冲、激活后通知与取消隔离", async () => {
   saveEffortSettings("mammoth-27b");

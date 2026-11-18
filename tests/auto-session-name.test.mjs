@@ -10,7 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setImmediate as nextTick } from "node:timers/promises";
-import { SessionManager } from "@earendil-works/pi-coding-agent";
+import { ExtensionRunner, SessionManager } from "@earendil-works/pi-coding-agent";
 import autoSessionName, {
   parseSessionTitle,
   recentNamingTurns,
@@ -71,8 +71,8 @@ function harness({
     process.env.PI_CODING_AGENT_DIR,
     "auto-session-name.json",
   );
-  const emit = async (event, data = {}) => {
-    for (const handler of events.get(event) ?? []) await handler(data, ctx);
+  const emit = async (event, data = {}, context = ctx) => {
+    for (const handler of events.get(event) ?? []) await handler(data, context);
   };
   const pi = {
     on(event, handler) {
@@ -257,6 +257,33 @@ test("后台命名不阻塞事件、不增加对话消息，复用认证接口�
   await restored.emit("agent_settled");
   await nextTick();
   assert.equal(restored.calls.length, 1, "重载后仍识别自己的自动标题");
+});
+
+test("会话关闭后，agent_settled 安静地跳过失效上下文", async () => {
+  const h = harness();
+  const runner = new ExtensionRunner([], { invalidate() {} }, h.ctx.cwd, h.sm, h.ctx.modelRegistry);
+  const ctx = runner.createContext();
+  runner.invalidate();
+  assert.throws(() => ctx.hasUI, /This extension ctx is stale/);
+  await h.emit("agent_settled", { aborted: true }, ctx);
+  await nextTick();
+  assert.equal(h.calls.length, 0);
+  assert.equal(h.notices.length, 0);
+});
+
+test("会话关闭后，状态栏事件跳过失效上下文", async () => {
+  const h = harness();
+  statusline(h.pi);
+  await h.emit("session_start");
+  h.turn();
+  await h.emit("session_shutdown");
+  const runner = new ExtensionRunner([], { invalidate() {} }, h.ctx.cwd, h.sm, h.ctx.modelRegistry);
+  const ctx = runner.createContext();
+  runner.invalidate();
+
+  await h.emit("agent_settled", { aborted: true }, ctx);
+  await h.emit("turn_start", {}, ctx);
+  assert.equal(h.widgets.get("personal-session-title"), undefined);
 });
 
 test("命名规则作为系统消息传给模型，会话文本只作为用户数据", async () => {

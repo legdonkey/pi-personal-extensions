@@ -3,13 +3,13 @@
 - 五项功能，默认全部开启 —— extensions/pi-personal-extensions.ts:16-47、88-90；README.md:3、32
 - 用户消息带橙色线框（左上角 user）—— extensions/user-message-border.ts:7、33-39
 - 回复里存在的本地文件路径变成可点击链接 —— extensions/clickable-paths.ts:2-10、97、242-249
-- 状态栏显示服务商剩余额度、会话 ID（末尾 8 位）及回复结束后的 token 速度 —— extensions/statusline.ts:37-44、132-140、243-271；README.md:39
-- 状态栏配色可换（需另行启用 pi-statusline）—— extensions/statusline.ts:930-953；README.md:39、133
+- 状态栏显示服务商剩余额度、会话 ID（末尾 8 位）及回复结束后的 token 速度 —— extensions/statusline.ts:38-45、133-141、250-278；README.md:39
+- 状态栏配色可换（需另行启用 pi-statusline）—— extensions/statusline.ts:937-960；README.md:39、133
 - 图中会话 ID `7c41e0a2`、会话名、模型名、额度数字都是示例值 —— 01-start.html:73-90 的 SVG 及图注。
-- 图中标题与会话 ID、额度处于同一状态栏区域，不在上方单独右对齐；标题通过 setStatus 提供，位置由 footer 决定 —— extensions/statusline.ts:106-109；01-start.html:77-90。
+- 图中标题与会话 ID、额度处于同一状态栏区域，不在上方单独右对齐；标题通过 setStatus 提供，位置由 footer 决定 —— extensions/statusline.ts:107-110；01-start.html:77-90。
 - 状态栏显示会话名 —— tests/session-title.test.mjs（合并标题回归测试）
-- 一轮正常结束后后台自动起会话名 —— extensions/auto-session-name.ts:274-280、458-460；README.md:48
-- 原位思考强度适用条件：GPT-6 Codex 使用 openai-codex-responses 接口且 ID 以 gpt-6 开头；Anthropic 协议分支使用 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true，且 ID 精确等于 claude-opus-5、claude-opus-5-5、claude-sonnet-5-5 或 claude-fable-5-2；Antigravity 分支要求 provider antigravity、antigravity-api 接口、ID 精确等于 claude-opus-5-5 或 claude-sonnet-5-5，并先安装和启用 pi-antigravity；三个分支 thinking 不为 off。自动选思考强度，🧠 段显示结果 —— extensions/inline-effort.ts:93、117-130、850-854、676、1047、1057-1060、1086；README.md:42、61-68
+- 一轮正常结束后后台自动起会话名 —— extensions/auto-session-name.ts:280-286、465-469；README.md:48
+- 原位思考强度适用条件：GPT-6 Codex 使用 openai-codex-responses 接口且 ID 以 gpt-6 开头；Anthropic 协议分支使用 anthropic-messages 接口、compat.supportsMidConvoEffort 为 true，且 ID 精确等于 claude-opus-5、claude-opus-5-5、claude-sonnet-5-5 或 claude-fable-5-2；Antigravity 分支要求 provider antigravity、antigravity-api 接口、ID 精确等于 claude-opus-5-5 或 claude-sonnet-5-5，并先安装和启用 pi-antigravity；三个分支 thinking 不为 off。自动选思考强度，🧠 段显示结果 —— extensions/inline-effort.ts:94、118-131、859-863、677、1058、1068-1071、1097；README.md:42、61-68
 - 章号对应：消息区第 2 章、状态栏第 3 章、会话名第 4 章、原位思考强度第 5 章、速查第 6 章 —— docs/extensions-usage/src/02～06 文件名
 - 需要 Pi ≥ 1.0.1、Node.js ≥ 22.19 —— README.md:11；package.json:25-29、38
 - 安装三条命令 —— README.md:14-16；npmmirror 镜像 —— README.md:19
@@ -34,7 +34,7 @@
 - personal-switches 录屏：下移到「状态栏：额度、会话 ID 与配色」，空格切成关闭，Esc 放弃，未按 Enter —— docs/extensions-usage/tapes/personal-switches.tape；media/personal-switches.png（本次用全新无凭据临时 agent 重录）
 - 列表自带提示「Enter/Space to change」，但入口先截获确认键（tui.select.confirm）保存并重载 —— extensions/pi-personal-extensions.ts:229-233；media/personal-switches.png
 - 「一轮」定义：你发出一条消息到 Pi 回复完 —— 讲解用语（usage-review-zh-2 术语表）
-- 原位思考强度给每条新消息选档位；朗读提示接口和模型能力要求见条件列表 —— extensions/inline-effort.ts:953-1012；README.md:61-68、119
+- 原位思考强度给每条新消息选档位；朗读提示接口和模型能力要求见条件列表 —— extensions/inline-effort.ts:963-1023；README.md:61-68、119
 - 地图卡片使用 /personal 菜单 label —— extensions/pi-personal-extensions.ts:16-47
 - 自动重载在 Pi 回复或压缩时会被拒绝 —— node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js:5300-5307（回复或压缩中拒绝 /reload）
 - 更新扩展见 faq —— faq.facts.md

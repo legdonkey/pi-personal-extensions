@@ -9,6 +9,7 @@ import type {
   ExtensionAPI,
   ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
+import { isStaleContextError } from "./stale-context.ts";
 const DECISION_MODELS = {
   jev: {
     name: "Jev",
@@ -755,8 +756,14 @@ export default function (pi: ExtensionAPI) {
                 classify(prompt, ctx, selected, signal, model, currentEffort, onFallback), controller.signal,
                 (completed, total) => { text.setText(`判档测评 ${completed}/${total} · Esc 取消`); tui.requestRender(); })
                 .then(done, (error: unknown) => {
-                  if (!controller.signal.aborted) ctx.ui.notify(`判档测评失败：${classificationFailure(error)}`, "warning");
-                  done(undefined);
+                  try {
+                    if (!controller.signal.aborted && !isStaleContextError(error))
+                      ctx.ui.notify(`判档测评失败：${classificationFailure(error)}`, "warning");
+                  } finally {
+                    done(undefined);
+                  }
+                }).catch((error: unknown) => {
+                  if (!isStaleContextError(error)) console.error("判档测评失败。");
                 });
               return {
                 render: (width) => text.render(width), invalidate: () => text.invalidate(),
@@ -766,7 +773,7 @@ export default function (pi: ExtensionAPI) {
                 dispose: () => controller.abort(),
               };
             });
-            if (!report) return;
+            if (!report || generation !== started) return;
             const directory = join(getAgentDir(), "inline-effort-bench");
             mkdirSync(directory, { recursive: true });
             const path = join(directory, `${Date.now()}-${randomUUID()}.json`);
@@ -826,21 +833,23 @@ export default function (pi: ExtensionAPI) {
         saveEffortSettings(selected);
         ctx.ui.notify(`已保存分类模型：${modelKey(selected)}。下一条尚未分类的用户消息生效，历史决策不变；其他会话的后续分类也会读取此配置。选择不代表可用，请在 /personal → 原位思考强度 → 测试分类模型可用性 中验证。`, "info");
       } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return;
+        if (isStaleContextError(error) || (error instanceof Error && error.name === "AbortError")) return;
         // 仅报告本地固定错误，不透出服务响应、文件内容或认证信息。
         ctx.ui.notify(error instanceof Error && error.name !== "TimeoutError" ? error.message : "分类测试超时或失败。", "warning");
       }
     },
   });
 
+  let sessionEnded = false;
   const active = (ctx: ExtensionContext) =>
-    ((ctx.model?.api === CODEX_API && isGpt6(ctx.model.id)) || supportsClaudeEffort(ctx.model)
+    !sessionEnded && ((ctx.model?.api === CODEX_API && isGpt6(ctx.model.id)) || supportsClaudeEffort(ctx.model)
       || (supportsAntigravityEffort(ctx.model)
         && typeof ctx.modelRegistry.getRegisteredProviderConfig?.("antigravity")?.streamSimple === "function"))
     && pi.getThinkingLevel() !== "off";
   const clearStatus = (event: { type?: string }, ctx: ExtensionContext) => {
     generation++;
     if (event.type !== "model_select") {
+      sessionEnded = event.type === "session_shutdown";
       warnedTimeout = false;
       cacheNotified = false;
     }
@@ -944,12 +953,13 @@ export default function (pi: ExtensionAPI) {
 
 
     const started = generation;
+    const signal = ctx.signal;
     const current = recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel();
     let thinkingLevel = current;
     let classifier: DecisionModel | null = null;
     let fallbackFrom: DecisionModel | undefined;
     try {
-      ctx.signal?.throwIfAborted();
+      signal?.throwIfAborted();
       const conversation = messages.filter(({ role }) => role === "user" || role === "assistant") as Message[];
       const prompt = classificationPrompt(conversation);
       if (prompt) {
@@ -964,11 +974,11 @@ export default function (pi: ExtensionAPI) {
           const outcome = await Promise.race([
             job.result,
             new Promise<"timeout">((resolve) => { timer = setTimeout(() => resolve("timeout"), CLASSIFICATION_WAIT_MS); }),
-            new Promise<never>((_, reject) => ctx.signal?.addEventListener("abort", () =>
+            new Promise<never>((_, reject) => signal?.addEventListener("abort", () =>
               reject(new DOMException("分类请求已取消", "AbortError")), { once: true, signal: cancelled.signal })),
           ]);
-          ctx.signal?.throwIfAborted();
           if (generation !== started) return;
+          signal?.throwIfAborted();
           classifier = job.selected;
           if (outcome === "timeout") {
             job.controller.abort();
@@ -991,14 +1001,15 @@ export default function (pi: ExtensionAPI) {
           job.controller.abort();
         }
       }
-      ctx.signal?.throwIfAborted();
       if (generation !== started) return;
+      signal?.throwIfAborted();
       for (const { timestamp } of pending) pi.appendEntry(EFFORT_ENTRY, { timestamp, thinkingLevel, classifier, ...(fallbackFrom ? { fallbackFrom } : {}) });
     } catch (error) {
+      if (generation !== started) return;
       anchors = undefined;
       claudeRequest = undefined;
       antigravityRequest = undefined;
-      if (ctx.signal?.aborted || (error instanceof Error && error.name === "AbortError")) return;
+      if (signal?.aborted || isStaleContextError(error) || (error instanceof Error && error.name === "AbortError")) return;
       throw error;
     }
   });

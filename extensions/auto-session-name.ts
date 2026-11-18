@@ -14,6 +14,7 @@ import {
   type ExtensionContext,
   type SessionEntry,
 } from "@earendil-works/pi-coding-agent";
+import { isStaleContextError } from "./stale-context.ts";
 
 const LEVELS = [
   "off",
@@ -222,6 +223,7 @@ export function parseSessionTitle(text: string): string | null {
 
 export default function autoSessionName(pi: ExtensionAPI) {
   let state: NamingState = { enabled: true };
+  let sessionEnded = false;
   let pending: AbortController | undefined;
   let lastEvaluated = "";
   let warned = false;
@@ -236,6 +238,7 @@ export default function autoSessionName(pi: ExtensionAPI) {
 
   pi.on("session_start", (_event, ctx) => {
     cancel();
+    sessionEnded = false;
     lastEvaluated = "";
     warned = false;
     state = { enabled: true };
@@ -252,21 +255,24 @@ export default function autoSessionName(pi: ExtensionAPI) {
     }
     if (!ownsName()) state.enabled = false;
   });
-  pi.on("session_shutdown", cancel);
+  pi.on("session_shutdown", () => {
+    sessionEnded = true;
+    cancel();
+  });
   pi.on("agent_start", cancel);
   pi.on("session_tree", () => {
     cancel();
     lastEvaluated = "";
   });
   pi.on("session_info_changed", (event) => {
-    if (event.name === state.lastAutoName) return;
+    if (sessionEnded || event.name === state.lastAutoName) return;
     cancel();
     state.enabled = false;
     save();
   });
 
   async function generate(ctx: ExtensionContext, preview: boolean) {
-    if (!ctx.hasUI || !ctx.isIdle()) return;
+    if (sessionEnded || !ctx.hasUI || !ctx.isIdle()) return;
     if (!preview && (!state.enabled || !ownsName())) return;
     const branch = ctx.sessionManager.getBranch();
     const latest = branch.findLast((entry) => entry.type === "message");
@@ -285,10 +291,10 @@ export default function autoSessionName(pi: ExtensionAPI) {
     const oldName = pi.getSessionName();
     const input = JSON.stringify({ currentTitle: oldName ?? null, turns });
     if (!preview && (pending || input === lastEvaluated)) return;
+    const sessionId = ctx.sessionManager.getSessionId();
     cancel();
     const controller = new AbortController();
     pending = controller;
-    const sessionId = ctx.sessionManager.getSessionId();
     const timer = setTimeout(() => controller.abort(), 30_000);
     timer.unref();
     let failure = "自动命名失败，已保留原名；可在 /personal → 自动会话命名 → 预览建议标题 中重试。";
@@ -364,7 +370,8 @@ export default function autoSessionName(pi: ExtensionAPI) {
         turns,
       });
       warned = false;
-    } catch {
+    } catch (error) {
+      if (isStaleContextError(error)) return;
       if (pending === controller && (preview || !warned)) {
         ctx.ui.notify(failure, "warning");
         warned = true;
@@ -445,7 +452,7 @@ export default function autoSessionName(pi: ExtensionAPI) {
         "info",
       );
     } catch (error) {
-      if (pending === controller && !controller.signal.aborted)
+      if (pending === controller && !controller.signal.aborted && !isStaleContextError(error))
         ctx.ui.notify(
           error instanceof Error ? error.message : "保存命名配置失败。",
           "warning",
@@ -457,7 +464,9 @@ export default function autoSessionName(pi: ExtensionAPI) {
 
   pi.on("agent_settled", (_event, ctx) => {
     // 不等待辅助模型，让用户可以立即继续输入。
-    void generate(ctx, false);
+    void generate(ctx, false).catch((error: unknown) => {
+      if (!isStaleContextError(error)) console.error("自动会话命名失败。");
+    });
   });
   pi.registerCommand("auto-name", {
     description:

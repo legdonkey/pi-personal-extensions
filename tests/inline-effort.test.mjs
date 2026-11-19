@@ -149,7 +149,7 @@ const isPrefix = (prefix, full) => JSON.stringify(full.slice(0, prefix.length)) 
 
 test("每条新用户消息分类一次，用 configuration_update 调整强度，顶层 effort 不变，历史前缀稳定", async () => {
   const h = setup();
-  h.choices = ["xhigh", "low", "medium"];
+  h.choices = ["xhigh", "high", "medium"];
   const messages = [system, user(1)];
   const first = await h.request(messages);
   assert.equal(h.calls, 1);
@@ -168,14 +168,14 @@ test("每条新用户消息分类一次，用 configuration_update 调整强度�
   const second = await h.request(messages);
   assert.equal(h.calls, 2);
   assert.ok(isPrefix(continuation.input, second.input));
-  assert.deepEqual(updates(second), [[1, "xhigh"], [6, "low"]]);
-  assert.equal(h.status, "🧠 low · 基线 medium · Jev");
+  assert.deepEqual(updates(second), [[1, "xhigh"], [6, "high"]]);
+  assert.equal(h.status, "🧠 high · 基线 medium · Jev");
 
   // 回到基线强度时也需要一条 update 抵消上一条。
   messages.push(assistant(6), user(7));
   const third = await h.request(messages);
   assert.ok(isPrefix(second.input, third.input));
-  assert.deepEqual(updates(third), [[1, "xhigh"], [6, "low"], [9, "medium"]]);
+  assert.deepEqual(updates(third), [[1, "xhigh"], [6, "high"], [9, "medium"]]);
   assert.equal(h.status, "🧠 medium · Jev");
   for (let i = 1; i < third.input.length; i++) {
     assert.ok(!(third.input[i].type === "configuration_update" && third.input[i - 1].type === "configuration_update"));
@@ -237,31 +237,31 @@ test("steering 与 follow-up 追加的用户消息重新分类，自定义消息
 
 test("压缩后由摘要承接被压掉的最后一次决策，保留消息沿用各自锚点", async () => {
   const h = setup();
-  h.choices = ["xhigh", "low"];
+  h.choices = ["xhigh", "high"];
   await h.request([system, user(1)]);
   await h.request([system, user(1), assistant(2), user(3)]);
   assert.equal(h.calls, 2);
 
   const summary = { role: "compactionSummary", summary: "摘要", tokensBefore: 100, timestamp: 10 };
-  // 保留 user(3)：摘要承接 xhigh，user(3) 再切到 low。
+  // 保留 user(3)：摘要承接 xhigh，user(3) 再切到 high。
   const kept = await h.request([system, summary, user(3), assistant(4), toolResult(5)]);
-  assert.deepEqual(updates(kept), [[1, "xhigh"], [3, "low"]]);
-  assert.equal(h.status, "🧠 low · 基线 medium · Jev");
+  assert.deepEqual(updates(kept), [[1, "xhigh"], [3, "high"]]);
+  assert.equal(h.status, "🧠 high · 基线 medium · Jev");
 
-  // 本轮中途压缩掉当前消息：摘要承接本轮 low，强度不回落到基线。
+  // 本轮中途压缩掉当前消息：摘要承接本轮 high，强度不回落到基线。
   const midTurn = await h.request([system, summary, assistant(4), toolResult(5)]);
-  assert.deepEqual(updates(midTurn), [[1, "low"]]);
+  assert.deepEqual(updates(midTurn), [[1, "high"]]);
   assert.equal(h.calls, 2);
 });
 
 test("分支只读取当前路径上的决策，切换分支后的新消息重新分类", async () => {
   const h = setup();
-  h.choices = ["max", "low"];
+  h.choices = ["max", "high"];
   await h.request([system, user(1)]);
   h.branch.length = 0;
   const payload = await h.request([system, user(2)]);
   assert.equal(h.calls, 2);
-  assert.deepEqual(updates(payload), [[1, "low"]]);
+  assert.deepEqual(updates(payload), [[1, "high"]]);
 });
 
 test("payload 的 user 项与上下文对不齐时不注入，并在状态栏提示", async () => {
@@ -532,7 +532,7 @@ test("配置无效时不偷用 Jev；选择器可修复配置，保存失败保�
 
 test("切换只影响新消息，不重分类旧消息；恢复、fork、分支和压缩保持历史前缀", async () => {
   const h = setup();
-  h.choices = ["xhigh", "low", "max"];
+  h.choices = ["xhigh", "high", "max"];
   const messages = [system, user(1)];
   const first = await h.request(messages);
   await h.command("model d1-ultra");
@@ -546,7 +546,7 @@ test("切换只影响新消息，不重分类旧消息；恢复、fork、分支�
   assert.equal(h.branch.at(-1).data.classifier, "d1-ultra");
   assert.match(h.status, /d1-ultra$/);
   await h.command("status");
-  assert.match(h.warnings.at(-1).message, /后续分类：openrouter\/liquid\/d1-ultra.*最近决策：low · d1-ultra/);
+  assert.match(h.warnings.at(-1).message, /后续分类：openrouter\/liquid\/d1-ultra.*最近决策：high · d1-ultra/);
   const model = h.classifierModels[1];
   assert.equal(model.type, "classifier");
   assert.equal(model.api, "typesafe-system-one");
@@ -561,7 +561,7 @@ test("切换只影响新消息，不重分类旧消息；恢复、fork、分支�
   // 旧记录无 classifier 字段仍可恢复；当前分支以外的记录不参与。
   delete restored.branch[0].data.classifier;
   const summary = { role: "compactionSummary", summary: "摘要", timestamp: 10 };
-  assert.deepEqual(updates(await restored.request([system, summary, user(3), assistant(4)])), [[1, "xhigh"], [3, "low"]]);
+  assert.deepEqual(updates(await restored.request([system, summary, user(3), assistant(4)])), [[1, "xhigh"], [3, "high"]]);
   await h.command("model jev");
   messages.push(assistant(4), user(5));
   const third = await h.request(messages);
@@ -667,14 +667,14 @@ for (const [selected, { id, name }] of Object.entries(decisionModels).filter(([k
       const payload = await h.request([system, user(1)]);
       assert.deepEqual(h.classifierModels.map(({ id }) => id), [id, "typesafe/jev-1.14"]);
       assert.deepEqual(h.inputs[0], h.inputs[1], "回退使用同一份已筛选的文本和规则");
-      assert.deepEqual(updates(payload), [[1, "low"]]);
-      assert.deepEqual(h.branch[0].data, { timestamp: 1, thinkingLevel: "low", classifier: "jev", fallbackFrom: selected });
-      assert.equal(h.status, `🧠 low · 基线 medium · Jev（${name} 回退）`);
-      assert.match(h.warnings.at(-1).message, /已回退到.*本次思考强度：low.*下条新消息会重新尝试/);
+      assert.deepEqual(updates(payload), []);
+      assert.deepEqual(h.branch[0].data, { timestamp: 1, thinkingLevel: "medium", classifier: "jev", fallbackFrom: selected });
+      assert.equal(h.status, `🧠 medium · Jev（${name} 回退）`);
+      assert.match(h.warnings.at(-1).message, /已回退到.*本次思考强度：medium.*下条新消息会重新尝试/);
       assert.ok(h.warnings.every(({ message }) => !message.includes("secret-key-from-proxy")));
       assert.deepEqual(readEffortSettings(), { model: selected });
       await h.command("status");
-      assert.match(h.warnings.at(-1).message, new RegExp(`失败回退：Jev（仅本次）；最近决策：low · Jev（${name} 回退）`));
+      assert.match(h.warnings.at(-1).message, new RegExp(`失败回退：Jev（仅本次）；最近决策：medium · Jev（${name} 回退）`));
     }
   });
 }
@@ -718,9 +718,9 @@ for (const [selected, { id, name }] of Object.entries(decisionModels).filter(([k
         assert.match(h.warnings[0].message, /正在切换/);
         assert.equal(h.warnings[0].type, "warning");
         if (fallback === "valid") {
-          assert.deepEqual(h.branch[0].data, { timestamp: 1, thinkingLevel: "low", classifier: "jev", fallbackFrom: selected });
-          assert.deepEqual(updates(payload), [[1, "low"]]);
-          assert.equal(h.status, `🧠 low · 基线 medium · Jev（${name} 回退）`);
+          assert.deepEqual(h.branch[0].data, { timestamp: 1, thinkingLevel: "medium", classifier: "jev", fallbackFrom: selected });
+          assert.deepEqual(updates(payload), []);
+          assert.equal(h.status, `🧠 medium · Jev（${name} 回退）`);
           assert.equal(h.warnings.at(-1).type, "info");
         } else {
           assert.deepEqual(h.branch[0].data, { timestamp: 1, thinkingLevel: "max", classifier: selected });
@@ -779,8 +779,8 @@ for (const [selected, { id, name }] of Object.entries(decisionModels).filter(([k
     assert.match(h.warnings[0].message, /HTTP 503：上游服务异常/);
     const restored = setup();
     restored.branch.push(...structuredClone(h.branch));
-    assert.deepEqual(updates(await restored.request(messages)), [[1, "low"]]);
-    assert.equal(restored.status, `🧠 low · 基线 medium · Jev（${name} 回退）`);
+    assert.deepEqual(updates(await restored.request(messages)), []);
+    assert.equal(restored.status, `🧠 medium · Jev（${name} 回退）`);
     assert.equal(restored.calls, 0);
     messages.push(assistant(2), toolResult(3));
     const continued = await h.request(messages);
@@ -812,7 +812,7 @@ for (const [selected, { id, name }] of Object.entries(decisionModels).filter(([k
       if (model.id === id) timers[0].abort(new DOMException("超时", "TimeoutError"));
       else assert.equal(signal.aborted, false);
     };
-    assert.deepEqual(updates(await h.request([system, user(1)])), [[1, "low"]]);
+    assert.deepEqual(updates(await h.request([system, user(1)])), []);
     assert.equal(timers.length, 2);
     assert.match(h.warnings[0].message, /分类请求超时（15 秒）.*正在切换/);
     assert.equal(h.branch[0].data.classifier, "jev");
@@ -849,14 +849,14 @@ test("回退同样适用于 Claude 和 Antigravity，状态栏和实际发送档
     h.classifyHook = (_signal, model) => { h.error = model.id === "liquid/d1-ultra" ? new Error("429") : undefined; };
     if (kind === "claude") {
       const { payload, reply } = await serializeClaude(h, [system, user(1)]);
-      assert.deepEqual(claudeMarkers(payload), ["low"]);
-      assert.equal(reply.providerThinkingLevel, "low");
+      assert.deepEqual(claudeMarkers(payload), ["medium"]);
+      assert.equal(reply.providerThinkingLevel, "medium");
     } else {
       const messages = [system, user(1)];
       await h.context(messages);
-      assert.equal(h.send(messages).options.reasoning, "low");
+      assert.equal(h.send(messages).options.reasoning, "medium");
     }
-    assert.equal(h.status, "🧠 low · 基线 medium · Jev（d1-ultra 回退）");
+    assert.equal(h.status, "🧠 medium · Jev（d1-ultra 回退）");
     assert.equal(h.thinking, "medium");
   }
 });
@@ -1046,7 +1046,7 @@ test("classifyThinking 接受未定义的其他概率与总和浮点误差，按
     type: "choice", choice: "high", probabilities: { low: 0.35, medium: 0.25, high: 0.4 },
   } } };
   await mapped.request([user(1)]);
-  assert.equal(mapped.branch[0].data.thinkingLevel, "low");
+  assert.equal(mapped.branch[0].data.thinkingLevel, "medium");
   assert.equal(mapped.warnings.length, 0);
 });
 
@@ -1099,8 +1099,8 @@ test("Claude 原生序列化保持顶层配置和历史前缀，实际 effort �
     assert.deepEqual(second.payload.output_config, first.payload.output_config);
     assert.deepEqual(second.payload.thinking, first.payload.thinking);
     assert.deepEqual(withoutCacheHints(second.payload.messages.slice(0, first.payload.messages.length)), withoutCacheHints(first.payload.messages));
-    assert.deepEqual(claudeMarkers(second.payload), ["xhigh", "low"]);
-    assert.equal(second.reply.providerThinkingLevel, "low");
+    assert.deepEqual(claudeMarkers(second.payload), ["xhigh", "medium"]);
+    assert.equal(second.reply.providerThinkingLevel, "medium");
     assert.equal(h.calls, 2);
     const restored = setup({ model: h.model });
     restored.branch.push(...structuredClone(h.branch));
@@ -1109,11 +1109,11 @@ test("Claude 原生序列化保持顶层配置和历史前缀，实际 effort �
     h.error = new Error("unavailable");
     messages.push(second.reply, user(5));
     const failed = await serializeClaude(h, messages);
-    assert.deepEqual(claudeMarkers(failed.payload), ["xhigh", "low", "low"]);
-    assert.equal(failed.reply.providerThinkingLevel, "low");
+    assert.deepEqual(claudeMarkers(failed.payload), ["xhigh", "medium", "medium"]);
+    assert.equal(failed.reply.providerThinkingLevel, "medium");
     const summary = { role: "user", content: "压缩摘要", timestamp: 100 };
     const compacted = await serializeClaude(h, [system, summary, failed.reply]);
-    assert.equal(compacted.payload.messages.at(-1).output_config.effort, "low");
+    assert.equal(compacted.payload.messages.at(-1).output_config.effort, "medium");
   }
 });
 
@@ -1208,10 +1208,10 @@ test("Claude 分类等待和流式期间的预热回放不消费快照或污染�
   release();
   await pending;
   const main = h.events.get("before_provider_request")({ payload: { ...body, max_tokens: 1024 } }, h.ctx);
-  assert.deepEqual(claudeMarkers(main), ["low"]);
+  assert.deepEqual(claudeMarkers(main), ["medium"]);
   assert.equal(h.events.get("before_provider_request")({ payload: body }, h.ctx), undefined);
   const reply = { ...assistant(4), api: h.model.api, provider: h.model.provider, model: h.model.id, providerThinkingLevel: "medium" };
-  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "low");
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "medium");
   assert.equal(h.calls, 1);
 });
 
@@ -1267,7 +1267,7 @@ test("Antigravity 两个模型经原生流调整请求档位，max/xhigh 限制�
     await h.context(messages);
     assert.equal(h.send(messages).options.reasoning, "high");
     assert.equal(h.calls, 1, "工具续调不分类");
-    for (const [time, level] of [[4, "medium"], [6, "low"], [8, "high"]]) {
+    for (const [time, level] of [[4, "medium"], [6, "medium"], [8, "high"]]) {
       messages.push(assistant(time - 1), user(time));
       await h.context(messages);
       assert.equal(h.send(messages).options.reasoning, level);
@@ -1285,7 +1285,7 @@ test("Antigravity 两个模型经原生流调整请求档位，max/xhigh 限制�
   }
 });
 
-test("classifyThinking 合并 Antigravity 同效概率并优先选最大有效档位，五档原生模型不合并", async () => {
+test("classifyThinking 合并 Antigravity 同效概率并优先选最大有效档位，原生模型不合并 high 与 xhigh", async () => {
   for (const [choice, probabilities] of [
     ["high", { low: 0.1, medium: 0.08, high: 0.42, xhigh: 0.40, max: 0 }],
     ["low", { low: 0.35, medium: 0.05, high: 0.29, xhigh: 0.30, max: 0.01 }],
@@ -1304,11 +1304,11 @@ test("classifyThinking 合并 Antigravity 同效概率并优先选最大有效�
     type: "choice", choice: "high", probabilities: { high: 0.4, xhigh: 0.8 },
   } } };
   await invalid.context([user(1)]);
-  assert.equal(invalid.branch[0].data.thinkingLevel, "low");
-  assert.equal(invalid.send([user(1)]).options.reasoning, "low");
+  assert.equal(invalid.branch[0].data.thinkingLevel, "medium");
+  assert.equal(invalid.send([user(1)]).options.reasoning, "medium");
   assert.equal(invalid.warnings.length, 1);
   assert.equal(invalid.warnings[0].type, "warning");
-  assert.match(invalid.warnings[0].message, /结果无效.*思考强度沿用 low/);
+  assert.match(invalid.warnings[0].message, /结果无效.*思考强度沿用 medium/);
 
   for (const model of [claudeModel(), codexModel("gpt-6-astra")]) {
     const h = setup({ model, thinking: "low" });
@@ -1316,7 +1316,7 @@ test("classifyThinking 合并 Antigravity 同效概率并优先选最大有效�
       type: "choice", choice: "high", probabilities: { high: 0.42, xhigh: 0.40 },
     } } };
     await h.request([user(1)]);
-    assert.equal(h.branch[0].data.thinkingLevel, "low");
+    assert.equal(h.branch[0].data.thinkingLevel, "medium");
     assert.equal(h.warnings.length, 0);
   }
 });
@@ -1352,7 +1352,7 @@ test("previousEffort 在 Antigravity 读取时归一为 high，保留 xhigh 决�
 
 test("Antigravity 预热、辅助请求、错误模型和旧上下文不调整；同一主请求重试仍调整", async () => {
   const h = antigravitySetup();
-  h.choices = ["low"];
+  h.choices = ["high"];
   const messages = [system, user(1)];
   let release;
   h.classifyHook = () => new Promise((resolve) => { release = resolve; });
@@ -1363,25 +1363,25 @@ test("Antigravity 预热、辅助请求、错误模型和旧上下文不调整�
     assert.equal(h.send(messages, extra).options.reasoning, extra.reasoning ?? "medium");
   assert.equal(h.send([system, user(2)]).options.reasoning, "medium");
   assert.equal(h.antigravityConfig.streamSimple(antigravityModel("gemini-4-argon"), { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "medium");
-  assert.equal(h.send(messages).options.reasoning, "low");
-  assert.equal(h.send(messages).options.reasoning, "low", "重复调用不是一次性消费");
+  assert.equal(h.send(messages).options.reasoning, "high");
+  assert.equal(h.send(messages).options.reasoning, "high", "重复调用不是一次性消费");
   const previous = h.model;
   h.model = codexModel();
   h.events.get("model_select")({ type: "model_select" }, h.ctx);
-  assert.equal(h.antigravityConfig.streamSimple(previous, { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "low");
+  assert.equal(h.antigravityConfig.streamSimple(previous, { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "high");
   const reply = { ...assistant(3), api: previous.api, provider: previous.provider, model: previous.id };
-  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "low");
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "high");
   assert.equal(h.antigravityConfig.streamSimple(previous, { messages }, { reasoning: "medium", sessionId: "test-session" }).options.reasoning, "medium");
 });
 
 test("Antigravity 取消不调整；失败沿用原档位；退出恢复原注册且不覆盖第三方重新注册", async () => {
   const h = antigravitySetup();
-  h.choices = ["low"];
+  h.choices = ["high"];
   await h.context([system, user(1)]);
   h.error = new Error("unavailable");
   const messages = [system, user(1), assistant(2), user(3)];
   await h.context(messages);
-  assert.equal(h.send(messages).options.reasoning, "low");
+  assert.equal(h.send(messages).options.reasoning, "high");
   const c = new AbortController(); c.abort(); h.ctx.signal = c.signal;
   await h.context([...messages, assistant(4), user(5)]);
   assert.equal(h.send(messages).options.reasoning, "medium");
@@ -1478,7 +1478,7 @@ test("真实 Pi classifier 管线复用 models.json 的代理端点、认证及�
     h.ctx.modelRegistry = registry;
     await h.command("model d1-ultra");
     const payload = await h.request([system, user(1, "测试消息")]);
-    assert.deepEqual(updates(payload), [[1, "low"]]);
+    assert.deepEqual(updates(payload), []);
     assert.equal(requests.length, 1);
     assert.equal(requests[0].url, "/api/v1/systemone");
     assert.equal(requests[0].headers.authorization, "Bearer local-test-credential");
@@ -1573,7 +1573,7 @@ test("提交时后台判档，完成结果直接复用；steer 和 follow-up 不
     await new Promise((resolve) => setImmediate(resolve));
     const result = await h.request([user(1, "改成小写")]);
     assert.equal(h.calls, 1);
-    assert.deepEqual(updates(result), [[0, "low"]]);
+    assert.deepEqual(updates(result), []);
   }
 });
 
@@ -1627,7 +1627,7 @@ test("请求最多等 5 秒，超时沿用并丢弃迟到结果，每个会话�
   assert.equal(h.warnings.filter((w) => /超过 5 秒/.test(w.message)).length, 2);
 });
 
-test("previousEffort 首轮超时保留 minimal 决策，第二轮向分类器传 low", async (t) => {
+test("previousEffort 首轮超时将 minimal 基线提升至 medium，第二轮传实际档位", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
   const h = setup({ thinking: "minimal", model: codexModel("gpt-6-astra") });
   let release;
@@ -1637,15 +1637,28 @@ test("previousEffort 首轮超时保留 minimal 决策，第二轮向分类器�
   t.mock.timers.tick(CLASSIFICATION_WAIT_MS);
   await first;
   assert.equal(h.inputs[0].state.currentEffort, undefined);
-  assert.equal(h.branch[0].data.thinkingLevel, "minimal");
-  assert.match(h.warnings[0].message, /超过 5 秒.*沿用 minimal/);
+  assert.equal(h.branch[0].data.thinkingLevel, "medium");
+  assert.match(h.warnings[0].message, /超过 5 秒.*沿用 medium/);
   release();
   await new Promise((resolve) => setImmediate(resolve));
   h.classifyHook = undefined;
   messages.push(assistant(2), user(3));
   await h.request(messages);
-  assert.equal(h.inputs[1].state.currentEffort, "low");
-  assert.equal(h.branch[0].data.thinkingLevel, "minimal");
+  assert.equal(h.inputs[1].state.currentEffort, "medium");
+  assert.equal(h.branch[0].data.thinkingLevel, "medium");
+});
+
+test("恢复旧 low / minimal 决策时实际用 medium，不重分类或改写历史条目", async () => {
+  for (const old of ["low", "minimal"]) {
+    const h = setup({ thinking: "low" });
+    h.branch.push({ type: "custom", customType: "jev-inline-effort", data: { timestamp: 1, thinkingLevel: old } });
+    const payload = await h.request([system, user(1), assistant(2), toolResult(3)], { base: "low" });
+    assert.deepEqual(updates(payload), [[1, "medium"]]);
+    assert.equal(payload.reasoning.effort, "low");
+    assert.equal(h.status, "🧠 medium · 基线 low · Jev");
+    assert.equal(h.calls, 0);
+    assert.deepEqual(h.branch.map(({ data }) => data.thinkingLevel), [old]);
+  }
 });
 
 test("previousEffort 优先助手实际档位，无效元数据回退决策，首轮不继承旧决策", async () => {
@@ -1672,7 +1685,7 @@ test("Fable 5.2 使用 Pi 1.5.2 目录快照与真实序列化器，保留两轮
   assert.equal(first.reply.providerThinkingLevel, "high");
   messages.push(first.reply, user(3));
   const second = await serializeClaude(h, messages);
-  assert.deepEqual(claudeMarkers(second.payload), ["high", "low"]);
+  assert.deepEqual(claudeMarkers(second.payload), ["high", "medium"]);
   assert.deepEqual(withoutCacheHints(second.payload.messages.slice(0, first.payload.messages.length)), withoutCacheHints(first.payload.messages));
   const antigravity = antigravitySetup({ model: antigravityModel("claude-fable-5-2") });
   await antigravity.context([user(1)]);
@@ -1740,7 +1753,7 @@ for (const id of ["gpt-6.2-astra", "gpt-6.2-sol"]) {
     assert.deepEqual(updates(first), [[1, "xhigh"]]);
     messages.push(assistant(2), user(3));
     const second = await h.request(messages);
-    assert.deepEqual(updates(second), [[1, "xhigh"], [4, "low"]]);
+    assert.deepEqual(updates(second), [[1, "xhigh"], [4, "medium"]]);
     assert.ok(isPrefix(first.input, second.input));
     assert.equal(first.reasoning.effort, "medium");
     assert.deepEqual(second.reasoning, first.reasoning);
@@ -1757,7 +1770,7 @@ const rebuilds = (h) => h.warnings.filter((w) => w.message.startsWith("缓存读
 
 test("缓存读取下降每个会话只提示一次，后续继续调档", async () => {
   const h = setup();
-  h.choices = ["high", "high", "high", "high", "low", "high", "high"];
+  h.choices = ["high", "high", "high", "high", "high", "high", "high"];
   for (const [i, read] of [20096, 2688, 21632, 0].entries()) {
     await h.request([user(i + 1)]);
     finishWithUsage(h, read, 0);
@@ -1765,7 +1778,7 @@ test("缓存读取下降每个会话只提示一次，后续继续调档", async
   assert.equal(rebuilds(h), 1);
   assert.equal(h.warnings.at(-1).message, "缓存读取从 20096 降至 2688，原因未确认；自动调档继续。");
   assert.equal(h.warnings.at(-1).type, "info");
-  assert.deepEqual(updates(await h.request([user(5)])), [[0, "low"]]);
+  assert.deepEqual(updates(await h.request([user(5)])), [[0, "high"]]);
   h.events.get("session_start")({ type: "session_start" }, h.ctx);
   await h.request([user(6)]);
   finishWithUsage(h, 100, 0);
@@ -2016,16 +2029,16 @@ for (const entry of ["input", "context_with_system"]) {
     const descriptor = Object.getOwnPropertyDescriptor(h.ctx, "ui");
     assert.equal(typeof descriptor.get, "function");
     assert.equal(descriptor.set, undefined);
-    h.choices = ["low"];
+    h.choices = ["high"];
     if (entry === "input") {
       assert.equal(h.events.get("input")({ text: "改成小写" }, h.ctx), undefined);
       await new Promise((resolve) => setImmediate(resolve));
     }
     const result = await h.request([user(1, "改成小写")]);
     assert.equal(h.calls, 1);
-    assert.deepEqual(updates(result), [[0, "low"]]);
-    assert.equal(h.branch[0].data.thinkingLevel, "low");
-    assert.equal(h.status, "🧠 low · 基线 medium · Jev");
+    assert.deepEqual(updates(result), [[0, "high"]]);
+    assert.equal(h.branch[0].data.thinkingLevel, "high");
+    assert.equal(h.status, "🧠 high · 基线 medium · Jev");
     assert.deepEqual(h.warnings, []);
     assert.equal(h.ctx.ui, ui);
     assert.deepEqual(Object.getOwnPropertyDescriptor(h.ctx, "ui"), descriptor);

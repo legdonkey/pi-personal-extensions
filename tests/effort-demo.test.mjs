@@ -28,7 +28,7 @@ test("讲解页演示仅在服务报错时回退 Jev；结果无效或低置信�
     const success = demo({ model });
     assert.equal(success.form.fallbackOk.disabled, false);
     assert.match(success.outputs.warn.textContent, new RegExp(`openrouter/${id.replace(/\./g, "\\.")}.*HTTP 429：服务限流.*openrouter/typesafe/jev-1\\.14.*已回退`));
-    assert.equal(success.outputs.status.textContent, `🧠 low · 基线 medium · Jev（${model} 回退）`);
+    assert.equal(success.outputs.status.textContent, `🧠 medium · Jev（${model} 回退）`);
     assert.match(demo({ model, fallbackOk: false }).outputs.warn.textContent, /Jev 也失败.*沿用 medium/);
     assert.equal(demo({ model, result: "xhigh", probability: 0.8 }).outputs.status.textContent, `🧠 xhigh · 基线 medium · ${model}`);
     const lowConfidence = demo({ model, result: "high", probability: 0.49 });

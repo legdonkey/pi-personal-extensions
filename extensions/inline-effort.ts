@@ -115,6 +115,11 @@ const classifierLabel = (model: unknown, fallbackFrom?: unknown) =>
 const CLASSIFIED_LEVELS = ["low", "medium", "high", "xhigh", "max"] as const;
 const THINKING_LEVELS = new Set<unknown>(["minimal", ...CLASSIFIED_LEVELS]);
 
+// 分类器和测评保留原有五档刻度；主请求的自动决策最低用 medium。
+function effortFloor<T extends string | undefined>(level: T): T | "medium" {
+  return level === "minimal" || level === "low" ? "medium" : level;
+}
+
 function isGpt6(id: unknown) {
   return typeof id === "string" && id.startsWith("gpt-6");
 }
@@ -463,13 +468,14 @@ async function classifyThinking(
     total += value;
   }
   if (total > 1 + 1e-6) return undefined;
-  if (probability >= 0.5) return level;
+  if (probability >= 0.5) return targetModel ? effortFloor(level) : level;
   if (targetModel) {
     const totals = new Map<Effort, number>();
     let preferred: Effort | undefined;
     for (const item of CLASSIFIED_LEVELS) {
-      const mapped = supportsAntigravityEffort(targetModel) ? clampThinkingLevel(targetModel, item) : apiEffort(targetModel, item);
-      const effective = CLASSIFIED_LEVELS.find((l) => l === (mapped === "minimal" ? "low" : mapped));
+      const candidate = effortFloor(item);
+      const mapped = supportsAntigravityEffort(targetModel) ? clampThinkingLevel(targetModel, candidate) : apiEffort(targetModel, candidate);
+      const effective = CLASSIFIED_LEVELS.find((l) => l === effortFloor(mapped));
       if (!effective) continue;
       if (item === level) preferred = effective;
       totals.set(effective, (totals.get(effective) ?? 0) + (probabilities[item] ?? 0));
@@ -499,7 +505,7 @@ function decisions(ctx: ExtensionContext): Decision[] {
     if (entry.type !== "custom" || entry.customType !== EFFORT_ENTRY) return [];
     const data = entry.data as Partial<Decision> | undefined;
     return typeof data?.timestamp === "number" && THINKING_LEVELS.has(data.thinkingLevel)
-      ? [data as Decision] : [];
+      ? [{ ...data as Decision, thinkingLevel: effortFloor(data.thinkingLevel!) }] : [];
   });
 }
 
@@ -666,7 +672,7 @@ export default function (pi: ExtensionAPI) {
         return original.streamSimple!(model, context, options);
       }
       const decision = decisions(request.ctx).at(-1);
-      const level = clampThinkingLevel(model, decision?.thinkingLevel ?? options.reasoning ?? "medium");
+      const level = effortFloor(clampThinkingLevel(model, decision?.thinkingLevel ?? effortFloor(options.reasoning ?? "medium")));
       if (level === "off") return original.streamSimple!(model, context, options);
       const base = options.reasoning ?? "medium";
       request.effort = level;
@@ -954,7 +960,7 @@ export default function (pi: ExtensionAPI) {
 
     const started = generation;
     const signal = ctx.signal;
-    const current = recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel();
+    const current = effortFloor(recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel());
     let thinkingLevel = current;
     let classifier: DecisionModel | null = null;
     let fallbackFrom: DecisionModel | undefined;
@@ -1033,8 +1039,7 @@ export default function (pi: ExtensionAPI) {
       const recorded = decisions(ctx);
       const decision = recorded.at(-1);
       if (!decision) return undefined;
-      const mapped = apiEffort(request.model, decision.thinkingLevel);
-      const effort = mapped === "minimal" ? "low" : mapped;
+      const effort = effortFloor(apiEffort(request.model, decision.thinkingLevel));
       if (typeof effort !== "string" || !CLASSIFIED_LEVELS.some((level) => level === effort)) return undefined;
       const base = last.output_config.effort;
       request.effort = effort;
@@ -1068,7 +1073,7 @@ export default function (pi: ExtensionAPI) {
         const anchor = snapshot[userIndex++];
         const level = anchor.role === "compactionSummary" ? carried
           : anchor.role === "user" ? desired.get(anchor.timestamp) : undefined;
-        const effort = level && apiEffort(ctx.model!, level);
+        const effort = level && effortFloor(apiEffort(ctx.model!, level));
         // 每条 update 后紧跟一个 user 项，因此不会出现相邻的 update。
         if (effort && effort !== running) {
           input.push({ type: "configuration_update", reasoning: { effort } } as InputItem);

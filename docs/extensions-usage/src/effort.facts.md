@@ -7,7 +7,7 @@
 ## 它能帮你什么
 
 - 会话关闭后不再启动分类，也不采用迟到的分类结果 —— ext:843-872, ext:930-1014；test「会话关闭后，原位分类跳过迟到的上下文事件和分类结果」。
-- 档位共五档：low、medium、high、xhigh、max —— ext:115, ext:431-439
+- 分类标签仍为 low、medium、high、xhigh、max；主请求最低使用 medium，失败、超时及恢复旧 low / minimal 决策也受下限约束，会话基线不变（ext:118-121, ext:471-478, ext:505-508, ext:963；test:1630-1662） —— ext:115, ext:431-439
 - 给每条新用户消息选一个档位；同一批进入请求的新消息共用一次分类结果，空白消息不分类 —— ext:963-1023, ext:965, ext:979；test:976-982；README.md:119, README.md:123
 - 只调整思考强度，主模型不变 —— README.md:90；ext:658-688, ext:1033-1098
 - 图 1 的三条消息和档位是示例；「把 hello 转成大写」是「测试分类模型可用性」的固定样例 —— ext:806
@@ -16,7 +16,7 @@
 - 「按官方指南整理」：三个 Claude 模型的 notes 和 levels 来自 auto-effort 的 `hooks/policy-text.ts`，源码注释列出 Anthropic 官方依据；四个 GPT 模型按 OpenAI 和 Codex 官方资料提炼为单模型选档条件，不含跨模型切换建议、价格或跑分对比 —— ext:210-226, ext:241-383；test:1682-1719；README.md:191-199
 - 「三个 Claude 模型的规则来自 Claude Code 的 auto-effort mod」指 notes 和五档 levels；共用原则适配 System One 单题分类，移除 suggestModel 残留，明确 prompt / currentEffort，区分被引用材料中的注入指令与用户本人的深度要求 —— ext:210-211, ext:241-285, ext:386-403；test:1682-1719；README.md:191
 - GPT 两个模型默认档是 Codex 内置目录的 low；已有上一轮回复时参考上一轮实际生效档位。Astra 档位刻度偏高，绝大多数任务不需要 max；Sol 低档事实核实已够用，冲突证据权衡与联动精修交付用 xhigh —— ext:299-348, ext:424, ext:891-911；test:1630-1660, test:1682-1709；README.md:189, README.md:195-197
-- 四个 GPT 模型的单模型档位就是 low 到 max 五档，直接对应分类结果，不需要换算 —— ext:298；README.md:198
+- 四个 GPT 模型的单模型档位就是 low 到 max 五档，分类标签与之同名，但主请求有 medium 下限 —— ext:298；README.md:198
 - 按模型规则分类仅在当前分支已有上一轮助手回复时传入 currentEffort，Antigravity 的 xhigh / max 按 high 传，minimal 归一为 low，首轮不传；会话条目保留原始档位。规则举例「跳过文件、没跑测试或半途放弃时至少高一档」来自共用原则，「Fable 5.2 上一轮 low / medium 提前停下、要求继续做完给 high」来自 Fable 说明 —— ext:263, ext:397, ext:424, ext:891-911, ext:924, ext:1023；test:1324-1351, test:1630-1660, test:1693-1696
 - 通用规则按推理结构判档，近期对话只补全当前任务、不继承旧难度；不因主题、代理数量或反复报错提档，无法识别时才 high 兜底。两套规则下分类器都只读有限文本，同轮工具续调不重分类 —— ext:432-439, ext:133-172, ext:963-968；test:1524-1561
 
@@ -67,7 +67,7 @@
 ## 分类失败怎么办
 
 - 首选非 Jev 模型超时或服务出错时显示安全原因、提示正在切换到 Jev 并单跳回退一次 Jev；仍失败才沿用当前档位并警告 —— ext:96, ext:517-537, ext:979-1020；README.md:121
-- 档位无效与把握不足（有效结果在同效档位合并后概率仍未达 0.5）均不触发 Jev 回退，直接沿用当前档位；无效结果发一次警告，低置信度静默。各已定义候选概率须为 [0, 1] 内有限数，总和不超过 1（容许 1e-6 浮点误差，其他候选可为 undefined）；Antigravity 将 high / xhigh / max 概率合到 high 后比较 0.5，原生五档不合并 —— ext:450-483, ext:524-528, ext:1009；test:307-345, test:748-769, test:976-1051, test:1288-1322；README.md:121
+- 档位无效与把握不足（有效结果在同效档位合并后概率仍未达 0.5）均不触发 Jev 回退，直接沿用当前档位；无效结果发一次警告，低置信度静默。各已定义候选概率须为 [0, 1] 内有限数，总和不超过 1（容许 1e-6 浮点误差，其他候选可为 undefined）；Antigravity 将 high / xhigh / max 概率合到 high 后比较 0.5，所有主模型将 low、medium 合到 medium —— ext:450-483, ext:524-528, ext:1009；test:307-345, test:748-769, test:976-1051, test:1288-1322；README.md:121
 - 当前档位 = 当前分支上一次决策，没有就是基线 —— ext:973
 - 对话照常进行（沿用后照常发出请求） —— ext:995-1013, ext:1023
 - 警告显示 HTTP 状态码和白名单中文原因（携带 Guardrail 关键词时优先归类为「OpenRouter 策略或白名单限制」）；首选非 Jev 模型超时或报错先提示「正在切换到 openrouter/typesafe/jev-1.14」，最终无合格结果时沿用，只列出实际错误或结果无效，不把低置信度列为错误。未知错误不透出服务原文 —— ext:190-208, ext:532-536；test:646-746, test:1447-1522
@@ -139,7 +139,7 @@
 - HTTP 429 显示服务限流、携带 Guardrail 关键词的 404/403 显示 OpenRouter 策略或白名单限制、5xx 显示上游服务异常；未知原因明确提示未识别。不输出服务端原文或凭据。回退警告在 Jev 调用前出现；成功后显示实际模型和档位，未获合格档位时只列出实际错误或结果无效，低置信度不警告 —— ext:190-208；test:646-746, test:1447-1522。
 - 用户取消或生命周期切换不继续回退，不写迟到决策或显示完成通知；已经发出的切换提示保留。空白输入不调用、配置无效不尝试任何模型 —— test:347-367, test:504-531, test:822-842。
 - 固定样例可用性测试走同一回退流程，固定用通用规则并隔离主模型与历史；不把 Jev 成功说成首选模型成功，不改会话决策、状态或基线 —— ext:802-813；test:864-914, test:1447-1522。
-- 演示区用本地固定示例模拟 Jev 返回 low，不发送 API 请求、不保证线上结果；仅服务报错可回退，结果无效与低置信度不回退并沿用基线 —— tests/effort-demo.test.mjs。
+- 演示区用本地固定示例模拟 Jev 返回 low、实际执行 medium，不发送 API 请求、不保证线上结果；仅服务报错可回退，结果无效与低置信度不回退并沿用基线 —— tests/effort-demo.test.mjs。
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
 - 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；随后重录 auto-name-model、auto-name-status（旧画面的一级菜单还有已合并的「右下角会话标题」），保留凭据文件但不发送模型消息，两个 tape 去掉一级菜单里多余的一次下移；未重录的只剩 chat-turn —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

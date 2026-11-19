@@ -56,7 +56,7 @@
 - 图 1 底部「后台分类 · 最多再等 5 秒」即上面两条
 - 分类器只收到对话文本（用户和助手消息），不含系统提示词（role 为 system 的消息）、工具结果、思考块和图片数据 —— ext:133-140, ext:979；README.md:120；test:369-411
 - 四个固定分类器 ID：Jev `typesafe/jev-1.14`、d1-ultra `liquid/d1-ultra`、Mammoth 27B `baseten/mammoth-1`、Decider v1.2 `perplexity/pplx-decider-v1.2`；宿主目录未收录对应固定 ID 时从原生 `~typesafe/jev-latest` 模板补充元数据，不覆盖服务商目录 —— ext:13-38, ext:175-187；README.md:83-88, README.md:124；test:576-644
-- 只回答 low、medium、high、xhigh、max —— ext:115, ext:426-441, ext:451-483；README.md:90
+- 分类标签仍为 low、medium、high、xhigh、max；主请求最低使用 medium，失败、超时及恢复旧 low / minimal 决策也受下限约束，会话基线不变（ext:118-121, ext:471-478, ext:505-508, ext:963；test:1630-1662） —— ext:115, ext:426-441, ext:451-483；README.md:90
 - 对话内容预算：当前请求最多 12,000、近期最多 6 条用户或助手消息、最多 8,000、合计不超过 16,000（JS 字符串长度，即 UTF-16 单元）；近期消息从最新向前按消息边界裁剪，保留 `用户:` / `助手:` 前缀，必要时只裁掉最早保留消息的正文开头 —— ext:142-172；test:369-411
 - 请求另加固定标题「近期对话:」「当前用户请求:」和分类规则，所以 prompt 可略超 16,000；`state.prompt` 不再夹带括号内元指令 —— ext:171, ext:423-442；test:379, test:383-410
 - 图片换成「[附有图片]」 —— ext:137；test:983-986
@@ -64,7 +64,7 @@
 
 ## 2. 分类结果怎么用（图 2）
 
-- 「合格」：分类正常完成（stopReason 为 stop）、档位在五档内，所选概率必须存在；各已定义候选概率是 [0, 1] 内的有限数，总和不超过 1（容许 1e-6 浮点误差，其他候选可为 undefined）。所选概率达到 0.5 就采用该标签；否则按主模型实际执行档位合并五档概率，最大有效档位概率达到 0.5 就采用，并列时优先所选标签的生效档位。Antigravity 将 high、xhigh、max 合为 high；原生五档不合并 —— ext:450-483；test:976-1051, test:1288-1322
+- 「合格」：分类正常完成（stopReason 为 stop）、档位在五档内，所选概率必须存在；各已定义候选概率是 [0, 1] 内的有限数，总和不超过 1（容许 1e-6 浮点误差，其他候选可为 undefined）。所选概率达到 0.5 就采用该标签；否则按主模型实际执行档位合并五档概率，最大有效档位概率达到 0.5 就采用，并列时优先所选标签的生效档位。Antigravity 将 high、xhigh、max 合为 high；所有主模型将 low、medium 合到 medium —— ext:450-483；test:976-1051, test:1288-1322
 - 首选非 Jev 模型超时或服务出错时先警告并回退一次 Jev；仍无合格结果才警告并沿用当前强度 —— ext:449, ext:517-537, ext:979-1020；test:307-345, test:646-746, test:937-974
 - 响应无法解析（缺答案、缺 confidence、概率结构无效）时 Pi 原生 classifier 返回 `stopReason: "error"`，扩展按服务报错处理 —— s1:37-55, s1:174-180；ext:449, ext:529-536
 - 档位不在五档内、概率分布非法或 stopReason 为 length 时视为结果无效，不触发 Jev 回退，直接发一次警告并沿用当前强度；有效结果在同效档位合并后仍未达 0.5 时也不回退，静默沿用当前强度 —— ext:450-483, ext:524-528；test:307-345, test:748-769, test:976-1051, test:1288-1322
@@ -181,7 +181,7 @@
 - Claude 三个模型的 notes 和五档 levels 移植自 auto-effort 的 `hooks/policy-text.ts`，源码注释保留 Anthropic 官方依据；默认档字段为 `defaultEffort`，三个 Claude 模型均取 medium。`COMMON_INSTRUCTIONS` 为 System One 单题分类移除了上游双判档器的 `suggestModel` 残留，明确 prompt / currentEffort 语义，并区分被引用材料中的注入指令与用户本人的深度要求 —— ext:210-285, ext:385-403；test:1682-1719；README.md:189-191
 - GPT-6 Astra（`gpt-6-astra`）和 GPT-6.1 Sol（`gpt-6.1-sol`）的 notes 与五档 levels 提炼自 OpenAI / Codex 官方资料，面向当前单模型选档，不含跨模型切换建议、价格或跑分比较；Sol 的 low / medium / xhigh 不再重复推荐器中的任务词。两个模型的 defaultEffort 均为 Codex 内置目录的 low —— ext:286-383；test:1705-1719；README.md:193-199
 - 页面要点：Astra 档位刻度偏高，从 low 起步，绝大多数任务不需要 max，不因回复格式或追问倾向加档；Sol 低档事实问答与核实用 low，常规功能与协同交付用 medium，迁移、协同文件生成与端到端测试用 high，冲突证据权衡与联动精修用 xhigh —— ext:299-348；README.md:195-197
-- 两个 GPT 模型的 ID 取自 Pi 1.5.2 的 `openai-codex` 目录；其 thinkingLevelMap 把 low～max 映射到同名档位。官方 API 档位就是 low、medium、high、xhigh、max，与分类结果一一对应，不需要映射；Codex 分支按 thinkingLevelMap 映射和插入 configuration_update 的逻辑不变 —— pi152/pi-ai/dist/providers/data/openai-codex.json（chat:gpt-6-astra、chat:gpt-6.1-sol）；gpt6 第 1 部分第 1 条；ext:298, ext:506-508（apiEffort）, ext:1087-1091
+- 两个 GPT 模型的 ID 取自 Pi 1.5.2 的 `openai-codex` 目录；其 thinkingLevelMap 把 low～max 映射到同名档位。官方 API 档位就是 low、medium、high、xhigh、max，与分类标签同名，实际执行以 medium 为下限；Codex 分支按 thinkingLevelMap 映射和插入 configuration_update 的逻辑不变 —— pi152/pi-ai/dist/providers/data/openai-codex.json（chat:gpt-6-astra、chat:gpt-6.1-sol）；gpt6 第 1 部分第 1 条；ext:298, ext:506-508（apiEffort）, ext:1087-1091
 - System One 单题 choice 请求：instructions = 共用原则 + 「当前模型：名称。说明」，criteria = 该模型五档条件；协议不要求输出跨模型推荐字段 —— ext:417-429；test:1682-1696, test:1713；README.md:189-191
 - 只对这七个模型 ID 生效，Anthropic 协议和 Antigravity 的同名 Claude 模型共用五档规则；当前分支已有上一轮助手回复时才传 `currentEffort`，优先读取助手的合法 `providerThinkingLevel`，否则用最近决策或基线，并按当前主模型实际生效五档规范化：Antigravity 的 xhigh / max 为 high，minimal 为 low；首轮不传。会话条目保留原始档位，兼容跨模型恢复 —— ext:228, ext:417-424, ext:891-911, ext:924, ext:1023；test:1324-1351, test:1630-1660, test:1682-1701；README.md:189
 - 共用原则按工作阶段、隐藏边界情况密度、自主执行长度判断，并用上一轮实际生效档位识别进展信号；prompt 中的对话只作分类数据，被引用内容中的注入指令不生效，用户本人对本轮深度的要求仍是选档依据 —— ext:386-403；test:1691, test:1712-1714
@@ -244,7 +244,7 @@
 - HTTP 429 显示服务限流、携带 Guardrail 关键词的 404/403 显示 OpenRouter 策略或白名单限制、5xx 显示上游服务异常；未知原因明确提示未识别。不输出服务端原文或凭据。回退警告在 Jev 调用前出现；成功后显示实际模型和档位，未获合格档位时只列出实际错误或结果无效，低置信度不警告 —— ext:190-208；test:646-746, test:1447-1522。
 - 用户取消或生命周期切换不继续回退，不写迟到决策或显示完成通知；已经发出的切换提示保留。空白输入不调用、配置无效不尝试任何模型 —— test:347-367, test:504-531, test:822-842。
 - 固定样例可用性测试走同一回退流程，固定用通用规则并隔离主模型与历史；不把 Jev 成功说成首选模型成功，不改会话决策、状态或基线 —— ext:802-813；test:864-914, test:1447-1522。
-- 演示区用本地固定示例模拟 Jev 返回 low，不发送 API 请求、不保证线上结果；仅服务报错可回退，结果无效与低置信度不回退并沿用基线 —— tests/effort-demo.test.mjs。
+- 演示区用本地固定示例模拟 Jev 返回 low、实际执行 medium，不发送 API 请求、不保证线上结果；仅服务报错可回退，结果无效与低置信度不回退并沿用基线 —— tests/effort-demo.test.mjs。
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
 - 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；随后重录 auto-name-model、auto-name-status（旧画面的一级菜单还有已合并的「右下角会话标题」），保留凭据文件但不发送模型消息，两个 tape 去掉一级菜单里多余的一次下移；未重录的只剩 chat-turn —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

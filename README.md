@@ -87,7 +87,7 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 | `mammoth-27b` | Mammoth 27B | `baseten/mammoth-1` |
 | `decider` | Decider v1.2 | `perplexity/pplx-decider-v1.2` |
 
-分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及本次成功的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；非 Jev 模型回退成功时标注回退来源，例如 `Jev（d1-ultra 回退）`、`Jev（Mammoth 27B 回退）`、`Jev（Decider v1.2 回退）`。全部失败时仍标注首选模型，表示最近尝试而非分类成功。Pi 自带的 thinking 显示仅反映基线。
+分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。主请求实际调档最低为 `medium`：`low` 分类也用 `medium`，分类失败、超时或恢复旧决策时遇到 `low` / `minimal` 也按 `medium` 执行。不修改 Pi 的基线，`off` 时仍不介入。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及本次成功的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；非 Jev 模型回退成功时标注回退来源，例如 `Jev（d1-ultra 回退）`、`Jev（Mammoth 27B 回退）`、`Jev（Decider v1.2 回退）`。全部失败时仍标注首选模型，表示最近尝试而非分类成功。Pi 自带的 thinking 显示仅反映基线。
 
 `pi-antigravity` 不触发 `onPayload`。因此，Antigravity 分支在 `context_with_system` 分类后，临时包装插件的原生 `streamSimple`。包装保留原 `oauth`、`headers`、`images` 和 `refreshModels`。注册和恢复 wrapper 时，扩展携带 `provider.getAllModels` 的当前动态目录，包括 chat、image 和 classifier 模型，并按 `type + id` 补回 registered model 的 `headers`。只有 `sessionId`、末条消息 `timestamp` 和模型都匹配当前主请求时，扩展才修改 `options.reasoning`，再交给插件按 `-low`、`-medium`、`-high` runtime ID 路由。`max` 和 `xhigh` 夹到 `high`。会话 thinking 和历史上下文不变。
 
@@ -109,7 +109,7 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 
 读取量下降只表示这次报告的缓存命中较少，不代表历史丢失，也不能据此认定是调档导致的。
 
-本次扩展 wrapper 真实通道短时实测使用固定分类夹具，强制 `low → high → medium → low`，避免分类波动。主模型使用真实 Antigravity。`cacheRead` 分别为：`claude-opus-5-5` 的 `0 / 13981 / 13994 / 14014`，`claude-sonnet-5-5` 的 `0 / 13978 / 13991 / 14011`。请求基线始终为 `medium`，实际 runtime 后缀依次为 `low / high / medium / low`，`message_end` 保存的实际字段与之一致。Opus 在完整成功序列前另有若干次 `SAFETY` 零输出尝试，这些尝试未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证，也不保证 TTL 到期或提示词变化后仍命中。
+设置 `medium` 下限前的扩展 wrapper 真实通道短时实测使用固定分类夹具，强制 `low → high → medium → low`，避免分类波动。主模型使用真实 Antigravity。`cacheRead` 分别为：`claude-opus-5-5` 的 `0 / 13981 / 13994 / 14014`，`claude-sonnet-5-5` 的 `0 / 13978 / 13991 / 14011`。请求基线始终为 `medium`，实际 runtime 后缀依次为 `low / high / medium / low`，`message_end` 保存的实际字段与之一致。Opus 在完整成功序列前另有若干次 `SAFETY` 零输出尝试，这些尝试未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证，也不保证 TTL 到期或提示词变化后仍命中。
 
 [Anthropic 官方文档](https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta)明确 Anthropic 协议分支的 Opus 5、Opus 5.5 和 Sonnet 5.5 支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta `mid-conversation-output-config-2026-07-01`，由 Pi 负责发送。Fable 5.2 额外依据 Pi 1.5.2 目录的 `supportsMidConvoEffort: true` 和真实序列化请求形状纳入支持；Pi 仍为它发送 `thinking.type: "adaptive"` 与末尾空 `system` effort 标记。Antigravity 不增加 Fable。其他 Opus、Sonnet 版本并非全部支持，本扩展不扩大到上述四个模型之外。Pi v1.5.0 的 [Anthropic 序列化实现](https://github.com/earendil-works/pi/blob/v1.5.0/packages/ai/src/api/anthropic-messages.ts)已有原生标记；本仓库依赖的 1.0.1 也有此能力，无需升级依赖。
 
@@ -195,7 +195,7 @@ GPT-6 Astra（`gpt-6-astra`）和 GPT-6.1 Sol（`gpt-6.1-sol`）的规则依据 
 - 两者的 `defaultEffort` 都是 Codex 内置目录的 `low`。规则提炼自官方刻度并面向单模型选档，不包含跨模型切换建议、价格或跑分对比。
 - Astra 的档位刻度偏高，从 `low` 起步，绝大多数任务不需要 `max`，也不因回复格式偏好或追问倾向调高档位。
 - Sol 在低档下的事实准确性已很高，单纯事实问答与核实用 `low`；常规功能开发与协同交付用 `medium`，迁移、协同文件生成与端到端测试用 `high`，冲突证据权衡与联动精修交付用 `xhigh`。
-- 两者的 API 档位就是 `low` 到 `max` 五档，与分类结果一一对应，不需要映射；Codex 分支按 `thinkingLevelMap` 映射和插入 `configuration_update` 的做法不变。
+- 两者的 API 档位就是 `low` 到 `max` 五档，分类标签同名，实际执行仍以 `medium` 为下限；Codex 分支按 `thinkingLevelMap` 映射和插入 `configuration_update` 的做法不变。
 - 只匹配这两个精确 ID，也就是 Pi 1.5.2 `openai-codex` 目录里的 ID。
 
 [GPT-6.2 Astra](https://developers.openai.com/api/docs/models/gpt-6.2-astra) 和 [GPT-6.2 Sol](https://developers.openai.com/api/docs/models/gpt-6.2-sol) 分别精确匹配 `gpt-6.2-astra`、`gpt-6.2-sol`。两者的 [Codex 目录默认档](https://github.com/openai/codex/blob/4389a526d51a5a7600e0648436a7142a304f0188/codex-rs/models-manager/models.json) 都是 `low`（[API 新集成指南](https://developers.openai.com/api/docs/guides/latest-model)建议起点为 `medium`；扩展只作记录，不覆盖会话的实际基线）。OpenAI 未给两模型分别规定完整的五档表：[Codex 的 6.2 指南](https://learn.chatgpt.com/codex/learn/prompting-gpt-6-2-astra)与 [Models](https://learn.chatgpt.com/docs/models) 是家族共用的选档阶梯，[Model selection](https://developers.openai.com/api/docs/guides/model-selection) 仅给出跨模型刻度（Astra 的 `low`/`medium`/`xhigh` 与 Sol 的 `medium`/`xhigh`）。本扩展将家族共用阶梯与型号刻度收敛为分类时可见的单模型条件：问答与明确小改用 `low`（Astra 另含清晰需求直出短文与小脚本）；需规划的常规功能开发、局部修 bug 与资料成稿用 `medium`；跨模块排障重构、代码与安全评审、竞争约束权衡及多源核验用 `high`；已呈现耦合因素、冲突线索或（Astra）开放式假设检验、（Sol）依赖中间验证反复调整方案的复杂多步任务及 `high` 未解决时用 `xhigh`；仅极难单一核心问题且用户明确要求不计时间和用量，或 `xhigh` 已证明不够时才用 `max`。不因篇幅长、步骤多或单纯跑测试加档，也不把 Codex 的多代理 Ultra 模式当作推理档位。

@@ -2122,3 +2122,61 @@ test("GPT-6.2 Astra 与 Sol 规则使用分类时可见条件并对齐评审与�
   assert.match(MODEL_RULES["gpt-6.2-astra"].levels.low, /短文与小脚本/);
   assert.match(MODEL_RULES["gpt-6.2-sol"].levels.xhigh, /中间验证结果/);
 });
+
+// Pi 1.6.0 的 Codex 请求：顶层 effort 固定为 medium，历史助手回复前和 input 末尾各有一条 Pi 生成的 configuration_update。
+const nativeInput = (messages, tailEffort) => [
+  ...messages.flatMap((message) => [
+    ...(message.role === "assistant" && message.providerThinkingLevel
+      ? [{ type: "configuration_update", reasoning: { effort: message.providerThinkingLevel } }] : []),
+    ...toInput([message]),
+  ]),
+  { type: "configuration_update", reasoning: { effort: tailEffort } },
+];
+
+test("Pi 已在末尾追加 configuration_update 时只替换该项档位，并把实际档位写回助手回复", async () => {
+  const h = setup({ thinking: "high" });
+  h.choices = ["xhigh", "low"];
+  const reply = (timestamp) => ({ ...assistant(timestamp), ...h.model, model: h.model.id, providerThinkingLevel: "high" });
+  const send = (messages) => h.request(messages, { input: nativeInput(messages, "high") });
+
+  const messages = [system, user(1)];
+  const first = await send(messages);
+  assert.equal(first.reasoning.effort, "medium", "顶层 effort 不变");
+  assert.deepEqual(updates(first), [[2, "xhigh"]], "只替换末尾项，不另行插入");
+  assert.equal(first.input.length, 3);
+  assert.equal(h.status, "🧠 xhigh · 基线 high · Jev");
+  const finalized = h.events.get("message_end")({ message: reply(2) }, h.ctx).message;
+  assert.equal(finalized.providerThinkingLevel, "xhigh");
+  assert.equal(h.events.get("message_end")({ message: reply(2) }, h.ctx), undefined, "实际档位只写回一次");
+
+  // 工具续调：历史项按写回的档位重放，末尾项沿用同一次决策，前缀不变。
+  messages.push(finalized, toolResult(3));
+  const continuation = await send(messages);
+  assert.equal(h.calls, 1);
+  assert.deepEqual(updates(continuation), [[2, "xhigh"], [5, "xhigh"]]);
+  assert.ok(isPrefix(first.input, continuation.input));
+  messages.push(h.events.get("message_end")({ message: reply(4) }, h.ctx).message);
+
+  // 新消息判为 low：执行档位最低为 medium，历史档位不动。
+  messages.push(user(5));
+  const second = await send(messages);
+  assert.equal(h.calls, 2);
+  assert.deepEqual(updates(second), [[2, "xhigh"], [5, "xhigh"], [8, "medium"]]);
+  assert.ok(isPrefix(continuation.input, second.input));
+  assert.equal(h.status, "🧠 medium · 基线 high · Jev");
+});
+
+test("Pi 末尾 configuration_update 的档位与决策相同或尚无决策时不改写 payload，也不写回", async () => {
+  const h = setup({ thinking: "high" });
+  h.choices = ["high"];
+  const messages = [system, user(1)];
+  const input = nativeInput(messages, "high");
+  const payload = await h.request(messages, { input });
+  assert.equal(payload.input, input);
+  assert.equal(h.status, "🧠 high · Jev");
+  assert.equal(h.events.get("message_end")({ message: { ...assistant(2), ...h.model, model: h.model.id } }, h.ctx), undefined);
+
+  // 没有经过 context_with_system 的请求（例如重放）保持原样。
+  const raw = { model: h.model.id, reasoning: { effort: "medium" }, input: nativeInput(messages, "high") };
+  assert.equal(h.events.get("before_provider_request")({ payload: raw }, h.ctx), undefined);
+});

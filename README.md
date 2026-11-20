@@ -62,7 +62,7 @@ TUI / RPC 中每轮成功结束后，参考当前分支最近最多 5 轮对话�
 
 | 主模型分支 | provider / 接口 | 模型条件 | 调整方式 |
 | --- | --- | --- | --- |
-| GPT-6 Codex | `openai-codex-responses` | 模型 ID 以 `gpt-6` 开头 | 在当前用户消息前插入 `configuration_update` |
+| GPT-6 Codex | `openai-codex-responses` | 模型 ID 以 `gpt-6` 开头 | Pi 1.6.0 起：只替换 Pi 在请求末尾追加的 `configuration_update` 的档位，并把实际档位写回助手回复；更早版本或关闭 `compat.supportsMidConvoEffort` 时：在当前用户消息前插入 `configuration_update` |
 | Claude（Anthropic 协议） | `anthropic-messages` | 模型 ID 精确等于 `claude-opus-5`、`claude-opus-5-5`、`claude-sonnet-5-5` 或 `claude-fable-5-2`；`compat.supportsMidConvoEffort === true` | 只修改 Pi 已生成的末尾空 `system` 消息中的 `output_config.effort` |
 | Claude（Antigravity） | provider `antigravity`；接口 `antigravity-api` | 模型 ID 精确等于 `claude-opus-5-5` 或 `claude-sonnet-5-5` | 临时包装 `pi-antigravity` 的原生 `streamSimple`，只修改匹配请求的 `options.reasoning` |
 
@@ -87,7 +87,7 @@ pi --model openai-codex/gpt-6.1-sol --thinking medium
 | `mammoth-27b` | Mammoth 27B | `baseten/mammoth-1` |
 | `decider` | Decider v1.2 | `perplexity/pplx-decider-v1.2` |
 
-分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。主请求实际调档最低为 `medium`：`low` 分类也用 `medium`，分类失败、超时或恢复旧决策时遇到 `low` / `minimal` 也按 `medium` 执行。不修改 Pi 的基线，`off` 时仍不介入。GPT-6 Codex 通过 `configuration_update` 调整强度，顶层 `reasoning.effort` 保持基线。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及本次成功的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；非 Jev 模型回退成功时标注回退来源，例如 `Jev（d1-ultra 回退）`、`Jev（Mammoth 27B 回退）`、`Jev（Decider v1.2 回退）`。全部失败时仍标注首选模型，表示最近尝试而非分类成功。Pi 自带的 thinking 显示仅反映基线。
+分类器只选择 `low`、`medium`、`high`、`xhigh`、`max`，不替换主聊天模型。主请求实际调档最低为 `medium`：`low` 分类也用 `medium`，分类失败、超时或恢复旧决策时遇到 `low` / `minimal` 也按 `medium` 执行。不修改 Pi 的基线，`off` 时仍不介入。GPT-6 Codex 通过 `configuration_update` 调整强度，不修改顶层 `reasoning.effort`；Pi 1.6.0 起该项由 Pi 生成，本扩展只替换其档位。Anthropic 协议分支使用 Pi 原生逐消息标记，只改末尾空 `system` 消息的 `output_config.effort`；顶层 `output_config`、`thinking` 和历史消息不变。Antigravity 是独立分支，不使用 Anthropic 的消息级 `output_config`。状态栏显示实际强度及本次成功的分类模型，例如 `🧠 xhigh · 基线 medium · Jev`；非 Jev 模型回退成功时标注回退来源，例如 `Jev（d1-ultra 回退）`、`Jev（Mammoth 27B 回退）`、`Jev（Decider v1.2 回退）`。全部失败时仍标注首选模型，表示最近尝试而非分类成功。Pi 自带的 thinking 显示仅反映基线。
 
 `pi-antigravity` 不触发 `onPayload`。因此，Antigravity 分支在 `context_with_system` 分类后，临时包装插件的原生 `streamSimple`。包装保留原 `oauth`、`headers`、`images` 和 `refreshModels`。注册和恢复 wrapper 时，扩展携带 `provider.getAllModels` 的当前动态目录，包括 chat、image 和 classifier 模型，并按 `type + id` 补回 registered model 的 `headers`。只有 `sessionId`、末条消息 `timestamp` 和模型都匹配当前主请求时，扩展才修改 `options.reasoning`，再交给插件按 `-low`、`-medium`、`-high` runtime ID 路由。`max` 和 `xhigh` 夹到 `high`。会话 thinking 和历史上下文不变。
 
@@ -124,7 +124,7 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 - 复用 Pi 原生 classifier、OpenRouter 认证及代理；宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 `~typesafe/jev-latest` 模板补充公开元数据，不修改服务商目录。四个分类模型均消耗 OpenRouter 额度，价格以 OpenRouter 公开端点信息为准。
 - OpenRouter 白名单需放行实际服务商（如 `typesafe`、`liquid`、`baseten`、`perplexity`）及对应模型，否则会被 Guardrail 拦截（常见表现为 HTTP 404）。
 - 子代理需加载本扩展，角色 thinking 作为基线；外部 CLI 代理不经过本扩展。
-- 仅 GPT-6 Codex：`configuration_update` 不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响。Codex 请求无法与上下文对齐时不注入，并显示「未调整」。
+- 仅 GPT-6 Codex：`configuration_update` 不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响。Pi 1.6.0 之前，Codex 请求无法与上下文对齐时不注入，并显示「未调整」。
 
 ## 路径链接与状态栏
 

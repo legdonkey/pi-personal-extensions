@@ -655,6 +655,7 @@ export default function (pi: ExtensionAPI) {
   let picker: AbortController | undefined;
   let generation = 0;
   let claudeRequest: { model: Model<any>; effort?: string } | undefined;
+  let codexRequest: { model: Model<any>; effort: string } | undefined;
   let antigravityRequest: { model: Model<any>; timestamp: number; sessionId: string; ctx: ExtensionContext; effort?: string } | undefined;
   let restoreAntigravity: (() => void) | undefined;
 
@@ -869,6 +870,7 @@ export default function (pi: ExtensionAPI) {
     anchors = undefined;
     // 流式期间切模型不应丢掉旧请求已发送的档位。
     if (event.type !== "model_select" || !claudeRequest?.effort) claudeRequest = undefined;
+    if (event.type !== "model_select") codexRequest = undefined;
     if (event.type !== "model_select" || !antigravityRequest?.effort) antigravityRequest = undefined;
     if (event.type === "session_shutdown") restoreAntigravity?.();
     showStatus(ctx, undefined);
@@ -1055,6 +1057,22 @@ export default function (pi: ExtensionAPI) {
     if (!Array.isArray(body.input) || typeof base !== "string" || !isGpt6(body.model)) return undefined;
     const recorded = decisions(ctx);
     const classifiedBy = recorded.length ? classifierLabel(recorded.at(-1)?.classifier, recorded.at(-1)?.fallbackFrom) : "未分类";
+    codexRequest = undefined;
+    // Pi 1.6.0 起（compat.supportsMidConvoEffort）顶层 effort 固定，实际档位由 Pi 在 input 末尾追加的 configuration_update 表达，
+    // 历史档位按各条助手回复的 providerThinkingLevel 重放。此时只替换末尾这一项，并在 message_end 写回实际档位；
+    // 另行插入的 update 会被这个末尾项覆盖。
+    const tail = body.input.at(-1) as { type?: string; reasoning?: { effort?: unknown } } | undefined;
+    if (tail?.type === "configuration_update" && typeof tail.reasoning?.effort === "string") {
+      const native = tail.reasoning.effort;
+      const decision = recorded.at(-1);
+      const effort = decision && effortFloor(apiEffort(ctx.model!, decision.thinkingLevel));
+      const adjusted = typeof effort === "string" && effort !== native && CLASSIFIED_LEVELS.some((level) => level === effort);
+      cacheRequest = { model: ctx.model!, adjusted, startedAt: Date.now() };
+      showStatus(ctx, `${adjusted ? `🧠 ${effort} · 基线 ${native}` : `🧠 ${native}`} · ${classifiedBy}`);
+      if (!adjusted) return undefined;
+      codexRequest = { model: ctx.model!, effort };
+      return { ...body, input: [...body.input.slice(0, -1), { ...tail, reasoning: { ...tail.reasoning, effort } }] };
+    }
     if (body.input.filter(({ role }) => role === "user").length !== snapshot.length) {
       showStatus(ctx, `🧠 ${base} · 未调整 · ${classifiedBy}`);
       return undefined;
@@ -1110,6 +1128,13 @@ export default function (pi: ExtensionAPI) {
         previousCache = { read: usage.cacheRead, startedAt: cache.startedAt, model };
         cacheHistoryChanged = false;
       }
+    }
+    const codex = codexRequest;
+    if (codex && message.role === "assistant" && message.api === CODEX_API
+      && message.provider === codex.model.provider && message.model === codex.model.id) {
+      codexRequest = undefined;
+      // Pi 按此字段重放历史 configuration_update，必须保存实际发送的档位而非会话基线。
+      return { message: { ...message, providerThinkingLevel: codex.effort } };
     }
     const antigravity = antigravityRequest;
     if (antigravity && message.role === "assistant" && message.api === "antigravity-api"

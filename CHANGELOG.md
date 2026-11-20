@@ -4,6 +4,7 @@
 
 ## 未发布
 
+- 适配 Pi 1.6.0：Pi 对 GPT-6 Codex 改为顶层 `reasoning.effort` 固定、在每次请求末尾追加 `configuration_update` 表达当前档位，`inline-effort` 原先插在用户消息前的档位会被它覆盖而不生效。现在检测到该末尾项时只替换其档位，并在回复结束时把实际档位写回助手回复，供 Pi 原位重放；更早版本的 Pi 或关闭 `compat.supportsMidConvoEffort` 时沿用原有插入方式。
 - `inline-effort` 对主请求自动调档时最低使用 `medium`；分类器判为 `low`、失败后沿用低档或恢复旧低档决策时都不会下调到 `low`。
 
 ## 0.8.2 - 2026-11-19

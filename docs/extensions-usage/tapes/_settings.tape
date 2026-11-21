@@ -15,10 +15,10 @@
 #   personal-switches       78  436  0.2  6.7  4.6   （再 pad=960:448:0:12:0x1e1e2e，顶部补 12px 底色，避开 Ponytail 行）
 #   statusline-style        0   708  0.2  10.0  7.2
 #   auto-name-model         88  434  0.4  8.4  6.3   （0.4 起，避开输入 /per 时补全列表里其他包的命令）
-#   effort-model            156 480  0.4  9.0  5.9   （0.4 起避开补全列表里其他包的命令；9.0 止，含 Esc 返回二级菜单）
+#   effort-model            156 480  0.5  9.0  5.9   （0.5 起避开补全列表里其他包的命令；9.0 止，含 Esc 返回二级菜单）
 #   clickable-paths-status  0   888  0.2  7.0  5.6
 #   auto-name-status        0   788  0.2  6.8  end
-#   effort-status           150 570  0.3  7.6  5.6   （tape 高 740，二级菜单五项时不滚动）
+#   effort-status           150 570  0.5  7.6  5.6   （tape 高 740，二级菜单五项时不滚动；0.5 起避开输入 /per 时补全列表里其他包的命令）
 Set Shell "bash"
 Set FontSize 18
 Set FontFamily "Maple Mono NF CN"

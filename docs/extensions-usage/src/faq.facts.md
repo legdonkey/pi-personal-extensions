@@ -1,7 +1,7 @@
 # faq 事实清单
 
 - 只注册 /personal 一个斜杠命令；各功能设置都在 /personal → 功能 → 二级菜单 —— extensions/pi-personal-extensions.ts:130-139；tests/personal.test.mjs:51、94；README.md（单一入口说明）
-- 菜单路径与设置项 label（自动会话命名 6 项、原位思考强度 5 项：状态查看、模型选择、可用性测试、恢复自动调整、运行判档测评、文件路径可点击 10 项、状态栏：额度、会话 ID 与配色「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-86
+- 菜单路径与设置项 label（自动会话命名 6 项、原位思考强度 4 项：状态查看、模型选择、可用性测试、运行判档测评、文件路径可点击 10 项、状态栏：额度、会话 ID 与配色「选择 pi-statusline 自定义配色」「查看 token 速度口径」「独立功能开关」）—— extensions/pi-personal-extensions.ts:54-86
 - 设置项只在功能已加载时出现；未加载只有「启用此功能并重载」—— extensions/pi-personal-extensions.ts:163-169
 - /personal switches 或一级菜单「批量功能开关」—— extensions/pi-personal-extensions.ts:152-158、194
 - /reload、/name 是 Pi 自带命令，不受影响 —— README.md:19；node_modules/@earendil-works/pi-coding-agent/docs/slash-commands.md:25、49

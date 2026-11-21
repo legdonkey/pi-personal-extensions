@@ -717,7 +717,7 @@ export default function (pi: ExtensionAPI) {
   }
 
   pi.registerCommand("effort", {
-    description: "自动思考强度：分类模型、可用性、恢复调整与判档测评",
+    description: "自动思考强度：分类模型、可用性与判档测评",
     async handler(args, ctx) {
       const [action = "status", value, ...extra] = args.trim().split(/\s+/).filter(Boolean);
       if (extra.length || !["status", "model", "test", "bench"].includes(action) || (value && action !== "model")) {

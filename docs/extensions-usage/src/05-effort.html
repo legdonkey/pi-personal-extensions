@@ -2,7 +2,6 @@
   <header class="chapter-head">
     <h2 id="ch-effort-h">原位思考强度：每条消息自动选档位</h2>
     <p class="chapter-sum">用 GPT-6 Codex、Anthropic 协议分支的四个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型时，按每条新消息的难度自动选档位，你不用手动切换。不用这些模型可以跳过本章。</p>
-    <p><strong>当前版本：</strong>缓存读取下降时，每个会话最多提示一次，自动调档继续。下文录屏、配图及配音中的「两次后暂停」和「恢复自动调整」是旧版行为，当前菜单已移除恢复项。</p>
     <dl class="meta">
       <dt>功能</dt><dd>原位思考强度</dd>
       <dt>入口</dt><dd><code>/personal</code> → 原位思考强度</dd>
@@ -159,14 +158,13 @@
       <p>
         <span class="seg" data-seg="effort-08" data-say="大脑图标段从左到右是：实际档位、基线和分类器。基线是 Pi 当前的 thinking 设置。">🧠 段从左到右是：实际档位、基线和分类器。基线是 Pi 当前的 thinking 设置。</span>
         <span class="seg" data-seg="effort-09" data-say="Pi 自带的 thinking 显示只是基线，实际档位看大脑图标段。">Pi 自带的 thinking 显示只是基线，实际档位看 🧠 段。</span>
-        <span class="seg" data-seg="effort-09a" data-say="同一会话两次检测到缓存重建后，大脑图标段改为显示「自动调整暂停」和恢复的菜单路径，见本章「缓存重建后暂停」一节。">同一会话两次检测到缓存重建后，🧠 段改为显示「自动调整暂停」和恢复的菜单路径，见本章「缓存重建后暂停」一节。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-3">
       <div class="fig-scroll">
-        <svg viewBox="0 0 600 334" role="img" aria-labelledby="fig-effort-3-title fig-effort-3-desc">
+        <svg viewBox="0 0 600 286" role="img" aria-labelledby="fig-effort-3-title fig-effort-3-desc">
           <title id="fig-effort-3-title">🧠 段的读法</title>
-          <desc id="fig-effort-3-desc">示例：🧠 xhigh · 基线 medium · Jev，三部分依次是实际档位、基线、分类器。Pi 自带的 thinking 显示 medium 只是基线，实际档位是 🧠 段里的 xhigh。另有三种情况：只显示一个档位表示等于基线；Pi 1.6.0 之前或关闭 compat.supportsMidConvoEffort 时 Codex 出现「未调整」表示这次按基线发出；没有 🧠 段时，恢复会话或切换模型后会清空，满足条件的下一次请求后显示；两次检测到缓存重建后显示「自动调整暂停」。</desc>
+          <desc id="fig-effort-3-desc">示例：🧠 xhigh · 基线 medium · Jev，三部分依次是实际档位、基线、分类器。Pi 自带的 thinking 显示 medium 只是基线，实际档位是 🧠 段里的 xhigh。另有三种情况：只显示一个档位表示等于基线；Pi 1.6.0 之前或关闭 compat.supportsMidConvoEffort 时 Codex 出现「未调整」表示这次按基线发出；没有 🧠 段时，恢复会话或切换模型后会清空，满足条件的下一次请求后显示。</desc>
           <g data-cue="effort-08">
             <text class="t-cap" x="16" y="18">示例</text>
             <rect class="n" x="16" y="28" width="120" height="32" rx="4"/><text class="t-mono" x="76" y="49" text-anchor="middle">🧠 xhigh</text>
@@ -197,11 +195,6 @@
           <text class="t-mono" x="16" y="250">（没有 🧠 段）</text>
           <text class="t-cap" x="232" y="250">恢复会话或切换模型后会清空；</text>
           <text class="t-cap" x="232" y="270">满足条件的下一次请求后显示</text>
-          <g data-cue="effort-09a">
-            <text class="t-mono" x="16" y="300">🧠 自动调整暂停 · …</text>
-            <text class="t-cap" x="232" y="300">两次检测到缓存重建后暂停，</text>
-            <text class="t-cap" x="232" y="320">后面跟着恢复的菜单路径</text>
-          </g>
         </svg>
       </div>
       <figcaption>示例。🧠 段显示最近一次选档位用的分类器，非 Jev 模型回退成功时标注来源（例如「Jev（d1-ultra 回退）」「Jev（Mammoth 27B 回退）」）；全部失败时仍标注首选模型，表示最近尝试。空白消息不分类，显示「未分类」。</figcaption>
@@ -217,8 +210,8 @@
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-status" id="fig-effort-4">
-      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，二级菜单列出五个设置项和禁用项；选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、失败回退 Jev、最近决策尚无，以及切换和测试的菜单路径"></video></div>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。」二级菜单列出五个设置项，最后是「禁用此功能并重载」。在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
+      <div class="capture-frame"><video data-cue="effort-10" src="media/effort-status.mp4" poster="media/effort-status.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度，二级菜单列出四个设置项和禁用项；选「查看分类模型与状态」，输出适用、后续分类 d1-ultra、失败回退 Jev、最近决策尚无，以及切换和测试的菜单路径"></video></div>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 查看分类模型与状态，输出「自动思考强度：适用；后续分类：openrouter/liquid/d1-ultra；失败回退：Jev（仅本次）；最近决策：尚无。切换：/personal → 原位思考强度 → 选择分类模型；可用性：/personal → 原位思考强度 → 测试分类模型可用性。」二级菜单列出四个设置项，最后是「禁用此功能并重载」。在临时 agent 目录录制，只查看配置，不验证模型可用性。示例配置选的是 d1-ultra，默认是 Jev；这是新会话，所以最近决策显示「尚无」。</figcaption>
     </figure>
   </div>
 
@@ -237,7 +230,7 @@
       </p>
     </div>
     <figure class="beat-fig capture" data-capture="effort-model" id="fig-effort-5">
-      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度的二级菜单（五个设置项），选「选择分类模型」，选择器标题显示当前 d1-ultra，光标在四个分类模型之间浏览后按 Esc 键回到二级菜单，不保存"></video></div>
+      <div class="capture-frame"><video data-cue="effort-11" src="media/effort-model.mp4" poster="media/effort-model.png" muted loop playsinline preload="none" aria-label="录屏：在 /personal 里打开原位思考强度的二级菜单（四个设置项），选「选择分类模型」，选择器标题显示当前 d1-ultra，光标在四个分类模型之间浏览后按 Esc 键回到二级菜单，不保存"></video></div>
       <div class="fig-scroll">
         <svg viewBox="0 0 600 104" role="img" aria-labelledby="fig-effort-5-title fig-effort-5-desc">
           <title id="fig-effort-5-title">换分类器的按键步骤</title>
@@ -290,7 +283,6 @@
           <tr><td>看是否适用、最近的档位</td><td>查看分类模型与状态</td></tr>
           <tr><td>换分类器</td><td>选择分类模型</td></tr>
           <tr><td>测试分类器能不能用</td><td>测试分类模型可用性</td></tr>
-          <tr><td>缓存重建暂停后恢复</td><td>恢复自动调整</td></tr>
           <tr><td>测评分类器选档准不准</td><td>运行判档测评</td></tr>
         </tbody>
       </table>
@@ -298,7 +290,7 @@
         <li>新分类器从下一条还没分类的消息开始用，已有消息的档位不变。</li>
         <li>「测试分类模型可用性」固定使用通用规则与公开样例「把 hello 转成大写。」，隔离主模型与会话历史，不改强度、不写决策。</li>
       </ul>
-      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 选择分类模型。在临时 agent 目录录制，只操作选择器，不发送模型消息。选择器标题显示当前 d1-ultra（录制环境的示例配置，默认是 Jev），列出 Jev、d1-ultra、Mammoth 27B、Decider v1.2 四项；光标下移浏览到 Mammoth 27B 后回到 Jev，按 Esc 键回到二级菜单，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。二级菜单有五个设置项：查看分类模型与状态、选择分类模型、测试分类模型可用性、恢复自动调整、运行判档测评，最后是「禁用此功能并重载」。</figcaption>
+      <figcaption>录屏：<code>/personal</code> → 原位思考强度 → 选择分类模型。在临时 agent 目录录制，只操作选择器，不发送模型消息。选择器标题显示当前 d1-ultra（录制环境的示例配置，默认是 Jev），列出 Jev、d1-ultra、Mammoth 27B、Decider v1.2 四项；光标下移浏览到 Mammoth 27B 后回到 Jev，按 Esc 键回到二级菜单，不保存。底部提示 <code>enter select</code> 即按 Enter 键保存。二级菜单有四个设置项：查看分类模型与状态、选择分类模型、测试分类模型可用性、运行判档测评，最后是「禁用此功能并重载」。</figcaption>
     </figure>
   </div>
 
@@ -340,7 +332,7 @@
             <rect class="n" x="296" y="132" width="288" height="40" rx="6"/>
             <text class="t" x="440" y="157" text-anchor="middle">沿用当前档位 · 丢弃迟到结果</text>
           </g>
-          <text class="t-cap" x="16" y="196">当前档位：上一条消息的档位；没有上一条消息时，用基线。对话照常进行。</text>
+          <text class="t-cap" x="16" y="196">当前档位：上一条消息的档位；没有上一条消息时，用基线（基线是 low 时用 medium）。对话照常进行。</text>
           <g data-cue="effort-17">
             <line class="w" x1="264" y1="236" x2="294" y2="236" marker-end="url(#fig-effort-6-arrow)"/>
             <rect class="n" x="16" y="216" width="248" height="40" rx="6"/>
@@ -354,44 +346,44 @@
     </figure>
   </div>
 
-  <!-- 6b. 缓存重建后暂停 -->
+  <!-- 6b. 缓存读取下降的提示 -->
   <div class="beat">
     <div class="beat-text">
-      <h3>缓存重建后暂停</h3>
+      <h3>缓存读取下降的提示</h3>
       <p>
-        <span class="seg" data-seg="effort-20">调整过档位后，如果主模型这次的缓存读取比上一次少，扩展会提示「检测到缓存重建」，并写明两次读取量和可能原因。只是缓存写入变大不算。每轮最多计一次。</span>
-        <span class="seg" data-seg="effort-21" data-say="同一会话累计两次后，扩展暂停自动调整：之后的消息沿用当前档位，不再调用分类器，大脑图标段显示暂停原因和恢复路径。">同一会话累计两次后，扩展暂停自动调整：之后的消息沿用当前档位，不再调用分类器，🧠 段显示暂停原因和恢复路径。</span>
-        <span class="seg" data-seg="effort-22" data-say="想恢复，在斜杠 personal 的原位思考强度菜单里选「恢复自动调整」，计数也会清零。切换主模型不会解除暂停，开始新会话会清零。">想恢复，在 <code>/personal</code> 的原位思考强度菜单里选「恢复自动调整」，计数也会清零。切换主模型不会解除暂停，开始新会话会清零。</span>
+        <span class="seg" data-seg="effort-20">调整过档位后，如果主模型这次的缓存读取比上一次少，扩展会提示一次，写明两次读取量，并说明原因未确认。只是缓存写入变大不算。</span>
+        <span class="seg" data-seg="effort-21">每个会话最多提示一次。提示后自动调整继续，不暂停。</span>
+        <span class="seg" data-seg="effort-22">提示过以后，切换主模型不会再提示；开始新会话后可以再提示一次。</span>
         <span class="seg" data-seg="effort-23">缓存过期、压缩、树导航和切换模型都会让缓存正常失效，这些情况不做判断。这仍只是提醒信号：服务端提前清除缓存，或其他扩展改了提示词，也可能触发。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-8">
       <div class="fig-scroll">
         <svg viewBox="0 0 600 220" role="img" aria-labelledby="fig-effort-8-title fig-effort-8-desc">
-          <title id="fig-effort-8-title">缓存重建两次后暂停</title>
-          <desc id="fig-effort-8-desc">缓存读取比上一次少时提示检测到缓存重建，每轮最多计一次；同一会话第二次时暂停自动调整，沿用当前档位，🧠 段显示「🧠 自动调整暂停：检测到两次缓存重建」和恢复路径；在 /personal → 原位思考强度 → 恢复自动调整 里恢复，计数清零。切换主模型不解除暂停，新会话清零。缓存过期、压缩、树导航和切换模型不做判断。</desc>
+          <title id="fig-effort-8-title">缓存读取下降时提示一次</title>
+          <desc id="fig-effort-8-desc">调整过档位后缓存读取比上一次少时提示一次，提示示例是「缓存读取从 100 降至 80，原因未确认；自动调档继续。」；每个会话最多提示一次，提示后自动调整继续，不暂停。切换主模型不会再提示，新会话可以再提示一次。缓存过期、压缩、树导航和切换模型不做判断。</desc>
           <defs>
             <marker id="fig-effort-8-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
           <g data-cue="effort-20">
             <rect class="n" x="16" y="24" width="172" height="56" rx="6"/>
-            <text class="t" x="102" y="48" text-anchor="middle">检测到缓存重建</text>
+            <text class="t" x="102" y="48" text-anchor="middle">缓存读取下降</text>
             <text class="t-cap" x="102" y="68" text-anchor="middle">读取比上一次少</text>
             <line class="w" x1="188" y1="52" x2="212" y2="52" marker-end="url(#fig-effort-8-arrow)"/>
           </g>
           <g data-cue="effort-21">
             <rect class="n is-focal" x="214" y="24" width="172" height="56" rx="6"/>
-            <text class="t" x="300" y="48" text-anchor="middle">第 2 次：暂停</text>
-            <text class="t-cap" x="300" y="68" text-anchor="middle">沿用当前档位</text>
-            <text class="t-mono" x="16" y="118">🧠 自动调整暂停：检测到两次缓存重建</text>
-            <text class="t-cap" x="16" y="140">· /personal → 原位思考强度 → 恢复自动调整</text>
+            <text class="t" x="300" y="48" text-anchor="middle">提示一次</text>
+            <text class="t-cap" x="300" y="68" text-anchor="middle">每个会话最多一次</text>
+            <text class="t-mono" x="16" y="118">缓存读取从 100 降至 80，原因未确认；自动调档继续。</text>
+            <text class="t-cap" x="16" y="140">提示原文，数值是示例</text>
           </g>
           <g data-cue="effort-22">
             <line class="w" x1="386" y1="52" x2="410" y2="52" marker-end="url(#fig-effort-8-arrow)"/>
             <rect class="n" x="412" y="24" width="172" height="56" rx="6"/>
-            <text class="t" x="498" y="48" text-anchor="middle">恢复自动调整</text>
-            <text class="t-cap" x="498" y="68" text-anchor="middle">计数清零</text>
-            <text class="t-cap" x="16" y="200">切换主模型不解除暂停；新会话清零</text>
+            <text class="t" x="498" y="48" text-anchor="middle">自动调整继续</text>
+            <text class="t-cap" x="498" y="68" text-anchor="middle">不暂停</text>
+            <text class="t-cap" x="16" y="200">切换主模型不会再提示；新会话可以再提示一次</text>
           </g>
           <line x1="16" y1="158" x2="584" y2="158" style="stroke:var(--rule);stroke-width:1"/>
           <g data-cue="effort-23">
@@ -399,7 +391,7 @@
           </g>
         </svg>
       </div>
-      <figcaption>状态栏文字是真实格式，触发次数是示例。暂停时「查看分类模型与状态」也显示「暂停（检测到两次缓存重建）」。</figcaption>
+      <figcaption>提示文字是真实格式，读取量是示例。</figcaption>
     </figure>
   </div>
 

@@ -1,6 +1,6 @@
 # effort（使用者版）事实清单
 
-当前版本：缓存读取下降仅提示读数，每会话至多一次，不中止分类。下列暂停和恢复操作为旧版配图、录屏记录。依据：`extensions/inline-effort.ts` 的 `cacheNotified` 与 `tests/inline-effort.test.mjs` 的「缓存读取下降每个会话只提示一次，后续继续调档」。
+当前版本：缓存读取下降仅提示读数，每会话至多一次，不中止分类。依据：`extensions/inline-effort.ts` 的 `cacheNotified` 与 `tests/inline-effort.test.mjs` 的「缓存读取下降每个会话只提示一次，后续继续调档」。
 
 Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，本扩展只替换该项档位并在 message_end 写回 providerThinkingLevel；正文按这条路径描述；「在用户项前插入」和「未调整」是 Pi 1.6.0 之前或关闭 compat.supportsMidConvoEffort 时的路径。依据：ext:1063-1079、ext:1136-1142；test「Pi 已在末尾追加 configuration_update 时只替换该项档位，并把实际档位写回助手回复」「Pi 末尾 configuration_update 的档位与决策相同或尚无决策时不改写 payload，也不写回」；2026-11-21 用 Pi 1.6.0、gpt-6.2-astra 实测：三轮决策 medium、max、medium 各对应一条 configuration_update，历史原位重放，缓存命中 93% 到 98%。
 
@@ -46,7 +46,6 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - 格式：实际档位与基线不同时 `🧠 实际 · 基线 基线值 · 分类器`，相同时 `🧠 基线值 · 分类器` —— ext:681, ext:1050, ext:1075, ext:1108；test:158, test:179, test:1096
 - 基线 = Pi 当前的 thinking 设置，会话中修改 thinking 后基线随之变化（每次请求读取） —— ext:966, ext:1069
 - 仅 Codex、Pi 1.6.0 之前：「未调整」表示这次请求没能调整，按基线发出 —— ext:1080-1083；test:272
-- 两次检测到缓存重建后，🧠 段显示「🧠 自动调整暂停：检测到两次缓存重建 · /personal → 原位思考强度 → 恢复自动调整」；图 3 里写作「🧠 自动调整暂停 · …」是缩写 —— ext:650-651；test:1773-1779
 - Pi 自带的 thinking 显示只反映基线 —— README.md:90
 - 恢复会话或切换模型后 🧠 段被清空；满足适用条件的下一次请求后显示 —— ext:856-880, ext:667-683, ext:1026-1109
 - 分类器一栏取最近一次决策；空白消息和等待超时的决策显示「未分类」 —— ext:109-114, ext:966-1015, ext:992-994, ext:681, ext:1062, ext:1108
@@ -63,7 +62,7 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - Jev 默认，四个分类模型均按输入计费；统一通过选择器切换 —— ext:13-38, ext:59, ext:808-841；README.md:124
 - 新选择对所有会话生效，从下一条未分类的消息开始，已有消息的档位不变 —— ext:841, ext:917, ext:961；README.md:118
 - Pi 正在工作时不能切换、测试或测评 —— ext:738-742, ext:836-838；README.md:118
-- 菜单速查表五行对应五个菜单项 —— entry:64-68
+- 菜单速查表四行对应四个菜单项 —— entry:64-66, entry:68；tests/personal.test.mjs:329
 - 录屏 effort-model：二级菜单五个设置项；标题「思考分类模型（全局） · 当前：openrouter/liquid/d1-ultra」，四项 Jev / d1-ultra / Mammoth 27B / Decider v1.2，光标浏览至 Mammoth 27B 后回到 Jev，底部提示 enter select，Esc 回到二级菜单、不保存；默认是 Jev —— docs/extensions-usage/tapes/effort-model.tape；media/effort-model.mp4、effort-model.png；ext:59, ext:818-823；entry:63-69
 
 ## 分类失败怎么办
@@ -94,7 +93,7 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 ## 单一入口（/personal）
 
 - 本项目只注册 `/personal`；原位思考强度的操作都在 `/personal` → 原位思考强度 的菜单项里 —— entry:43, entry:63-69, entry:130-139
-- 菜单项：查看分类模型与状态、选择分类模型、测试分类模型可用性、恢复自动调整、运行判档测评 —— entry:64-68；tests/personal.test.mjs:329
+- 菜单项：查看分类模型与状态、选择分类模型、测试分类模型可用性、运行判档测评 —— entry:64-66, entry:68；tests/personal.test.mjs:329
 - 录屏 effort-status：/personal → 原位思考强度 → 二级菜单 → 查看分类模型与状态，显示失败回退 Jev（仅本次）、最近决策尚无；2026-11-14 在临时 agent 目录（未复制凭据文件）用 Pi 1.5.2 重录，tape 高度 740，仅查看示例配置，不验证模型可用性；技术版素材与使用者版逐字节相同 —— docs/extensions-usage/tapes/effort-status.tape；两版 media/effort-status.png；ext:729-737；entry:63-69。
 - 录屏 effort-model：选择器标题当前 d1-ultra，列出四项模型，光标浏览至 Mammoth 27B 后回到 Jev，Esc 回到二级菜单；二级菜单含五个设置项，加上「禁用此功能并重载」共六项；2026-11-14 在临时 agent 目录（未复制凭据文件）用 Pi 1.5.2 重录，只操作选择器，不发模型消息；gemini-video 审查后把截止点延到 9.0 秒以包含 Esc 返回 —— docs/extensions-usage/tapes/effort-model.tape；docs/extensions-usage/tapes/_settings.tape；media/effort-model.png；entry:63-69、162-169；ext:818-823。
 
@@ -106,15 +105,14 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - 字号调整、图示设计、查数画图与混杂归因为判据示例，不是线上分类保证 —— ext:439-442；test:1524-1561 只校验发送内容
 - 分类看不到图片与工具结果，同轮工具续调不重分类，已有历史决策不变；文本筛选范围和档位写入机制不变 —— ext:138-177, ext:675, ext:956-1015, ext:1055-1062, ext:1093-1109
 
-## 缓存重建后暂停
+## 缓存读取下降的提示
 
-- 调整过档位且上一次缓存读取大于 0 时，本次读取比上一次少就提示「检测到缓存重建」，并写明两次读取量和可能原因；只是写入变大不算；每轮最多计一次 —— ext:973, ext:1123-1151；test:1758-1770, test:1797-1834
+- 调整过档位且上一次缓存读取大于 0 时，本次读取比上一次少就提示一次，写明两次读取量，并说明原因未确认；只是写入变大不算 —— ext:1126-1130；test:1771-1780, test:1808-1827
 - 缓存过期、压缩、树导航和切换模型属于正常失效，不做判断：两次主请求开始时刻相隔超过缓存保留时间（模型目录 promptCache.short，没有时 5 分钟）、上次判断以来发生压缩或树导航、模型变了，都跳过本次判断 —— ext:98-107, ext:863-865, ext:881-882, ext:1121-1128；test:1829-1870
-- 「服务端提前清除缓存，或其他扩展改了提示词，也可能触发」：这些情况同样会让读取变少，扩展无法区分，警告文案列出这些可能原因 —— ext:1149-1151
-- 同一会话累计两次暂停：不再调用分类器、沿用当前档位、🧠 段显示暂停原因和恢复路径 —— ext:1152-1152, ext:937-938, ext:983, ext:650-651；test:1758-1779
-- 「恢复自动调整」恢复并清零计数；切换主模型不解除，新会话清零 —— ext:725-735, ext:865-875；test:1780-1795
-- 暂停时「查看分类模型与状态」显示「暂停（检测到两次缓存重建）」 —— ext:741；test:1781-1782
-- 图 8 的触发次数是示例，状态栏文字是源码原文；第一个方框副标题「读取比上一次少」、底部「不做判断：缓存过期、压缩、树导航、切换模型」即上面两条 —— ext:650-651, ext:1144-1146, ext:1152
+- 「这仍只是提醒信号：服务端提前清除缓存，或其他扩展改了提示词，也可能触发」：这些情况同样会让读取变少，扩展无法区分，所以提示文案只写「原因未确认」 —— ext:1130；test:1779
+- 每个会话最多提示一次，提示后自动调档继续，不暂停 —— ext:648, ext:1128-1131；test:1771-1788
+- 提示过以后，切换主模型不会再提示；开始新会话后可以再提示一次 —— ext:856-862（session_start / session_shutdown 清除 cacheNotified，model_select 不清除，没有专门测试）；test:1782-1787（session_start 后再提示）
+- 图 8 的读取量 100、80 是示例，提示文字是源码原文「缓存读取从 100 降至 80，原因未确认；自动调档继续。」；第一个方框「缓存读取下降」副标题「读取比上一次少」、「提示一次」「每个会话最多一次」、「不暂停」、底部「不做判断：缓存过期、压缩、树导航、切换模型」即上面几条 —— ext:1128-1130；ext:881-882, ext:1126-1127
 
 ## 判档测评
 
@@ -141,7 +139,7 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - HTTP 429 显示服务限流、携带 Guardrail 关键词的 404/403 显示 OpenRouter 策略或白名单限制、5xx 显示上游服务异常；未知原因明确提示未识别。不输出服务端原文或凭据。回退警告在 Jev 调用前出现；成功后显示实际模型和档位，未获合格档位时只列出实际错误或结果无效，低置信度不警告 —— ext:194-212；test:646-746, test:1447-1522。
 - 用户取消或生命周期切换不继续回退，不写迟到决策或显示完成通知；已经发出的切换提示保留。空白输入不调用、配置无效不尝试任何模型 —— test:347-367, test:504-531, test:822-842。
 - 固定样例可用性测试走同一回退流程，固定用通用规则并隔离主模型与历史；不把 Jev 成功说成首选模型成功，不改会话决策、状态或基线 —— ext:795-806；test:864-914, test:1447-1522。
-- 演示区用本地固定示例模拟 Jev 返回 low、实际执行 medium，不发送 API 请求、不保证线上结果；仅服务报错可回退，结果无效与低置信度不回退并沿用基线 —— tests/effort-demo.test.mjs。
+- 图 6 底部说明「当前档位：上一条消息的档位；没有上一条消息时，用基线」：当前强度取最近一次决策，没有决策时取基线，两者都取下限 medium，所以基线为 low 时实际是 medium，页面这句没有写出下限；使用版页面没有演示区，演示在技术版页面 —— ext:966, ext:119-121；test:1630-1649（minimal 基线首轮取 medium）；docs/extensions-usage/src/05-effort.html:335
 
 - 本轮重录 personal-menu、personal-switches、statusline-style，后者包含第五项标题开关及状态栏标题；其他认证/聊天录屏保留历史画面并在紧邻图注中标明标题位置已变化，不伪造模型调用 —— docs/extensions-usage/tapes/；两版页面可见历史录屏图注。
 - 删除原视频审查后（/personal 一级菜单和批量开关各少一项），在按 _settings.tape 创建的临时 agent 目录重录 personal-menu、personal-switches、statusline-style、clickable-paths-status、effort-status、effort-model，画面中一级菜单为五项功能加「批量功能开关」；前三个录制前移除了临时目录里的凭据文件，后三个保留凭据文件但不发送模型消息；随后重录 auto-name-model、auto-name-status（旧画面的一级菜单还有已合并的「右下角会话标题」），保留凭据文件但不发送模型消息，两个 tape 去掉一级菜单里多余的一次下移；未重录的只剩 chat-turn —— docs/extensions-usage/tapes/；docs/extensions-usage/media/；extensions/pi-personal-extensions.ts:16-47

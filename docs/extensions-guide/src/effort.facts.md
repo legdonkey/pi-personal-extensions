@@ -1,6 +1,6 @@
 # effort 章节事实清单
 
-当前版本：缓存读取下降仅提示读数，每会话至多一次，不中止分类。下列暂停和恢复操作为旧版配图、录屏记录。依据：`extensions/inline-effort.ts` 的 `cacheNotified` 与 `tests/inline-effort.test.mjs` 的「缓存读取下降每个会话只提示一次，后续继续调档」。
+当前版本：缓存读取下降仅提示读数，每会话至多一次，不中止分类。依据：`extensions/inline-effort.ts` 的 `cacheNotified` 与 `tests/inline-effort.test.mjs` 的「缓存读取下降每个会话只提示一次，后续继续调档」。
 
 Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，本扩展只替换该项档位并在 message_end 写回 providerThinkingLevel；正文第 4 节和图 4 按这条路径描述；「在用户项前插入」和「未调整」是 Pi 1.6.0 之前或关闭 compat.supportsMidConvoEffort 时的路径。Pi 1.6.0 下顶层 effort 固定为 medium、与基线无关：2026-11-21 实测基线 high 时请求体顶层为 medium。依据：ext:1063-1079、ext:1136-1142；test「Pi 已在末尾追加 configuration_update 时只替换该项档位，并把实际档位写回助手回复」「Pi 末尾 configuration_update 的档位与决策相同或尚无决策时不改写 payload，也不写回」；2026-11-21 用 Pi 1.6.0、gpt-6.2-astra 实测：三轮决策 medium、max、medium 各对应一条 configuration_update，历史原位重放，缓存命中 93% 到 98%。
 
@@ -28,7 +28,7 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 
 - 功能 ID `inline-effort`，菜单 label「原位思考强度」 —— entry:42-43
 - 入口 `/personal` → 原位思考强度 → 菜单项；处理函数以 `effort` 名存进 commands 表，不注册成斜杠命令 —— ext:719；entry:43, entry:63-69, entry:130-137, entry:139
-- 头部导语「用户提交时后台分类，发请求时最多再等 5 秒；两次缓存重建暂停；菜单里运行判档测评」分别见下文第 1 节、「缓存守护」和「判档测评」
+- 头部导语「用户提交时后台分类，发请求时最多再等 5 秒；菜单里还能运行判档测评」分别见下文第 1 节和「判档测评」
 - 配置文件在 agent 目录下的 `inline-effort.json`；agent 目录默认 `~/.pi/agent/`，`PI_CODING_AGENT_DIR` 可覆盖 —— ext:47-51, ext:72；config:453-458；README.md:164-177
 - 默认分类器 Jev，可选 d1-ultra、Mammoth 27B、Decider v1.2 —— ext:13-38, ext:59, ext:64
 
@@ -47,7 +47,7 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - 功能不替换主模型 —— README.md:90；ext:662-684, ext:1026-1109（只调整请求中的档位）
 - 空白输入不调用分类器，沿用当前强度 —— ext:149-153, ext:966-1015；README.md:123；test:976-982
 - 当前强度 = 当前分支最近一次决策；没有决策时用基线（Pi 的 thinking 设置） —— ext:966
-- 用户提交时在 `input` 事件里后台启动分类（模板展开前；steer、follow-up 同样经过 input）；缓存守护暂停或不适用时不启动 —— ext:937-946, ext:894-935；rt:1502, rt:1658, rt:1680-1691（steer / followUp 入队前已触发 input）；test:1564-1578
+- 用户提交时在 `input` 事件里后台启动分类（模板展开前；steer、follow-up 同样经过 input）；主模型不适用时不启动 —— ext:928-936, ext:899-926, ext:850-855；rt:1502, rt:1658, rt:1680-1691（steer / followUp 入队前已触发 input）；test:1564-1578
 - 扩展命令（如 `/personal`）在 input 事件之前处理，不会触发后台分类 —— rt:1489-1497
 - 发请求的 `context_with_system` 按最终上下文重算分类文本；与后台任务相同就复用，不同就中止旧任务并重新分类 —— ext:972-979；test:1580-1589
 - 会话关闭后跳过迟到的上下文事件。等待分类期间发生关闭时，丢弃分类结果 —— ext:850-879, ext:939-1021；test「会话关闭后，原位分类跳过迟到的上下文事件和分类结果」。
@@ -108,13 +108,13 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - Pi 1.6.0 之前：档位和当前强度相同时，当前用户项前不插入 —— ext:1100-1103；test:185-193
 - Pi 1.6.0 之前：回到基线时也插入一条 update 抵消前一条 —— ext:1098-1105；test:174-178
 - 仅 Codex：不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响 —— README.md:127（源码无对应检查）
-- 图 4 是独立 Codex 示例（medium、xhigh、medium）；被引测试的实际序列是 xhigh → low → medium（test:152, test:170, test:177），只用于证明注入机制
+- 图 4 是独立的 Codex 示例（Pi 1.6.0）：基线 medium，U1 分为 medium、U2 分为 xhigh、U3 分为 medium，请求 2 末尾的 update 被换成 xhigh，请求 3 在原位置重放 xhigh、末尾 medium 等于基线不改写 —— docs/extensions-guide/src/06-effort.html 图 4 的 desc 与 figcaption；ext:1063-1079；被引测试「Pi 已在末尾追加 configuration_update 时只替换该项档位，并把实际档位写回助手回复」的实际序列与图 4 不同：基线 high，分类依次为 xhigh、low（执行档位取下限 medium），末尾 update 依次为 xhigh、xhigh（工具续调沿用同一次决策）、medium，历史项按写回的档位重放 —— test:2138, test:2145, test:2156, test:2164；末尾档位与决策相同时不改写见 test:2169-2189
 
 ### Claude
 
 - Pi 原生序列化器用空 system 消息的 `output_config.effort` 记录逐消息档位；扩展只替换 Pi 已生成的末尾空 system 标记，不改顶层 output_config、thinking、历史消息或 thinking blocks —— anthropic:1209-1217；ext:1026-1052；test:1085-1137
 - 官方文档明确 `claude-opus-5`、`claude-opus-5-5`、`claude-sonnet-5-5` 支持逐消息 effort 并保持此前缓存前缀；所需 beta `mid-conversation-output-config-2026-07-01` 由 Pi 发送；其他 Opus、Sonnet 版本并非全部支持 —— README.md:114；anthropic:117, anthropic:851-853；https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta
-- `claude-fable-5-2` 依据 Pi 1.5.2 目录 `supportsMidConvoEffort: true` 纳入；用 Pi 1.5.2 序列化器在网络调用前截取两轮请求：末尾标记依次 `[high]`、`[high, low]`，顶层 effort 始终 low，thinking 始终 adaptive，前一轮消息前缀相同（忽略缓存断点），message_end 保存 high、low —— ext:125；tests/fixtures/fable-5-2.pi-1.5.2.json；pi152/pi-ai/dist/providers/data/anthropic.json；pi152/pi-ai/dist/api/anthropic-messages.js:1167；test:1662-1680；report「Fable 验证」
+- `claude-fable-5-2` 依据 Pi 1.5.2 目录 `supportsMidConvoEffort: true` 纳入；测试用 Pi 1.5.2 目录快照和真实序列化器在 onPayload 截止（不发真实请求），分类依次为 high、low（执行档位取下限 medium）：第一轮末尾标记为 high、thinking 为 adaptive、message_end 保存 high；第二轮末尾标记序列为 [high, medium]，前一轮消息前缀相同（忽略缓存断点）；顶层 effort 恒为 low 是 Pi 1.5.2 序列化器的行为，本测试没有断言 —— ext:127-131；tests/fixtures/fable-5-2.pi-1.5.2.json；pi152/pi-ai/dist/providers/data/anthropic.json；pi152/pi-ai/dist/api/anthropic-messages.js:1167-1178；test:1675-1689；report「Fable 验证」
 - Fable 5.2 两轮真实请求和第二轮缓存读取未验证：真实会话预检因 `no-anthropic-auth` 失败，没有向 Fable 提供方发送请求；Antigravity 分支不加 Fable —— report「Fable 验证」；ext:133-136；test:1690-1692
 - Pi v1.5.0 的 Anthropic 序列化实现和本仓库 1.0.1 依赖都有原生标记，无需升级依赖 —— README.md:114；anthropic:1209-1217；https://github.com/earendil-works/pi/blob/v1.5.0/packages/ai/src/api/anthropic-messages.ts
 - `message_end` 保存实际发送的 `providerThinkingLevel`，供 Pi 重建历史 effort 标记；主会话 thinking 基线不变 —— ext:1150-1156；anthropic:1152-1156, anthropic:1210-1216；test:1085-1118
@@ -138,7 +138,7 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - 恢复、fork、树导航后旧消息保持原档位、不重新分类 —— README.md:119；test:533-574, test:1085-1118
 - 分叉后仍继承共同祖先（图中 U1）的决策，读不到分叉后另一分支（U2）的决策；新消息重新分类 —— ext:503-510；sm:1057-1071；test:257-265
 - 压缩摘要承接被压缩部分的最后一次决策，强度不回落到基线 —— ext:1085-1105；test:238-244, test:245-254
-- 会话开始、退出和切换模型时只清掉本扩展的 🧠 段（setStatus 只作用于 STATUS_KEY），并取消进行中的分类和后台分类；缓存守护暂停时这个位置显示暂停提示，切换模型不解除暂停，session_start 清零 —— ext:93, ext:650-651, ext:865-889；test:298-305, test:1758-1795
+- 会话开始、退出和切换模型时只清掉本扩展的 🧠 段（setStatus 只作用于 STATUS_KEY），并取消进行中的分类和后台分类 —— ext:93, ext:654, ext:856-880；test:298-305
 - 图 5 的 xhigh、low 是示例值 —— 结构参照 test:238-265
 
 ## 6. 状态栏与演示（图 6）
@@ -148,20 +148,17 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - 分类器标签取最近一次决策；无决策或 classifier 为 null 时「未分类」 —— ext:109-114, ext:681, ext:1062, ext:1108
 - 未获得合格档位时仍记录首选分类器；回退成功时记录实际 Jev 和回退来源（如 `Jev（d1-ultra 回退）`、`Jev（Mammoth 27B 回退）`、`Jev（Decider v1.2 回退）`） —— ext:109-114, ext:917, ext:991, ext:1015；test:331, test:646-680
 - Pi 自带的 thinking 显示只反映基线 —— README.md:90
-- 暂停时状态栏文字固定为「🧠 自动调整暂停：检测到两次缓存重建 · /personal → 原位思考强度 → 恢复自动调整」，覆盖各分支的普通状态 —— ext:650-651；test:1773-1778
 - 会话刚恢复时没有 🧠 段，下一次请求后才显示 —— ext:876（session_start 清空）, ext:667-683, ext:1026-1109（发送前才设置）
-- demo 的「第一条消息时当前强度等于基线」 —— ext:976；demo 只展示 Codex 的 update 和「未调整」规则：档位不等于基线时显示「把末尾 update 的档位改为…」，等于时显示「不改写」；「未调整」勾选项标注为 Pi 1.6.0 之前 —— ext:1063-1079, ext:1083-1120
+- demo 第一条消息时当前强度取基线的下限：基线选 low 时当前强度是 medium，其余等于基线；采用的档位与基线比较，所以基线 low 且没有采用分类结果（空白、超时、不回退）时显示「把末尾 update 的档位改为 medium」「🧠 medium · 基线 low · …」，基线 medium 及以上沿用时显示「不改写」；demo 只展示 Codex 的 update 和「未调整」规则：档位不等于基线时显示「把末尾 update 的档位改为…」，等于时显示「不改写」；「未调整」勾选项标注为 Pi 1.6.0 之前 —— 06-effort.html:698-699, 06-effort.html:727-729（demo 脚本）；ext:966（真实当前强度同样取 effortFloor）；test:1630-1649（minimal 基线首轮取 medium）；ext:1063-1079, ext:1083-1120；tests/effort-demo.test.mjs 只测基线 medium，没有覆盖基线 low
 - demo「等待超过 5 秒（示例）」：沿用基线、不改写、标签「未分类」、提醒原文同上 —— ext:991-998；tests/effort-demo.test.mjs「讲解页演示…」末段 timeout 断言
 
 ## 7. 在 /personal 里管理（图 7 录屏 + 表）
 
-- 菜单项与处理函数参数：查看分类模型与状态（status）、选择分类模型（model）、测试分类模型可用性（test）、恢复自动调整（resume）、运行判档测评（bench） —— entry:63-69, entry:166-186；tests/personal.test.mjs:329
+- 菜单项与处理函数参数：查看分类模型与状态（status）、选择分类模型（model）、测试分类模型可用性（test）、运行判档测评（bench） —— entry:63-69, entry:166-186；ext:723（处理函数只接受这四个参数）；tests/personal.test.mjs:329
 - 本项目只注册 `/personal`；功能的 registerCommand 被 featureApi 截住，只存进 commands 表 —— entry:130-137, entry:139
 - `/personal` 有 UI 就能用（TUI、RPC）；没有 UI 时提示并返回；批量功能开关只在 TUI —— entry:142-145, entry:190-193
 - 查看状态：是否适用、后续分类器、失败回退策略、当前分支最近决策 —— ext:729-737
-- 「查看分类模型与状态」和「恢复自动调整」在 agent 运行时也可用；选择、测试和测评要求空闲 —— ext:725-750, ext:845-848；test:916-935, test:1923-1932
-- 暂停时状态第一项显示「暂停（检测到两次缓存重建）」 —— ext:741；test:1780-1782
-- 「恢复自动调整」：未暂停时提示「当前会话未暂停自动调整。」；暂停时解除并清零计数与缓存比较基准 —— ext:725-735；test:1783-1791
+- 「查看分类模型与状态」在 agent 运行时也可用；选择、测试和测评要求空闲 —— ext:729-741（status 在空闲检查前返回，其余在 ext:738-741 要求空闲）；test:916-935, test:1926-1929
 - 「运行判档测评」只在 TUI；确认框说明 OpenRouter 额度；Esc 取消 —— ext:742-782；test:1926-1941
 - 「选择分类模型」打开四个模型的选择器，Esc 取消不保存 —— ext:808-841
 - 选择写入全局配置，从下一条未分类消息生效，旧决策不变；其他会话和子代理的后续分类也读取 —— ext:840-841, ext:917, ext:961；README.md:118；test:533-546
@@ -211,10 +208,10 @@ Pi 1.6.0 起的 Codex 调档：Pi 在 input 末尾追加 configuration_update，
 - Pi 1.5.2 对 Anthropic 请求默认 short 保留：cache_control 为 `{ type: "ephemeral" }` 不带 ttl；`PI_CACHE_RETENTION=long` 且模型支持时才是 1h；目录 promptCache 为 `{ short: 300, long: 3600 }` —— pi152/pi-ai/dist/api/anthropic-messages.js:28-47；pi152/pi-ai/dist/providers/data/anthropic.json；tests/fixtures/fable-5-2.pi-1.5.2.json
 - 间隔按两次请求的开始时刻计算：startedAt 在发请求前记录；Pi 的 CacheWarmer 在 streamFn 发送前 start()，以 Date.now() 计 startedAt 和下次预热时刻 —— ext:680, ext:944, ext:1049, ext:1107, ext:1121-1132；pi152/pi-coding-agent/dist/core/sdk.js:261-270；pi152/pi-coding-agent/dist/core/cache-warmer.js:56-92, 132-146；test:1851-1861（上一轮回复 6 分钟后立即请求，不触发）
 - 用 short 计算偏保守：真实保留更长时只会多跳过 —— ext:98-101；pi152/pi-ai/dist/cache-warming.js:26-33（getPromptCacheTtlMs 按 retention 取 promptCache）
-- 警告文案以「检测到缓存重建」开头，写明两次读取量、可能原因（改档改变前缀、服务端提前清除缓存、其他扩展改系统提示词或工具）和已排除的情况；页面里的 80 / 100 是示例数值 —— ext:1128-1130（当前文案为「缓存读取从 X 降至 Y，原因未确认；自动调档继续。」，页面此处的旧文案尚未更新）；test:1779
-- 每个用户轮次最多计一次（新的待分类用户消息时重置） —— ext:973, ext:1146-1147；test:1797-1813
-- 累计两次暂停：中止后台分类，状态栏显示暂停；暂停期间 input 不启动分类、context_with_system 不调用分类器、沿用当前强度 —— ext:1152-1152, ext:938, ext:983；test:1758-1778
-- 暂停与计数只在扩展内存；model_select 保留暂停并清空比较基准，session_start 全部清零；「恢复自动调整」清零计数和基准 —— ext:642-649, ext:865-875, ext:729-732；test:1780-1795
+- 提示文案为「缓存读取从 X 降至 Y，原因未确认；自动调档继续。」，X 是上一次读取、Y 是本次读取，级别 info；页面里的 100 → 80 是示例数值；「服务端提前清除缓存、其他扩展改了系统提示词或工具也可能触发」是页面对原因未确认的补充，文案本身不列原因 —— ext:1128-1130；test:1779-1780（20096 降至 2688）
+- 每个会话最多提示一次：提示后 cacheNotified 置为 true，之后读取再下降也不提示 —— ext:648, ext:1128-1130；test:1771-1788（读取依次 20096、2688、21632、0，只提示一次）
+- 提示后不暂停：后续请求仍按决策改写档位，状态栏不显示暂停 —— ext:1128-1131；test:1781（提示后下一次请求仍改写为 [[0, "high"]]）, test:1805, test:1885
+- 提示标记只在扩展内存：session_start、session_shutdown 清除，model_select 不清除（没有专门测试）；model_select 仍清空缓存比较基准 —— ext:648, ext:856-866；test:1782-1787（session_start 后可再提示一次）, test:1867-1868（model_select 后读取变少不提示）
 - 图 9 是判断流程示意，不含实测数字
 
 ## 判档测评（图 10）

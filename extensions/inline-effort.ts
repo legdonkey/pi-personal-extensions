@@ -886,12 +886,13 @@ export default function (pi: ExtensionAPI) {
   ): Effort | undefined {
     const lastAssistant = priorMessages.findLast(({ role }) => role === "assistant");
     if (!lastAssistant) return undefined;
-    const raw = THINKING_LEVELS.has(lastAssistant.providerThinkingLevel) ? lastAssistant.providerThinkingLevel
-      : recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel();
+    // providerThinkingLevel 是已经过 thinkingLevelMap 的实际档位，不再映射一次。
+    const sent = THINKING_LEVELS.has(lastAssistant.providerThinkingLevel);
+    const raw = sent ? lastAssistant.providerThinkingLevel : recorded.at(-1)?.thinkingLevel ?? pi.getThinkingLevel();
     if (!THINKING_LEVELS.has(raw)) return undefined;
     const level = raw as ModelThinkingLevel;
     const normalized = supportsAntigravityEffort(ctx.model) ? clampThinkingLevel(ctx.model!, level)
-      : ctx.model ? apiEffort(ctx.model, level) ?? clampThinkingLevel(ctx.model, level) : level;
+      : ctx.model && !sent ? apiEffort(ctx.model, level) ?? clampThinkingLevel(ctx.model, level) : level;
     return CLASSIFIED_LEVELS.find((l) => l === (normalized === "minimal" ? "low" : normalized));
   }
 
@@ -1049,6 +1050,8 @@ export default function (pi: ExtensionAPI) {
       showStatus(ctx, `${effort === base ? `🧠 ${base}` : `🧠 ${effort} · 基线 ${base}`} · ${classifierLabel(decision.classifier, decision.fallbackFrom)}`);
       return { ...body, messages: [...body.messages!.slice(0, -1), { ...last, output_config: { ...last.output_config, effort } }] };
     }
+    // shortcut: Pi 的缓存预热在 Codex 上以 max_output_tokens 下限 16 回放且无请求 ID；跳过它，不消耗本轮快照，待 Pi 提供关联 ID 后改用 ID。
+    if ((event.payload as { max_output_tokens?: unknown } | undefined)?.max_output_tokens === 16) return undefined;
     const snapshot = anchors;
     anchors = undefined;
     if (!snapshot || !active(ctx)) return undefined;
@@ -1065,7 +1068,8 @@ export default function (pi: ExtensionAPI) {
     if (tail?.type === "configuration_update" && typeof tail.reasoning?.effort === "string") {
       const native = tail.reasoning.effort;
       const decision = recorded.at(-1);
-      const effort = decision && effortFloor(apiEffort(ctx.model!, decision.thinkingLevel));
+      // 决策读取时已按 medium 取下限；映射后的值原样使用，模型不支持该档位（映射为 null）时不改写。
+      const effort = decision && apiEffort(ctx.model!, decision.thinkingLevel);
       const adjusted = typeof effort === "string" && effort !== native && CLASSIFIED_LEVELS.some((level) => level === effort);
       cacheRequest = { model: ctx.model!, adjusted, startedAt: Date.now() };
       showStatus(ctx, `${adjusted ? `🧠 ${effort} · 基线 ${native}` : `🧠 ${native}`} · ${classifiedBy}`);

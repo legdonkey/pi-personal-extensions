@@ -124,7 +124,7 @@ Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模�
 - 复用 Pi 原生 classifier、OpenRouter 认证及代理；宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 `~typesafe/jev-latest` 模板补充公开元数据，不修改服务商目录。四个分类模型均消耗 OpenRouter 额度，价格以 OpenRouter 公开端点信息为准。
 - OpenRouter 白名单需放行实际服务商（如 `typesafe`、`liquid`、`baseten`、`perplexity`）及对应模型，否则会被 Guardrail 拦截（常见表现为 HTTP 404）。
 - 子代理需加载本扩展，角色 thinking 作为基线；外部 CLI 代理不经过本扩展。
-- 仅 GPT-6 Codex：`configuration_update` 不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响。Pi 1.6.0 之前，Codex 请求无法与上下文对齐时不注入，并显示「未调整」。
+- 仅 GPT-6 Codex：`configuration_update` 不能与服务端自动压缩、自动截断或 `/responses/compact` 混用；Pi 客户端压缩不受影响。Pi 1.6.0 之前或关闭 `compat.supportsMidConvoEffort` 时，Codex 请求无法与上下文对齐时不注入，并显示「未调整」。
 
 ## 路径链接与状态栏
 

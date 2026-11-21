@@ -2720,7 +2720,7 @@ const featureApi = Object.assign(Object.create(pi), {
     <div class="beat-text">
       <h3>什么时候分类</h3>
       <p>
-        <span class="seg" data-seg="effort-01" data-say="不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、x high、max 五档里选。">不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、xhigh、max 五档里选。</span>
+        <span class="seg" data-seg="effort-01" data-say="不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、x high、max 五档里选。主请求最低用 medium，分类为 low 也用 medium。">不同的消息需要的思考强度不同。这项功能给每条新用户消息自动选一个档位，结果叫决策。档位是思考强度的取值，分类器从 low、medium、high、xhigh、max 五档里选。主请求最低用 medium，分类为 low 也用 medium。</span>
         <span class="seg" data-seg="effort-02" data-say="GPT 六 Codex、Anthropic 协议分支的四个指定 Claude 模型，或 Antigravity 分支的两个指定 Claude 模型才适用，thinking 不能是 off。Anthropic 协议分支还要求接口是 anthropic messages，compat 点 supports mid convo effort 为 true。Antigravity 分支要求 provider 是 antigravity，接口是 antigravity api。不适用就不分类。">GPT-6 Codex、Anthropic 协议分支的四个指定 Claude 模型，或 Antigravity 分支的两个指定 Claude 模型才适用，thinking 不能是 <code>off</code>。Anthropic 协议分支还要求接口是 <code>anthropic-messages</code>，<code>compat.supportsMidConvoEffort</code> 为 <code>true</code>。Antigravity 分支要求 provider 是 <code>antigravity</code>，接口是 <code>antigravity-api</code>。不适用就不分类。</span>
         <span class="seg" data-seg="effort-01r" data-say="分类规则按主模型分两套。按模型规则覆盖七个模型：先是共用的原则，再接该模型的说明和五档条件。共用原则按工作阶段、隐藏边界情况的密度和自主执行的长度判断，已有上一轮回复时还传入上一轮实际生效档位识别进展信号；首句是「为当前主会话的下一轮选择推理强度」，不再写 Claude Code。">分类规则按主模型分两套。按模型规则覆盖七个模型：先是共用的原则，再接该模型的说明和五档条件。共用原则按工作阶段、隐藏边界情况的密度和自主执行的长度判断，已有上一轮回复时还传入上一轮实际生效档位识别进展信号；首句是「为当前主会话的下一轮选择推理强度」，不再写 Claude Code。</span>
         <span class="seg" data-seg="effort-01s" data-say="Opus 5.5、Sonnet 5.5 和 Fable 5.2 的规则移植自 Claude Code 的 auto effort mod 里的 policy text，依据是 Anthropic 官方的 effort 与 prompting 指南。GPT 六 Astra 和 GPT 六点一 Sol 的规则依据 OpenAI 官方的模型指南、Reasoning models、Model selection 和 Codex 文档整理，六点二 Astra 和 Sol 也有各自的五档规则，四者的 Codex 默认档都是 low。">Opus 5.5、Sonnet 5.5 和 Fable 5.2 的规则移植自 Claude Code 的 <code>auto-effort</code> mod 里的 <code>policy-text</code>，依据是 Anthropic 官方的 effort 与 prompting 指南。GPT-6 Astra 和 GPT-6.1 Sol 的规则依据 OpenAI 官方的模型指南、Reasoning models、Model selection 和 Codex 文档整理，6.2 Astra 和 Sol 也有各自的五档规则，四者的 Codex 默认档都是 low。</span>
@@ -2789,7 +2789,7 @@ const featureApi = Object.assign(Object.create(pi), {
         <li>不再分类：工具续调、重试、自定义消息、bash 命令输出。steer 和 follow-up 追加的用户消息算新消息。</li>
         <li>后台分类在 Pi 的 <code>input</code> 事件启动（模板展开之前，steer 和 follow-up 也经过这里）；发请求前的 <code>context_with_system</code> 用最终上下文重算分类文本，相同就复用，不同就中止旧任务重新分类，两种情况都最多再等 <code>5</code> 秒。缓存守护暂停时不启动后台分类。通知在独立包装上下文中缓冲，用 <code>Object.defineProperty</code> 定义自有 <code>ui</code>，不向宿主的只读 <code>ctx.ui</code> 赋值；其他上下文属性仍委托宿主。</li>
         <li>按模型规则只用于 <code>claude-opus-5-5</code>、<code>claude-sonnet-5-5</code>、<code>claude-fable-5-2</code>、<code>gpt-6-astra</code>、<code>gpt-6.1-sol</code>、<code>gpt-6.2-astra</code>、<code>gpt-6.2-sol</code>，Anthropic 协议和 Antigravity 的同名 Claude 模型共用；已有上一轮助手回复时另传上一轮实际生效的五档强度，首轮不传。<code>claude-opus-5</code> 和其他 GPT-6 Codex 模型（如 <code>gpt-6-sol</code>、<code>gpt-6.1-terra</code>、<code>gpt-6-luna</code>）用通用规则，不传当前强度。规则原文和官方依据链接保留在源码注释里。</li>
-        <li>四个 GPT 模型按精确 ID 匹配 <code>openai-codex</code> 模型目录。它们的 API 档位就是 <code>low</code> 到 <code>max</code> 五档，与分类结果一一对应，不需要映射。默认档字段统一叫 <code>defaultEffort</code>：Claude 三个模型取 Claude Code 的 <code>medium</code>，四个 GPT 模型取 Codex 内置目录的 <code>low</code>。</li>
+        <li>四个 GPT 模型按精确 ID 匹配 <code>openai-codex</code> 模型目录。它们的 API 档位就是 <code>low</code> 到 <code>max</code> 五档；扩展执行时把 low 提升到 medium。默认档字段统一叫 <code>defaultEffort</code>：Claude 三个模型取 Claude Code 的 <code>medium</code>，四个 GPT 模型取 Codex 内置目录的 <code>low</code>。</li>
         <li>GPT 规则只用于当前模型。6.2 结合家族共用指南与 Model selection 的型号刻度整理成分类时可见的条件：问答与明确小改用 <code>low</code>（Astra 另含清晰需求直出短文与小脚本），常规功能开发、局部修 bug 与资料成稿用 <code>medium</code>，跨模块排障、代码与安全评审及多约束权衡用 <code>high</code>，已呈现耦合因素、冲突线索或（Astra）开放式假设检验、（Sol）依赖中间验证反复调整方案的多步任务及 <code>high</code> 未解决时用 <code>xhigh</code>，极难单一问题且用户明示不计成本或 <code>xhigh</code> 不足才用 <code>max</code>；不因步骤多或单纯跑测试加档，也不含多代理 <code>Ultra</code>。旧版 GPT-6 Astra 档位刻度偏高，从 <code>low</code> 起步且绝大多数任务不需要 <code>max</code>；GPT-6.1 Sol 低档事实核实已够用，常规功能开发用 <code>medium</code>，迁移与端到端测试用 <code>high</code>，冲突证据权衡与联动精修用 <code>xhigh</code>。</li>
         <li>分类器：Jev（<code>typesafe/jev-1.14</code>，默认）、d1-ultra（<code>liquid/d1-ultra</code>）、Mammoth 27B（<code>baseten/mammoth-1</code>）或 Decider v1.2（<code>perplexity/pplx-decider-v1.2</code>），均只回答 <code>low</code>、<code>medium</code>、<code>high</code>、<code>xhigh</code>、<code>max</code>。宿主目录尚未收录对应固定模型 ID 时，扩展从 OpenRouter 原生 <code>~typesafe/jev-latest</code> 模板补充元数据，不覆盖服务商目录。</li>
         <li>只发对话文本，不发系统提示词、工具结果、思考块和图片数据（图片换成「[附有图片]」）。</li>
@@ -2939,7 +2939,7 @@ const featureApi = Object.assign(Object.create(pi), {
       </div>
       <ul class="fig-notes">
         <li>色条：绿色是与上一次请求相同的开头（缓存前缀），红色是从第一处不同开始的部分，灰色是新增部分。</li>
-        <li>本次扩展 wrapper 真实通道短时实测用固定分类夹具强制 <code>low → high → medium → low</code>，主模型是真实 Antigravity。<code>cacheRead</code> 分别为：<code>claude-opus-5-5</code> 的 <code>0 / 13981 / 13994 / 14014</code>，<code>claude-sonnet-5-5</code> 的 <code>0 / 13978 / 13991 / 14011</code>。请求基线始终为 <code>medium</code>，实际 runtime 后缀和 <code>message_end</code> 保存的字段都依次为 <code>low / high / medium / low</code>。Opus 在完整成功序列前有若干次 <code>SAFETY</code> 零输出尝试，未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证；TTL、最小 token 数和其他提示变更仍会影响命中。</li>
+        <li>设置最低档之前，扩展 wrapper 真实通道短时实测用固定分类夹具强制 <code>low → high → medium → low</code>，主模型是真实 Antigravity。<code>cacheRead</code> 分别为：<code>claude-opus-5-5</code> 的 <code>0 / 13981 / 13994 / 14014</code>，<code>claude-sonnet-5-5</code> 的 <code>0 / 13978 / 13991 / 14011</code>。请求基线始终为 <code>medium</code>，实际 runtime 后缀和 <code>message_end</code> 保存的字段都依次为 <code>low / high / medium / low</code>。Opus 在完整成功序列前有若干次 <code>SAFETY</code> 零输出尝试，未计入成功序列。固定分类夹具不等于真实 Jev 端到端测试。这些数字只代表本次短时实测，不是厂商保证；TTL、最小 token 数和其他提示变更仍会影响命中。</li>
         <li><a href="https://ai.google.dev/gemini-api/docs/latest-model">Gemini 4 Argon</a> 已存在，但官方资料只明确 implicit cache。本次未找到改变 <code>thinking_level</code> 仍保留缓存的明确官方承诺，因此不支持。这是缺少证据，不是证明切换档位一定丢失缓存。</li>
         <li>WebSocket 增量续传（传输方式 <code>auto</code> 或 <code>websocket-cached</code>）的前提：当前连接保留着上次的续传状态和响应 ID；除 <code>input</code>、<code>previous_response_id</code> 外其余字段一致；新 input 以「上次 input + 上次响应」开头。满足时只发新增部分。</li>
       </ul>
@@ -2947,14 +2947,14 @@ const featureApi = Object.assign(Object.create(pi), {
     </figure>
   </div>
 
-  <!-- 4. 插入 configuration_update -->
+  <!-- 4. 写入 configuration_update -->
   <div class="beat">
     <div class="beat-text">
       <h3>按接入分支写入档位</h3>
       <p>
-        <span class="seg" data-seg="effort-12" data-say="对 GPT 六 Codex，扩展让顶层保持基线，在当前用户消息前插入一个 configuration update 项，只写新档位。档位写在 input 里这条消息的位置上，这就是原位。">对 GPT-6 Codex，扩展让顶层保持基线，在当前用户消息前插入一个 <code>configuration_update</code> 项，只写新档位。档位写在 input 里这条消息的位置上，这就是「原位」。</span>
-        <span class="seg" data-seg="effort-13">决策按消息时间戳存在会话里。模型、基线和已有上下文不变时，下一次请求重放同样档位，开头逐项不变。</span>
-        <span class="seg" data-seg="effort-14">Codex 档位和当前强度相同时，扩展不插入。档位回到基线时，扩展也要插入一项，抵消之前那一项。</span>
+        <span class="seg" data-seg="effort-12" data-say="对 GPT 六 Codex，Pi 一点六点零起固定顶层 effort，并在每次请求的 input 末尾追加一个 configuration update 项，写当前档位。扩展不动顶层，只把这一项的档位换成本次决策。档位写在 input 里这条消息的位置上，这就是原位。">对 GPT-6 Codex，Pi 1.6.0 起固定顶层 effort，并在每次请求的 input 末尾追加一个 <code>configuration_update</code> 项，写当前档位。扩展不动顶层，只把这一项的档位换成本次决策。档位写在 input 里这条消息的位置上，这就是「原位」。</span>
+        <span class="seg" data-seg="effort-13" data-say="回复结束时，扩展把实际发送的档位写回这条助手回复的 provider thinking level。下一次请求里，Pi 按它在原位置重放这一项，开头逐项不变。">回复结束时，扩展把实际发送的档位写回这条助手回复的 <code>providerThinkingLevel</code>。下一次请求里，Pi 按它在原位置重放这一项，开头逐项不变。</span>
+        <span class="seg" data-seg="effort-14" data-say="决策和 Pi 写入的档位相同时，扩展不改请求。Pi 一点六点零之前，或模型关闭 compat 点 supports mid convo effort 时，请求里没有末尾这一项，扩展走旧路径：顶层保持基线，在当前用户消息前插入一项；档位回到基线时也插入一项，抵消之前那一项。">决策和 Pi 写入的档位相同时，扩展不改请求。Pi 1.6.0 之前，或模型关闭 <code>compat.supportsMidConvoEffort</code> 时，请求里没有末尾这一项，扩展走旧路径：顶层保持基线，在当前用户消息前插入一项；档位回到基线时也插入一项，抵消之前那一项。</span>
         <span class="seg" data-seg="effort-14a" data-say="Anthropic 协议分支使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 system 消息里的 output config 点 effort。顶层 output config、thinking 和历史消息不变。message end 保存实际发送的 provider thinking level，供 Pi 重放历史标记。主会话 thinking 基线不变。">Anthropic 协议分支使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 <code>system</code> 消息里的 <code>output_config.effort</code>。顶层 <code>output_config</code>、<code>thinking</code> 和历史消息不变。<code>message_end</code> 保存实际发送的 <code>providerThinkingLevel</code>，供 Pi 重放历史标记。主会话 thinking 基线不变。</span>
         <span class="seg" data-seg="effort-14b" data-say="同一 Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 max tokens 为 1 的缓存预热回放。当前没有请求 ID 可用于区分请求，因此 max tokens 为 1 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。">同一 Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 <code>max_tokens: 1</code> 缓存预热回放。当前没有请求 ID 可用于区分请求，因此 <code>max_tokens: 1</code> 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。</span>
         <span class="seg" data-seg="effort-14c" data-say="Antigravity 是独立分支，不使用 Anthropic 消息级 output config。插件不触发 on payload，所以扩展在 context with system 分类后临时包装原生 stream simple。扩展只改匹配当前 session、末条消息时间戳和模型的主请求 options 点 reasoning，交给插件按 low、medium、high 后缀的 runtime ID 路由。max 和 x high 夹到 high，会话 thinking 和历史上下文不变。">Antigravity 是独立分支，不使用 Anthropic 消息级 <code>output_config</code>。插件不触发 <code>onPayload</code>，所以扩展在 <code>context_with_system</code> 分类后临时包装原生 <code>streamSimple</code>。扩展只改匹配当前 session、末条消息 <code>timestamp</code> 和模型的主请求 <code>options.reasoning</code>，交给插件按 <code>-low</code>、<code>-medium</code>、<code>-high</code> runtime ID 路由。<code>max</code> 和 <code>xhigh</code> 夹到 <code>high</code>，会话 thinking 和历史上下文不变。</span>
@@ -2965,53 +2965,59 @@ const featureApi = Object.assign(Object.create(pi), {
     <figure class="beat-fig" id="fig-effort-4">
       <div class="fig-scroll">
         <svg viewBox="0 0 656 236" role="img" aria-labelledby="fig-effort-4-title fig-effort-4-desc">
-          <title id="fig-effort-4-title">Codex 插入 configuration_update：请求开头的对比</title>
-          <desc id="fig-effort-4-desc">Codex 示例：顶层一直是 medium。请求 2 在 U2 前插入 xhigh 的 update，开头等于请求 1；请求 3 在 U3 前插入 medium 的 update，开头等于整个请求 2。</desc>
+          <title id="fig-effort-4-title">Codex 替换末尾的 configuration_update：请求开头的对比</title>
+          <desc id="fig-effort-4-desc">Codex 示例（Pi 1.6.0）：顶层由 Pi 固定为 medium，每次请求的 input 末尾有一个 update。请求 1 是 U1 和 medium 的 update。请求 2 末尾的 update 被扩展换成 xhigh，开头等于请求 1。请求 3 在原位置重放 xhigh 的 update，开头等于整个请求 2；末尾的 update 是 medium，等于基线，扩展不改写。</desc>
 
-          <text class="t-cap" x="134" y="18" text-anchor="middle">顶层 effort</text>
+          <text class="t-cap" x="134" y="18" text-anchor="middle">顶层 effort（Pi 固定）</text>
           <text class="t-cap" x="200" y="18">input 列表（按顺序）</text>
 
           <text class="t-sub" x="16" y="53">请求 1</text>
-          <rect class="n" x="80" y="32" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="53" text-anchor="middle">medium</text>
-          <rect class="n" x="200" y="32" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="53" text-anchor="middle">U1</text>
+            <rect class="n" x="80" y="32" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="53" text-anchor="middle">medium</text>
+            <rect class="n" x="200" y="32" width="50" height="32" rx="4"/><text class="t-mono" x="225" y="53" text-anchor="middle">U1</text>
+            <rect class="n" x="256" y="32" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="281" y="45" text-anchor="middle">update</text><text class="t-mono" x="281" y="59" text-anchor="middle">medium</text>
 
           <g data-cue="effort-12">
             <text class="t-sub" x="16" y="101">请求 2</text>
             <rect class="n" x="80" y="80" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="101" text-anchor="middle">medium</text>
-            <rect class="n" x="200" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="101" text-anchor="middle">U1</text>
-            <rect class="n" x="264" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="292" y="101" text-anchor="middle">A1</text>
-            <rect class="n is-focal" x="328" y="80" width="56" height="32" rx="4"/>
-            <text class="t-sub" x="356" y="93" text-anchor="middle">update</text><text class="t-mono" x="356" y="107" text-anchor="middle">xhigh</text>
-            <rect class="n" x="392" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="420" y="101" text-anchor="middle">U2</text>
-            <rect x="80" y="120" width="176" height="6" rx="2" style="fill:var(--ok)">
-              <animate attributeName="width" from="0" to="176" dur="0.8s" begin="indefinite" fill="freeze"/>
+            <rect class="n" x="200" y="80" width="50" height="32" rx="4"/><text class="t-mono" x="225" y="101" text-anchor="middle">U1</text>
+            <rect class="n" x="256" y="80" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="281" y="93" text-anchor="middle">update</text><text class="t-mono" x="281" y="107" text-anchor="middle">medium</text>
+            <rect class="n" x="312" y="80" width="50" height="32" rx="4"/><text class="t-mono" x="337" y="101" text-anchor="middle">A1</text>
+            <rect class="n" x="368" y="80" width="50" height="32" rx="4"/><text class="t-mono" x="393" y="101" text-anchor="middle">U2</text>
+            <rect class="n is-focal" x="424" y="80" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="449" y="93" text-anchor="middle">update</text><text class="t-mono" x="449" y="107" text-anchor="middle">xhigh</text>
+            <rect x="80" y="120" width="226" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="226" dur="0.8s" begin="indefinite" fill="freeze"/>
             </rect>
-            <rect x="264" y="120" width="184" height="6" rx="2" style="fill:var(--soft)"/>
+            <rect x="312" y="120" width="162" height="6" rx="2" style="fill:var(--soft)"/>
             <text class="t-cap" x="80" y="146">与请求 1 相同</text>
-            <text class="t-cap" x="264" y="146">新增</text>
+            <text class="t-cap" x="312" y="146">新增：末尾项换成 xhigh</text>
           </g>
 
           <g data-cue="effort-13">
             <text class="t-sub" x="16" y="181">请求 3</text>
             <rect class="n" x="80" y="160" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="181" text-anchor="middle">medium</text>
-            <rect class="n" x="200" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="181" text-anchor="middle">U1</text>
-            <rect class="n" x="264" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="292" y="181" text-anchor="middle">A1</text>
-            <rect class="n" x="328" y="160" width="56" height="32" rx="4"/>
-            <text class="t-sub" x="356" y="173" text-anchor="middle">update</text><text class="t-mono" x="356" y="187" text-anchor="middle">xhigh</text>
-            <rect class="n" x="392" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="420" y="181" text-anchor="middle">U2</text>
-            <rect class="n" x="456" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="484" y="181" text-anchor="middle">A2</text>
-            <rect x="80" y="200" width="368" height="6" rx="2" style="fill:var(--ok)">
-              <animate attributeName="width" from="0" to="368" dur="1.2s" begin="indefinite" fill="freeze"/>
+            <rect class="n" x="200" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="225" y="181" text-anchor="middle">U1</text>
+            <rect class="n" x="256" y="160" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="281" y="173" text-anchor="middle">update</text><text class="t-mono" x="281" y="187" text-anchor="middle">medium</text>
+            <rect class="n" x="312" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="337" y="181" text-anchor="middle">A1</text>
+            <rect class="n" x="368" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="393" y="181" text-anchor="middle">U2</text>
+            <rect class="n" x="424" y="160" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="449" y="173" text-anchor="middle">update</text><text class="t-mono" x="449" y="187" text-anchor="middle">xhigh</text>
+            <rect x="80" y="200" width="394" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="394" dur="1.2s" begin="indefinite" fill="freeze"/>
             </rect>
-            <text class="t-cap" x="80" y="226">与整个请求 2 相同，含 xhigh 的 update</text>
+            <text class="t-cap" x="80" y="226">与整个请求 2 相同，xhigh 的 update 在原位置</text>
           </g>
 
           <g data-cue="effort-14">
-            <rect class="n is-focal" x="520" y="160" width="56" height="32" rx="4"/>
-            <text class="t-sub" x="548" y="173" text-anchor="middle">update</text><text class="t-mono" x="548" y="187" text-anchor="middle">medium</text>
-            <rect class="n" x="584" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="612" y="181" text-anchor="middle">U3</text>
-            <rect x="456" y="200" width="184" height="6" rx="2" style="fill:var(--soft)"/>
-            <text class="t-cap" x="640" y="226" text-anchor="end">新增：回到基线</text>
+            <rect class="n" x="480" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="505" y="181" text-anchor="middle">A2</text>
+            <rect class="n" x="536" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="561" y="181" text-anchor="middle">U3</text>
+            <rect class="n" x="592" y="160" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="617" y="173" text-anchor="middle">update</text><text class="t-mono" x="617" y="187" text-anchor="middle">medium</text>
+            <rect x="480" y="200" width="162" height="6" rx="2" style="fill:var(--soft)"/>
+            <text class="t-cap" x="642" y="226" text-anchor="end">新增：等于基线，不改写</text>
           </g>
         </svg>
       </div>
@@ -3022,13 +3028,13 @@ const featureApi = Object.assign(Object.create(pi), {
       <ul class="fig-notes">
         <li>上图和 JSON 只描述 Codex。Anthropic 协议分支使用 Pi 原生空 <code>system</code> 消息标记，不插入 <code>configuration_update</code>。Antigravity 分支只修改匹配请求的 <code>options.reasoning</code>，不使用这两种机制。</li>
         <li>Antigravity wrapper 保留原 <code>oauth</code>、<code>headers</code>、<code>images</code> 和 <code>refreshModels</code>。注册和恢复时携带 <code>provider.getAllModels</code> 当前动态目录，包括 chat、image 和 classifier 模型，并按 <code>type + id</code> 补回 registered model 的 <code>headers</code>。</li>
-        <li>Codex 插入发生在 <code>before_provider_request</code>，只改写 <code>input</code>。整轮没有任何 update 时，请求原样发出。</li>
-        <li>Codex 每条 update 后面紧跟一个用户项，不会相邻。档位先经过模型的 <code>thinkingLevelMap</code> 映射。</li>
+        <li>Codex 的改写发生在 <code>before_provider_request</code>，只替换 <code>input</code> 末尾 update 的档位。决策等于该档位或还没有决策时，请求原样发出。</li>
+        <li>Pi 1.6.0 之前，或模型关闭 <code>compat.supportsMidConvoEffort</code> 时，扩展自己在用户项前插入 update，每条 update 后面紧跟一个用户项，不会相邻。两条路径的档位都先经过模型的 <code>thinkingLevelMap</code> 映射。</li>
         <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 和 <code>claude-sonnet-5-5</code> 支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta <code>mid-conversation-output-config-2026-07-01</code>，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持。</li>
-        <li><code>claude-fable-5-2</code> 依据 Pi 1.5.2 目录的 <code>supportsMidConvoEffort: true</code> 和本地序列化结果纳入：两轮请求的末尾标记依次为 <code>[high]</code>、<code>[high, low]</code>，顶层 effort 和 <code>thinking: adaptive</code> 不变，前一轮消息前缀不变。这次没有向 Fable 发出真实请求。</li>
+        <li><code>claude-fable-5-2</code> 依据 Pi 1.5.2 目录的 <code>supportsMidConvoEffort: true</code> 和本地序列化结果纳入：两轮请求的末尾标记依次为 <code>[high]</code>、<code>[high, medium]</code>，顶层 effort 和 <code>thinking: adaptive</code> 不变，前一轮消息前缀不变。这次没有向 Fable 发出真实请求。</li>
         <li>仅 GPT-6 Codex：<code>configuration_update</code> 不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 混用。Pi 在客户端做的压缩不受影响。</li>
       </ul>
-      <figcaption>Codex 示例：基线 medium，U2 分为 xhigh，U3 分为 medium。色条含义同上图。</figcaption>
+      <figcaption>Codex 示例（Pi 1.6.0）：基线 medium，U1 分为 medium，U2 分为 xhigh，U3 分为 medium。顶层 effort 由 Pi 固定，不随基线变化。色条含义同上图。</figcaption>
     </figure>
   </div>
 
@@ -3039,14 +3045,14 @@ const featureApi = Object.assign(Object.create(pi), {
       <p>
         <span class="seg" data-seg="effort-15">决策是会话里的自定义条目，不发给模型。扩展只读当前分支路径上的决策，所以恢复会话、fork 或树导航后，旧消息保持原档位，不重新分类。</span>
         <span class="seg" data-seg="effort-16" data-say="从 A1 另开分支 b 时，扩展仍继承共同祖先 U1 的决策，但读不到分叉后 U2 的决策。U3 是新消息，重新分类。">从 A1 另开分支 b 时，扩展仍继承共同祖先 U1 的决策，但读不到分叉后 U2 的决策。U3 是新消息，重新分类。</span>
-        <span class="seg" data-seg="effort-17">压缩后，压缩摘要承接被压缩部分的最后一次决策，强度不回落到基线。</span>
+        <span class="seg" data-seg="effort-17">压缩后，强度不回落到基线：末尾项仍按最近一次决策替换；旧路径下，由压缩摘要承接被压缩部分的最后一次决策。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-5">
       <div class="fig-scroll">
         <svg viewBox="0 0 640 272" role="img" aria-labelledby="fig-effort-5-title fig-effort-5-desc">
           <title id="fig-effort-5-title">决策跟随会话分支</title>
-          <desc id="fig-effort-5-desc">示例会话树：U1、A1 是共同祖先。分支 a 上 U1、U2 保持原决策，压缩后摘要承接 low；从 A1 分出的分支 b 继承 U1 的决策，新消息 U3 重新分类。</desc>
+          <desc id="fig-effort-5-desc">示例会话树：U1、A1 是共同祖先。分支 a 上 U1、U2 保持原决策，压缩后摘要承接 medium；从 A1 分出的分支 b 继承 U1 的决策，新消息 U3 重新分类。</desc>
           <defs>
             <marker id="fig-effort-5-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" style="fill:var(--soft)"/></marker>
           </defs>
@@ -3063,7 +3069,7 @@ const featureApi = Object.assign(Object.create(pi), {
             <text class="t-cap" x="216" y="149" text-anchor="middle">助手回复</text>
             <rect class="n" x="312" y="40" width="136" height="48" rx="6"/>
             <text class="t" x="380" y="60" text-anchor="middle">U2</text>
-            <text class="t-sub" x="380" y="77" text-anchor="middle">决策 low</text>
+            <text class="t-sub" x="380" y="77" text-anchor="middle">决策 medium</text>
           </g>
 
           <g data-cue="effort-16">
@@ -3083,7 +3089,7 @@ const featureApi = Object.assign(Object.create(pi), {
             <text class="t-cap" x="471" y="52" text-anchor="middle">压缩</text>
             <rect class="n" x="496" y="40" width="128" height="48" rx="6"/>
             <text class="t" x="560" y="60" text-anchor="middle">压缩摘要</text>
-            <text class="t-sub" x="560" y="77" text-anchor="middle">承接 low</text>
+            <text class="t-sub" x="560" y="77" text-anchor="middle">承接 medium</text>
             <text class="t-cap" x="560" y="108" text-anchor="middle">U1、U2 被压缩掉</text>
           </g>
         </svg>
@@ -3103,13 +3109,13 @@ const featureApi = Object.assign(Object.create(pi), {
       <p>
         <span class="seg" data-seg="effort-18" data-say="状态栏的思考强度段显示当前强度、基线和最近一次决策的分类器，例如：x high，基线 medium，Jev。当前强度等于基线时，只显示一个档位。">状态栏的 🧠 段显示当前强度、基线和最近一次决策的分类器，例如 <code>🧠 xhigh · 基线 medium · Jev</code>。当前强度等于基线时，只显示一个档位。</span>
         <span class="seg" data-seg="effort-18a" data-say="非 Jev 模型回退成功时，分类器标注回退来源，例如「Jev（D1 Ultra 回退）」或「Jev（Mammoth 二十七 B 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。">非 Jev 模型回退成功时，分类器标注回退来源，例如「Jev（d1-ultra 回退）」或「Jev（Mammoth 27B 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。</span>
-        <span class="seg" data-seg="effort-19">对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
+        <span class="seg" data-seg="effort-19" data-say="旧路径下，对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。">旧路径下，对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
         <span class="seg" data-seg="effort-19a" data-say="缓存守护暂停后，大脑图标段改为「自动调整暂停：检测到两次缓存重建，斜杠 personal，原位思考强度，恢复自动调整」，直到恢复或开始新会话。">缓存守护暂停后，🧠 段改为「🧠 自动调整暂停：检测到两次缓存重建 · /personal → 原位思考强度 → 恢复自动调整」，直到恢复或开始新会话。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="demo" id="effort-demo">
-        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；非 Jev 模型服务报错时先回退一次 Jev，结果无效或概率低于 0.5 时不回退、直接沿用当前强度；等待超过 5 秒时沿用当前强度，不记分类器。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
+        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；非 Jev 模型服务报错时先回退一次 Jev，结果无效或概率低于 0.5 时不回退、直接沿用当前强度；等待超过 5 秒时沿用当前强度，不记分类器。采用的档位不等于当前强度时，扩展把请求末尾 <code>configuration_update</code> 的档位改为它，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；旧路径下项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
         <form class="effort-demo-form" hidden>
           <div class="effort-demo-grid">
             <label>基线 thinking
@@ -3136,7 +3142,7 @@ const featureApi = Object.assign(Object.create(pi), {
             </label>
           </div>
           <label class="effort-demo-check"><input type="checkbox" name="fallbackOk" checked> Jev 回退成功（示例：low，概率 1）</label>
-          <label class="effort-demo-check" data-cue="effort-19"><input type="checkbox" name="misaligned"> 用户项数和上下文不一致</label>
+          <label class="effort-demo-check" data-cue="effort-19"><input type="checkbox" name="misaligned"> 用户项数和上下文不一致（旧路径）</label>
           <div class="effort-demo-out" aria-live="polite">
             <p><span>当前强度</span><span data-out="level"></span></p>
             <p><span>请求里的 update</span><span data-out="update"></span></p>
@@ -3237,7 +3243,7 @@ const featureApi = Object.assign(Object.create(pi), {
       </div>
       <ul class="fig-notes">
         <li>只看主会话助手回复：provider、接口和模型要和本次请求一致，<code>stopReason</code> 不是 <code>error</code> 或 <code>aborted</code>，<code>cacheRead</code> 是有限的非负数。分类器、命名等辅助请求不计入。</li>
-        <li>「调整过档位」：Codex 插入了 <code>configuration_update</code>；Anthropic 协议分支按决策改写了末尾标记；Antigravity 分支有可用决策。</li>
+        <li>「调整过档位」：Codex 改写或插入了 <code>configuration_update</code>；Anthropic 协议分支按决策改写了末尾标记；Antigravity 分支有可用决策。</li>
         <li>警告示例（数值是示例）：<code>检测到缓存重建：本次缓存读取 80，少于上一次的 100。可能是调整思考强度改变了请求前缀，也可能是服务端提前清除了缓存，或其他扩展改了系统提示词或工具；缓存过期、压缩、树导航和切换模型已排除。</code>暂停后状态栏提示恢复的菜单路径，「查看分类模型与状态」也显示「暂停（检测到两次缓存重建）」。</li>
         <li>间隔按两次主请求的开始时刻计算：缓存在请求开始时读写并重新计时，Pi 的缓存预热也从请求开始计时。上一轮回复很长、刚结束就发下一次请求时，开始时刻可能已相隔超过保留时间，同样跳过。</li>
         <li>Pi 1.5.2 对 Anthropic 请求默认用 short 保留，<code>cache_control</code> 不带 <code>ttl</code>。设置 <code>PI_CACHE_RETENTION=long</code> 后实际保留 1 小时，扩展仍按 short 计算，只会多跳过判断。跳过时，本次读取作为下一次比较的基准。</li>
@@ -3398,7 +3404,8 @@ const featureApi = Object.assign(Object.create(pi), {
           const p = Number(form.p.value);
           form.pOut.value = p.toFixed(2);
           form.p.disabled = !LEVELS.includes(result);
-          let level = base;
+          const floor = (value) => value === "low" ? "medium" : value;
+          let level = floor(base);
           let label = name;
           let warn = "无";
           const lowConfidence = LEVELS.includes(result) && Number.isFinite(p) && p >= 0 && p < 0.5;
@@ -3408,18 +3415,18 @@ const featureApi = Object.assign(Object.create(pi), {
           if (result === "empty") label = "未分类";
           else if (result === "timeout") {
             label = "未分类";
-            warn = `分类等待超过 5 秒，本次沿用 ${base}；分类已中止，迟到结果不再采用。（每个会话只提醒第一次）`;
+            warn = `分类等待超过 5 秒，本次沿用 ${level}；分类已中止，迟到结果不再采用。（每个会话只提醒第一次）`;
           }
-          else if (!failed) level = result;
+          else if (!failed) level = floor(result);
           else if (serviceError && name !== "Jev") {
             warn = `openrouter/${IDS[name]} 分类失败（HTTP 429：服务限流），正在切换到 openrouter/typesafe/jev-1.14。仅本次回退，全局选择不变。`;
             if (form.fallbackOk.checked) {
-              level = "low"; label = `Jev（${name} 回退）`;
-              warn += " 已回退到 Jev，本次分类：low（示例，普通提示）。";
-            } else warn += ` Jev 也失败（示例：HTTP 503：上游服务异常），思考强度沿用 ${base}。`;
+              level = "medium"; label = `Jev（${name} 回退）`;
+              warn += " 已回退到 Jev，本次思考强度：medium（示例）。";
+            } else warn += ` Jev 也失败（示例：HTTP 503：上游服务异常），思考强度沿用 ${level}。`;
           } else if (!lowConfidence) {
             const reason = serviceError ? "HTTP 429：服务限流" : "结果无效";
-            warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${base}。`;
+            warn = `openrouter/${IDS[name]}：${reason}。思考强度沿用 ${level}。`;
           }
           if (form.misaligned.checked) {
             out("level").textContent = `${level}（本次请求未生效）`;
@@ -3427,7 +3434,7 @@ const featureApi = Object.assign(Object.create(pi), {
             out("status").textContent = `🧠 ${base} · 未调整 · ${label}`;
           } else {
             out("level").textContent = level === base ? `${level}（等于基线）` : level;
-            out("update").textContent = level === base ? "不插入" : `在本条用户消息前插入 effort = ${level}`;
+            out("update").textContent = level === base ? "不改写" : `把末尾 update 的档位改为 ${level}`;
             out("status").textContent = level === base ? `🧠 ${base} · ${label}` : `🧠 ${level} · 基线 ${base} · ${label}`;
           }
           out("warn").textContent = warn;
@@ -3670,7 +3677,7 @@ npm view &lt;包名&gt; version \
   </div>
 </div>
 
-<script>window.NARRATION = {"src":"audio/narration.mp3?v=fbc82368","duration":1868.84,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":2.8},{"id":"overview-01","ch":"overview","start":3.12,"end":11.84},{"id":"overview-02","ch":"overview","start":12.16,"end":23.6},{"id":"overview-03","ch":"overview","start":23.92,"end":30.32},{"id":"overview-04","ch":"overview","start":30.64,"end":40.8},{"id":"overview-05","ch":"overview","start":41.12,"end":50.88},{"id":"overview-06","ch":"overview","start":51.2,"end":67.92},{"id":"overview-07","ch":"overview","start":68.24,"end":72.24},{"id":"entry-00","ch":"entry","start":73.14,"end":76.9},{"id":"entry-01","ch":"entry","start":77.22,"end":89.14},{"id":"entry-02","ch":"entry","start":89.46,"end":97.62},{"id":"entry-03","ch":"entry","start":97.94,"end":102.42},{"id":"entry-04","ch":"entry","start":102.74,"end":106.9},{"id":"entry-05","ch":"entry","start":107.22,"end":112.58},{"id":"entry-06","ch":"entry","start":112.9,"end":118.74},{"id":"entry-07","ch":"entry","start":119.06,"end":125.7},{"id":"entry-08","ch":"entry","start":126.02,"end":133.14},{"id":"entry-09","ch":"entry","start":133.46,"end":141.46},{"id":"entry-10","ch":"entry","start":141.78,"end":159.14},{"id":"entry-11","ch":"entry","start":159.46,"end":165.3},{"id":"entry-12","ch":"entry","start":165.62,"end":169.7},{"id":"entry-13","ch":"entry","start":170.02,"end":176.26},{"id":"entry-14","ch":"entry","start":176.58,"end":182.42},{"id":"entry-15","ch":"entry","start":182.74,"end":190.1},{"id":"entry-16","ch":"entry","start":190.42,"end":199.14},{"id":"entry-17","ch":"entry","start":199.46,"end":210.26},{"id":"message-00","ch":"message","start":211.16,"end":214.6},{"id":"message-01","ch":"message","start":214.92,"end":225.72},{"id":"message-02","ch":"message","start":226.04,"end":234.76},{"id":"message-03","ch":"message","start":235.08,"end":243.16},{"id":"message-04","ch":"message","start":243.48,"end":254.28},{"id":"message-05","ch":"message","start":254.6,"end":261.72},{"id":"message-06","ch":"message","start":262.04,"end":269.24},{"id":"message-07","ch":"message","start":269.56,"end":278.04},{"id":"message-08","ch":"message","start":278.36,"end":291.88},{"id":"message-09","ch":"message","start":292.2,"end":301.88},{"id":"message-10","ch":"message","start":302.2,"end":309.24},{"id":"message-11","ch":"message","start":309.56,"end":317.08},{"id":"message-12","ch":"message","start":317.4,"end":331.4},{"id":"message-13","ch":"message","start":331.72,"end":338.84},{"id":"message-14","ch":"message","start":339.16,"end":348.36},{"id":"message-15","ch":"message","start":348.68,"end":353.88},{"id":"message-16","ch":"message","start":354.2,"end":361.4},{"id":"message-17","ch":"message","start":361.72,"end":367.48},{"id":"message-18","ch":"message","start":367.8,"end":371.8},{"id":"message-19","ch":"message","start":372.12,"end":379.24},{"id":"message-20","ch":"message","start":379.56,"end":385.32},{"id":"statusbar-00","ch":"statusbar","start":386.22,"end":388.62},{"id":"statusbar-01","ch":"statusbar","start":388.94,"end":406.38},{"id":"statusbar-02","ch":"statusbar","start":406.7,"end":417.42},{"id":"statusbar-03","ch":"statusbar","start":417.74,"end":426.22},{"id":"statusbar-19","ch":"statusbar","start":426.54,"end":445.18},{"id":"statusbar-20","ch":"statusbar","start":445.5,"end":469.66},{"id":"statusbar-21","ch":"statusbar","start":469.98,"end":501.1},{"id":"statusbar-16","ch":"statusbar","start":501.42,"end":522.14},{"id":"statusbar-17","ch":"statusbar","start":522.46,"end":552.78},{"id":"statusbar-18","ch":"statusbar","start":553.1,"end":580.78},{"id":"statusbar-04","ch":"statusbar","start":581.1,"end":593.34},{"id":"statusbar-05","ch":"statusbar","start":593.66,"end":607.9},{"id":"statusbar-06","ch":"statusbar","start":608.22,"end":641.58},{"id":"statusbar-07","ch":"statusbar","start":641.9,"end":654.62},{"id":"statusbar-08","ch":"statusbar","start":654.94,"end":667.66},{"id":"statusbar-09","ch":"statusbar","start":667.98,"end":679.98},{"id":"statusbar-10","ch":"statusbar","start":680.3,"end":687.82},{"id":"statusbar-11","ch":"statusbar","start":688.14,"end":693.98},{"id":"statusbar-12","ch":"statusbar","start":694.3,"end":700.46},{"id":"statusbar-13","ch":"statusbar","start":700.78,"end":705.42},{"id":"statusbar-14","ch":"statusbar","start":705.74,"end":713.58},{"id":"statusbar-15","ch":"statusbar","start":713.9,"end":721.26},{"id":"title-00","ch":"title","start":722.16,"end":725.04},{"id":"title-01","ch":"title","start":725.36,"end":733.76},{"id":"title-02","ch":"title","start":734.08,"end":746.48},{"id":"title-03","ch":"title","start":746.8,"end":757.12},{"id":"title-migration","ch":"title","start":757.44,"end":778},{"id":"title-04","ch":"title","start":778.32,"end":786.16},{"id":"title-05","ch":"title","start":786.48,"end":793.84},{"id":"title-06","ch":"title","start":794.16,"end":800.64},{"id":"title-07","ch":"title","start":800.96,"end":809.92},{"id":"title-08","ch":"title","start":810.24,"end":821.76},{"id":"title-09","ch":"title","start":822.08,"end":832.48},{"id":"title-10","ch":"title","start":832.8,"end":837.76},{"id":"title-11","ch":"title","start":838.08,"end":844.96},{"id":"title-12","ch":"title","start":845.28,"end":852.56},{"id":"title-13","ch":"title","start":852.88,"end":860.8},{"id":"title-14","ch":"title","start":861.12,"end":871.2},{"id":"title-15","ch":"title","start":871.52,"end":880.16},{"id":"title-16","ch":"title","start":880.48,"end":892.32},{"id":"title-17","ch":"title","start":892.64,"end":897.12},{"id":"title-18","ch":"title","start":897.44,"end":902.08},{"id":"title-19","ch":"title","start":902.4,"end":908.88},{"id":"title-20","ch":"title","start":909.2,"end":918.64},{"id":"title-21","ch":"title","start":918.96,"end":924.16},{"id":"title-22","ch":"title","start":924.48,"end":935.04},{"id":"title-23","ch":"title","start":935.36,"end":945.04},{"id":"title-24","ch":"title","start":945.36,"end":952.8},{"id":"title-25","ch":"title","start":953.12,"end":963.52},{"id":"title-26","ch":"title","start":963.84,"end":975.12},{"id":"title-27","ch":"title","start":975.44,"end":983.92},{"id":"effort-00","ch":"effort","start":984.82,"end":987.86},{"id":"effort-01","ch":"effort","start":988.18,"end":1003.14},{"id":"effort-02","ch":"effort","start":1003.46,"end":1029.22},{"id":"effort-01r","ch":"effort","start":1029.54,"end":1055.7},{"id":"effort-01s","ch":"effort","start":1056.02,"end":1085.06},{"id":"effort-01a","ch":"effort","start":1085.38,"end":1105.46},{"id":"effort-01b","ch":"effort","start":1105.78,"end":1126.58},{"id":"effort-01c","ch":"effort","start":1126.9,"end":1151.54},{"id":"effort-03","ch":"effort","start":1151.86,"end":1162.5},{"id":"effort-04","ch":"effort","start":1162.82,"end":1178.58},{"id":"effort-04a","ch":"effort","start":1178.9,"end":1199.38},{"id":"effort-04b","ch":"effort","start":1199.7,"end":1207.22},{"id":"effort-05","ch":"effort","start":1207.54,"end":1222.1},{"id":"effort-06","ch":"effort","start":1222.42,"end":1250.82},{"id":"effort-07","ch":"effort","start":1251.14,"end":1264.66},{"id":"effort-08","ch":"effort","start":1264.98,"end":1268.98},{"id":"effort-09","ch":"effort","start":1269.3,"end":1279.46},{"id":"effort-10","ch":"effort","start":1279.78,"end":1293.46},{"id":"effort-11","ch":"effort","start":1293.78,"end":1307.7},{"id":"effort-12","ch":"effort","start":1308.02,"end":1321.3},{"id":"effort-13","ch":"effort","start":1321.62,"end":1331.86},{"id":"effort-14","ch":"effort","start":1332.18,"end":1340.66},{"id":"effort-14a","ch":"effort","start":1340.98,"end":1361.94},{"id":"effort-14b","ch":"effort","start":1362.26,"end":1387.3},{"id":"effort-14c","ch":"effort","start":1387.62,"end":1416.9},{"id":"effort-14d","ch":"effort","start":1417.22,"end":1435.7},{"id":"effort-14e","ch":"effort","start":1436.02,"end":1455.78},{"id":"effort-15","ch":"effort","start":1456.1,"end":1469.62},{"id":"effort-16","ch":"effort","start":1469.94,"end":1480.9},{"id":"effort-17","ch":"effort","start":1481.22,"end":1487.54},{"id":"effort-18","ch":"effort","start":1487.86,"end":1500.42},{"id":"effort-18a","ch":"effort","start":1500.74,"end":1516.9},{"id":"effort-19","ch":"effort","start":1517.22,"end":1528.1},{"id":"effort-19a","ch":"effort","start":1528.42,"end":1541.78},{"id":"effort-26","ch":"effort","start":1542.1,"end":1552.1},{"id":"effort-26a","ch":"effort","start":1552.42,"end":1574.9},{"id":"effort-27","ch":"effort","start":1575.22,"end":1600.42},{"id":"effort-28","ch":"effort","start":1600.74,"end":1615.86},{"id":"effort-29","ch":"effort","start":1616.18,"end":1625.7},{"id":"effort-20","ch":"effort","start":1626.02,"end":1640.98},{"id":"effort-21","ch":"effort","start":1641.3,"end":1653.14},{"id":"effort-22","ch":"effort","start":1653.46,"end":1672.18},{"id":"effort-22a","ch":"effort","start":1672.5,"end":1682.34},{"id":"effort-22b","ch":"effort","start":1682.66,"end":1691.3},{"id":"effort-23","ch":"effort","start":1691.62,"end":1705.3},{"id":"effort-30","ch":"effort","start":1705.62,"end":1722.5},{"id":"effort-31","ch":"effort","start":1722.82,"end":1739.62},{"id":"effort-31a","ch":"effort","start":1739.94,"end":1755.3},{"id":"effort-32","ch":"effort","start":1755.62,"end":1770.5},{"id":"effort-33","ch":"effort","start":1770.82,"end":1793.78},{"id":"effort-24","ch":"effort","start":1794.1,"end":1802.34},{"id":"effort-25","ch":"effort","start":1802.66,"end":1817.7},{"id":"setup-00","ch":"setup","start":1818.6,"end":1820.92},{"id":"setup-01","ch":"setup","start":1821.24,"end":1830.52},{"id":"setup-02","ch":"setup","start":1830.84,"end":1837.4},{"id":"setup-03","ch":"setup","start":1837.72,"end":1842.76},{"id":"setup-04","ch":"setup","start":1843.08,"end":1849.8},{"id":"setup-05","ch":"setup","start":1850.12,"end":1854.28},{"id":"setup-06","ch":"setup","start":1854.6,"end":1864.84},{"id":"setup-07","ch":"setup","start":1865.16,"end":1868.84}]};</script>
+<script>window.NARRATION = {"src":"audio/narration.mp3?v=a0420fee","duration":1899.72,"segs":[{"id":"overview-00","ch":"overview","start":0,"end":2.8},{"id":"overview-01","ch":"overview","start":3.12,"end":11.84},{"id":"overview-02","ch":"overview","start":12.16,"end":23.6},{"id":"overview-03","ch":"overview","start":23.92,"end":30.32},{"id":"overview-04","ch":"overview","start":30.64,"end":40.8},{"id":"overview-05","ch":"overview","start":41.12,"end":50.88},{"id":"overview-06","ch":"overview","start":51.2,"end":67.92},{"id":"overview-07","ch":"overview","start":68.24,"end":72.24},{"id":"entry-00","ch":"entry","start":73.14,"end":76.9},{"id":"entry-01","ch":"entry","start":77.22,"end":89.14},{"id":"entry-02","ch":"entry","start":89.46,"end":97.62},{"id":"entry-03","ch":"entry","start":97.94,"end":102.42},{"id":"entry-04","ch":"entry","start":102.74,"end":106.9},{"id":"entry-05","ch":"entry","start":107.22,"end":112.58},{"id":"entry-06","ch":"entry","start":112.9,"end":118.74},{"id":"entry-07","ch":"entry","start":119.06,"end":125.7},{"id":"entry-08","ch":"entry","start":126.02,"end":133.14},{"id":"entry-09","ch":"entry","start":133.46,"end":141.46},{"id":"entry-10","ch":"entry","start":141.78,"end":159.14},{"id":"entry-11","ch":"entry","start":159.46,"end":165.3},{"id":"entry-12","ch":"entry","start":165.62,"end":169.7},{"id":"entry-13","ch":"entry","start":170.02,"end":176.26},{"id":"entry-14","ch":"entry","start":176.58,"end":182.42},{"id":"entry-15","ch":"entry","start":182.74,"end":190.1},{"id":"entry-16","ch":"entry","start":190.42,"end":199.14},{"id":"entry-17","ch":"entry","start":199.46,"end":210.26},{"id":"message-00","ch":"message","start":211.16,"end":214.6},{"id":"message-01","ch":"message","start":214.92,"end":225.72},{"id":"message-02","ch":"message","start":226.04,"end":234.76},{"id":"message-03","ch":"message","start":235.08,"end":243.16},{"id":"message-04","ch":"message","start":243.48,"end":254.28},{"id":"message-05","ch":"message","start":254.6,"end":261.72},{"id":"message-06","ch":"message","start":262.04,"end":269.24},{"id":"message-07","ch":"message","start":269.56,"end":278.04},{"id":"message-08","ch":"message","start":278.36,"end":291.88},{"id":"message-09","ch":"message","start":292.2,"end":301.88},{"id":"message-10","ch":"message","start":302.2,"end":309.24},{"id":"message-11","ch":"message","start":309.56,"end":317.08},{"id":"message-12","ch":"message","start":317.4,"end":331.4},{"id":"message-13","ch":"message","start":331.72,"end":338.84},{"id":"message-14","ch":"message","start":339.16,"end":348.36},{"id":"message-15","ch":"message","start":348.68,"end":353.88},{"id":"message-16","ch":"message","start":354.2,"end":361.4},{"id":"message-17","ch":"message","start":361.72,"end":367.48},{"id":"message-18","ch":"message","start":367.8,"end":371.8},{"id":"message-19","ch":"message","start":372.12,"end":379.24},{"id":"message-20","ch":"message","start":379.56,"end":385.32},{"id":"statusbar-00","ch":"statusbar","start":386.22,"end":388.62},{"id":"statusbar-01","ch":"statusbar","start":388.94,"end":406.38},{"id":"statusbar-02","ch":"statusbar","start":406.7,"end":417.42},{"id":"statusbar-03","ch":"statusbar","start":417.74,"end":426.22},{"id":"statusbar-19","ch":"statusbar","start":426.54,"end":445.18},{"id":"statusbar-20","ch":"statusbar","start":445.5,"end":469.66},{"id":"statusbar-21","ch":"statusbar","start":469.98,"end":501.1},{"id":"statusbar-16","ch":"statusbar","start":501.42,"end":522.14},{"id":"statusbar-17","ch":"statusbar","start":522.46,"end":552.78},{"id":"statusbar-18","ch":"statusbar","start":553.1,"end":580.78},{"id":"statusbar-04","ch":"statusbar","start":581.1,"end":593.34},{"id":"statusbar-05","ch":"statusbar","start":593.66,"end":607.9},{"id":"statusbar-06","ch":"statusbar","start":608.22,"end":641.58},{"id":"statusbar-07","ch":"statusbar","start":641.9,"end":654.62},{"id":"statusbar-08","ch":"statusbar","start":654.94,"end":667.66},{"id":"statusbar-09","ch":"statusbar","start":667.98,"end":679.98},{"id":"statusbar-10","ch":"statusbar","start":680.3,"end":687.82},{"id":"statusbar-11","ch":"statusbar","start":688.14,"end":693.98},{"id":"statusbar-12","ch":"statusbar","start":694.3,"end":700.46},{"id":"statusbar-13","ch":"statusbar","start":700.78,"end":705.42},{"id":"statusbar-14","ch":"statusbar","start":705.74,"end":713.58},{"id":"statusbar-15","ch":"statusbar","start":713.9,"end":721.26},{"id":"title-00","ch":"title","start":722.16,"end":725.04},{"id":"title-01","ch":"title","start":725.36,"end":733.76},{"id":"title-02","ch":"title","start":734.08,"end":746.48},{"id":"title-03","ch":"title","start":746.8,"end":757.12},{"id":"title-migration","ch":"title","start":757.44,"end":778},{"id":"title-04","ch":"title","start":778.32,"end":786.16},{"id":"title-05","ch":"title","start":786.48,"end":793.84},{"id":"title-06","ch":"title","start":794.16,"end":800.64},{"id":"title-07","ch":"title","start":800.96,"end":809.92},{"id":"title-08","ch":"title","start":810.24,"end":821.76},{"id":"title-09","ch":"title","start":822.08,"end":832.48},{"id":"title-10","ch":"title","start":832.8,"end":837.76},{"id":"title-11","ch":"title","start":838.08,"end":844.96},{"id":"title-12","ch":"title","start":845.28,"end":852.56},{"id":"title-13","ch":"title","start":852.88,"end":860.8},{"id":"title-14","ch":"title","start":861.12,"end":871.2},{"id":"title-15","ch":"title","start":871.52,"end":880.16},{"id":"title-16","ch":"title","start":880.48,"end":892.32},{"id":"title-17","ch":"title","start":892.64,"end":897.12},{"id":"title-18","ch":"title","start":897.44,"end":902.08},{"id":"title-19","ch":"title","start":902.4,"end":908.88},{"id":"title-20","ch":"title","start":909.2,"end":918.64},{"id":"title-21","ch":"title","start":918.96,"end":924.16},{"id":"title-22","ch":"title","start":924.48,"end":935.04},{"id":"title-23","ch":"title","start":935.36,"end":945.04},{"id":"title-24","ch":"title","start":945.36,"end":952.8},{"id":"title-25","ch":"title","start":953.12,"end":963.52},{"id":"title-26","ch":"title","start":963.84,"end":975.12},{"id":"title-27","ch":"title","start":975.44,"end":983.92},{"id":"effort-00","ch":"effort","start":984.82,"end":987.86},{"id":"effort-01","ch":"effort","start":988.18,"end":1008.02},{"id":"effort-02","ch":"effort","start":1008.34,"end":1034.1},{"id":"effort-01r","ch":"effort","start":1034.42,"end":1060.58},{"id":"effort-01s","ch":"effort","start":1060.9,"end":1089.94},{"id":"effort-01a","ch":"effort","start":1090.26,"end":1110.34},{"id":"effort-01b","ch":"effort","start":1110.66,"end":1131.46},{"id":"effort-01c","ch":"effort","start":1131.78,"end":1156.42},{"id":"effort-03","ch":"effort","start":1156.74,"end":1167.38},{"id":"effort-04","ch":"effort","start":1167.7,"end":1183.46},{"id":"effort-04a","ch":"effort","start":1183.78,"end":1204.26},{"id":"effort-04b","ch":"effort","start":1204.58,"end":1212.1},{"id":"effort-05","ch":"effort","start":1212.42,"end":1226.98},{"id":"effort-06","ch":"effort","start":1227.3,"end":1255.7},{"id":"effort-07","ch":"effort","start":1256.02,"end":1269.54},{"id":"effort-08","ch":"effort","start":1269.86,"end":1273.86},{"id":"effort-09","ch":"effort","start":1274.18,"end":1284.34},{"id":"effort-10","ch":"effort","start":1284.66,"end":1298.34},{"id":"effort-11","ch":"effort","start":1298.66,"end":1312.58},{"id":"effort-12","ch":"effort","start":1312.9,"end":1332.1},{"id":"effort-13","ch":"effort","start":1332.42,"end":1344.1},{"id":"effort-14","ch":"effort","start":1344.42,"end":1366.58},{"id":"effort-14a","ch":"effort","start":1366.9,"end":1387.86},{"id":"effort-14b","ch":"effort","start":1388.18,"end":1413.22},{"id":"effort-14c","ch":"effort","start":1413.54,"end":1442.82},{"id":"effort-14d","ch":"effort","start":1443.14,"end":1461.62},{"id":"effort-14e","ch":"effort","start":1461.94,"end":1481.7},{"id":"effort-15","ch":"effort","start":1482.02,"end":1495.54},{"id":"effort-16","ch":"effort","start":1495.86,"end":1506.82},{"id":"effort-17","ch":"effort","start":1507.14,"end":1517.14},{"id":"effort-18","ch":"effort","start":1517.46,"end":1530.02},{"id":"effort-18a","ch":"effort","start":1530.34,"end":1546.5},{"id":"effort-19","ch":"effort","start":1546.82,"end":1558.98},{"id":"effort-19a","ch":"effort","start":1559.3,"end":1572.66},{"id":"effort-26","ch":"effort","start":1572.98,"end":1582.98},{"id":"effort-26a","ch":"effort","start":1583.3,"end":1605.78},{"id":"effort-27","ch":"effort","start":1606.1,"end":1631.3},{"id":"effort-28","ch":"effort","start":1631.62,"end":1646.74},{"id":"effort-29","ch":"effort","start":1647.06,"end":1656.58},{"id":"effort-20","ch":"effort","start":1656.9,"end":1671.86},{"id":"effort-21","ch":"effort","start":1672.18,"end":1684.02},{"id":"effort-22","ch":"effort","start":1684.34,"end":1703.06},{"id":"effort-22a","ch":"effort","start":1703.38,"end":1713.22},{"id":"effort-22b","ch":"effort","start":1713.54,"end":1722.18},{"id":"effort-23","ch":"effort","start":1722.5,"end":1736.18},{"id":"effort-30","ch":"effort","start":1736.5,"end":1753.38},{"id":"effort-31","ch":"effort","start":1753.7,"end":1770.5},{"id":"effort-31a","ch":"effort","start":1770.82,"end":1786.18},{"id":"effort-32","ch":"effort","start":1786.5,"end":1801.38},{"id":"effort-33","ch":"effort","start":1801.7,"end":1824.66},{"id":"effort-24","ch":"effort","start":1824.98,"end":1833.22},{"id":"effort-25","ch":"effort","start":1833.54,"end":1848.58},{"id":"setup-00","ch":"setup","start":1849.48,"end":1851.8},{"id":"setup-01","ch":"setup","start":1852.12,"end":1861.4},{"id":"setup-02","ch":"setup","start":1861.72,"end":1868.28},{"id":"setup-03","ch":"setup","start":1868.6,"end":1873.64},{"id":"setup-04","ch":"setup","start":1873.96,"end":1880.68},{"id":"setup-05","ch":"setup","start":1881,"end":1885.16},{"id":"setup-06","ch":"setup","start":1885.48,"end":1895.72},{"id":"setup-07","ch":"setup","start":1896.04,"end":1899.72}]};</script>
 <script>
 // 讲解页运行时：主题切换、朗读播放器、段落高亮、图表 cue、录屏播放。
 // NARRATION 由 build.mjs 注入：{ src, duration, segs: [{ id, ch, start, end }] }。

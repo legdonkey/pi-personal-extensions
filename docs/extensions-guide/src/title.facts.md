@@ -99,7 +99,7 @@
 
 ## 代价（title-25 ～ 26，图 10）与命令（title-27，录屏 auto-name-status）
 
-- 对照：原位思考强度在用户提交时后台分类，发请求前最多再等 5 秒 —— extensions/inline-effort.ts:97, extensions/inline-effort.ts:904-913, extensions/inline-effort.ts:956-976；tests/inline-effort.test.mjs:1564-1628
+- 对照：原位思考强度在用户提交时后台分类，发请求前最多再等 5 秒 —— extensions/inline-effort.ts:97, extensions/inline-effort.ts:928-937, extensions/inline-effort.ts:973-985；tests/inline-effort.test.mjs:1564-1628
 - 命名请求在后台、最多 30 秒，用户不用等 —— 命名:298, 466-469
 
 - 命名和预览额外消耗模型额度，不计入 Pi 自带会话用量统计 —— README.md:56；命名:319-371（结果不写入会话用量），codex-b 核对 agent-session.js:3345-3378

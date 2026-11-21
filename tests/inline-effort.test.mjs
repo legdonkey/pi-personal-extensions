@@ -2179,4 +2179,48 @@ test("Pi 末尾 configuration_update 的档位与决策相同或尚无决策时�
   // 没有经过 context_with_system 的请求（例如重放）保持原样。
   const raw = { model: h.model.id, reasoning: { effort: "medium" }, input: nativeInput(messages, "high") };
   assert.equal(h.events.get("before_provider_request")({ payload: raw }, h.ctx), undefined);
+
+  // 尚无决策：分类未返回合格结果且会话里没有历史决策时，沿用 Pi 写入的档位。
+  const fresh = setup({ thinking: "high" });
+  fresh.confidence = 0.1;
+  const untouched = nativeInput(messages, "high");
+  assert.equal((await fresh.request(messages, { input: untouched })).input, untouched);
+  assert.equal(fresh.events.get("message_end")({ message: { ...assistant(2), ...fresh.model, model: fresh.model.id } }, fresh.ctx), undefined);
+});
+
+test("Codex 缓存预热请求不消耗本轮快照，主请求仍按决策替换末尾档位并写回", async () => {
+  const h = setup({ thinking: "high" });
+  h.choices = ["xhigh"];
+  const messages = [system, user(1)];
+  await h.events.get("context_with_system")({ type: "context_with_system", messages }, h.ctx);
+  const body = () => ({ model: h.model.id, reasoning: { effort: "medium" }, input: nativeInput(messages, "high") });
+  const send = (payload) => h.events.get("before_provider_request")({ payload }, h.ctx) ?? payload;
+
+  // Pi 把预热的 1 token 上限夹到 16。
+  const warm = { ...body(), max_output_tokens: 16 };
+  assert.equal(send(warm), warm, "预热请求原样发出");
+  assert.deepEqual(updates(send(body())), [[2, "xhigh"]], "主请求仍被调整");
+  const reply = { ...assistant(2), ...h.model, model: h.model.id, providerThinkingLevel: "high" };
+  assert.equal(h.events.get("message_end")({ message: reply }, h.ctx).message.providerThinkingLevel, "xhigh");
+});
+
+test("thinkingLevelMap 不是同名映射时，末尾档位用映射后的值，上一轮档位不重复映射，映射为 null 时不改写", async () => {
+  // currentEffort 只传给有专属规则的模型。
+  const shifted = { ...codexModel("gpt-6-astra"), thinkingLevelMap: { off: null, minimal: "low", low: "low", medium: "medium", high: "xhigh", xhigh: "max", max: "max" } };
+  const h = setup({ thinking: "medium", model: shifted });
+  h.choices = ["high", "high"];
+  const messages = [system, user(1)];
+  const first = await h.request(messages, { input: nativeInput(messages, "medium") });
+  assert.deepEqual(updates(first), [[2, "xhigh"]], "high 映射为 xhigh");
+  const sent = h.events.get("message_end")({ message: { ...assistant(2), ...h.model, model: h.model.id, providerThinkingLevel: "medium" } }, h.ctx).message;
+  assert.equal(sent.providerThinkingLevel, "xhigh");
+  messages.push(sent, user(3));
+  await h.request(messages, { input: nativeInput(messages, "medium") });
+  assert.equal(h.inputs.at(-1).state.currentEffort, "xhigh", "已发送的 xhigh 不再映射成 max");
+
+  const unsupported = { ...codexModel(), thinkingLevelMap: { off: null, minimal: "low", low: "low", medium: null, high: "low", xhigh: "xhigh", max: "max" } };
+  const g = setup({ thinking: "high", model: unsupported });
+  g.choices = ["medium"];
+  const input = nativeInput(messages.slice(0, 2), "low");
+  assert.equal((await g.request(messages.slice(0, 2), { input })).input, input, "medium 映射为 null，不写入字面量 medium");
 });

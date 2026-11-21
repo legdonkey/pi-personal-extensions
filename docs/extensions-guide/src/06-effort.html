@@ -243,14 +243,14 @@
     </figure>
   </div>
 
-  <!-- 4. 插入 configuration_update -->
+  <!-- 4. 写入 configuration_update -->
   <div class="beat">
     <div class="beat-text">
       <h3>按接入分支写入档位</h3>
       <p>
-        <span class="seg" data-seg="effort-12" data-say="对 GPT 六 Codex，扩展让顶层保持基线，在当前用户消息前插入一个 configuration update 项，只写新档位。档位写在 input 里这条消息的位置上，这就是原位。">对 GPT-6 Codex，扩展让顶层保持基线，在当前用户消息前插入一个 <code>configuration_update</code> 项，只写新档位。档位写在 input 里这条消息的位置上，这就是「原位」。</span>
-        <span class="seg" data-seg="effort-13">决策按消息时间戳存在会话里。模型、基线和已有上下文不变时，下一次请求重放同样档位，开头逐项不变。</span>
-        <span class="seg" data-seg="effort-14">Codex 档位和当前强度相同时，扩展不插入。档位回到基线时，扩展也要插入一项，抵消之前那一项。</span>
+        <span class="seg" data-seg="effort-12" data-say="对 GPT 六 Codex，Pi 一点六点零起固定顶层 effort，并在每次请求的 input 末尾追加一个 configuration update 项，写当前档位。扩展不动顶层，只把这一项的档位换成本次决策。档位写在 input 里这条消息的位置上，这就是原位。">对 GPT-6 Codex，Pi 1.6.0 起固定顶层 effort，并在每次请求的 input 末尾追加一个 <code>configuration_update</code> 项，写当前档位。扩展不动顶层，只把这一项的档位换成本次决策。档位写在 input 里这条消息的位置上，这就是「原位」。</span>
+        <span class="seg" data-seg="effort-13" data-say="回复结束时，扩展把实际发送的档位写回这条助手回复的 provider thinking level。下一次请求里，Pi 按它在原位置重放这一项，开头逐项不变。">回复结束时，扩展把实际发送的档位写回这条助手回复的 <code>providerThinkingLevel</code>。下一次请求里，Pi 按它在原位置重放这一项，开头逐项不变。</span>
+        <span class="seg" data-seg="effort-14" data-say="决策和 Pi 写入的档位相同时，扩展不改请求。Pi 一点六点零之前，或模型关闭 compat 点 supports mid convo effort 时，请求里没有末尾这一项，扩展走旧路径：顶层保持基线，在当前用户消息前插入一项；档位回到基线时也插入一项，抵消之前那一项。">决策和 Pi 写入的档位相同时，扩展不改请求。Pi 1.6.0 之前，或模型关闭 <code>compat.supportsMidConvoEffort</code> 时，请求里没有末尾这一项，扩展走旧路径：顶层保持基线，在当前用户消息前插入一项；档位回到基线时也插入一项，抵消之前那一项。</span>
         <span class="seg" data-seg="effort-14a" data-say="Anthropic 协议分支使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 system 消息里的 output config 点 effort。顶层 output config、thinking 和历史消息不变。message end 保存实际发送的 provider thinking level，供 Pi 重放历史标记。主会话 thinking 基线不变。">Anthropic 协议分支使用 Pi 原生标记。扩展只修改 Pi 已生成的末尾空 <code>system</code> 消息里的 <code>output_config.effort</code>。顶层 <code>output_config</code>、<code>thinking</code> 和历史消息不变。<code>message_end</code> 保存实际发送的 <code>providerThinkingLevel</code>，供 Pi 重放历史标记。主会话 thinking 基线不变。</span>
         <span class="seg" data-seg="effort-14b" data-say="同一 Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 max tokens 为 1 的缓存预热回放。当前没有请求 ID 可用于区分请求，因此 max tokens 为 1 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。">同一 Anthropic 协议请求由提供方内部重建或重试时，扩展复用原模型快照。流式期间切换模型后，旧回复仍保存实际档位。扩展不干预 Pi 的 <code>max_tokens: 1</code> 缓存预热回放。当前没有请求 ID 可用于区分请求，因此 <code>max_tokens: 1</code> 的主请求也不自动调整；等待 Pi 暴露请求 ID 后再区分。</span>
         <span class="seg" data-seg="effort-14c" data-say="Antigravity 是独立分支，不使用 Anthropic 消息级 output config。插件不触发 on payload，所以扩展在 context with system 分类后临时包装原生 stream simple。扩展只改匹配当前 session、末条消息时间戳和模型的主请求 options 点 reasoning，交给插件按 low、medium、high 后缀的 runtime ID 路由。max 和 x high 夹到 high，会话 thinking 和历史上下文不变。">Antigravity 是独立分支，不使用 Anthropic 消息级 <code>output_config</code>。插件不触发 <code>onPayload</code>，所以扩展在 <code>context_with_system</code> 分类后临时包装原生 <code>streamSimple</code>。扩展只改匹配当前 session、末条消息 <code>timestamp</code> 和模型的主请求 <code>options.reasoning</code>，交给插件按 <code>-low</code>、<code>-medium</code>、<code>-high</code> runtime ID 路由。<code>max</code> 和 <code>xhigh</code> 夹到 <code>high</code>，会话 thinking 和历史上下文不变。</span>
@@ -261,53 +261,59 @@
     <figure class="beat-fig" id="fig-effort-4">
       <div class="fig-scroll">
         <svg viewBox="0 0 656 236" role="img" aria-labelledby="fig-effort-4-title fig-effort-4-desc">
-          <title id="fig-effort-4-title">Codex 插入 configuration_update：请求开头的对比</title>
-          <desc id="fig-effort-4-desc">Codex 示例：顶层一直是 medium。请求 2 在 U2 前插入 xhigh 的 update，开头等于请求 1；请求 3 在 U3 前插入 medium 的 update，开头等于整个请求 2。</desc>
+          <title id="fig-effort-4-title">Codex 替换末尾的 configuration_update：请求开头的对比</title>
+          <desc id="fig-effort-4-desc">Codex 示例（Pi 1.6.0）：顶层由 Pi 固定为 medium，每次请求的 input 末尾有一个 update。请求 1 是 U1 和 medium 的 update。请求 2 末尾的 update 被扩展换成 xhigh，开头等于请求 1。请求 3 在原位置重放 xhigh 的 update，开头等于整个请求 2；末尾的 update 是 medium，等于基线，扩展不改写。</desc>
 
-          <text class="t-cap" x="134" y="18" text-anchor="middle">顶层 effort</text>
+          <text class="t-cap" x="134" y="18" text-anchor="middle">顶层 effort（Pi 固定）</text>
           <text class="t-cap" x="200" y="18">input 列表（按顺序）</text>
 
           <text class="t-sub" x="16" y="53">请求 1</text>
-          <rect class="n" x="80" y="32" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="53" text-anchor="middle">medium</text>
-          <rect class="n" x="200" y="32" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="53" text-anchor="middle">U1</text>
+            <rect class="n" x="80" y="32" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="53" text-anchor="middle">medium</text>
+            <rect class="n" x="200" y="32" width="50" height="32" rx="4"/><text class="t-mono" x="225" y="53" text-anchor="middle">U1</text>
+            <rect class="n" x="256" y="32" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="281" y="45" text-anchor="middle">update</text><text class="t-mono" x="281" y="59" text-anchor="middle">medium</text>
 
           <g data-cue="effort-12">
             <text class="t-sub" x="16" y="101">请求 2</text>
             <rect class="n" x="80" y="80" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="101" text-anchor="middle">medium</text>
-            <rect class="n" x="200" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="101" text-anchor="middle">U1</text>
-            <rect class="n" x="264" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="292" y="101" text-anchor="middle">A1</text>
-            <rect class="n is-focal" x="328" y="80" width="56" height="32" rx="4"/>
-            <text class="t-sub" x="356" y="93" text-anchor="middle">update</text><text class="t-mono" x="356" y="107" text-anchor="middle">xhigh</text>
-            <rect class="n" x="392" y="80" width="56" height="32" rx="4"/><text class="t-mono" x="420" y="101" text-anchor="middle">U2</text>
-            <rect x="80" y="120" width="176" height="6" rx="2" style="fill:var(--ok)">
-              <animate attributeName="width" from="0" to="176" dur="0.8s" begin="indefinite" fill="freeze"/>
+            <rect class="n" x="200" y="80" width="50" height="32" rx="4"/><text class="t-mono" x="225" y="101" text-anchor="middle">U1</text>
+            <rect class="n" x="256" y="80" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="281" y="93" text-anchor="middle">update</text><text class="t-mono" x="281" y="107" text-anchor="middle">medium</text>
+            <rect class="n" x="312" y="80" width="50" height="32" rx="4"/><text class="t-mono" x="337" y="101" text-anchor="middle">A1</text>
+            <rect class="n" x="368" y="80" width="50" height="32" rx="4"/><text class="t-mono" x="393" y="101" text-anchor="middle">U2</text>
+            <rect class="n is-focal" x="424" y="80" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="449" y="93" text-anchor="middle">update</text><text class="t-mono" x="449" y="107" text-anchor="middle">xhigh</text>
+            <rect x="80" y="120" width="226" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="226" dur="0.8s" begin="indefinite" fill="freeze"/>
             </rect>
-            <rect x="264" y="120" width="184" height="6" rx="2" style="fill:var(--soft)"/>
+            <rect x="312" y="120" width="162" height="6" rx="2" style="fill:var(--soft)"/>
             <text class="t-cap" x="80" y="146">与请求 1 相同</text>
-            <text class="t-cap" x="264" y="146">新增</text>
+            <text class="t-cap" x="312" y="146">新增：末尾项换成 xhigh</text>
           </g>
 
           <g data-cue="effort-13">
             <text class="t-sub" x="16" y="181">请求 3</text>
             <rect class="n" x="80" y="160" width="108" height="32" rx="4"/><text class="t-mono" x="134" y="181" text-anchor="middle">medium</text>
-            <rect class="n" x="200" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="228" y="181" text-anchor="middle">U1</text>
-            <rect class="n" x="264" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="292" y="181" text-anchor="middle">A1</text>
-            <rect class="n" x="328" y="160" width="56" height="32" rx="4"/>
-            <text class="t-sub" x="356" y="173" text-anchor="middle">update</text><text class="t-mono" x="356" y="187" text-anchor="middle">xhigh</text>
-            <rect class="n" x="392" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="420" y="181" text-anchor="middle">U2</text>
-            <rect class="n" x="456" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="484" y="181" text-anchor="middle">A2</text>
-            <rect x="80" y="200" width="368" height="6" rx="2" style="fill:var(--ok)">
-              <animate attributeName="width" from="0" to="368" dur="1.2s" begin="indefinite" fill="freeze"/>
+            <rect class="n" x="200" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="225" y="181" text-anchor="middle">U1</text>
+            <rect class="n" x="256" y="160" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="281" y="173" text-anchor="middle">update</text><text class="t-mono" x="281" y="187" text-anchor="middle">medium</text>
+            <rect class="n" x="312" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="337" y="181" text-anchor="middle">A1</text>
+            <rect class="n" x="368" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="393" y="181" text-anchor="middle">U2</text>
+            <rect class="n" x="424" y="160" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="449" y="173" text-anchor="middle">update</text><text class="t-mono" x="449" y="187" text-anchor="middle">xhigh</text>
+            <rect x="80" y="200" width="394" height="6" rx="2" style="fill:var(--ok)">
+              <animate attributeName="width" from="0" to="394" dur="1.2s" begin="indefinite" fill="freeze"/>
             </rect>
-            <text class="t-cap" x="80" y="226">与整个请求 2 相同，含 xhigh 的 update</text>
+            <text class="t-cap" x="80" y="226">与整个请求 2 相同，xhigh 的 update 在原位置</text>
           </g>
 
           <g data-cue="effort-14">
-            <rect class="n is-focal" x="520" y="160" width="56" height="32" rx="4"/>
-            <text class="t-sub" x="548" y="173" text-anchor="middle">update</text><text class="t-mono" x="548" y="187" text-anchor="middle">medium</text>
-            <rect class="n" x="584" y="160" width="56" height="32" rx="4"/><text class="t-mono" x="612" y="181" text-anchor="middle">U3</text>
-            <rect x="456" y="200" width="184" height="6" rx="2" style="fill:var(--soft)"/>
-            <text class="t-cap" x="640" y="226" text-anchor="end">新增：回到基线</text>
+            <rect class="n" x="480" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="505" y="181" text-anchor="middle">A2</text>
+            <rect class="n" x="536" y="160" width="50" height="32" rx="4"/><text class="t-mono" x="561" y="181" text-anchor="middle">U3</text>
+            <rect class="n" x="592" y="160" width="50" height="32" rx="4"/>
+            <text class="t-sub" x="617" y="173" text-anchor="middle">update</text><text class="t-mono" x="617" y="187" text-anchor="middle">medium</text>
+            <rect x="480" y="200" width="162" height="6" rx="2" style="fill:var(--soft)"/>
+            <text class="t-cap" x="642" y="226" text-anchor="end">新增：等于基线，不改写</text>
           </g>
         </svg>
       </div>
@@ -318,13 +324,13 @@
       <ul class="fig-notes">
         <li>上图和 JSON 只描述 Codex。Anthropic 协议分支使用 Pi 原生空 <code>system</code> 消息标记，不插入 <code>configuration_update</code>。Antigravity 分支只修改匹配请求的 <code>options.reasoning</code>，不使用这两种机制。</li>
         <li>Antigravity wrapper 保留原 <code>oauth</code>、<code>headers</code>、<code>images</code> 和 <code>refreshModels</code>。注册和恢复时携带 <code>provider.getAllModels</code> 当前动态目录，包括 chat、image 和 classifier 模型，并按 <code>type + id</code> 补回 registered model 的 <code>headers</code>。</li>
-        <li>Codex 插入发生在 <code>before_provider_request</code>，只改写 <code>input</code>。整轮没有任何 update 时，请求原样发出。</li>
-        <li>Codex 每条 update 后面紧跟一个用户项，不会相邻。档位先经过模型的 <code>thinkingLevelMap</code> 映射。</li>
+        <li>Codex 的改写发生在 <code>before_provider_request</code>，只替换 <code>input</code> 末尾 update 的档位。决策等于该档位或还没有决策时，请求原样发出。</li>
+        <li>Pi 1.6.0 之前，或模型关闭 <code>compat.supportsMidConvoEffort</code> 时，扩展自己在用户项前插入 update，每条 update 后面紧跟一个用户项，不会相邻。两条路径的档位都先经过模型的 <code>thinkingLevelMap</code> 映射。</li>
         <li><a href="https://platform.claude.com/docs/en/build-with-claude/effort#change-effort-mid-conversation-beta">Anthropic 官方文档</a>明确 <code>claude-opus-5</code>、<code>claude-opus-5-5</code> 和 <code>claude-sonnet-5-5</code> 支持逐消息 effort，并保持此前缓存前缀。该能力需要 beta <code>mid-conversation-output-config-2026-07-01</code>，由 Pi 负责发送。其他 Opus、Sonnet 版本并非全部支持。</li>
         <li><code>claude-fable-5-2</code> 依据 Pi 1.5.2 目录的 <code>supportsMidConvoEffort: true</code> 和本地序列化结果纳入：两轮请求的末尾标记依次为 <code>[high]</code>、<code>[high, medium]</code>，顶层 effort 和 <code>thinking: adaptive</code> 不变，前一轮消息前缀不变。这次没有向 Fable 发出真实请求。</li>
         <li>仅 GPT-6 Codex：<code>configuration_update</code> 不能和服务端自动压缩、自动截断或 <code>/responses/compact</code> 混用。Pi 在客户端做的压缩不受影响。</li>
       </ul>
-      <figcaption>Codex 示例：基线 medium，U2 分为 xhigh，U3 分为 medium。色条含义同上图。</figcaption>
+      <figcaption>Codex 示例（Pi 1.6.0）：基线 medium，U1 分为 medium，U2 分为 xhigh，U3 分为 medium。顶层 effort 由 Pi 固定，不随基线变化。色条含义同上图。</figcaption>
     </figure>
   </div>
 
@@ -335,7 +341,7 @@
       <p>
         <span class="seg" data-seg="effort-15">决策是会话里的自定义条目，不发给模型。扩展只读当前分支路径上的决策，所以恢复会话、fork 或树导航后，旧消息保持原档位，不重新分类。</span>
         <span class="seg" data-seg="effort-16" data-say="从 A1 另开分支 b 时，扩展仍继承共同祖先 U1 的决策，但读不到分叉后 U2 的决策。U3 是新消息，重新分类。">从 A1 另开分支 b 时，扩展仍继承共同祖先 U1 的决策，但读不到分叉后 U2 的决策。U3 是新消息，重新分类。</span>
-        <span class="seg" data-seg="effort-17">压缩后，压缩摘要承接被压缩部分的最后一次决策，强度不回落到基线。</span>
+        <span class="seg" data-seg="effort-17">压缩后，强度不回落到基线：末尾项仍按最近一次决策替换；旧路径下，由压缩摘要承接被压缩部分的最后一次决策。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-5">
@@ -399,13 +405,13 @@
       <p>
         <span class="seg" data-seg="effort-18" data-say="状态栏的思考强度段显示当前强度、基线和最近一次决策的分类器，例如：x high，基线 medium，Jev。当前强度等于基线时，只显示一个档位。">状态栏的 🧠 段显示当前强度、基线和最近一次决策的分类器，例如 <code>🧠 xhigh · 基线 medium · Jev</code>。当前强度等于基线时，只显示一个档位。</span>
         <span class="seg" data-seg="effort-18a" data-say="非 Jev 模型回退成功时，分类器标注回退来源，例如「Jev（D1 Ultra 回退）」或「Jev（Mammoth 二十七 B 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。">非 Jev 模型回退成功时，分类器标注回退来源，例如「Jev（d1-ultra 回退）」或「Jev（Mammoth 27B 回退）」。全部失败时显示的是首选模型，表示最近尝试，不表示分类成功。</span>
-        <span class="seg" data-seg="effort-19">对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
+        <span class="seg" data-seg="effort-19" data-say="旧路径下，对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。">旧路径下，对 Codex，插入前，扩展核对 input 里 role 为 user 的项数。项数和本次上下文不一致时，扩展不插入，状态栏显示「未调整」。</span>
         <span class="seg" data-seg="effort-19a" data-say="缓存守护暂停后，大脑图标段改为「自动调整暂停：检测到两次缓存重建，斜杠 personal，原位思考强度，恢复自动调整」，直到恢复或开始新会话。">缓存守护暂停后，🧠 段改为「🧠 自动调整暂停：检测到两次缓存重建 · /personal → 原位思考强度 → 恢复自动调整」，直到恢复或开始新会话。</span>
       </p>
     </div>
     <figure class="beat-fig" id="fig-effort-6">
       <div class="demo" id="effort-demo">
-        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；非 Jev 模型服务报错时先回退一次 Jev，结果无效或概率低于 0.5 时不回退、直接沿用当前强度；等待超过 5 秒时沿用当前强度，不记分类器。采用的档位不等于当前强度时，扩展插入 <code>configuration_update</code>，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
+        <p class="effort-demo-static">演示需要 JavaScript。本演示以 GPT-6 Codex 为例。规则（第一条消息时，当前强度等于基线）：分类结果合格时采用该档位；非 Jev 模型服务报错时先回退一次 Jev，结果无效或概率低于 0.5 时不回退、直接沿用当前强度；等待超过 5 秒时沿用当前强度，不记分类器。采用的档位不等于当前强度时，扩展把请求末尾 <code>configuration_update</code> 的档位改为它，状态栏显示「🧠 〈档位〉 · 基线 〈基线〉 · 〈分类器〉」；等于时显示「🧠 〈基线〉 · 〈分类器〉」；旧路径下项数不一致时显示「🧠 〈基线〉 · 未调整 · 〈分类器〉」。</p>
         <form class="effort-demo-form" hidden>
           <div class="effort-demo-grid">
             <label>基线 thinking
@@ -432,7 +438,7 @@
             </label>
           </div>
           <label class="effort-demo-check"><input type="checkbox" name="fallbackOk" checked> Jev 回退成功（示例：low，概率 1）</label>
-          <label class="effort-demo-check" data-cue="effort-19"><input type="checkbox" name="misaligned"> 用户项数和上下文不一致</label>
+          <label class="effort-demo-check" data-cue="effort-19"><input type="checkbox" name="misaligned"> 用户项数和上下文不一致（旧路径）</label>
           <div class="effort-demo-out" aria-live="polite">
             <p><span>当前强度</span><span data-out="level"></span></p>
             <p><span>请求里的 update</span><span data-out="update"></span></p>
@@ -533,7 +539,7 @@
       </div>
       <ul class="fig-notes">
         <li>只看主会话助手回复：provider、接口和模型要和本次请求一致，<code>stopReason</code> 不是 <code>error</code> 或 <code>aborted</code>，<code>cacheRead</code> 是有限的非负数。分类器、命名等辅助请求不计入。</li>
-        <li>「调整过档位」：Codex 插入了 <code>configuration_update</code>；Anthropic 协议分支按决策改写了末尾标记；Antigravity 分支有可用决策。</li>
+        <li>「调整过档位」：Codex 改写或插入了 <code>configuration_update</code>；Anthropic 协议分支按决策改写了末尾标记；Antigravity 分支有可用决策。</li>
         <li>警告示例（数值是示例）：<code>检测到缓存重建：本次缓存读取 80，少于上一次的 100。可能是调整思考强度改变了请求前缀，也可能是服务端提前清除了缓存，或其他扩展改了系统提示词或工具；缓存过期、压缩、树导航和切换模型已排除。</code>暂停后状态栏提示恢复的菜单路径，「查看分类模型与状态」也显示「暂停（检测到两次缓存重建）」。</li>
         <li>间隔按两次主请求的开始时刻计算：缓存在请求开始时读写并重新计时，Pi 的缓存预热也从请求开始计时。上一轮回复很长、刚结束就发下一次请求时，开始时刻可能已相隔超过保留时间，同样跳过。</li>
         <li>Pi 1.5.2 对 Anthropic 请求默认用 short 保留，<code>cache_control</code> 不带 <code>ttl</code>。设置 <code>PI_CACHE_RETENTION=long</code> 后实际保留 1 小时，扩展仍按 short 计算，只会多跳过判断。跳过时，本次读取作为下一次比较的基准。</li>
@@ -724,7 +730,7 @@
             out("status").textContent = `🧠 ${base} · 未调整 · ${label}`;
           } else {
             out("level").textContent = level === base ? `${level}（等于基线）` : level;
-            out("update").textContent = level === base ? "不插入" : `在本条用户消息前插入 effort = ${level}`;
+            out("update").textContent = level === base ? "不改写" : `把末尾 update 的档位改为 ${level}`;
             out("status").textContent = level === base ? `🧠 ${base} · ${label}` : `🧠 ${level} · 基线 ${base} · ${label}`;
           }
           out("warn").textContent = warn;

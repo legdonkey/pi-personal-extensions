@@ -18,9 +18,9 @@
 - 额度只支持 openai-codex、zai-coding-cn、kimi-coding 和 antigravity；其他服务商不显示额度，但可显示 token 速度 —— extensions/statusline.ts:20-24、133-141、250-278
 - （本章已不写刷新节奏，见 statusbar 章）额度每 5 分钟刷新，每轮结束后也刷新（30 秒冷却）—— extensions/statusline.ts:17-18、143-165、205-248、280-283
 - 前三个服务商查询失败保留缓存，Antigravity 隐藏旧值 —— extensions/statusline.ts:156-160、188-193
-- 🧠 段条件：GPT-6 Codex、Anthropic 协议分支的四个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型，对应 provider、接口和模型能力符合要求，thinking 不为 off；完整模型 ID 和 compat 条件见第 1、5 章 —— extensions/inline-effort.ts:94、118-131、860-864；README.md:61-68
-- 🧠 段在会话开始、切换模型时清除，下一次请求时显示 —— extensions/inline-effort.ts:865-889、664-681、1035-1116
-- 分类器不可用时提示，这条消息沿用当前强度；需要 OpenRouter 认证 —— extensions/inline-effort.ts:981-1025；README.md:61、124
+- 🧠 段条件：GPT-6 Codex、Anthropic 协议分支的四个指定 Claude 模型或 Antigravity 分支的两个指定 Claude 模型，对应 provider、接口和模型能力符合要求，thinking 不为 off；完整模型 ID 和 compat 条件见第 1、5 章 —— extensions/inline-effort.ts:94、123-136、850-855；README.md:61-68
+- 🧠 段在会话开始、切换模型时清除，下一次请求时显示 —— extensions/inline-effort.ts:856-880、667-683、1026-1109
+- 分类器不可用时提示，这条消息沿用当前强度；需要 OpenRouter 认证 —— extensions/inline-effort.ts:966-1015；README.md:61、124
 - 只有真实存在的文件变成链接 —— extensions/clickable-paths.ts:85-105
 - 多行代码块（``` 或 ~~~ 围栏）里的路径不转换 —— extensions/clickable-paths.ts:205-226
 - 回复还在输出时不转换，输出完才转换 —— extensions/clickable-paths.ts:245
